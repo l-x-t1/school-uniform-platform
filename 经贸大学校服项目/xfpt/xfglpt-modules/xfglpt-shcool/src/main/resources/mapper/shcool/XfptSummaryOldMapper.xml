@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSummaryOldMapper">
+
+    <resultMap type="XfptSummaryOld" id="XfptSummaryOldResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="money"    column="money"    />
+        <result property="inviteFile"    column="invite_file"    />
+        <result property="winBidFile"    column="win_bid_file"    />
+        <result property="enterprise"    column="enterprise"    />
+        <result property="count"    column="count"    />
+        <result property="schoolUniformFile"    column="school_uniform_file"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="buyTime"    column="buy_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="otherFile"    column="other_file"    />
+    </resultMap>
+
+    <sql id="selectXfptSummaryOldVo">
+        select other_file,id, title, money, invite_file, win_bid_file, enterprise, count, school_uniform_file, school_name, dept_id, ancestors, remark, create_by, create_time, update_time, update_by, buy_time, del_flag from xfpt_summary_old
+    </sql>
+
+    <select id="selectXfptSummaryOldList" parameterType="XfptSummaryOld" resultMap="XfptSummaryOldResult">
+        <include refid="selectXfptSummaryOldVo"/>
+        <include refid="search"/>
+        <if test="title != null  and title != ''">and title = #{title}</if>
+        <if test="money != null ">and money = #{money}</if>
+        <if test="enterprise != null  and enterprise != ''">and enterprise = #{enterprise}</if>
+        <if test="schoolName != null  and schoolName != ''">and school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="buyTime != null ">and buy_time = #{buyTime}</if>
+        <if test="deptId != null "> and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+        </if>
+    </select>
+
+    <select id="selectXfptSummaryOldById" parameterType="Long" resultMap="XfptSummaryOldResult">
+        <include refid="selectXfptSummaryOldVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSummaryOld" parameterType="XfptSummaryOld" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_summary_old
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="money != null">money,</if>
+            <if test="inviteFile != null">invite_file,</if>
+            <if test="winBidFile != null">win_bid_file,</if>
+            <if test="enterprise != null">enterprise,</if>
+            <if test="count != null">count,</if>
+            <if test="schoolUniformFile != null">school_uniform_file,</if>
+            <if test="schoolName != null">school_name,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="buyTime != null">buy_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="money != null">#{money},</if>
+            <if test="inviteFile != null">#{inviteFile},</if>
+            <if test="winBidFile != null">#{winBidFile},</if>
+            <if test="enterprise != null">#{enterprise},</if>
+            <if test="count != null">#{count},</if>
+            <if test="schoolUniformFile != null">#{schoolUniformFile},</if>
+            <if test="schoolName != null">#{schoolName},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="buyTime != null">#{buyTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptSummaryOld" parameterType="XfptSummaryOld">
+        update xfpt_summary_old
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="money != null">money = #{money},</if>
+            <if test="inviteFile != null">invite_file = #{inviteFile},</if>
+            <if test="winBidFile != null">win_bid_file = #{winBidFile},</if>
+            <if test="enterprise != null">enterprise = #{enterprise},</if>
+            <if test="count != null">count = #{count},</if>
+            <if test="schoolUniformFile != null">school_uniform_file = #{schoolUniformFile},</if>
+            <if test="schoolName != null">school_name = #{schoolName},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="buyTime != null">buy_time = #{buyTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSummaryOldById" parameterType="Long">
+        delete from xfpt_summary_old where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSummaryOldByIds" parameterType="String">
+        delete from xfpt_summary_old where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

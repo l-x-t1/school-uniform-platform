@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptReportModeMapper">
+
+    <resultMap type="XfptReportMode" id="XfptReportModeResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="purchaseMode"    column="purchase_mode"    />
+        <result property="reportForm"    column="report_form"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="teamId"    column="team_id"    />
+    </resultMap>
+
+    <sql id="selectXfptReportModeVo">
+        select team_id,id, title, purchase_mode, report_form, remark, del_flag, create_by, update_time, update_by, create_time, ancestors, dept_id from xfpt_report_mode
+    </sql>
+
+    <select id="selectXfptReportModeList" parameterType="XfptReportMode" resultMap="XfptReportModeResult">
+        <include refid="selectXfptReportModeVo"/>
+        <include refid="search"/>
+        <if test="title != null  and title != ''"> and title like concat('%', #{title}, '%')</if>
+        <if test="purchaseMode != null  and purchaseMode != ''"> and purchase_mode = #{purchaseMode}</if>
+        <if test="reportForm != null  and reportForm != ''"> and report_form = #{reportForm}</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+        <if test="deptId != null "> and dept_id = #{deptId}</if>
+        <if test="teamId != null"> and team_id = #{teamId}</if>
+        <if test="createTime != null and createTime != ''"> AND date_format(create_time,'%Y%m%d') = date_format(#{createTime},'%Y%m%d')</if>
+        <if test="updateTime != null and updateTime != ''"> AND date_format(update_time,'%Y%m%d') = date_format(#{updateTime},'%Y%m%d')</if>
+        <if test="deptId != null">
+            and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
+        </if>
+    </select>
+
+    <select id="selectXfptReportModeById" parameterType="Long" resultMap="XfptReportModeResult">
+        <include refid="selectXfptReportModeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptReportMode" parameterType="XfptReportMode" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_report_mode
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="purchaseMode != null">purchase_mode,</if>
+            <if test="reportForm != null">report_form,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="deptId != null">dept_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="purchaseMode != null">#{purchaseMode},</if>
+            <if test="reportForm != null">#{reportForm},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="deptId != null">#{deptId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptReportMode" parameterType="XfptReportMode">
+        update xfpt_report_mode
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="purchaseMode != null">purchase_mode = #{purchaseMode},</if>
+            <if test="reportForm != null">report_form = #{reportForm},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptReportModeById" parameterType="Long">
+        delete from xfpt_report_mode where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptReportModeByIds" parameterType="String">
+        delete from xfpt_report_mode where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

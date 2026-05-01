@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSuppliceInspectionReportMapper">
+    <resultMap type="XfptSuppliceInspectionReport" id="XfptSuppliceInspectionReportResult">
+        <result property="id" column="id"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="deptName" column="dept_name"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="supplierPhone" column="supplier_phone"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="teamMeetingId" column="team_meeting_id"/>
+        <result property="ancestors" column="ancestors"/>
+        
+    </resultMap>
+
+    <sql id="selectXfptSuppliceInspectionReportVo">
+        select id,
+               dept_id,
+               dept_name,
+               supplier_id,
+               supplier_name,
+               supplier_phone,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               team_meeting_id,
+               ancestors
+        from xfpt_supplice_inspection_report
+    </sql>
+
+    <select id="selectXfptSuppliceInspectionReportList" parameterType="XfptSuppliceInspectionReport"
+            resultMap="XfptSuppliceInspectionReportResult">
+        <include refid="selectXfptSuppliceInspectionReportVo"/>
+        <include refid="search"/>
+        <if test="deptId != null  and deptId != ''">
+            and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
+        </if>
+        <if test="deptName != null  and deptName != ''">
+            and dept_name like concat('%', #{deptName}, '%')
+        </if>
+        <if test="supplierId != null  and supplierId != ''">
+            and supplier_id = #{supplierId}
+        </if>
+        <if test="supplierName != null  and supplierName != ''">
+            and supplier_name like concat('%', #{supplierName}, '%')
+        </if>
+        <if test="supplierPhone != null  and supplierPhone != ''">
+            and supplier_phone = #{supplierPhone}
+        </if>
+        <if test="teamMeetingId != null  and teamMeetingId != ''">
+            and team_meeting_id = #{teamMeetingId}
+        </if>
+        
+        <if test="ancestors != null  and ancestors != ''">
+            and ancestors like concat('%', #{ancestors}, '%')
+        </if>
+    </select>
+
+    <select id="selectXfptSuppliceInspectionReportById" parameterType="Long"
+            resultMap="XfptSuppliceInspectionReportResult">
+        <include refid="selectXfptSuppliceInspectionReportVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSuppliceInspectionReport" parameterType="XfptSuppliceInspectionReport" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into xfpt_supplice_inspection_report
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">
+                dept_id,
+            </if>
+            <if test="deptName != null">
+                dept_name,
+            </if>
+            <if test="supplierId != null">
+                supplier_id,
+            </if>
+            <if test="supplierName != null">
+                supplier_name,
+            </if>
+            <if test="supplierPhone != null">
+                supplier_phone,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="teamMeetingId != null">
+                team_meeting_id,
+            </if>
+            <if test="ancestors != null">
+                ancestors,
+            </if>
+            
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">
+                #{deptId},
+            </if>
+            <if test="deptName != null">
+                #{deptName},
+            </if>
+            <if test="supplierId != null">
+                #{supplierId},
+            </if>
+            <if test="supplierName != null">
+                #{supplierName},
+            </if>
+            <if test="supplierPhone != null">
+                #{supplierPhone},
+            </if>
+            <if test="createBy != null">
+                #{createBy},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+            <if test="remark != null">
+                #{remark},
+            </if>
+            <if test="teamMeetingId != null">
+                #{teamMeetingId},
+            </if>
+            <if test="ancestors != null">
+                #{ancestors},
+            </if>
+            
+        </trim>
+    </insert>
+
+    <update id="updateXfptSuppliceInspectionReport" parameterType="XfptSuppliceInspectionReport">
+        update xfpt_supplice_inspection_report
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null">
+                dept_id = #{deptId},
+            </if>
+            <if test="deptName != null">
+                dept_name = #{deptName},
+            </if>
+            <if test="supplierId != null">
+                supplier_id = #{supplierId},
+            </if>
+            <if test="supplierName != null">
+                supplier_name = #{supplierName},
+            </if>
+            <if test="supplierPhone != null">
+                supplier_phone = #{supplierPhone},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="teamMeetingId != null">
+                team_meeting_id = #{teamMeetingId},
+            </if>
+            <if test="ancestors != null">
+                ancestors = #{ancestors},
+            </if>
+            
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSuppliceInspectionReportById" parameterType="Long">
+        delete
+        from xfpt_supplice_inspection_report
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSuppliceInspectionReportByIds" parameterType="String">
+        delete from xfpt_supplice_inspection_report where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

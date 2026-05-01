@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.system.mapper.XfptCarouselImageMapper">
+
+    <resultMap type="XfptCarouselImage" id="XfptCarouselImageResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="image"    column="image"    />
+        <result property="type"    column="type"    />
+        <result property="sort"    column="sort"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+    </resultMap>
+
+    <sql id="selectXfptCarouselImageVo">
+        select id, name, image, type, sort, del_flag, update_by, update_time, create_time, create_by from xfpt_carousel_image
+    </sql>
+
+    <select id="selectXfptCarouselImageList" parameterType="XfptCarouselImage" resultMap="XfptCarouselImageResult">
+        <include refid="selectXfptCarouselImageVo"/>
+        <include refid="search"/>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+        order by sort asc
+    </select>
+
+    <select id="selectXfptCarouselImageById" parameterType="Long" resultMap="XfptCarouselImageResult">
+        <include refid="selectXfptCarouselImageVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptCarouselImage" parameterType="XfptCarouselImage" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_carousel_image
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="image != null">image,</if>
+            <if test="type != null">type,</if>
+            <if test="sort != null">sort,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="image != null">#{image},</if>
+            <if test="type != null">#{type},</if>
+            <if test="sort != null">#{sort},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptCarouselImage" parameterType="XfptCarouselImage">
+        update xfpt_carousel_image
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="sort != null">sort = #{sort},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptCarouselImageById" parameterType="Long">
+        delete from xfpt_carousel_image where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptCarouselImageByIds" parameterType="String">
+        delete from xfpt_carousel_image where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

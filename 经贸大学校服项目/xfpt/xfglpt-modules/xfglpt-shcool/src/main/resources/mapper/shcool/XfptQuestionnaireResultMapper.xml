@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptQuestionnaireResultMapper">
+
+    <resultMap type="XfptQuestionnaireResult" id="XfptQuestionnaireResultResult">
+        <result property="id"    column="id"    />
+        <result property="questionnaireSurveyId"    column="questionnaire_survey_id"    />
+        <result property="surveyId"    column="survey_id"    />
+        <result property="questionnaireResult"    column="questionnaire_result"    />
+        <result property="patriarchName"    column="patriarch_name"    />
+        <result property="studentName"    column="student_name"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="ipAddress"    column="ip_address"    />
+
+    </resultMap>
+
+    <sql id="selectXfptQuestionnaireResultVo">
+        select id, questionnaire_survey_id, survey_id, questionnaire_result, patriarch_name, student_name, create_by, create_time, update_by, update_time, remark, del_flag,ip_address from xfpt_questionnaire_result
+    </sql>
+
+    <select id="selectXfptQuestionnaireResultList" parameterType="XfptQuestionnaireResult" resultMap="XfptQuestionnaireResultResult">
+        <include refid="selectXfptQuestionnaireResultVo"/>
+        <include refid="search"/>
+            <if test="questionnaireSurveyId != null  and questionnaireSurveyId != ''"> and questionnaire_survey_id = #{questionnaireSurveyId}</if>
+            <if test="surveyId != null  and surveyId != ''"> and survey_id = #{surveyId}</if>
+            <if test="questionnaireResult != null  and questionnaireResult != ''"> and questionnaire_result = #{questionnaireResult}</if>
+            <if test="patriarchName != null  and patriarchName != ''"> and patriarch_name like concat('%', #{patriarchName}, '%')</if>
+            <if test="studentName != null  and studentName != ''"> and student_name like concat('%', #{studentName}, '%')</if>
+        <if test="ipAddress != null  and ipAddress != ''"> and ip_address like concat('%', #{ipAddress}, '%')</if>
+
+
+    </select>
+
+    <select id="selectXfptQuestionnaireResultById" parameterType="Long" resultMap="XfptQuestionnaireResultResult">
+        <include refid="selectXfptQuestionnaireResultVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptQuestionnaireResult" parameterType="XfptQuestionnaireResult" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_questionnaire_result
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="questionnaireSurveyId != null">questionnaire_survey_id,</if>
+            <if test="surveyId != null">survey_id,</if>
+            <if test="questionnaireResult != null">questionnaire_result,</if>
+            <if test="patriarchName != null">patriarch_name,</if>
+            <if test="studentName != null">student_name,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="ipAddress != null">ip_address,</if>
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="questionnaireSurveyId != null">#{questionnaireSurveyId},</if>
+            <if test="surveyId != null">#{surveyId},</if>
+            <if test="questionnaireResult != null">#{questionnaireResult},</if>
+            <if test="patriarchName != null">#{patriarchName},</if>
+            <if test="studentName != null">#{studentName},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="ipAddress != null">#{ipAddress},</if>
+
+         </trim>
+    </insert>
+
+    <update id="updateXfptQuestionnaireResult" parameterType="XfptQuestionnaireResult">
+        update xfpt_questionnaire_result
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="questionnaireSurveyId != null">questionnaire_survey_id = #{questionnaireSurveyId},</if>
+            <if test="surveyId != null">survey_id = #{surveyId},</if>
+            <if test="questionnaireResult != null">questionnaire_result = #{questionnaireResult},</if>
+            <if test="patriarchName != null">patriarch_name = #{patriarchName},</if>
+            <if test="studentName != null">student_name = #{studentName},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="ipAddress != null">ip_address = #{ipAddress},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptQuestionnaireResultById" parameterType="Long">
+        delete from xfpt_questionnaire_result where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptQuestionnaireResultByIds" parameterType="String">
+        delete from xfpt_questionnaire_result where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

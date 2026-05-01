@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptJzBuyOpinionsSonMapper">
+
+    <resultMap type="com.xfgl.school.domain.XfptJzBuyOpinionsSon" id="XfptJzBuyOpinionsSonResult">
+        <result property="id" column="id"/>
+        <result property="pId" column="p_id"/>
+        <result property="cgnj" column="cgnj"/>
+        <result property="cgnjId" column="cgnj_id"/>
+        <result property="xfpl" column="xfpl"/>
+        <result property="xsngmts" column="xsngmts"/>
+        <result property="jgqj" column="jgqj"/>
+        <result property="bz" column="bz"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectXfptJzBuyOpinionsSonVo">
+        select id,
+               p_id,
+               cgnj,
+               cgnj_id,
+               xfpl,
+               xsngmts,
+               jgqj,
+               bz,
+               create_time,
+               create_by,
+               update_by,
+               update_time,
+               del_flag,
+               remark
+        from xfpt_jz_buy_opinions_son
+    </sql>
+
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+    <select id="selectXfptJzBuyOpinionsSonList" parameterType="com.xfgl.school.domain.XfptJzBuyOpinionsSon"
+            resultMap="XfptJzBuyOpinionsSonResult">
+        <include refid="selectXfptJzBuyOpinionsSonVo"/>
+        <include refid="search"/>
+        <if test="pId != null ">and p_id = #{pId}</if>
+        <if test="cgnj != null  and cgnj != ''">and cgnj = #{cgnj}</if>
+        <if test="xfpl != null  and xfpl != ''">and xfpl = #{xfpl}</if>
+        <if test="xsngmts != null  and xsngmts != ''">and xsngmts = #{xsngmts}</if>
+        <if test="jgqj != null  and jgqj != ''">and jgqj = #{jgqj}</if>
+        <if test="bz != null  and bz != ''">and bz = #{bz}</if>
+    </select>
+
+    <select id="selectXfptJzBuyOpinionsSonById" parameterType="Long" resultMap="XfptJzBuyOpinionsSonResult">
+        <include refid="selectXfptJzBuyOpinionsSonVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptJzBuyOpinionsSon" parameterType="com.xfgl.school.domain.XfptJzBuyOpinionsSon"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_jz_buy_opinions_son
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pId != null">p_id,</if>
+            <if test="cgnj != null">cgnj,</if>
+            <if test="xfpl != null">xfpl,</if>
+            <if test="xsngmts != null">xsngmts,</if>
+            <if test="jgqj != null">jgqj,</if>
+            <if test="bz != null">bz,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            <if test="cgnjId != null">cgnj_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pId != null">#{pId},</if>
+            <if test="cgnj != null">#{cgnj},</if>
+            <if test="xfpl != null">#{xfpl},</if>
+            <if test="xsngmts != null">#{xsngmts},</if>
+            <if test="jgqj != null">#{jgqj},</if>
+            <if test="bz != null">#{bz},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="cgnjId != null">#{cgnjId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptJzBuyOpinionsSon" parameterType="com.xfgl.school.domain.XfptJzBuyOpinionsSon">
+        update xfpt_jz_buy_opinions_son
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="cgnj != null">cgnj = #{cgnj},</if>
+            <if test="xfpl != null">xfpl = #{xfpl},</if>
+            <if test="xsngmts != null">xsngmts = #{xsngmts},</if>
+            <if test="jgqj != null">jgqj = #{jgqj},</if>
+            <if test="bz != null">bz = #{bz},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="cgnjId != null">cgnj_id = #{cgnjId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptJzBuyOpinionsSonById" parameterType="Long">
+        delete
+        from xfpt_jz_buy_opinions_son
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptJzBuyOpinionsSon" parameterType="com.xfgl.school.domain.XfptJzBuyOpinionsSon">
+        delete from xfpt_jz_buy_opinions_son
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="pId != null">
+                p_id = #{pId}
+            </if>
+            <if test="pidList != null and pidList.size() > 0">
+                and p_id in
+                <foreach collection="pidList" item="pidCurr" open="(" separator="," close=")">
+                    #{pidCurr}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteXfptJzBuyOpinionsSonByIds" parameterType="String">
+        delete from xfpt_jz_buy_opinions_son where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

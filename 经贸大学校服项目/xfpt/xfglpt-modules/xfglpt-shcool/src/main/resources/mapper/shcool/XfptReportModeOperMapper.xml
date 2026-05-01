@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptReportModeOperMapper">
+
+    <resultMap type="XfptReportModeOper" id="XfptReportModeOperResult">
+        <result property="id"    column="id"    />
+        <result property="czr"    column="czr"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="ip"    column="ip"    />
+        <result property="reportModeId"    column="report_mode_id"    />
+    </resultMap>
+
+    <sql id="selectXfptReportModeOperVo">
+        select id, czr, create_time, create_by, update_time, update_by, del_flag, ip, report_mode_id from xfpt_report_mode_oper
+    </sql>
+
+    <select id="selectXfptReportModeOperList" parameterType="XfptReportModeOper" resultMap="XfptReportModeOperResult">
+        <include refid="selectXfptReportModeOperVo"/>
+        <include refid="search"/>
+
+    </select>
+
+    <select id="selectXfptReportModeOperById" parameterType="Long" resultMap="XfptReportModeOperResult">
+        <include refid="selectXfptReportModeOperVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptReportModeOper" parameterType="XfptReportModeOper" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_report_mode_oper
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="czr != null">czr,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="ip != null">ip,</if>
+            <if test="reportModeId != null">report_mode_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="czr != null">#{czr},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="ip != null">#{ip},</if>
+            <if test="reportModeId != null">#{reportModeId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptReportModeOper" parameterType="XfptReportModeOper">
+        update xfpt_report_mode_oper
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="czr != null">czr = #{czr},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="ip != null">ip = #{ip},</if>
+            <if test="reportModeId != null">report_mode_id = #{reportModeId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptReportModeOperById" parameterType="Long">
+        delete from xfpt_report_mode_oper where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptReportModeOperByIds" parameterType="String">
+        delete from xfpt_report_mode_oper where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

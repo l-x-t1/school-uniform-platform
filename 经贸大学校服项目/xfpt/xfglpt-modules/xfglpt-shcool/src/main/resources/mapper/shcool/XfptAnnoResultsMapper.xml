@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptAnnoResultsMapper">
+
+    <resultMap type="XfptAnnoResults" id="XfptAnnoResultsResult">
+        <result property="id"    column="id"    />
+        <result property="noticeTitle"    column="notice_title"    />
+        <result property="procurementNoticeName"    column="procurement_notice_name"    />
+        <result property="procurementNoticeId"    column="procurement_notice_id"    />
+        <result property="transactionCompanyName"    column="transaction_company_name"    />
+        <result property="bidPrice"    column="bid_price"    />
+        <result property="judgesList"    column="judges_list"    />
+        <result property="judgesCount"    column="judges_count"    />
+        <result property="announcementFile"    column="announcement_file"    />
+        <result property="otherFile"    column="other_file"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="isRelease"    column="is_release"    />
+        <result property="cgsj"    column="cgsj"    />
+        <result property="noticeFile"    column="notice_file"    />
+    </resultMap>
+
+    <sql id="selectXfptAnnoResultsVo">
+        select notice_file,cgsj,is_release,file_type,dept_id,ancestors,team_id,id, notice_title, procurement_notice_name, procurement_notice_id, transaction_company_name, bid_price, judges_list, judges_count, announcement_file, other_file, remark, del_flag, create_by, update_time, update_by, create_time from xfpt_anno_results
+    </sql>
+
+    <select id="selectXfptAnnoResultsList" parameterType="XfptAnnoResults" resultMap="XfptAnnoResultsResult">
+        <include refid="selectXfptAnnoResultsVo"/>
+        <include refid="search"/>
+            <if test="noticeTitle != null  and noticeTitle != ''"> and notice_title = #{noticeTitle}</if>
+            <if test="procurementNoticeName != null  and procurementNoticeName != ''"> and procurement_notice_name like concat('%', #{procurementNoticeName}, '%')</if>
+            <if test="procurementNoticeId != null  and procurementNoticeId != ''"> and procurement_notice_id = #{procurementNoticeId}</if>
+            <if test="transactionCompanyName != null  and transactionCompanyName != ''"> and transaction_company_name like concat('%', #{transactionCompanyName}, '%')</if>
+            <if test="bidPrice != null  and bidPrice != ''"> and bid_price = #{bidPrice}</if>
+            <if test="judgesList != null  and judgesList != ''"> and judges_list = #{judgesList}</if>
+            <if test="judgesCount != null "> and judges_count = #{judgesCount}</if>
+            <if test="announcementFile != null  and announcementFile != ''"> and announcement_file = #{announcementFile}</if>
+            <if test="otherFile != null and otherFile != ''"> and other_file = #{otherFile}</if>
+            <if test="teamId != null"> and team_id = #{teamId}</if>
+            <if test="deptId != null">
+                and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
+            </if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+        </if>
+    </select>
+
+    <select id="selectXfptAnnoResultsById" parameterType="Long" resultMap="XfptAnnoResultsResult">
+        <include refid="selectXfptAnnoResultsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptAnnoResults" parameterType="XfptAnnoResults" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_anno_results
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="noticeTitle != null">notice_title,</if>
+            <if test="procurementNoticeName != null">procurement_notice_name,</if>
+            <if test="procurementNoticeId != null">procurement_notice_id,</if>
+            <if test="transactionCompanyName != null">transaction_company_name,</if>
+            <if test="bidPrice != null">bid_price,</if>
+            <if test="judgesList != null">judges_list,</if>
+            <if test="judgesCount != null">judges_count,</if>
+            <if test="announcementFile != null">announcement_file,</if>
+            <if test="otherFile != null">other_file,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="noticeTitle != null">#{noticeTitle},</if>
+            <if test="procurementNoticeName != null">#{procurementNoticeName},</if>
+            <if test="procurementNoticeId != null">#{procurementNoticeId},</if>
+            <if test="transactionCompanyName != null">#{transactionCompanyName},</if>
+            <if test="bidPrice != null">#{bidPrice},</if>
+            <if test="judgesList != null">#{judgesList},</if>
+            <if test="judgesCount != null">#{judgesCount},</if>
+            <if test="announcementFile != null">#{announcementFile},</if>
+            <if test="otherFile != null">#{otherFile},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptAnnoResults" parameterType="XfptAnnoResults">
+        update xfpt_anno_results
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="noticeTitle != null">notice_title = #{noticeTitle},</if>
+            <if test="procurementNoticeName != null">procurement_notice_name = #{procurementNoticeName},</if>
+            <if test="procurementNoticeId != null">procurement_notice_id = #{procurementNoticeId},</if>
+            <if test="transactionCompanyName != null">transaction_company_name = #{transactionCompanyName},</if>
+            <if test="bidPrice != null">bid_price = #{bidPrice},</if>
+            <if test="judgesList != null">judges_list = #{judgesList},</if>
+            <if test="judgesCount != null">judges_count = #{judgesCount},</if>
+            <if test="announcementFile != null">announcement_file = #{announcementFile},</if>
+            <if test="otherFile != null">other_file = #{otherFile},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptAnnoResultsById" parameterType="Long">
+        delete from xfpt_anno_results where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptAnnoResultsByIds" parameterType="String">
+        delete from xfpt_anno_results where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

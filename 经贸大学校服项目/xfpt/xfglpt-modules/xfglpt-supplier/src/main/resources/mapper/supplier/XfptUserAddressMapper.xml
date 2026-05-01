@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.supplier.mapper.XfptUserAddressMapper">
+
+    <resultMap type="XfptUserAddress" id="XfptUserAddressResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="receiverName"    column="receiver_name"    />
+        <result property="receiverPhone"    column="receiver_phone"    />
+        <result property="provinceName"    column="province_name"    />
+        <result property="cityName"    column="city_name"    />
+        <result property="districtName"    column="district_name"    />
+        <result property="detailAddress"    column="detail_address"    />
+        <result property="addressType"    column="address_type"    />
+        <result property="isDefault"    column="is_default"    />
+        <result property="checkedFlag"    column="checked_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectXfptUserAddressVo">
+        select id, user_id, receiver_name, receiver_phone, province_name, city_name, district_name, detail_address, address_type, is_default, checked_flag, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_user_address
+    </sql>
+
+    <select id="selectXfptUserAddressList" parameterType="XfptUserAddress" resultMap="XfptUserAddressResult">
+        <include refid="selectXfptUserAddressVo"/>
+        <include refid="search"/>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="receiverName != null  and receiverName != ''"> and receiver_name like concat('%', #{receiverName}, '%')</if>
+            <if test="receiverPhone != null  and receiverPhone != ''"> and receiver_phone = #{receiverPhone}</if>
+            <if test="provinceName != null  and provinceName != ''"> and province_name like concat('%', #{provinceName}, '%')</if>
+            <if test="cityName != null  and cityName != ''"> and city_name like concat('%', #{cityName}, '%')</if>
+            <if test="districtName != null  and districtName != ''"> and district_name like concat('%', #{districtName}, '%')</if>
+            <if test="detailAddress != null  and detailAddress != ''"> and detail_address = #{detailAddress}</if>
+            <if test="addressType != null  and addressType != ''"> and address_type = #{addressType}</if>
+            <if test="isDefault != null  and isDefault != ''"> and is_default = #{isDefault}</if>
+            <if test="checkedFlag != null  and checkedFlag != ''"> and checked_flag = #{checkedFlag}</if>
+
+    </select>
+
+    <select id="selectXfptUserAddressById" parameterType="Long" resultMap="XfptUserAddressResult">
+        <include refid="selectXfptUserAddressVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptUserAddress" parameterType="XfptUserAddress" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_user_address
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="receiverName != null and receiverName != ''">receiver_name,</if>
+            <if test="receiverPhone != null and receiverPhone != ''">receiver_phone,</if>
+            <if test="provinceName != null">province_name,</if>
+            <if test="cityName != null">city_name,</if>
+            <if test="districtName != null">district_name,</if>
+            <if test="detailAddress != null and detailAddress != ''">detail_address,</if>
+            <if test="addressType != null and addressType != ''">address_type,</if>
+            <if test="isDefault != null and isDefault != ''">is_default,</if>
+            <if test="checkedFlag != null">checked_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="receiverName != null and receiverName != ''">#{receiverName},</if>
+            <if test="receiverPhone != null and receiverPhone != ''">#{receiverPhone},</if>
+            <if test="provinceName != null">#{provinceName},</if>
+            <if test="cityName != null">#{cityName},</if>
+            <if test="districtName != null">#{districtName},</if>
+            <if test="detailAddress != null and detailAddress != ''">#{detailAddress},</if>
+            <if test="addressType != null and addressType != ''">#{addressType},</if>
+            <if test="isDefault != null and isDefault != ''">#{isDefault},</if>
+            <if test="checkedFlag != null">#{checkedFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptUserAddress" parameterType="XfptUserAddress">
+        update xfpt_user_address
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="receiverName != null and receiverName != ''">receiver_name = #{receiverName},</if>
+            <if test="receiverPhone != null and receiverPhone != ''">receiver_phone = #{receiverPhone},</if>
+            <if test="provinceName != null">province_name = #{provinceName},</if>
+            <if test="cityName != null">city_name = #{cityName},</if>
+            <if test="districtName != null">district_name = #{districtName},</if>
+            <if test="detailAddress != null and detailAddress != ''">detail_address = #{detailAddress},</if>
+            <if test="addressType != null and addressType != ''">address_type = #{addressType},</if>
+            <if test="isDefault != null and isDefault != ''">is_default = #{isDefault},</if>
+            <if test="checkedFlag != null">checked_flag = #{checkedFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptUserAddressById" parameterType="Long">
+        delete from xfpt_user_address where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptUserAddressByIds" parameterType="String">
+        delete from xfpt_user_address where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

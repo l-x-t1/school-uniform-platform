@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.system.mapper.XfptNoticeMapper">
+
+    <resultMap type="XfptNotice" id="XfptNoticeResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="content"    column="content"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="type"    column="type"    />
+        <result property="status"    column="status"    />
+        <result property="xgType"    column="xg_type"    />
+        <result property="file"    column="file"    />
+        <result property="ggFile"    column="gg_file"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="samplesPic"    column="samples_pic"    />
+        <result property="enteId"    column="ente_id"    />
+        <result property="readCount"    column="read_count"    />
+        <result property="userId"    column="user_id"    />
+        <result property="fmImg"    column="fm_img"    />
+        <result property="catagory"    column="catagory"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="area"    column="area"    />
+        <result property="areaname"    column="areaname"    />
+        <result property="deptname"    column="deptname"    />
+        <result property="isBc"    column="is_bc"    />
+    </resultMap>
+
+    <sql id="selectXfptNoticeVo">
+        select notic.*,cate.name as catagoryName from xfpt_notice notic LEFT JOIN XFPT_CATEGORY_NOTICE cate
+        ON notic.CATAGORY=cate.bs
+    </sql>
+
+    <select id="selectXfptNoticeList" parameterType="XfptNotice" resultMap="XfptNoticeResult">
+        <include refid="selectXfptNoticeVo"/>
+        where notic.del_flag = 0 and catagory!= 'CGGG' and catagory!= 'QYRWGG' and catagory!= 'QYRWGG'
+        <if test="title != null  and title != ''"> and notic.title like concat('%', #{title}, '%')</if>
+        <if test="content != null  and content != ''"> and notic.content = #{content}</if>
+        <if test="type != null  and type != ''"> and notic.type = #{type}</if>
+        <if test="status != null  and status != ''"> and notic.status = #{status}</if>
+        <if test="catagory != null  and catagory != ''"> and notic.catagory = #{catagory}</if>
+        <if test="xgType != null  and xgType != ''"> and notic.xg_type = #{xgType}</if>
+        <if test="area != null  and area != ''"> and notic.area = #{area}</if>
+        <if test="areaname != null  and areaname != ''"> and notic.areaname = #{areaname}</if>
+        <if test="deptname != null  and deptname != ''"> and notic.areaname = #{deptname}</if>
+         order by notic.create_time desc
+    </select>
+
+    <select id="selectXfptNoticeById" parameterType="Long" resultMap="XfptNoticeResult">
+        <include refid="selectXfptNoticeVo"/>
+        where id = #{id}
+    </select>
+    <select id="appList" resultType="XfptNotice">
+        SELECT * FROM XFPT_NOTICE
+        <where>
+            REMARK in
+            (select stu.SHCOOL_ID from xfpt_sim_user sim left join XFPT_STUDENT_INFO stu on sim.id=stu.sim_id where sim.id=#{simId})
+            <if test="catagory != null  and catagory != ''"> and catagory = #{catagory}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="title != null  and title != ''">and title like concat('%', #{title}, '%')</if>
+        </where>
+
+        order by create_time desc
+
+    </select>
+
+    <insert id="insertXfptNotice" parameterType="XfptNotice" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_notice
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="content != null">content,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="type != null">type,</if>
+            <if test="status != null">status,</if>
+            <if test="xgType != null">xg_type,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="content != null">#{content},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="type != null">#{type},</if>
+            <if test="status != null">#{status},</if>
+            <if test="xgType != null">#{xgType},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptNotice" parameterType="XfptNotice">
+        update xfpt_notice
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="xgType != null">xg_type = #{xgType},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptNoticeById" parameterType="Long">
+        delete from xfpt_notice where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptNoticeByIds" parameterType="String">
+        delete from xfpt_notice where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

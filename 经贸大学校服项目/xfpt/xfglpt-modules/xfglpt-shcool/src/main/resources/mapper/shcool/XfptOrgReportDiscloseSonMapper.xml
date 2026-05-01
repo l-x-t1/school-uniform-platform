@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptOrgReportDiscloseSonMapper">
+
+    <resultMap type="com.xfgl.school.domain.XfptOrgReportDiscloseSon" id="XfptOrgReportDiscloseSonResult">
+        <result property="id" column="id"/>
+        <result property="pId" column="p_id"/>
+        <result property="zw" column="zw"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="dblb" column="dblb"/>
+        <result property="xm" column="xm"/>
+        <result property="phone" column="phone"/>
+        <result property="njZy" column="nj_zy"/>
+        <result property="bj" column="bj"/>
+    </resultMap>
+
+    <sql id="selectXfptOrgReportDiscloseSonVo">
+        select id,
+               p_id,
+               zw,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               del_flag,
+               dblb,
+               xm,
+               phone,
+               nj_zy,
+               bj
+        from xfpt_org_report_disclose_son
+    </sql>
+
+    <select id="selectXfptOrgReportDiscloseSonList" parameterType="com.xfgl.school.domain.XfptOrgReportDiscloseSon"
+            resultMap="XfptOrgReportDiscloseSonResult">
+        <include refid="selectXfptOrgReportDiscloseSonVo"/>
+        <include refid="search"/>
+        <if test="id != null ">and id = #{id}</if>
+        <if test="pId != null ">and p_id = #{pId}</if>
+        <if test="zw != null  and zw != ''">and zw = #{zw}</if>
+        <if test="dblb != null  and dblb != ''">and dblb = #{dblb}</if>
+        <if test="xm != null  and xm != ''">and xm = #{xm}</if>
+        <if test="phone != null  and phone != ''">and phone = #{phone}</if>
+        <if test="njZy != null  and njZy != ''">and nj_zy = #{njZy}</if>
+        <if test="bj != null  and bj != ''">and bj = #{bj}</if>
+
+    </select>
+
+    <select id="selectXfptOrgReportDiscloseSonByTId" parameterType="Long" resultMap="XfptOrgReportDiscloseSonResult">
+        <include refid="selectXfptOrgReportDiscloseSonVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptOrgReportDiscloseSon" parameterType="com.xfgl.school.domain.XfptOrgReportDiscloseSon"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_org_report_disclose_son
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="pId != null">p_id,</if>
+            <if test="zw != null">zw,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="dblb != null">dblb,</if>
+            <if test="xm != null">xm,</if>
+            <if test="phone != null">phone,</if>
+            <if test="njZy != null">nj_zy,</if>
+            <if test="bj != null">bj,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="pId != null">#{pId},</if>
+            <if test="zw != null">#{zw},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="dblb != null">#{dblb},</if>
+            <if test="xm != null">#{xm},</if>
+            <if test="phone != null">#{phone},</if>
+            <if test="njZy != null">#{njZy},</if>
+            <if test="bj != null">#{bj},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptOrgReportDiscloseSon" parameterType="com.xfgl.school.domain.XfptOrgReportDiscloseSon">
+        update xfpt_org_report_disclose_son
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="zw != null">zw = #{zw},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="dblb != null">dblb = #{dblb},</if>
+            <if test="xm != null">xm = #{xm},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="njZy != null">nj_zy = #{njZy},</if>
+            <if test="bj != null">bj = #{bj},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptOrgReportDiscloseSonByTId" parameterType="Long">
+        delete
+        from xfpt_org_report_disclose_son
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteOrgReportDiscloseSon" parameterType="com.xfgl.school.domain.XfptOrgReportDiscloseSon">
+        delete from xfpt_org_report_disclose_son
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="pId != null">
+                and p_id = #{pId}
+            </if>
+            <if test="pidList != null and pidList.size() > 0">
+                and p_id in
+                <foreach collection="pidList" item="currPid" open="(" separator="," close=")">
+                    #{currPid}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteXfptOrgReportDiscloseSonByTIds" parameterType="String">
+        delete from xfpt_org_report_disclose_son where id in
+        <foreach item="IdCurr" collection="array" open="(" separator="," close=")">
+            #{IdCurr}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

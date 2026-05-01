@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.TeamMeetingSonMapper">
+
+    <resultMap type="com.xfgl.school.domain.TeamMeetingSon" id="TeamMeetingSonResult">
+        <result property="id" column="id"/>
+        <result property="teamMeetingId" column="team_meeting_id"/>
+        <result property="cgnj" column="cgnj"/>
+        <result property="cgnjId" column="cgnj_id"/>
+        <result property="xfpl" column="xfpl"/>
+        <result property="gmts" column="gmts"/>
+        <result property="jgqj" column="jgqj"/>
+        <result property="bz" column="bz"/>
+    </resultMap>
+
+    <sql id="selectTeamMeetingSonVo">
+        select id, team_meeting_id, cgnj, xfpl, gmts, jgqj, bz, cgnj_id
+        from XFPT_TEAM_MEETING_SON
+    </sql>
+
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+    <select id="selectTeamMeetingSonList" parameterType="com.xfgl.school.domain.TeamMeetingSon" resultMap="TeamMeetingSonResult">
+        <include refid="selectTeamMeetingSonVo"/>
+        <include refid="search"/>
+        <if test="teamMeetingId != null ">and team_meeting_id = #{teamMeetingId}</if>
+        <if test="cgnj != null  and cgnj != ''">and cgnj = #{cgnj}</if>
+        <if test="xfpl != null  and xfpl != ''">and xfpl = #{xfpl}</if>
+        <if test="gmts != null ">and gmts = #{gmts}</if>
+        <if test="jgqj != null  and jgqj != ''">and jgqj = #{jgqj}</if>
+        <if test="bz != null  and bz != ''">and bz = #{bz}</if>
+
+    </select>
+
+    <select id="selectTeamMeetingSonById" parameterType="String" resultMap="TeamMeetingSonResult">
+        <include refid="selectTeamMeetingSonVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTeamMeetingSon" parameterType="com.xfgl.school.domain.TeamMeetingSon"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into XFPT_TEAM_MEETING_SON
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="teamMeetingId != null">team_meeting_id,</if>
+            <if test="cgnj != null">cgnj,</if>
+            <if test="xfpl != null">xfpl,</if>
+            <if test="gmts != null">gmts,</if>
+            <if test="jgqj != null">jgqj,</if>
+            <if test="bz != null">bz,</if>
+            <if test="cgnjId != null">cgnj_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="teamMeetingId != null">#{teamMeetingId},</if>
+            <if test="cgnj != null">#{cgnj},</if>
+            <if test="xfpl != null">#{xfpl},</if>
+            <if test="gmts != null">#{gmts},</if>
+            <if test="jgqj != null">#{jgqj},</if>
+            <if test="bz != null">#{bz},</if>
+            <if test="cgnjId != null">#{cgnjId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateTeamMeetingSon" parameterType="com.xfgl.school.domain.TeamMeetingSon">
+        update XFPT_TEAM_MEETING_SON
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamMeetingId != null">team_meeting_id = #{teamMeetingId},</if>
+            <if test="cgnj != null">cgnj = #{cgnj},</if>
+            <if test="xfpl != null">xfpl = #{xfpl},</if>
+            <if test="gmts != null">gmts = #{gmts},</if>
+            <if test="jgqj != null">jgqj = #{jgqj},</if>
+            <if test="bz != null">bz = #{bz},</if>
+            <if test="cgnjId != null">cgnj_id = #{cgnjId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTeamMeetingSon" parameterType="com.xfgl.school.domain.TeamMeetingSon">
+        delete
+        from XFPT_TEAM_MEETING_SON
+        <where>
+            <if test="id != null">
+                id = #{id}
+            </if>
+            <if test="teamMeetingId != null">
+                and team_meeting_id = #{teamMeetingId}
+            </if>
+            <if test="teamMeetingIdList != null and teamMeetingIdList.size() > 0">
+                and team_meeting_id in
+                <foreach collection="teamMeetingIdList" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>
+    </delete>
+
+    <delete id="deleteTeamMeetingSonByIds" parameterType="String">
+        delete from XFPT_TEAM_MEETING_SON where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

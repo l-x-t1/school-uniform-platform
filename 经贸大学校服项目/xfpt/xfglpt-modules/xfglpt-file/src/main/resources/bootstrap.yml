@@ -1,0 +1,35 @@
+# Tomcat
+server:
+  port: 9300
+# Spring
+spring:
+  application:
+    # 应用名称
+    name: xfglpt-file
+  profiles:
+    # 环境配置
+    active: dev
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: localhost:8848
+        ip: 127.0.0.1
+        namespace: e4771fd7-40af-4918-96f5-90641c81b444
+        #server-addr: 172.16.25.27:8848
+        #ip: 172.16.25.141
+        port: 9300
+        username: nacos
+        password: admin123W999*)^(!@#
+      config:
+        # 配置中心地址
+        server-addr: localhost:8848
+        #server-addr: 172.16.25.27:8848
+        username: nacos
+        password: admin123W999*)^(!@#
+        namespace: 5e3e155d-73b2-4a36-ab8b-e54454e8b351
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}

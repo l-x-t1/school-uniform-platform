@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptJzbuyOpinionsConfigMapper">
+
+    <resultMap type="com.xfgl.school.domain.XfptJzbuyOpinionsConfig" id="XfptJzbuyOpinionsConfigResult">
+        <result property="id" column="id"/>
+        <result property="category" column="category"/>
+        <result property="content" column="content"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="remark" column="remark"/>
+    </resultMap>
+
+    <sql id="selectXfptJzbuyOpinionsConfigVo">
+        select id,
+               category,
+               content,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               del_flag,
+               dept_id,
+               ancestors,
+               remark
+        from xfpt_jzbuy_opinions_config
+    </sql>
+
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+
+    <select id="selectXfptJzbuyOpinionsConfigList" parameterType="com.xfgl.school.domain.XfptJzbuyOpinionsConfig"
+            resultMap="XfptJzbuyOpinionsConfigResult">
+        <include refid="selectXfptJzbuyOpinionsConfigVo"/>
+        <include refid="search"/>
+        <if test="category != null  and category != ''">and category = #{category}</if>
+        <if test="content != null  and content != ''">and content = #{content}</if>
+        <if test="deptId != null">
+            and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
+        </if>
+    </select>
+
+    <select id="selectXfptJzbuyOpinionsConfigById" parameterType="Long" resultMap="XfptJzbuyOpinionsConfigResult">
+        <include refid="selectXfptJzbuyOpinionsConfigVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptJzbuyOpinionsConfig" parameterType="com.xfgl.school.domain.XfptJzbuyOpinionsConfig"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_jzbuy_opinions_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="category != null">category,</if>
+            <if test="content != null">content,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null and ancestors != ''">ancestors,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="category != null">#{category},</if>
+            <if test="content != null">#{content},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null and ancestors != ''">#{ancestors},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptJzbuyOpinionsConfig" parameterType="com.xfgl.school.domain.XfptJzbuyOpinionsConfig">
+        update xfpt_jzbuy_opinions_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="category != null">category = #{category},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptJzbuyOpinionsConfigById" parameterType="Long">
+        delete
+        from xfpt_jzbuy_opinions_config
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptJzbuyOpinionsConfigByIds" parameterType="String">
+        delete from xfpt_jzbuy_opinions_config where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

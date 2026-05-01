@@ -1,0 +1,2 @@
+com.xfgl.common.log.service.AsyncLogService
+com.xfgl.common.log.aspect.LogAspect

@@ -1,0 +1,76 @@
+package ${packageName}.domain;
+
+#foreach ($import in $importList)
+import ${import};
+#end
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.experimental.Accessors;
+import lombok.*;
+import com.xfgl.common.core.annotation.Excel;
+#if($table.crud || $table.sub)
+import com.xfgl.common.core.web.domain.BaseEntity;
+#elseif($table.tree)
+import com.xfgl.common.core.web.domain.TreeEntity;
+#end
+
+/**
+ * ${functionName}对象 ${tableName}
+ *
+ * @author ${author}
+ * @date ${datetime}
+ */
+#if($table.crud || $table.sub)
+    #set($Entity="BaseEntity")
+#elseif($table.tree)
+    #set($Entity="TreeEntity")
+#end
+@Data
+@ToString
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+@Accessors(chain = true)
+@TableName("${tableName}")
+@Schema(description = "${functionName}")
+public class ${ClassName} extends ${Entity}
+        {
+private static final long serialVersionUID = 1L;
+
+#foreach ($column in $columns)
+    #if(!$table.isSuperColumn($column.javaField))
+    /** $column.columnComment */
+        #if($column.list)
+            #set($parentheseIndex=$column.columnComment.indexOf("（"))
+            #if($parentheseIndex != -1)
+                #set($comment=$column.columnComment.substring(0, $parentheseIndex))
+            #else
+                #set($comment=$column.columnComment)
+            #end
+            #if($parentheseIndex != -1)
+            @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
+            #elseif($column.javaType == 'Date')
+            @JsonFormat(pattern = "yyyy-MM-dd")
+            @Excel(name = "${comment}", width = 30, dateFormat = "yyyy-MM-dd")
+            #else
+            @Excel(name = "${comment}")
+            #end
+        #end
+        #if($column.pk)
+        @TableId(type= IdType.AUTO)
+        #end
+    @Schema(description = "$column.columnComment")
+    private $column.javaType $column.javaField;
+
+    #end
+#end
+#if($table.sub)
+/** $table.subTable.functionName信息 */
+@TableField(exist = false)
+@Schema(description = "$table.subTable.functionName")
+private List<${subClassName}> ${subclassName}List;
+#end
+        }

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.xfgl.school.mapper.SupplierMessageMapper">
+    <resultMap type="SupplierMessage" id="SupplierMessageResult">
+        <result property="id"    column="id"    />
+        <result property="supplierName"    column="supplier_name"    />
+        <result property="supplierPhone"    column="supplier_phone"    />
+        <result property="supplierType"    column="supplier_type"    />
+        <result property="legalRepresentative"    column="legal_representative"    />
+        <result property="turnoverTime"    column="turnover_time"    />
+        <result property="staffNumber"    column="staff_number"    />
+        <result property="establishedTime"    column="established_time"    />
+        <result property="supplierAddress"    column="supplier_address"    />
+        <result property="supplierIntroduce"    column="supplier_introduce"    />
+        <result property="equipmentConditions"    column="equipment_conditions"    />
+        <result property="businessLicense"    column="business_license"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="insuredNumber"    column="insured_number"    />
+        <result property="blacklistStatus"    column="blacklist_status"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="violationReason"    column="violation_reason"    />
+    </resultMap>
+
+    <sql id="selectSupplierMessageVo">
+        select violation_reason,id, supplier_name, supplier_phone, supplier_type, legal_representative, turnover_time, staff_number, established_time, supplier_address, supplier_introduce, equipment_conditions, business_license, create_by, create_time, update_by, update_time, remark,registered_capital,insured_number,blacklist_status,dept_id,dept_name,ancestors from xfpt_supplier_message
+    </sql>
+
+    <select id="selectSupplierMessageList" parameterType="SupplierMessage" resultMap="SupplierMessageResult">
+        <include refid="selectSupplierMessageVo"/>
+        <include refid="search"/>
+            <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
+            <if test="supplierPhone != null  and supplierPhone != ''"> and supplier_phone = #{supplierPhone}</if>
+            <if test="supplierType != null  and supplierType != ''"> and supplier_type = #{supplierType}</if>
+            <if test="legalRepresentative != null  and legalRepresentative != ''"> and legal_representative = #{legalRepresentative}</if>
+            <if test="turnoverTime != null "> and turnover_time = #{turnoverTime}</if>
+            <if test="staffNumber != null  and staffNumber != ''"> and staff_number = #{staffNumber}</if>
+            <if test="establishedTime != null "> and established_time = #{establishedTime}</if>
+            <if test="supplierAddress != null  and supplierAddress != ''"> and supplier_address = #{supplierAddress}</if>
+            <if test="supplierIntroduce != null  and supplierIntroduce != ''"> and supplier_introduce = #{supplierIntroduce}</if>
+            <if test="equipmentConditions != null  and equipmentConditions != ''"> and equipment_conditions = #{equipmentConditions}</if>
+            <if test="businessLicense != null  and businessLicense != ''"> and business_license = #{businessLicense}</if>
+            <if test="insuredNumber != null  and insuredNumber != ''"> and insured_number = #{insuredNumber}</if>
+            <if test="blacklistStatus != null  and blacklistStatus != ''"> and blacklist_status = #{blacklistStatus}</if>
+        <if test="deptId != null  and deptId != ''"> and dept_id = #{deptId}</if>
+        <if test="deptName != null  and deptName != ''"> and dept_name = #{deptName}</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+        order by create_time desc
+    </select>
+
+    <select id="selectSupplierMessageById" parameterType="Long" resultMap="SupplierMessageResult">
+        <include refid="selectSupplierMessageVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertSupplierMessage" parameterType="SupplierMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_supplier_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="supplierName != null">supplier_name,</if>
+            <if test="supplierPhone != null">supplier_phone,</if>
+            <if test="supplierType != null">supplier_type,</if>
+            <if test="legalRepresentative != null">legal_representative,</if>
+            <if test="turnoverTime != null">turnover_time,</if>
+            <if test="staffNumber != null">staff_number,</if>
+            <if test="establishedTime != null">established_time,</if>
+            <if test="supplierAddress != null">supplier_address,</if>
+            <if test="supplierIntroduce != null">supplier_introduce,</if>
+            <if test="equipmentConditions != null">equipment_conditions,</if>
+            <if test="businessLicense != null">business_license,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="insuredNumber != null">insured_number,</if>
+            <if test="blacklistStatus != null">blacklist_status,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="ancestors != null">ancestors,</if>
+
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="supplierName != null">#{supplierName},</if>
+            <if test="supplierPhone != null">#{supplierPhone},</if>
+            <if test="supplierType != null">#{supplierType},</if>
+            <if test="legalRepresentative != null">#{legalRepresentative},</if>
+            <if test="turnoverTime != null">#{turnoverTime},</if>
+            <if test="staffNumber != null">#{staffNumber},</if>
+            <if test="establishedTime != null">#{establishedTime},</if>
+            <if test="supplierAddress != null">#{supplierAddress},</if>
+            <if test="supplierIntroduce != null">#{supplierIntroduce},</if>
+            <if test="equipmentConditions != null">#{equipmentConditions},</if>
+            <if test="businessLicense != null">#{businessLicense},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="insuredNumber != null">#{insuredNumber},</if>
+            <if test="blacklistStatus != null">#{blacklistStatus},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+
+         </trim>
+    </insert>
+
+    <update id="updateSupplierMessage" parameterType="SupplierMessage">
+        update xfpt_supplier_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="supplierName != null">supplier_name = #{supplierName},</if>
+            <if test="supplierPhone != null">supplier_phone = #{supplierPhone},</if>
+            <if test="supplierType != null">supplier_type = #{supplierType},</if>
+            <if test="legalRepresentative != null">legal_representative = #{legalRepresentative},</if>
+            <if test="turnoverTime != null">turnover_time = #{turnoverTime},</if>
+            <if test="staffNumber != null">staff_number = #{staffNumber},</if>
+            <if test="establishedTime != null">established_time = #{establishedTime},</if>
+            <if test="supplierAddress != null">supplier_address = #{supplierAddress},</if>
+            <if test="supplierIntroduce != null">supplier_introduce = #{supplierIntroduce},</if>
+            <if test="equipmentConditions != null">equipment_conditions = #{equipmentConditions},</if>
+            <if test="businessLicense != null">business_license = #{businessLicense},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="insuredNumber != null">insured_number = #{insuredNumber},</if>
+            <if test="blacklistStatus != null">blacklist_status = #{blacklistStatus},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+
+            <if test="ancestors != null">dept_name = #{ancestors},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteSupplierMessageById" parameterType="Long">
+        delete from xfpt_supplier_message where id = #{id}
+    </delete>
+
+    <delete id="deleteSupplierMessageByIds" parameterType="String">
+        delete from xfpt_supplier_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

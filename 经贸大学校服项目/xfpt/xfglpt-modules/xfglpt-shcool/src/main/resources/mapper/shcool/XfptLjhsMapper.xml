@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptLjhsMapper">
+
+    <resultMap type="XfptLjhs" id="XfptLjhsResult">
+        <result property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="className" column="class_name"/>
+        <result property="images" column="images"/>
+        <result property="schoolName" column="school_name"/>
+        <result property="status" column="status"/>
+        <result property="otherFile" column="other_file"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="simId" column="sim_id"/>
+    </resultMap>
+
+    <sql id="selectXfptLjhsVo">
+        select id, name, school_id, class_name, images, school_name, status, other_file, remark, del_flag, create_by,
+        update_time, update_by, create_time,sim_id from xfpt_ljhs
+    </sql>
+
+    <select id="selectXfptLjhsList" parameterType="XfptLjhs" resultMap="XfptLjhsResult">
+        <include refid="selectXfptLjhsVo"/>
+        <include refid="search"/>
+        <if test="name != null  and name != ''">and name like concat('%', #{name}, '%')</if>
+        <if test="className != null  and className != ''">and class_name like concat('%', #{className}, '%')</if>
+        <if test="schoolName != null  and schoolName != ''">and school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="status != null  and status != ''">and status = #{status}</if>
+        <if test="schoolId != null">and school_id = #{deptId} </if>
+        <if test="simId != null">and sim_id = #{simId} </if>
+
+    </select>
+
+    <select id="selectXfptLjhsById" parameterType="Long" resultMap="XfptLjhsResult">
+        <include refid="selectXfptLjhsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptLjhs" parameterType="XfptLjhs">
+        insert into xfpt_ljhs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="name != null">name,</if>
+            <if test="schoolId != null">school_id,</if>
+            <if test="className != null">class_name,</if>
+            <if test="images != null">images,</if>
+            <if test="schoolName != null">school_name,</if>
+            <if test="status != null">status,</if>
+            <if test="otherFile != null">other_file,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="name != null">#{name},</if>
+            <if test="schoolId != null">#{schoolId},</if>
+            <if test="className != null">#{className},</if>
+            <if test="images != null">#{images},</if>
+            <if test="schoolName != null">#{schoolName},</if>
+            <if test="status != null">#{status},</if>
+            <if test="otherFile != null">#{otherFile},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptLjhs" parameterType="XfptLjhs">
+        update xfpt_ljhs
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="schoolId != null">school_id = #{schoolId},</if>
+            <if test="className != null">class_name = #{className},</if>
+            <if test="images != null">images = #{images},</if>
+            <if test="schoolName != null">school_name = #{schoolName},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="otherFile != null">other_file = #{otherFile},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptLjhsById" parameterType="Long">
+        delete from xfpt_ljhs where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptLjhsByIds" parameterType="String">
+        delete from xfpt_ljhs where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

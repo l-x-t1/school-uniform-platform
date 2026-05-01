@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptNoticUserMapper">
+
+    <resultMap type="XfptNoticUser" id="XfptNoticUserResult">
+        <result property="userId"    column="user_id"    />
+        <result property="noticId"    column="notic_id"    />
+    </resultMap>
+
+    <sql id="selectXfptNoticUserVo">
+        select user_id, notic_id from xfpt_notic_user
+    </sql>
+
+    <select id="selectXfptNoticUserList" parameterType="XfptNoticUser" resultMap="XfptNoticUserResult">
+        <include refid="selectXfptNoticUserVo"/>
+        <include refid="search"/>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="noticId != null "> and notic_id = #{noticId}</if>
+
+    </select>
+
+    <select id="selectXfptNoticUserByUserId" parameterType="Long" resultMap="XfptNoticUserResult">
+        <include refid="selectXfptNoticUserVo"/>
+        where user_id = #{userId}
+    </select>
+    <select id="collectList" resultType="com.xfgl.system.api.domain.XfptNotice">
+        SELECT * FROM  `xfglpt`.`xfpt_notic_user` xnu LEFT  JOIN `XFPT_NOTICE`
+        xn ON  xnu.`notic_id` =xn.`ID` WHERE  xnu.`user_id`=#{userId} and xnu.del_flag = 0
+    </select>
+
+    <insert id="insertXfptNoticUser" parameterType="XfptNoticUser">
+        insert into xfpt_notic_user
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="noticId != null">notic_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="noticId != null">#{noticId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptNoticUser" parameterType="XfptNoticUser">
+        update xfpt_notic_user
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="noticId != null">notic_id = #{noticId},</if>
+        </trim>
+        where user_id = #{userId}
+    </update>
+
+    <delete id="deleteXfptNoticUserByUserId" parameterType="Long">
+        delete from xfpt_notic_user where user_id = #{userId}
+    </delete>
+
+    <delete id="deleteXfptNoticUserByUserIds" parameterType="String">
+        delete from xfpt_notic_user where user_id in
+        <foreach item="userId" collection="array" open="(" separator="," close=")">
+            #{userId}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

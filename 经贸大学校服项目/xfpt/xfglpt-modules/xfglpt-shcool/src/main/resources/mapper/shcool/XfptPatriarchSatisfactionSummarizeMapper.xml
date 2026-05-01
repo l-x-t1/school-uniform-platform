@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptPatriarchSatisfactionSummarizeMapper">
+
+    <resultMap type="XfptPatriarchSatisfactionSummarize" id="XfptPatriarchSatisfactionSummarizeResult">
+        <result property="id"    column="id"    />
+        <result property="summarizeReportName"    column="summarize_report_name"    />
+        <result property="summarizeReportType"    column="summarize_report_type"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="endTime"    column="end_time"    />
+        <result property="questionnaireSurveyId"    column="questionnaire_survey_id"    />
+        <result property="surveyFileUrl"    column="survey_file_url"    />
+        <result property="surveyFileName"    column="survey_file_name"    />
+        <result property="state"    column="state"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="teamMeetingId"    column="team_meeting_id"    />
+        <result property="amount"    column="amount"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="count"    column="count"    />
+
+    </resultMap>
+
+    <sql id="selectXfptPatriarchSatisfactionSummarizeVo">
+        select count,id, summarize_report_name, summarize_report_type, start_time, end_time, questionnaire_survey_id, survey_file_url, survey_file_name, state, create_by, create_time, update_by, update_time, remark, del_flag, dept_id, dept_name,team_meeting_id,amount,ancestors from xfpt_patriarch_satisfaction_summarize
+    </sql>
+
+    <select id="selectXfptPatriarchSatisfactionSummarizeList" parameterType="XfptPatriarchSatisfactionSummarize" resultMap="XfptPatriarchSatisfactionSummarizeResult">
+        <include refid="selectXfptPatriarchSatisfactionSummarizeVo"/>
+        <include refid="search"/>
+        <if test="summarizeReportName != null  and summarizeReportName != ''"> and summarize_report_name like concat('%', #{summarizeReportName}, '%')</if>
+        <if test="summarizeReportType != null  and summarizeReportType != ''"> and summarize_report_type = #{summarizeReportType}</if>
+        <if test="startTime != null "> and start_time = #{startTime}</if>
+        <if test="endTime != null "> and end_time = #{endTime}</if>
+        <if test="questionnaireSurveyId != null  and questionnaireSurveyId != ''"> and questionnaire_survey_id = #{questionnaireSurveyId}</if>
+        <if test="surveyFileUrl != null  and surveyFileUrl != ''"> and survey_file_url = #{surveyFileUrl}</if>
+        <if test="surveyFileName != null  and surveyFileName != ''"> and survey_file_name like concat('%', #{surveyFileName}, '%')</if>
+        <if test="state != null  and state != ''"> and state = #{state}</if>
+        <if test="deptId != null  and deptId != ''"> and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+        <if test="deptName != null  and deptName != ''"> and dept_name like concat('%', #{deptName}, '%')</if>
+        <if test="teamMeetingId != null  and teamMeetingId != ''"> and team_meeting_id =#{teamMeetingId}</if>
+        <if test="amount != null  and amount != ''"> and amount = #{amount}</if>
+        <if test="ancestors != null  and amount != ''"> and ancestors like concat('%', #{amount}, '%')</if>
+
+
+
+    </select>
+
+    <select id="selectXfptPatriarchSatisfactionSummarizeById" parameterType="Long" resultMap="XfptPatriarchSatisfactionSummarizeResult">
+        <include refid="selectXfptPatriarchSatisfactionSummarizeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptPatriarchSatisfactionSummarize" parameterType="XfptPatriarchSatisfactionSummarize" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_patriarch_satisfaction_summarize
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="summarizeReportName != null">summarize_report_name,</if>
+            <if test="summarizeReportType != null">summarize_report_type,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="questionnaireSurveyId != null">questionnaire_survey_id,</if>
+            <if test="surveyFileUrl != null">survey_file_url,</if>
+            <if test="surveyFileName != null">survey_file_name,</if>
+            <if test="state != null">state,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="teamMeetingId != null">team_meeting_id,</if>
+            <if test="amount != null">amount,</if>
+            <if test="ancestors != null">ancestors,</if>
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="summarizeReportName != null">#{summarizeReportName},</if>
+            <if test="summarizeReportType != null">#{summarizeReportType},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="questionnaireSurveyId != null">#{questionnaireSurveyId},</if>
+            <if test="surveyFileUrl != null">#{surveyFileUrl},</if>
+            <if test="surveyFileName != null">#{surveyFileName},</if>
+            <if test="state != null">#{state},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="teamMeetingId != null">#{teamMeetingId},</if>
+            <if test="amount != null">#{amount},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+
+         </trim>
+    </insert>
+
+    <update id="updateXfptPatriarchSatisfactionSummarize" parameterType="XfptPatriarchSatisfactionSummarize">
+        update xfpt_patriarch_satisfaction_summarize
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="summarizeReportName != null">summarize_report_name = #{summarizeReportName},</if>
+            <if test="summarizeReportType != null">summarize_report_type = #{summarizeReportType},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="questionnaireSurveyId != null">questionnaire_survey_id = #{questionnaireSurveyId},</if>
+            <if test="surveyFileUrl != null">survey_file_url = #{surveyFileUrl},</if>
+            <if test="surveyFileName != null">survey_file_name = #{surveyFileName},</if>
+            <if test="state != null">state = #{state},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="teamMeetingId != null">team_meeting_id = #{teamMeetingId},</if>
+            <if test="amount != null">amount = #{amount},</if>
+            <if test="ancestors != null">amount = #{ancestors},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptPatriarchSatisfactionSummarizeById" parameterType="Long">
+        delete from xfpt_patriarch_satisfaction_summarize where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptPatriarchSatisfactionSummarizeByIds" parameterType="String">
+        delete from xfpt_patriarch_satisfaction_summarize where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

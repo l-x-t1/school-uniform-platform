@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSuppliceContractSonMapper">
+    <resultMap type="XfptSuppliceContractSon" id="XfptSuppliceContractSonResult">
+        <result property="id" column="id"/>
+        <result property="suppliceContractId" column="supplice_contract_id"/>
+        <result property="contractName" column="contract_name"/>
+        <result property="contractDeadline" column="contract_deadline"/>
+        <result property="url" column="url"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="fileName" column="file_name"/>
+
+        <result property="supplierPrincipal" column="supplier_principal"/>
+        <result property="supplierPhone" column="supplier_phone"/>
+        <result property="numberOrderers" column="number_orderers"/>
+        <result property="unitPrice" column="unit_price"/>
+        <result property="totalAmount" column="total_amount"/>
+        <result property="fzr" column="fzr"/>
+        <result property="fzrdh" column="fzrdh"/>
+        <result property="count" column="count"/>
+        <result property="dj" column="dj"/>
+        <result property="zj" column="zj"/>
+        <result property="integrity" column="integrity"/>
+    </resultMap>
+
+    <sql id="selectXfptSuppliceContractSonVo">
+        select id,
+               supplice_contract_id,
+               contract_name,
+               contract_deadline,
+               url,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               file_name,
+               file_type,
+               supplier_principal,
+               supplier_phone,
+               number_orderers,
+               unit_price,
+               total_amount,fzr,fzrdh,count,dj,zj,integrity
+        from xfpt_supplice_contract_son
+    </sql>
+
+    <select id="selectXfptSuppliceContractSonList" parameterType="XfptSuppliceContractSon"
+            resultMap="XfptSuppliceContractSonResult">
+        <include refid="selectXfptSuppliceContractSonVo"/>
+        <include refid="search"/>
+        <if test="suppliceContractId != null  and suppliceContractId != ''">
+            and supplice_contract_id = #{suppliceContractId}
+        </if>
+        <if test="contractName != null  and contractName != ''">
+            and contract_name like concat('%', #{contractName}, '%')
+        </if>
+        <if test="contractDeadline != null  and contractDeadline != ''">
+            and contract_deadline = #{contractDeadline}
+        </if>
+        <if test="url != null  and url != ''">
+            and url = #{url}
+        </if>
+        <if test="fileType != null  and fileType != ''">
+            and file_type = #{fileType}
+        </if>
+        <if test="supplierPrincipal != null  and supplierPrincipal != ''">
+            and supplier_principal = #{supplierPrincipal}
+        </if>
+        <if test="supplierPhone != null  and supplierPhone != ''">
+            and supplier_phone = #{supplierPhone}
+        </if>
+        <if test="numberOrderers != null  and numberOrderers != ''">
+            and number_orderers = #{numberOrderers}
+        </if>
+        <if test="unitPrice != null  and unitPrice != ''">
+            and unit_price = #{unitPrice}
+        </if>
+        <if test="totalAmount != null  and totalAmount != ''">
+            and total_amount = #{totalAmount}
+        </if>
+
+
+
+    </select>
+
+    <select id="selectXfptSuppliceContractSonById" parameterType="Long" resultMap="XfptSuppliceContractSonResult">
+        <include refid="selectXfptSuppliceContractSonVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSuppliceContractSon" parameterType="XfptSuppliceContractSon" useGeneratedKeys="true"
+            keyProperty="id">
+        insert into xfpt_supplice_contract_son
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="suppliceContractId != null">
+                supplice_contract_id,
+            </if>
+            <if test="contractName != null">
+                contract_name,
+            </if>
+            <if test="contractDeadline != null">
+                contract_deadline,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="fileType != null">
+                file_type,
+            </if>
+
+            <if test="supplierPrincipal != null">
+                supplier_principal,
+            </if>
+            <if test="supplierPhone != null">
+                supplier_phone,
+            </if>
+            <if test="numberOrderers != null">
+                number_orderers,
+            </if>
+            <if test="unitPrice != null">
+                unit_price,
+            </if>
+            <if test="totalAmount != null">
+                total_amount,
+            </if>
+
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="suppliceContractId != null">
+                #{suppliceContractId},
+            </if>
+            <if test="contractName != null">
+                #{contractName},
+            </if>
+            <if test="contractDeadline != null">
+                #{contractDeadline},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+            <if test="createBy != null">
+                #{createBy},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+            <if test="remark != null">
+                #{remark},
+            </if>
+            <if test="fileType != null">
+                #{fileType},
+            </if>
+            <if test="supplierPrincipal != null">
+                #{supplierPrincipal},
+            </if>
+            <if test="supplierPhone != null">
+                #{supplierPhone},
+            </if>
+            <if test="numberOrderers != null">
+                #{numberOrderers},
+            </if>
+            <if test="unitPrice != null">
+                #{unitPrice},
+            </if>
+            <if test="totalAmount != null">
+                #{totalAmount},
+            </if>
+
+        </trim>
+    </insert>
+
+    <update id="updateXfptSuppliceContractSon" parameterType="XfptSuppliceContractSon">
+        update xfpt_supplice_contract_son
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="suppliceContractId != null">
+                supplice_contract_id = #{suppliceContractId},
+            </if>
+            <if test="contractName != null">
+                contract_name = #{contractName},
+            </if>
+            <if test="contractDeadline != null">
+                contract_deadline = #{contractDeadline},
+            </if>
+            <if test="url != null">
+                url = #{url},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="fileType != null">
+                file_type = #{fileType},
+            </if>
+
+            <if test="supplierPrincipal != null">
+                supplier_principal = #{supplierPrincipal},
+            </if>
+            <if test="supplierPhone != null">
+                supplier_phone = #{supplierPhone},
+            </if>
+            <if test="numberOrderers != null">
+                number_orderers = #{numberOrderers},
+            </if>
+            <if test="unitPrice != null">
+                unit_price = #{unitPrice},
+            </if>
+            <if test="totalAmount != null">
+                total_amount = #{totalAmount},
+            </if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSuppliceContractSonById" parameterType="Long">
+        delete
+        from xfpt_supplice_contract_son
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSuppliceContractSonByIds" parameterType="String">
+        delete from xfpt_supplice_contract_son where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

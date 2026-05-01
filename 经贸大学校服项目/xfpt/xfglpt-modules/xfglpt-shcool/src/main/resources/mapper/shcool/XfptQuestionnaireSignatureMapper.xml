@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptQuestionnaireSignatureMapper">
+
+    <resultMap type="XfptQuestionnaireSignature" id="XfptQuestionnaireSignatureResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="image"    column="image"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="questionnaireSurveyId"    column="questionnaire_survey_id"    />
+    </resultMap>
+
+    <sql id="selectXfptQuestionnaireSignatureVo">
+        select id, user_id, image, del_flag, remark, update_time, update_by, create_time, create_by, questionnaire_survey_id from xfpt_questionnaire_signature
+    </sql>
+
+    <select id="selectXfptQuestionnaireSignatureList" parameterType="XfptQuestionnaireSignature" resultMap="XfptQuestionnaireSignatureResult">
+        <include refid="selectXfptQuestionnaireSignatureVo"/>
+        <include refid="search"/>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="image != null  and image != ''"> and image = #{image}</if>
+            <if test="questionnaireSurveyId != null "> and questionnaire_survey_id = #{questionnaireSurveyId}</if>
+
+    </select>
+
+    <select id="selectXfptQuestionnaireSignatureById" parameterType="Long" resultMap="XfptQuestionnaireSignatureResult">
+        <include refid="selectXfptQuestionnaireSignatureVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptQuestionnaireSignature" parameterType="XfptQuestionnaireSignature" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_questionnaire_signature
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="image != null">image,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="questionnaireSurveyId != null">questionnaire_survey_id,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="image != null">#{image},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="questionnaireSurveyId != null">#{questionnaireSurveyId},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptQuestionnaireSignature" parameterType="XfptQuestionnaireSignature">
+        update xfpt_questionnaire_signature
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="image != null">image = #{image},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="questionnaireSurveyId != null">questionnaire_survey_id = #{questionnaireSurveyId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptQuestionnaireSignatureById" parameterType="Long">
+        delete from xfpt_questionnaire_signature where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptQuestionnaireSignatureByIds" parameterType="String">
+        delete from xfpt_questionnaire_signature where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSchoolMessageMapper">
+
+    <resultMap type="XfptSchoolMessage" id="XfptSchoolMessageResult">
+        <result property="id"    column="id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="academyType"    column="academy_type"    />
+        <result property="regionProvince"    column="region_province"    />
+        <result property="regionCity"    column="region_city"    />
+        <result property="regionCounty"    column="region_county"    />
+        <result property="detailedAddress"    column="detailed_address"    />
+        <result property="schoolType"    column="school_type"    />
+        <result property="schoolBadge"    column="school_badge"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="schoolArea"    column="school_area"    />
+        <result property="principalName"    column="principal_name"    />
+        <result property="principalPhone"    column="principal_phone"    />
+        <result property="area"    column="area"    />
+        <result property="peopleCount"    column="people_count"    />
+
+
+
+    </resultMap>
+
+    <sql id="selectXfptSchoolMessageVo">
+        select people_count,area,id, dept_id, school_name, academy_type, region_province, region_city, region_county, detailed_address, school_type, school_badge, create_by, create_time, update_by, update_time, remark, del_flag,school_area,principal_name,principal_phone from xfpt_school_message
+    </sql>
+
+    <select id="selectXfptSchoolMessageList" parameterType="XfptSchoolMessage" resultMap="XfptSchoolMessageResult">
+        <include refid="selectXfptSchoolMessageVo"/>
+        <include refid="search"/>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="schoolName != null  and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
+            <if test="academyType != null  and academyType != ''"> and academy_type = #{academyType}</if>
+            <if test="regionProvince != null  and regionProvince != ''"> and region_province = #{regionProvince}</if>
+            <if test="regionCity != null  and regionCity != ''"> and region_city = #{regionCity}</if>
+            <if test="regionCounty != null  and regionCounty != ''"> and region_county = #{regionCounty}</if>
+            <if test="detailedAddress != null  and detailedAddress != ''"> and detailed_address = #{detailedAddress}</if>
+            <if test="schoolType != null  and schoolType != ''"> and school_type = #{schoolType}</if>
+            <if test="schoolBadge != null  and schoolBadge != ''"> and school_badge = #{schoolBadge}</if>
+        <if test="schoolArea != null  and schoolArea != ''"> and school_area = #{schoolArea}</if>
+        <if test="principalName != null  and principalName != ''"> and principal_name = #{principalName}</if>
+        <if test="principalPhone != null  and principalPhone != ''"> and principal_phone = #{principalPhone}</if>
+    </select>
+
+    <select id="selectXfptSchoolMessageById" parameterType="Long" resultMap="XfptSchoolMessageResult">
+        <include refid="selectXfptSchoolMessageVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSchoolMessage" parameterType="XfptSchoolMessage" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_school_message
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">dept_id,</if>
+            <if test="schoolName != null">school_name,</if>
+            <if test="academyType != null">academy_type,</if>
+            <if test="regionProvince != null">region_province,</if>
+            <if test="regionCity != null">region_city,</if>
+            <if test="regionCounty != null">region_county,</if>
+            <if test="detailedAddress != null">detailed_address,</if>
+            <if test="schoolType != null">school_type,</if>
+            <if test="schoolBadge != null">school_badge,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="schoolArea != null">school_area,</if>
+            <if test="principalName != null">principal_name,</if>
+            <if test="principalPhone != null">principal_phone,</if>
+
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">#{deptId},</if>
+            <if test="schoolName != null">#{schoolName},</if>
+            <if test="academyType != null">#{academyType},</if>
+            <if test="regionProvince != null">#{regionProvince},</if>
+            <if test="regionCity != null">#{regionCity},</if>
+            <if test="regionCounty != null">#{regionCounty},</if>
+            <if test="detailedAddress != null">#{detailedAddress},</if>
+            <if test="schoolType != null">#{schoolType},</if>
+            <if test="schoolBadge != null">#{schoolBadge},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="schoolArea != null">#{schoolArea},</if>
+            <if test="principalName != null">#{principalName},</if>
+            <if test="principalPhone != null">#{principalPhone},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptSchoolMessage" parameterType="XfptSchoolMessage">
+        update xfpt_school_message
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="schoolName != null">school_name = #{schoolName},</if>
+            <if test="academyType != null">academy_type = #{academyType},</if>
+            <if test="regionProvince != null">region_province = #{regionProvince},</if>
+            <if test="regionCity != null">region_city = #{regionCity},</if>
+            <if test="regionCounty != null">region_county = #{regionCounty},</if>
+            <if test="detailedAddress != null">detailed_address = #{detailedAddress},</if>
+            <if test="schoolType != null">school_type = #{schoolType},</if>
+            <if test="schoolBadge != null">school_badge = #{schoolBadge},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="schoolArea != null">school_area = #{schoolArea},</if>
+
+            <if test="principalName != null">principal_name = #{principalName},</if>
+            <if test="principalPhone != null">principal_phone = #{principalPhone},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSchoolMessageById" parameterType="Long">
+        delete from xfpt_school_message where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSchoolMessageByIds" parameterType="String">
+        delete from xfpt_school_message where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+
+    <select id="selectDictDate" parameterType="String" >
+        select dict_code, dict_sort, dict_label, dict_value, dict_type, css_class, list_class, is_default, status, create_by, create_time, remark
+        from sys_dict_data
+        where status = '0' and dict_type = #{dictType} order by dict_sort asc
+    </select>
+
+    <select id="selectDeptList" parameterType="SysDept" >
+        select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time,d.is_school,d.school_badge,d.is_complete,d.people_count
+        from sys_dept d
+        where d.del_flag = '0'
+        <if test="deptId != null and deptId != 0">
+            AND d.dept_id = #{deptId}
+        </if>
+        <if test="parentId != null and parentId != 0">
+            AND (d.parent_id = #{parentId} or find_in_set(#{parentId},d.ancestors))
+        </if>
+        <if test="deptName != null and deptName != ''">
+            AND d.dept_name like concat('%', #{deptName}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND d.status = #{status}
+        </if>
+        <if test="isSchool != null and isSchool != ''">
+            AND d.is_school = #{isSchool}
+        </if>
+        <if test="isComplete != null and isComplete != ''">
+            AND d.is_complete = #{isComplete}
+        </if>
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        order by d.parent_id, d.order_num
+    </select>
+
+    <select id="selectDeptList1" parameterType="SysDept" >
+        select d.dept_id, d.parent_id, d.ancestors, d.dept_name, d.order_num, d.leader, d.phone, d.email, d.status, d.del_flag, d.create_by, d.create_time,d.is_school,d.school_badge,d.is_complete,d.people_count
+        from sys_dept d
+        join xfpt_school_message massgae on d.dept_id=massgae.dept_id
+        where d.del_flag = '0'
+        <if test="deptId != null and deptId != 0">
+            AND d.dept_id = #{deptId}
+        </if>
+        <if test="parentId != null and parentId != 0">
+            AND d.parent_id = #{parentId}
+        </if>
+        <if test="deptName != null and deptName != ''">
+            AND d.dept_name like concat('%', #{deptName}, '%')
+        </if>
+        <if test="status != null and status != ''">
+            AND d.status = #{status}
+        </if>
+        <if test="isSchool != null and isSchool != ''">
+            AND d.is_school = #{isSchool}
+        </if>
+        <if test="isComplete != null and isComplete != ''">
+            AND d.is_complete = #{isComplete}
+        </if>
+
+        <if test="schoolType != null and schoolType != ''">
+            AND massgae.school_type = #{schoolType}
+        </if>
+        <if test="schoolArea != null and schoolArea != ''">
+            AND massgae.school_area = #{schoolArea}
+        </if>
+
+        <!-- 数据范围过滤 -->
+        ${params.dataScope}
+        order by d.parent_id, d.order_num
+    </select>
+
+    <select id="selectSchoolNumber" resultType="String">
+        SELECT COUNT(number) from  xfpt_school_grade_class where dept_id=#{deptId}
+    </select>
+
+
+</mapper>

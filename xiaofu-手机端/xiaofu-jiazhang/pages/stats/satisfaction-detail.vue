@@ -1,0 +1,444 @@
+<template>
+  <view class="page" v-if="item">
+    <view class="block">
+      <text class="block-title">基本信息</text>
+      <view class="kv">
+        <text class="k">总结报告名称</text>
+        <text class="v multiline">{{ item.title }}</text>
+      </view>
+      <view class="kv">
+        <text class="k">创建时间</text>
+        <text class="v">{{ item.createTime }}</text>
+      </view>
+      <view
+        class="kv"
+        v-if="
+          item.surveyType === '线上调查' &&
+          item.surveyStatus &&
+          item.surveyStatus !== '—'
+        "
+      >
+        <text class="k">问卷调查状态</text>
+        <text class="v">{{ item.surveyStatus }}</text>
+      </view>
+    </view>
+
+    <view class="block" v-if="item.resultFile && item.resultFile.name">
+      <text class="block-title">调查结果文件</text>
+      <view class="file-row">
+        <uni-icons type="paperclip" size="22" color="#30a3ff"></uni-icons>
+        <text class="file-name">{{ item.resultFile.name }}</text>
+      </view>
+      <view class="file-actions">
+        <text class="link" @click="onPreview(item.resultFile)">预览</text>
+        <text class="link-gap"></text>
+        <text class="link" @click="onDownload(item.resultFile)">下载</text>
+      </view>
+    </view>
+
+    <view class="block" v-else-if="item.fjPlainText">
+      <text class="block-title">调查结果文件</text>
+      <text class="plain-body">{{ item.fjPlainText }}</text>
+    </view>
+
+    <view class="block" v-else>
+      <text class="block-title">调查结果文件</text>
+      <text class="plain-body muted">暂无调查结果附件</text>
+    </view>
+
+    <view class="block block--table" v-if="item.surveyType === '线上调查'">
+      <text class="block-title">投票名单</text>
+      <view v-if="sigLoading" class="muted-tip">名单加载中…</view>
+      <view v-else-if="!signatureColumns.length" class="empty-data">暂无数据</view>
+      <template v-else>
+        <scroll-view scroll-x="true" class="table-scroll">
+          <view class="table-inner">
+            <view class="tr tr--head">
+              <view
+                v-for="col in signatureColumns"
+                :key="col.id || col.value"
+                class="td td--head"
+              >
+                <text class="td-text">{{ col.label }}</text>
+              </view>
+            </view>
+            <view v-for="(row, ri) in signatureRows" :key="ri" class="tr">
+              <view
+                v-for="col in signatureColumns"
+                :key="(col.id || col.value) + '-' + ri"
+                class="td"
+              >
+                <image
+                  v-if="col.value === 'signature' && cellVal(row, col)"
+                  class="sig-img"
+                  :src="sigUrl(cellVal(row, col))"
+                  mode="widthFix"
+                  @click="previewSig(cellVal(row, col))"
+                />
+                <text v-else class="td-text">{{ displayCell(row, col) }}</text>
+              </view>
+            </view>
+          </view>
+        </scroll-view>
+        <view v-if="!signatureRows.length" class="empty-data empty-data--below">
+          暂无数据
+        </view>
+      </template>
+    </view>
+  </view>
+  <view class="page miss" v-else-if="!loading">
+    <text class="miss-text">未找到该记录</text>
+  </view>
+  <view class="page miss" v-else>
+    <text class="miss-text">加载中…</text>
+  </view>
+</template>
+
+<script>
+import {
+  fetchQuestionnaireHeadingList,
+  fetchSatisfactionSummaryDetail,
+  fetchSatisfactionSurveyDictMaps,
+  fetchVoteSignatureList,
+  mapSatisfactionSummaryToDetailView,
+  resolveFileUrl,
+} from "./qr-open-api.js";
+
+export default {
+  data() {
+    return {
+      item: null,
+      loading: true,
+      sigLoading: false,
+      signatureColumns: [],
+      signatureRows: [],
+    };
+  },
+  onLoad(options) {
+    const id = options.id;
+    if (!id) {
+      this.loading = false;
+      this.item = null;
+      return;
+    }
+    this.loadDetail(id);
+  },
+  methods: {
+    async loadDetail(id) {
+      this.loading = true;
+      this.signatureColumns = [];
+      this.signatureRows = [];
+      try {
+        const [raw, dictMaps] = await Promise.all([
+          fetchSatisfactionSummaryDetail(id),
+          fetchSatisfactionSurveyDictMaps(),
+        ]);
+        this.item = mapSatisfactionSummaryToDetailView(raw, dictMaps);
+        if (this.item && this.item.surveyType === "线上调查" && this.item.questId) {
+          await this.loadSignatureData(this.item.questId);
+        }
+        if (this.item && this.item.detailNavTitle) {
+          uni.setNavigationBarTitle({
+            title: this.item.detailNavTitle,
+          });
+        } else {
+          uni.setNavigationBarTitle({ title: "详情" });
+        }
+      } catch (e) {
+        this.item = null;
+        uni.setNavigationBarTitle({ title: "详情" });
+        uni.showToast({
+          title: (e && e.message) || "加载失败",
+          icon: "none",
+        });
+      } finally {
+        this.loading = false;
+      }
+    },
+    cellVal(row, col) {
+      if (!row || !col) return "";
+      const k = col.value;
+      if (k == null || k === "") return "";
+      const v = row[k];
+      return v != null ? v : "";
+    },
+    displayCell(row, col) {
+      const v = this.cellVal(row, col);
+      return v === "" || v == null ? "—" : String(v);
+    },
+    sigUrl(u) {
+      if (u == null || u === "") return "";
+      return resolveFileUrl(String(u));
+    },
+    previewSig(u) {
+      const url = this.sigUrl(u);
+      if (!url) return;
+      uni.previewImage({ urls: [url], current: url });
+    },
+    async loadSignatureData(questId) {
+      this.sigLoading = true;
+      try {
+        const [cols, pack] = await Promise.all([
+          fetchQuestionnaireHeadingList(questId),
+          fetchVoteSignatureList({
+            questId,
+            pageNum: 1,
+            pageSize: 200,
+          }),
+        ]);
+        this.signatureColumns = Array.isArray(cols) ? cols : [];
+        this.signatureRows = pack && Array.isArray(pack.rows) ? pack.rows : [];
+      } catch (e) {
+        this.signatureColumns = [];
+        this.signatureRows = [];
+      } finally {
+        this.sigLoading = false;
+      }
+    },
+    onPreview(file) {
+      if (!file || !file.url) {
+        uni.showToast({ title: "暂无文件地址", icon: "none" });
+        return;
+      }
+      uni.showLoading({ title: "打开中..." });
+      uni.downloadFile({
+        url: file.url,
+        success: (res) => {
+          uni.hideLoading();
+          if (res.statusCode === 200 && res.tempFilePath) {
+            uni.openDocument({
+              filePath: res.tempFilePath,
+              showMenu: true,
+            });
+          } else {
+            uni.showToast({ title: "预览失败", icon: "none" });
+          }
+        },
+        fail: () => {
+          uni.hideLoading();
+          uni.showToast({ title: "下载失败", icon: "none" });
+        },
+      });
+    },
+    onDownload(file) {
+      if (!file || !file.url) {
+        uni.showToast({ title: "暂无文件地址", icon: "none" });
+        return;
+      }
+      uni.showLoading({ title: "下载中..." });
+      uni.downloadFile({
+        url: file.url,
+        success: (res) => {
+          uni.hideLoading();
+          if (res.statusCode === 200 && res.tempFilePath) {
+            uni.saveFile({
+              tempFilePath: res.tempFilePath,
+              success: () => {
+                uni.showToast({ title: "已保存", icon: "success" });
+              },
+              fail: () => {
+                uni.showToast({ title: "保存失败", icon: "none" });
+              },
+            });
+          } else {
+            uni.showToast({ title: "下载失败", icon: "none" });
+          }
+        },
+        fail: () => {
+          uni.hideLoading();
+          uni.showToast({ title: "下载失败", icon: "none" });
+        },
+      });
+    },
+  },
+};
+</script>
+
+<style lang="scss" scoped>
+.page {
+  min-height: 100vh;
+  padding: 24rpx 30rpx 48rpx;
+  box-sizing: border-box;
+  background-color: #f0f2f5;
+}
+
+.block {
+  background-color: #fff;
+  border-radius: 20rpx;
+  padding: 28rpx 28rpx 32rpx;
+  margin-bottom: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0, 0, 0, 0.06);
+}
+
+.block--table {
+  overflow: hidden;
+}
+
+.block-title {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #333;
+  display: block;
+  margin-bottom: 24rpx;
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid #f0f0f0;
+}
+
+.kv {
+  margin-bottom: 24rpx;
+}
+
+.kv:last-child {
+  margin-bottom: 0;
+}
+
+.k {
+  font-size: 26rpx;
+  color: #888;
+  display: block;
+  margin-bottom: 10rpx;
+}
+
+.v {
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.55;
+  display: block;
+}
+
+.v.multiline {
+  word-break: break-all;
+}
+
+.file-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+
+.file-name {
+  flex: 1;
+  font-size: 28rpx;
+  color: #333;
+  line-height: 1.45;
+  word-break: break-all;
+}
+
+.file-actions {
+  display: flex;
+  align-items: center;
+  padding-top: 8rpx;
+}
+
+.link {
+  font-size: 28rpx;
+  color: #30a3ff;
+}
+
+.link-gap {
+  width: 48rpx;
+}
+
+.plain-body {
+  font-size: 28rpx;
+  color: #555;
+  line-height: 1.65;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.plain-body.muted {
+  color: #bbb;
+}
+
+.muted-tip {
+  font-size: 26rpx;
+  color: #909399;
+  text-align: center;
+  padding: 24rpx 0;
+}
+
+.empty-data {
+  font-size: 28rpx;
+  color: #909399;
+  text-align: center;
+  padding: 48rpx 24rpx;
+}
+
+.empty-data--below {
+  padding: 32rpx 24rpx 16rpx;
+}
+
+.table-scroll {
+  width: 100%;
+  white-space: nowrap;
+}
+
+.table-inner {
+  display: inline-block;
+  min-width: 100%;
+  vertical-align: top;
+}
+
+.tr {
+  display: flex;
+  flex-direction: row;
+  border-bottom: 1rpx solid #ebeef5;
+}
+
+.tr--head {
+  background: #f5f7fa;
+}
+
+.tr:last-child {
+  border-bottom: none;
+}
+
+.td {
+  flex-shrink: 0;
+  width: 200rpx;
+  padding: 20rpx 16rpx;
+  box-sizing: border-box;
+  border-right: 1rpx solid #ebeef5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.td:last-child {
+  border-right: none;
+}
+
+.td--head {
+  background: #f5f7fa;
+}
+
+.td-text {
+  font-size: 24rpx;
+  color: #606266;
+  text-align: center;
+  word-break: break-all;
+  white-space: normal;
+}
+
+.tr:not(.tr--head) .td-text {
+  color: #303133;
+}
+
+.sig-img {
+  max-width: 160rpx;
+  max-height: 80rpx;
+}
+
+.miss {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.miss-text {
+  font-size: 28rpx;
+  color: #999;
+}
+</style>

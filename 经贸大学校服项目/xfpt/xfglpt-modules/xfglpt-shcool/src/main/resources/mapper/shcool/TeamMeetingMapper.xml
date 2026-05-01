@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.TeamMeetingMapper">
+
+    <resultMap type="com.xfgl.school.domain.TeamMeeting" id="TeamMeetingResult">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="meetingTime" column="meeting_time"/>
+        <result property="meetingUser" column="meeting_user"/>
+        <result property="zw" column="zw"/>
+        <result property="dblb" column="dblb"/>
+        <result property="zzName" column="zz_name"/>
+        <result property="hyjy" column="hyjy"/>
+        <result property="currOrder" column="curr_order"/>
+        <result property="timeTb" column="time_tb"/>
+        <result property="gyfwnx" column="gyfwnx"/>
+        <result property="jyjStatus" column="jyj_status"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="teamId" column="team_id"/>
+    </resultMap>
+
+    <sql id="selectTeamMeetingVo">
+        select id,
+               title,
+               meeting_time,
+               meeting_user,
+               zw,
+               dblb,
+               jyj_status,
+               zz_name,
+               hyjy,
+               curr_order,
+               time_tb,
+               gyfwnx,
+               del_flag,
+               dept_id,
+               ancestors,
+               create_time,team_id
+        from xfpt_team_meeting
+    </sql>
+
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+    <select id="selectTeamMeetingList" parameterType="com.xfgl.school.domain.TeamMeeting" resultMap="TeamMeetingResult">
+        <include refid="selectTeamMeetingVo"/>
+        <include refid="search"/>
+        <if test="title != null  and title != ''">and title like concat('%',#{title},'%')</if>
+        <if test="params != null">
+            <if test="params.beginTime != null and params.beginTime != ''">
+                and date_format(meeting_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''">
+                and date_format(meeting_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+            </if>
+        </if>
+        <if test="meetingUser != null  and meetingUser != ''">and meeting_user = #{meetingUser}</if>
+        <if test="zw != null  and zw != ''">and zw = #{zw}</if>
+        <if test="dblb != null  and dblb != ''">and dblb = #{dblb}</if>
+        <if test="zzName != null  and zzName != ''">and zz_name like concat('%', #{zzName}, '%')</if>
+        <if test="hyjy != null  and hyjy != ''">and hyjy = #{hyjy}</if>
+        <if test="currOrder != null ">and curr_order = #{currOrder}</if>
+        <if test="timeTb != null  and timeTb != ''">and time_tb = #{timeTb}</if>
+        <if test="gyfwnx != null  and gyfwnx != ''">and gyfwnx = #{gyfwnx}</if>
+        <if test="jyjStatus != null">and jyj_status = #{jyjStatus}</if>
+        <if test="id != null">and id = #{id}</if>
+        <if test="teamId != null">and team_id = #{teamId}</if>
+        <if test="deptId != null"> and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors)) </if>
+        and del_flag ='0'
+         order by create_time desc
+    </select>
+
+    <select id="selectTeamMeetingById" parameterType="Long" resultMap="TeamMeetingResult">
+        <include refid="selectTeamMeetingVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertTeamMeeting" parameterType="com.xfgl.school.domain.TeamMeeting" useGeneratedKeys="true" keyColumn="id">
+        insert into xfpt_team_meeting
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="title != null">title,</if>
+            <if test="meetingTime != null">meeting_time,</if>
+            <if test="meetingUser != null">meeting_user,</if>
+            <if test="zw != null">zw,</if>
+            <if test="dblb != null">dblb,</if>
+            <if test="zzName != null">zz_name,</if>
+            <if test="hyjy != null">hyjy,</if>
+            <if test="currOrder != null">curr_order,</if>
+            <if test="timeTb != null">time_tb,</if>
+            <if test="gyfwnx != null">gyfwnx,</if>
+            <if test="teamId != null">team_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="title != null">#{title},</if>
+            <if test="meetingTime != null">#{meetingTime},</if>
+            <if test="meetingUser != null">#{meetingUser},</if>
+            <if test="zw != null">#{zw},</if>
+            <if test="dblb != null">#{dblb},</if>
+            <if test="zzName != null">#{zzName},</if>
+            <if test="hyjy != null">#{hyjy},</if>
+            <if test="currOrder != null">#{currOrder},</if>
+            <if test="timeTb != null">#{timeTb},</if>
+            <if test="gyfwnx != null">#{gyfwnx},</if>
+            <if test="teamId != null">#{teamId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateTeamMeeting" parameterType="com.xfgl.school.domain.TeamMeeting">
+        update xfpt_team_meeting
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamMeeting.title != null and teamMeeting.title != ''">title = #{teamMeeting.title},</if>
+            <if test="teamMeeting.meetingTime != null">meeting_time = #{teamMeeting.meetingTime},</if>
+            <if test="teamMeeting.meetingUser != null and teamMeeting.meetingUser != ''">meeting_user =
+                #{teamMeeting.meetingUser},
+            </if>
+            <if test="teamMeeting.zw != null and teamMeeting.zw != ''">zw = #{teamMeeting.zw},</if>
+            <if test="teamMeeting.dblb != null and teamMeeting.dblb != ''">dblb = #{teamMeeting.dblb},</if>
+            <if test="teamMeeting.zzName != null and teamMeeting.zzName != ''">zz_name = #{teamMeeting.zzName},</if>
+            <if test="teamMeeting.hyjy != null">hyjy = #{teamMeeting.hyjy},</if>
+            <if test="teamMeeting.timeTb != null and teamMeeting.timeTb != ''">time_tb = #{teamMeeting.timeTb},</if>
+            <if test="teamMeeting.gyfwnx != null and teamMeeting.gyfwnx != ''">gyfwnx = #{teamMeeting.gyfwnx},</if>
+            <if test="teamMeeting.jyjStatus != null">jyj_status = #{teamMeeting.jyjStatus},</if>
+            <if test="teamMeeting.teamId != null">team_id = #{teamMeeting.teamId},</if>
+        </trim>
+        where id = #{teamMeeting.id}
+    </update>
+
+    <update id="updateTeamMeetingCurrOrder" parameterType="com.xfgl.school.domain.TeamMeeting">
+        update xfpt_team_meeting
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="timeTb != null and timeTb != ''">TIME_TB = #{timeTb},</if>
+            <if test="currOrder != null">CURR_ORDER = #{currOrder},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTeamMeetingById" parameterType="Long">
+        delete
+        from xfpt_team_meeting
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteTeamMeetingByIds" parameterType="String">
+        delete from xfpt_team_meeting where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <select id="listSchoolStatistics" resultType="com.xfgl.school.domain.vo.XfptSchoolStatisticsVO">
+        select t.deptId,t.schoolName,t.bzhyFlg,t.jzgmyjFlg,t.zzmdFlg,
+               t.xyzzxgmsFlg,t.xgjggsFlg,t.cghtFlg,t.cpzljybgFlg,t.jzmydzjbgFlg,t.schoolType,t.cggzzjFlag,t.zjbbFlg
+               from (select dept.dept_id deptId,dept.dept_name schoolName,xsm.school_Type as schoolType,
+        case when exists(select 1 from xfpt_team_meeting a
+        <where>
+            a.dept_id = dept.dept_id
+            and a.del_flag = 0
+            and find_in_set(#{parentDeptId},a.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and a.id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as bzhyFlg,
+        case when exists(select 1 from xfpt_jz_buy_opinions b
+        <where>
+            b.dept_id = dept.dept_id
+            and b.del_flag = 0
+            and find_in_set(#{parentDeptId},b.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and b.team_meeting_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as jzgmyjFlg,
+        case when exists(select 1 from xfpt_org_report_disclose c
+        <where>
+            c.dept_id = dept.dept_id
+            and c.del_flag = 0
+            and find_in_set(#{parentDeptId},c.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and c.team_meeting_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as zzmdFlg,
+        case when exists(select 1 from xfpt_report_mode d
+        <where>
+            d.dept_id = dept.dept_id
+            and d.del_flag = 0
+            and find_in_set(#{parentDeptId},d.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and d.team_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as xyzzxgmsFlg,
+        case when exists(select 1 from xfpt_anno_results e
+        <where>
+            e.dept_id = dept.dept_id
+            and e.del_flag = 0
+            and find_in_set(#{parentDeptId},e.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and e.team_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as xgjggsFlg,
+        case when exists(select 1 from xfpt_supplice_contract f
+        <where>
+            f.dept_id = dept.dept_id
+            and f.del_flag = 0
+            and find_in_set(#{parentDeptId},f.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and f.team_meeting_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as cghtFlg,
+        case when exists(select 1 from xfpt_supplice_inspection_report g
+        <where>
+            g.dept_id = dept.dept_id
+            and g.del_flag = 0
+            and find_in_set(#{parentDeptId},g.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and g.team_meeting_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as cpzljybgFlg,
+        case when exists(select 1 from xfpt_patriarch_satisfaction_summarize h
+        <where>
+            h.dept_id = dept.dept_id
+            and h.del_flag = 0
+            and find_in_set(#{parentDeptId},h.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and h.team_meeting_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>) then '已报备' else '未报备' end as cggzzjFlag,
+        case when exists(select 1 from XFPT_CGLCGZZJ cggg
+        <where>
+            cggg.dept_id = dept.dept_id
+            and cggg.del_flag = 0
+            and find_in_set(#{parentDeptId},cggg.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and cggg.team_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>)then '已报备' else '未报备' end as zjbbFlg,
+        case when exists(select 1 from XFPT_PROC_SUMMARY xps
+        <where>
+            xps.dept_id = dept.dept_id
+            and xps.del_flag = 0
+            and find_in_set(#{parentDeptId},xps.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and xps.team_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>)then '已报备' else '未报备' end as jzmydzjbgFlg
+        from sys_dept dept left join xfpt_school_message xsm on dept.dept_id = xsm.dept_id
+        where dept.del_flag = 0 and find_in_set(#{parentDeptId},dept.ancestors)
+        order by dept.dept_id) t
+        <where>
+            <if test="selectType != null and selectType != '' and bblbValue != null and bblbValue != ''">
+                <choose>
+                    <when test="selectType == 1">
+                        and bzhyFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 2">
+                        and jzgmyjFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 3">
+                        and zzmdFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 4">
+                        and xyzzxgmsFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 5">
+                        and xgjggsFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 6">
+                        and cghtFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 7">
+                        and cpzljybgFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 8">
+                        and jzmydzjbgFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 9">
+                        <if test="bblbValue == '已报备'">
+                            and (
+                                bzhyFlg = '已报备' or jzgmyjFlg = '已发起' or zzmdFlg = '已报备' or xyzzxgmsFlg = '已报备'
+                                or xgjggsFlg = '已报备' or cghtFlg = '已报备' or cpzljybgFlg = '已报备' or jzmydzjbgFlg = '已报备'
+                            )
+                        </if>
+                        <if test="bblbValue == '未报备'">
+                            and (
+                                bzhyFlg = '未报备' or jzgmyjFlg = '未发起' or zzmdFlg = '未报备' or xyzzxgmsFlg = '未报备'
+                                or xgjggsFlg = '未报备' or cghtFlg = '未报备' or cpzljybgFlg = '未报备' or jzmydzjbgFlg = '未报备'
+                            )
+                        </if>
+                    </when>
+                </choose>
+            </if>
+            <if test="schoolType != null and schoolType != ''">
+                and schoolType = #{schoolType}
+            </if>
+            <if test="schoolName != null and schoolName != ''">
+                and schoolName like concat('%',#{schoolName},'%')
+            </if>
+        </where>
+    </select>
+
+</mapper>

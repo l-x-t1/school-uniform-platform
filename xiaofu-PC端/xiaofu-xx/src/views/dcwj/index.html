@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>调查问卷</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Microsoft YaHei", sans-serif;
+      }
+      body {
+        background-color: #f5f7fa;
+        color: #333;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 10px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+      }
+      h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #2c3e50;
+        font-weight: 600;
+      }
+      .description {
+        text-align: center;
+        color: #7f8c8d;
+        margin-bottom: 30px;
+        padding: 0 20px;
+      }
+      .form-group {
+        margin-bottom: 25px;
+        padding: 20px;
+        border-radius: 8px;
+        background-color: #f9fafc;
+      }
+      .question {
+        font-weight: 600;
+        margin-bottom: 15px;
+        color: #34495e;
+      }
+      .option {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+      }
+      .option label {
+        margin-left: 10px;
+        cursor: pointer;
+      }
+      input[type="radio"],
+      input[type="checkbox"] {
+        cursor: pointer;
+        width: 18px;
+        height: 18px;
+      }
+      input[type="text"],
+      textarea {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        font-size: 14px;
+        margin-top: 5px;
+      }
+      textarea {
+        min-height: 100px;
+        resize: vertical;
+      }
+      .required {
+        color: #e74c3c;
+        margin-left: 5px;
+      }
+      .submit-btn {
+        display: block;
+        width: 200px;
+        margin: 30px auto 0;
+        padding: 12px;
+        background-color: #3498db;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
+      .submit-btn:hover {
+        background-color: #2980b9;
+      }
+      .hint {
+        font-size: 13px;
+        color: #95a5a6;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>用户满意度调查问卷</h1>
+      <p class="description">
+        感谢您参与本次调查，您的反馈对我们非常重要。本问卷大约需要3-5分钟完成。
+      </p>
+
+      <form id="surveyForm">
+        <!-- 基本信息 -->
+        <div class="form-group">
+          <div class="question">1. 您的姓名<span class="required">*</span></div>
+          <input
+            type="text"
+            id="name"
+            name="name"
+            required
+            placeholder="请输入您的姓名"
+          />
+        </div>
+
+        <!-- 单选题 -->
+        <div class="form-group">
+          <div class="question">
+            2. 您的年龄段<span class="required">*</span>
+          </div>
+          <div class="option">
+            <input type="radio" id="age1" name="age" value="18以下" required />
+            <label for="age1">18岁以下</label>
+          </div>
+          <div class="option">
+            <input type="radio" id="age2" name="age" value="18-25" />
+            <label for="age2">18-25岁</label>
+          </div>
+          <div class="option">
+            <input type="radio" id="age3" name="age" value="26-35" />
+            <label for="age3">26-35岁</label>
+          </div>
+          <div class="option">
+            <input type="radio" id="age4" name="age" value="36-50" />
+            <label for="age4">36-50岁</label>
+          </div>
+          <div class="option">
+            <input type="radio" id="age5" name="age" value="50以上" />
+            <label for="age5">50岁以上</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="question">
+            3. 您对我们的服务总体满意度<span class="required">*</span>
+          </div>
+          <div class="option">
+            <input
+              type="radio"
+              id="satisfaction1"
+              name="satisfaction"
+              value="非常满意"
+              required
+            />
+            <label for="satisfaction1">非常满意</label>
+          </div>
+          <div class="option">
+            <input
+              type="radio"
+              id="satisfaction2"
+              name="satisfaction"
+              value="满意"
+            />
+            <label for="satisfaction2">满意</label>
+          </div>
+          <div class="option">
+            <input
+              type="radio"
+              id="satisfaction3"
+              name="satisfaction"
+              value="一般"
+            />
+            <label for="satisfaction3">一般</label>
+          </div>
+          <div class="option">
+            <input
+              type="radio"
+              id="satisfaction4"
+              name="satisfaction"
+              value="不满意"
+            />
+            <label for="satisfaction4">不满意</label>
+          </div>
+          <div class="option">
+            <input
+              type="radio"
+              id="satisfaction5"
+              name="satisfaction"
+              value="非常不满意"
+            />
+            <label for="satisfaction5">非常不满意</label>
+          </div>
+        </div>
+
+        <!-- 多选题 -->
+        <div class="form-group">
+          <div class="question">
+            4. 您通过哪些渠道了解到我们？<span class="required">*</span
+            >（可多选）
+          </div>
+          <div class="option">
+            <input
+              type="checkbox"
+              id="channel1"
+              name="channel"
+              value="搜索引擎"
+              required
+            />
+            <label for="channel1">搜索引擎</label>
+          </div>
+          <div class="option">
+            <input
+              type="checkbox"
+              id="channel2"
+              name="channel"
+              value="社交媒体"
+            />
+            <label for="channel2">社交媒体</label>
+          </div>
+          <div class="option">
+            <input
+              type="checkbox"
+              id="channel3"
+              name="channel"
+              value="朋友推荐"
+            />
+            <label for="channel3">朋友推荐</label>
+          </div>
+          <div class="option">
+            <input type="checkbox" id="channel4" name="channel" value="广告" />
+            <label for="channel4">广告</label>
+          </div>
+          <div class="option">
+            <input type="checkbox" id="channel5" name="channel" value="其他" />
+            <label for="channel5">其他</label>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div class="question">
+            5. 您最关注我们产品/服务的哪些方面？（可多选）
+          </div>
+          <div class="option">
+            <input type="checkbox" id="aspect1" name="aspect" value="质量" />
+            <label for="aspect1">质量</label>
+          </div>
+          <div class="option">
+            <input type="checkbox" id="aspect2" name="aspect" value="价格" />
+            <label for="aspect2">价格</label>
+          </div>
+          <div class="option">
+            <input type="checkbox" id="aspect3" name="aspect" value="服务" />
+            <label for="aspect3">服务</label>
+          </div>
+          <div class="option">
+            <input type="checkbox" id="aspect4" name="aspect" value="品牌" />
+            <label for="aspect4">品牌</label>
+          </div>
+          <div class="option">
+            <input type="checkbox" id="aspect5" name="aspect" value="创新性" />
+            <label for="aspect5">创新性</label>
+          </div>
+        </div>
+
+        <!-- 填空题 -->
+        <div class="form-group">
+          <div class="question">6. 您对我们的产品/服务有什么建议？</div>
+          <textarea
+            id="suggestion"
+            name="suggestion"
+            placeholder="请输入您的建议和意见..."
+          ></textarea>
+        </div>
+
+        <div class="form-group">
+          <div class="question">7. 您的联系方式</div>
+          <input
+            type="text"
+            id="contact"
+            name="contact"
+            placeholder="请输入您的电话或邮箱"
+          />
+          <p class="hint">我们可能会联系您进一步了解您的反馈，此项为选填</p>
+        </div>
+
+        <button type="submit" class="submit-btn">提交问卷</button>
+      </form>
+    </div>
+
+    <script>
+      document
+        .getElementById("surveyForm")
+        .addEventListener("submit", function (e) {
+          e.preventDefault();
+
+          // 表单验证
+          let nameInput = document.getElementById("name");
+          if (!nameInput.value.trim()) {
+            alert("请填写您的姓名");
+            nameInput.focus();
+            return;
+          }
+
+          let ageSelected = false;
+          document.getElementsByName("age").forEach(function (radio) {
+            if (radio.checked) ageSelected = true;
+          });
+          if (!ageSelected) {
+            alert("请选择您的年龄段");
+            return;
+          }
+
+          let satisfactionSelected = false;
+          document.getElementsByName("satisfaction").forEach(function (radio) {
+            if (radio.checked) satisfactionSelected = true;
+          });
+          if (!satisfactionSelected) {
+            alert("请选择您的满意度");
+            return;
+          }
+
+          let channelSelected = false;
+          document.getElementsByName("channel").forEach(function (checkbox) {
+            if (checkbox.checked) channelSelected = true;
+          });
+          if (!channelSelected) {
+            alert("请至少选择一个了解渠道");
+            return;
+          }
+
+          // 提交成功
+          alert("感谢您的参与！您的反馈已成功提交。");
+          this.reset();
+        });
+    </script>
+  </body>
+</html>

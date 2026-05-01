@@ -1,0 +1,4 @@
+com.xfgl.system.api.factory.RemoteUserFallbackFactory
+com.xfgl.system.api.factory.RemoteLogFallbackFactory
+com.xfgl.system.api.factory.RemoteFileFallbackFactory
+com.xfgl.system.api.factory.RemoteNoticFallbackFactory

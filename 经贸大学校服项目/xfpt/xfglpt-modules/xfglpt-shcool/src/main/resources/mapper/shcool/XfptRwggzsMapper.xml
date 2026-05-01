@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptRwggzsMapper">
+
+    <resultMap type="XfptRwggzs" id="XfptRwggzsResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="isRelease"    column="is_release"    />
+        <result property="file"    column="file"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="type"    column="type"    />
+    </resultMap>
+
+    <sql id="selectXfptRwggzsVo">
+        select id, name, is_release, file, del_flag, dept_id, ancestors, update_time, update_by, create_time, create_by,type from xfpt_rwggzs
+    </sql>
+
+    <select id="selectXfptRwggzsList" parameterType="XfptRwggzs" resultMap="XfptRwggzsResult">
+        <include refid="selectXfptRwggzsVo"/>
+        <include refid="search"/>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="isRelease != null  and isRelease != ''"> and is_release = #{isRelease}</if>
+            <if test="file != null  and file != ''"> and file = #{file}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="teamId != null "> and team_id = #{teamId}</if>
+            <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+           and type = '0'
+    </select>
+
+    <select id="selectXfptRwggzsById" parameterType="Long" resultMap="XfptRwggzsResult">
+        <include refid="selectXfptRwggzsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptRwggzs" parameterType="XfptRwggzs" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_rwggzs
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="isRelease != null">is_release,</if>
+            <if test="file != null">file,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="isRelease != null">#{isRelease},</if>
+            <if test="file != null">#{file},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptRwggzs" parameterType="XfptRwggzs">
+        update xfpt_rwggzs
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="isRelease != null">is_release = #{isRelease},</if>
+            <if test="file != null">file = #{file},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptRwggzsById" parameterType="Long">
+        delete from xfpt_rwggzs where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptRwggzsByIds" parameterType="String">
+        delete from xfpt_rwggzs where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

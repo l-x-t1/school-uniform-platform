@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptParentsFeedbackMapper">
+
+    <resultMap type="XfptParentsFeedback" id="XfptParentsFeedbackResult">
+        <result property="id"    column="id"    />
+        <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="feedbackContent"    column="feedback_content"    />
+        <result property="feedbackUrl"    column="feedback_url"    />
+        <result property="replyContent"    column="reply_content"    />
+        <result property="replyUrl"    column="reply_url"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="replyState"    column="reply_state"    />
+        <result property="replyBy"    column="reply_by"    />
+        <result property="replyTime"    column="reply_time"    />
+        <result property="isPublic"    column="is_public"    />
+        <result property="lxfs"    column="lxfs"    />
+        <result property="region"    column="region"    />
+    </resultMap>
+
+    <sql id="selectXfptParentsFeedbackVo">
+        select back.*
+        from xfpt_parents_feedback back left join SYS_DEPT dept
+        ON back.dept_id=dept.dept_id
+    </sql>
+
+    <select id="selectXfptParentsFeedbackList" parameterType="XfptParentsFeedback" resultMap="XfptParentsFeedbackResult">
+        <include refid="selectXfptParentsFeedbackVo"/>
+        <where>
+            back.del_flag = 0
+            <if test="userId != null  and userId != ''"> and back.user_id = #{userId}</if>
+            <if test="region != null  and region != ''"> and back.region = #{region}</if>
+            <if test="userName != null  and userName != ''"> and back.user_name like concat('%', #{userName}, '%')</if>
+            <if test="deptId != null  and deptId != ''"> and (dept.dept_id = #{deptId} or find_in_set(#{deptId},dept.ancestors))</if>
+            <if test="deptName != null  and deptName != ''"> and back.dept_name like concat('%', #{deptName}, '%')</if>
+            <if test="feedbackContent != null  and feedbackContent != ''"> and back.feedback_content = #{feedbackContent}</if>
+            <if test="feedbackUrl != null  and feedbackUrl != ''"> and back.feedback_url = #{feedbackUrl}</if>
+            <if test="replyContent != null  and replyContent != ''"> and back.reply_content = #{replyContent}</if>
+            <if test="replyUrl != null  and replyUrl != ''"> and back.reply_url = #{replyUrl}</if>
+        <if test="replyState != null  and replyState != ''"> and back.reply_state = #{replyState}</if>
+        <if test="replyBy != null  and replyBy != ''"> and back.reply_by = #{replyBy}</if>
+        <if test="replyTime != null  and replyBy != ''"> and back.reply_time = #{replyTime}</if>
+        </where> order by create_time desc
+    </select>
+
+    <select id="selectXfptParentsFeedbackById" parameterType="Long" resultMap="XfptParentsFeedbackResult">
+        <include refid="selectXfptParentsFeedbackVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectXfptParentsFeedbackList2" resultType="com.xfgl.school.domain.XfptParentsFeedback">
+        <include refid="selectXfptParentsFeedbackVo"/>
+        <where>
+            back.del_flag = 0
+            <if test="userId != null  and userId != ''"> and back.user_id = #{userId}</if>
+            <if test="userName != null  and userName != ''"> and back.user_name like concat('%', #{userName}, '%')</if>
+            <if test="deptId != null  and deptId != ''"> and (dept.dept_id = #{deptId} or find_in_set(#{deptId},dept.ancestors) or dept.dept_id is null)</if>
+            <if test="deptName != null  and deptName != ''"> and back.dept_name like concat('%', #{deptName}, '%')</if>
+            <if test="feedbackContent != null  and feedbackContent != ''"> and back.feedback_content = #{feedbackContent}</if>
+            <if test="feedbackUrl != null  and feedbackUrl != ''"> and back.feedback_url = #{feedbackUrl}</if>
+            <if test="replyContent != null  and replyContent != ''"> and back.reply_content = #{replyContent}</if>
+            <if test="replyUrl != null  and replyUrl != ''"> and back.reply_url = #{replyUrl}</if>
+            <if test="replyState != null  and replyState != ''"> and back.reply_state = #{replyState}</if>
+            <if test="replyBy != null  and replyBy != ''"> and back.reply_by = #{replyBy}</if>
+            <if test="replyTime != null  and replyBy != ''"> and back.reply_time = #{replyTime}</if>
+            <if test="region != null  and region != ''"> and back.region = #{region}</if>
+        </where>order by create_time desc
+    </select>
+
+    <insert id="insertXfptParentsFeedback" parameterType="XfptParentsFeedback" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_parents_feedback
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="userId != null">user_id,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="feedbackContent != null">feedback_content,</if>
+            <if test="feedbackUrl != null">feedback_url,</if>
+            <if test="replyContent != null">reply_content,</if>
+            <if test="replyUrl != null">reply_url,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="replyState != null">reply_state,</if>
+            <if test="replyBy != null">reply_by,</if>
+            <if test="replyTime != null">reply_time,</if>
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="userId != null">#{userId},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="feedbackContent != null">#{feedbackContent},</if>
+            <if test="feedbackUrl != null">#{feedbackUrl},</if>
+            <if test="replyContent != null">#{replyContent},</if>
+            <if test="replyUrl != null">#{replyUrl},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="replyState != null">#{replyState},</if>
+            <if test="replyBy != null">#{replyBy},</if>
+            <if test="replyTime != null">#{replyTime},</if>
+
+
+         </trim>
+    </insert>
+
+    <update id="updateXfptParentsFeedback" parameterType="XfptParentsFeedback">
+        update xfpt_parents_feedback
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="userId != null">user_id = #{userId},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="feedbackContent != null">feedback_content = #{feedbackContent},</if>
+            <if test="feedbackUrl != null">feedback_url = #{feedbackUrl},</if>
+            <if test="replyContent != null">reply_content = #{replyContent},</if>
+            <if test="replyUrl != null">reply_url = #{replyUrl},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="replyState != null">reply_state = #{replyState},</if>
+            <if test="replyBy != null">reply_by = #{replyBy},</if>
+            <if test="replyTime != null">reply_time = #{replyTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptParentsFeedbackById" parameterType="Long">
+        delete from xfpt_parents_feedback where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptParentsFeedbackByIds" parameterType="String">
+        delete from xfpt_parents_feedback where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

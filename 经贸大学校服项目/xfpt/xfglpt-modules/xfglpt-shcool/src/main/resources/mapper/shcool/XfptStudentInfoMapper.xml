@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptStudentInfoMapper">
+
+    <resultMap type="XfptStudentInfo" id="XfptStudentInfoResult">
+        <result property="id"    column="id"    />
+        <result property="classId"    column="class_id"    />
+        <result property="shcoolId"    column="shcool_id"    />
+        <result property="name"    column="name"    />
+        <result property="sex"    column="sex"    />
+        <result property="birthday"    column="birthday"    />
+        <result property="simId"    column="sim_id"    />
+        <result property="idNumber"    column="id_number"    />
+        <result property="grade"    column="grade"    />
+
+    </resultMap>
+
+    <sql id="selectXfptStudentInfoVo">
+        select grade,id, class_id, shcool_id, name, sex, birthday, sim_id,id_number from xfpt_student_info
+    </sql>
+
+    <select id="selectXfptStudentInfoList" parameterType="XfptStudentInfo" resultMap="XfptStudentInfoResult">
+        <include refid="selectXfptStudentInfoVo"/>
+        <include refid="search"/>
+            <if test="classId != null  and classId != ''"> and class_id = #{classId}</if>
+            <if test="shcoolId != null  and shcoolId != ''"> and shcool_id = #{shcoolId}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="sex != null  and sex != ''"> and sex = #{sex}</if>
+            <if test="birthday != null  and birthday != ''"> and birthday = #{birthday}</if>
+            <if test="simId != null  and simId != ''"> and sim_id = #{simId}</if>
+        <if test="idNumber != null  and idNumber != ''"> and id_number like concat('%', #{idNumber}, '%')</if>
+
+    </select>
+
+    <select id="selectXfptStudentInfoById" parameterType="Long" resultMap="XfptStudentInfoResult">
+        <include refid="selectXfptStudentInfoVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptStudentInfo" parameterType="XfptStudentInfo" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_student_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="classId != null">class_id,</if>
+            <if test="shcoolId != null">shcool_id,</if>
+            <if test="name != null">name,</if>
+            <if test="sex != null">sex,</if>
+            <if test="birthday != null">birthday,</if>
+            <if test="simId != null">sim_id,</if>
+            <if test="idNumber != null">id_number,</if>
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="classId != null">#{classId},</if>
+            <if test="shcoolId != null">#{shcoolId},</if>
+            <if test="name != null">#{name},</if>
+            <if test="sex != null">#{sex},</if>
+            <if test="birthday != null">#{birthday},</if>
+            <if test="simId != null">#{simId},</if>
+            <if test="idNumber != null">#{idNumber},</if>
+
+         </trim>
+    </insert>
+
+    <update id="updateXfptStudentInfo" parameterType="XfptStudentInfo">
+        update xfpt_student_info
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="classId != null">class_id = #{classId},</if>
+            <if test="shcoolId != null">shcool_id = #{shcoolId},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="sex != null">sex = #{sex},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="simId != null">sim_id = #{simId},</if>
+            <if test="idNumber != null">id_number = #{idNumber},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptStudentInfoById" parameterType="Long">
+        delete from xfpt_student_info where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptStudentInfoByIds" parameterType="String">
+        delete from xfpt_student_info where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

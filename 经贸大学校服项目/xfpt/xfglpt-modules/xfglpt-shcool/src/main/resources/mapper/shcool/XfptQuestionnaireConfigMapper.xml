@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptQuestionnaireConfigMapper">
+
+    <resultMap type="com.xfgl.school.domain.XfptQuestionnaireConfig" id="XfptQuestionnaireConfigResult">
+        <result property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="useStatus" column="use_status"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="category" column="category"/>
+        <result property="fbStatus" column="fb_status"/>
+        <result property="beginTime" column="begin_time"/>
+        <result property="endTime" column="end_time"/>
+
+        <result property="type" column="type"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="wjStatus" column="wj_status"/>
+        <result property="votingDescription" column="voting_description"/>
+        <result property="votingNotice" column="voting_notice"/>
+        <result property="lcCategory" column="lc_category"/>
+
+    </resultMap>
+
+    <sql id="selectXfptQuestionnaireConfigVo">
+        select id,
+               title,
+               use_status,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               del_flag,
+               category,
+               fb_status,
+               begin_time,
+               end_time,
+               type,
+               dept_id,
+               ancestors,
+        wj_status,voting_description,voting_notice,lc_category
+        from xfpt_questionnaire_config
+    </sql>
+
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+
+
+    <select id="selectXfptQuestionnaireConfigList" parameterType="com.xfgl.school.domain.XfptQuestionnaireConfig"
+            resultMap="XfptQuestionnaireConfigResult">
+        <include refid="selectXfptQuestionnaireConfigVo"/>
+        <include refid="search"/>
+        <if test="title != null  and title != ''">and title = #{title}</if>
+        <if test="useStatus != null ">and use_status = #{useStatus}</if>
+        <if test="category != null">and category = #{category}</if>
+        <if test="fbStatus != null">and fb_status = #{fbStatus}</if>
+        <if test="type != null">and type = #{type}</if>
+        <if test="deptId != null">and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+        <if test="ancestors != null">and ancestors = #{ancestors}</if>
+        <if test="wjStatus != null">and wj_status = #{wjStatus}</if>
+        <if test="votingNotice != null">and voting_notice = #{votingNotice}</if>
+
+    </select>
+
+    <select id="selectXfptQuestionnaireConfigById" parameterType="Long" resultMap="XfptQuestionnaireConfigResult">
+        <include refid="selectXfptQuestionnaireConfigVo"/>
+        where id = #{id}
+    </select>
+    <select id="selectXfptQuestionnaireConfigList2"
+            resultType="com.xfgl.school.domain.XfptQuestionnaireConfig">
+        <include refid="selectXfptQuestionnaireConfigVo"/>
+        <include refid="search"/>
+        and category in (0,1,2,3,4)
+        <if test="title != null  and title != ''">and title = #{title}</if>
+        <if test="useStatus != null ">and use_status = #{useStatus}</if>
+        <if test="fbStatus != null">and fb_status = #{fbStatus}</if>
+        <if test="type != null">and type = #{type}</if>
+        <if test="deptIds != null and deptIds.size() > 0">
+            <!-- 遍历dept_id in语句 -->
+            and dept_id in
+            <foreach item="item" index="index" collection="deptIds" separator="," open="(" close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="ancestors != null">and ancestors = #{ancestors}</if>
+        <if test="wjStatus != null">and wj_status = #{wjStatus}</if>
+        <if test="votingNotice != null">and voting_notice = #{votingNotice}</if>
+        order by end_time desc
+
+    </select>
+
+    <insert id="insertXfptQuestionnaireConfig" parameterType="com.xfgl.school.domain.XfptQuestionnaireConfig"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_questionnaire_config
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="useStatus != null">use_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="category != null">category,</if>
+            <if test="fbStatus != null">fb_status,</if>
+            <if test="beginTime != null">begin_time,</if>
+            <if test="endTime != null">end_time,</if>
+            <if test="wjStatus != null">wj_status,</if>
+            <if test="votingDescription != null">voting_description,</if>
+            <if test="votingNotice != null">voting_notice,</if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="useStatus != null">#{useStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="category != null">#{category},</if>
+            <if test="fbStatus != null">#{fbStatus},</if>
+            <if test="beginTime != null">#{beginTime},</if>
+            <if test="endTime != null">#{endTime},</if>
+            <if test="wjStatus != null">#{wjStatus},</if>
+            <if test="votingDescription != null">#{votingDescription},</if>
+            <if test="votingNotice != null">#{votingNotice},</if>
+
+        </trim>
+    </insert>
+
+    <update id="updateXfptQuestionnaireConfig" parameterType="com.xfgl.school.domain.XfptQuestionnaireConfig">
+        update xfpt_questionnaire_config
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="useStatus != null">use_status = #{useStatus},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="category != null">category = #{category},</if>
+            <if test="fbStatus != null">fb_status = #{fbStatus},</if>
+            <if test="beginTime != null">begin_time = #{beginTime},</if>
+            <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="endTime != null">wj_status = #{wjStatus},</if>
+            <if test="votingDescription != null">voting_description = #{votingDescription},</if>
+            <if test="votingNotice != null">voting_notice = #{votingNotice},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptQuestionnaireConfigById" parameterType="Long">
+        delete
+        from xfpt_questionnaire_config
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptQuestionnaireConfigByIds" parameterType="String">
+        delete from xfpt_questionnaire_config where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

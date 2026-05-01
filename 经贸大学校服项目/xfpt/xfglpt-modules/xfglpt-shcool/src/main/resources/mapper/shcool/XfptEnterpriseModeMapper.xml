@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptEnterpriseModeMapper">
+
+    <resultMap type="XfptEnterpriseMode" id="XfptEnterpriseModeResult">
+        <result property="id"    column="id"    />
+        <result property="noticeName"    column="notice_name"    />
+        <result property="noticeFile"    column="notice_file"    />
+        <result property="otherFile"    column="other_file"    />
+        <result property="isSamplesPic"    column="is_samples_pic"    />
+        <result property="type"    column="type"    />
+        <result property="meetingTitle"    column="meeting_title"    />
+        <result property="tenderingCompany"    column="tendering_company"    />
+        <result property="signingTime"    column="signing_time"    />
+        <result property="contactsName"    column="contacts_name"    />
+        <result property="companyContactPhone"    column="company_contact_phone"    />
+        <result property="companyContactAddress"    column="company_contact_address"    />
+        <result property="licenseFile"    column="license_file"    />
+        <result property="biddingAgencyContract"    column="bidding_agency_contract"    />
+        <result property="bidEvaluationTitle"    column="bid_evaluation_title"    />
+        <result property="bidEvaluationResults"    column="bid_evaluation_results"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="isRelease"    column="is_release"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="samplesPic"    column="samples_pic"    />
+        <result property="fileType"    column="file_type"    />
+        <result property="releaseTime"    column="release_time"    />
+        <result property="lookStatus"    column="look_status"    />
+    </resultMap>
+
+    <sql id="selectXfptEnterpriseModeVo">
+        select look_status,release_time,file_type,samples_pic,team_id,id, notice_name, notice_file, other_file, is_samples_pic, type, meeting_title, tendering_company, signing_time, contacts_name, company_contact_phone, company_contact_address, license_file, bidding_agency_contract, bid_evaluation_title, bid_evaluation_results, remark, del_flag, create_by, update_time, update_by, create_time, is_release, dept_id, ancestors from xfpt_enterprise_mode
+    </sql>
+
+    <select id="selectXfptEnterpriseModeList" parameterType="XfptEnterpriseMode" resultMap="XfptEnterpriseModeResult">
+        <include refid="selectXfptEnterpriseModeVo"/>
+        <include refid="search"/>
+        <if test="noticeName != null  and noticeName != ''"> and notice_name like concat('%', #{noticeName}, '%')</if>
+        <if test="noticeFile != null  and noticeFile != ''"> and notice_file = #{noticeFile}</if>
+        <if test="otherFile != null  and otherFile != ''"> and other_file = #{otherFile}</if>
+        <if test="isSamplesPic != null  and isSamplesPic != ''"> and is_samples_pic = #{isSamplesPic}</if>
+        <if test="type != null  and type != ''"> and type = #{type}</if>
+        <if test="meetingTitle != null  and meetingTitle != ''"> and meeting_title = #{meetingTitle}</if>
+        <if test="tenderingCompany != null  and tenderingCompany != ''"> and tendering_company = #{tenderingCompany}</if>
+        <if test="signingTime != null "> and signing_time = #{signingTime}</if>
+        <if test="contactsName != null  and contactsName != ''"> and contacts_name like concat('%', #{contactsName}, '%')</if>
+        <if test="companyContactPhone != null  and companyContactPhone != ''"> and company_contact_phone = #{companyContactPhone}</if>
+        <if test="companyContactAddress != null  and companyContactAddress != ''"> and company_contact_address = #{companyContactAddress}</if>
+        <if test="licenseFile != null  and licenseFile != ''"> and license_file = #{licenseFile}</if>
+        <if test="biddingAgencyContract != null  and biddingAgencyContract != ''"> and bidding_agency_contract = #{biddingAgencyContract}</if>
+        <if test="bidEvaluationTitle != null  and bidEvaluationTitle != ''"> and bid_evaluation_title = #{bidEvaluationTitle}</if>
+        <if test="bidEvaluationResults != null  and bidEvaluationResults != ''"> and bid_evaluation_results = #{bidEvaluationResults}</if>
+        <if test="isRelease != null  and isRelease != ''"> and is_release = #{isRelease}</if>
+        <if test="deptId != null "> and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+        <if test="teamId != null"> and team_id = #{teamId}</if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+        </if>
+
+    </select>
+
+    <select id="selectXfptEnterpriseModeById" parameterType="Long" resultMap="XfptEnterpriseModeResult">
+        <include refid="selectXfptEnterpriseModeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptEnterpriseMode" parameterType="XfptEnterpriseMode" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_enterprise_mode
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="noticeName != null">notice_name,</if>
+            <if test="noticeFile != null">notice_file,</if>
+            <if test="otherFile != null">other_file,</if>
+            <if test="isSamplesPic != null">is_samples_pic,</if>
+            <if test="type != null">type,</if>
+            <if test="meetingTitle != null">meeting_title,</if>
+            <if test="tenderingCompany != null">tendering_company,</if>
+            <if test="signingTime != null">signing_time,</if>
+            <if test="contactsName != null">contacts_name,</if>
+            <if test="companyContactPhone != null">company_contact_phone,</if>
+            <if test="companyContactAddress != null">company_contact_address,</if>
+            <if test="licenseFile != null">license_file,</if>
+            <if test="biddingAgencyContract != null">bidding_agency_contract,</if>
+            <if test="bidEvaluationTitle != null">bid_evaluation_title,</if>
+            <if test="bidEvaluationResults != null">bid_evaluation_results,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="isRelease != null">is_release,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="noticeName != null">#{noticeName},</if>
+            <if test="noticeFile != null">#{noticeFile},</if>
+            <if test="otherFile != null">#{otherFile},</if>
+            <if test="isSamplesPic != null">#{isSamplesPic},</if>
+            <if test="type != null">#{type},</if>
+            <if test="meetingTitle != null">#{meetingTitle},</if>
+            <if test="tenderingCompany != null">#{tenderingCompany},</if>
+            <if test="signingTime != null">#{signingTime},</if>
+            <if test="contactsName != null">#{contactsName},</if>
+            <if test="companyContactPhone != null">#{companyContactPhone},</if>
+            <if test="companyContactAddress != null">#{companyContactAddress},</if>
+            <if test="licenseFile != null">#{licenseFile},</if>
+            <if test="biddingAgencyContract != null">#{biddingAgencyContract},</if>
+            <if test="bidEvaluationTitle != null">#{bidEvaluationTitle},</if>
+            <if test="bidEvaluationResults != null">#{bidEvaluationResults},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="isRelease != null">#{isRelease},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptEnterpriseMode" parameterType="XfptEnterpriseMode">
+        update xfpt_enterprise_mode
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="noticeName != null">notice_name = #{noticeName},</if>
+            <if test="noticeFile != null">notice_file = #{noticeFile},</if>
+            <if test="otherFile != null">other_file = #{otherFile},</if>
+            <if test="isSamplesPic != null">is_samples_pic = #{isSamplesPic},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="meetingTitle != null">meeting_title = #{meetingTitle},</if>
+            <if test="tenderingCompany != null">tendering_company = #{tenderingCompany},</if>
+            <if test="signingTime != null">signing_time = #{signingTime},</if>
+            <if test="contactsName != null">contacts_name = #{contactsName},</if>
+            <if test="companyContactPhone != null">company_contact_phone = #{companyContactPhone},</if>
+            <if test="companyContactAddress != null">company_contact_address = #{companyContactAddress},</if>
+            <if test="licenseFile != null">license_file = #{licenseFile},</if>
+            <if test="biddingAgencyContract != null">bidding_agency_contract = #{biddingAgencyContract},</if>
+            <if test="bidEvaluationTitle != null">bid_evaluation_title = #{bidEvaluationTitle},</if>
+            <if test="bidEvaluationResults != null">bid_evaluation_results = #{bidEvaluationResults},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="isRelease != null">is_release = #{isRelease},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptEnterpriseModeById" parameterType="Long">
+        delete from xfpt_enterprise_mode where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptEnterpriseModeByIds" parameterType="String">
+        delete from xfpt_enterprise_mode where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

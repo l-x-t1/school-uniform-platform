@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSchoolGradeClassMapper">
+
+    <resultMap type="XfptSchoolGradeClass" id="XfptSchoolGradeClassResult">
+        <result property="id"    column="id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="deptName"    column="dept_name"    />
+        <result property="gradeClass"    column="grade_class"    />
+        <result property="number"    column="number"    />
+        <result property="parentId"    column="parent_id"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="gradeYear"    column="grade_year"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="cgId"    column="cg_id"    />
+
+    </resultMap>
+
+    <sql id="selectXfptSchoolGradeClassVo">
+        select cg_id,id, dept_id, dept_name, grade_class, number, parent_id, status, create_by, create_time, update_by, update_time, remark, del_flag,grade_year,ancestors from xfpt_school_grade_class
+    </sql>
+
+    <select id="selectXfptSchoolGradeClassList" parameterType="XfptSchoolGradeClass" resultMap="XfptSchoolGradeClassResult">
+        <include refid="selectXfptSchoolGradeClassVo"/>
+        <include refid="search"/>
+            <if test="deptId != null  and deptId != ''"> and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+            <if test="deptName != null  and deptName != ''"> and dept_name like concat('%', #{deptName}, '%')</if>
+            <if test="gradeClass != null  and gradeClass != ''"> and grade_class = #{gradeClass}</if>
+            <if test="number != null  and number != ''"> and number = #{number}</if>
+            <if test="parentId != null "> and parent_id = #{parentId}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="cgId != null  and cgId != ''"> and cg_id = #{cgId}</if>
+        <if test="gradeYear != null  and gradeYear != ''"> and grade_year = #{gradeYear}</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+
+    </select>
+
+    <select id="selectXfptSchoolGradeClassById" parameterType="Long" resultMap="XfptSchoolGradeClassResult">
+        <include refid="selectXfptSchoolGradeClassVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSchoolGradeClass" parameterType="XfptSchoolGradeClass" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_school_grade_class
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">dept_id,</if>
+            <if test="deptName != null">dept_name,</if>
+            <if test="gradeClass != null">grade_class,</if>
+            <if test="number != null">number,</if>
+            <if test="parentId != null">parent_id,</if>
+            <if test="status != null">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="gradeYear != null">grade_year,</if>
+            <if test="ancestors != null">ancestors,</if>
+
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="deptId != null">#{deptId},</if>
+            <if test="deptName != null">#{deptName},</if>
+            <if test="gradeClass != null">#{gradeClass},</if>
+            <if test="number != null">#{number},</if>
+            <if test="parentId != null">#{parentId},</if>
+            <if test="status != null">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="gradeYear != null">#{gradeYear},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+
+         </trim>
+    </insert>
+
+    <update id="updateXfptSchoolGradeClass" parameterType="XfptSchoolGradeClass">
+        update xfpt_school_grade_class
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="deptName != null">dept_name = #{deptName},</if>
+            <if test="gradeClass != null">grade_class = #{gradeClass},</if>
+            <if test="number != null">number = #{number},</if>
+            <if test="parentId != null">parent_id = #{parentId},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="gradeYear != null">grade_year = #{gradeYear},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSchoolGradeClassById" parameterType="Long">
+        delete from xfpt_school_grade_class where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSchoolGradeClassByIds" parameterType="String">
+        delete from xfpt_school_grade_class where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+
+
+    <select id="selectDeptId" parameterType="SysDept" >
+
+        select * from sys_dept where dept_id=#{id}
+    </select>
+</mapper>

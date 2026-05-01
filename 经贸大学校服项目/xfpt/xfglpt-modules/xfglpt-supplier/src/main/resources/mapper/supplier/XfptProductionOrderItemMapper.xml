@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.supplier.mapper.XfptProductionOrderItemMapper">
+
+    <resultMap type="XfptProductionOrderItem" id="XfptProductionOrderItemResult">
+        <result property="id"    column="id"    />
+        <result property="productionId"    column="production_id"    />
+        <result property="orderItemId"    column="order_item_id"    />
+        <result property="goodsId"    column="goods_id"    />
+        <result property="sizeId"    column="size_id"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="sizeName"    column="size_name"    />
+        <result property="buyNum"    column="buy_num"    />
+        <result property="finishNum"    column="finish_num"    />
+        <result property="status"    column="status"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectXfptProductionOrderItemVo">
+        select id, production_id, order_item_id, goods_id, size_id, goods_name, size_name, buy_num, finish_num, status, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_production_order_item
+    </sql>
+
+    <select id="selectXfptProductionOrderItemList" parameterType="XfptProductionOrderItem" resultMap="XfptProductionOrderItemResult">
+        <include refid="selectXfptProductionOrderItemVo"/>
+        <include refid="search"/>
+            <if test="productionId != null "> and production_id = #{productionId}</if>
+            <if test="orderItemId != null "> and order_item_id = #{orderItemId}</if>
+            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
+            <if test="sizeId != null "> and size_id = #{sizeId}</if>
+            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="sizeName != null  and sizeName != ''"> and size_name like concat('%', #{sizeName}, '%')</if>
+            <if test="buyNum != null  and buyNum != ''"> and buy_num = #{buyNum}</if>
+            <if test="finishNum != null  and finishNum != ''"> and finish_num = #{finishNum}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+
+    </select>
+
+    <select id="selectXfptProductionOrderItemById" parameterType="Long" resultMap="XfptProductionOrderItemResult">
+        <include refid="selectXfptProductionOrderItemVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptProductionOrderItem" parameterType="XfptProductionOrderItem" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_production_order_item
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productionId != null">production_id,</if>
+            <if test="orderItemId != null">order_item_id,</if>
+            <if test="goodsId != null">goods_id,</if>
+            <if test="sizeId != null">size_id,</if>
+            <if test="goodsName != null and goodsName != ''">goods_name,</if>
+            <if test="sizeName != null">size_name,</if>
+            <if test="buyNum != null and buyNum != ''">buy_num,</if>
+            <if test="finishNum != null">finish_num,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productionId != null">#{productionId},</if>
+            <if test="orderItemId != null">#{orderItemId},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="sizeId != null">#{sizeId},</if>
+            <if test="goodsName != null and goodsName != ''">#{goodsName},</if>
+            <if test="sizeName != null">#{sizeName},</if>
+            <if test="buyNum != null and buyNum != ''">#{buyNum},</if>
+            <if test="finishNum != null">#{finishNum},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptProductionOrderItem" parameterType="XfptProductionOrderItem">
+        update xfpt_production_order_item
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productionId != null">production_id = #{productionId},</if>
+            <if test="orderItemId != null">order_item_id = #{orderItemId},</if>
+            <if test="goodsId != null">goods_id = #{goodsId},</if>
+            <if test="sizeId != null">size_id = #{sizeId},</if>
+            <if test="goodsName != null and goodsName != ''">goods_name = #{goodsName},</if>
+            <if test="sizeName != null">size_name = #{sizeName},</if>
+            <if test="buyNum != null and buyNum != ''">buy_num = #{buyNum},</if>
+            <if test="finishNum != null">finish_num = #{finishNum},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptProductionOrderItemById" parameterType="Long">
+        delete from xfpt_production_order_item where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptProductionOrderItemByIds" parameterType="String">
+        delete from xfpt_production_order_item where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

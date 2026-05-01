@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptOrganizationModeMapper">
+
+    <resultMap type="XfptOrganizationMode" id="XfptOrganizationModeResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="isSamplesPic"    column="is_samples_pic"    />
+        <result property="samplesPic"    column="samples_pic"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="otherFile"    column="other_file"    />
+        <result property="noticeFile"    column="notice_file"    />
+        <result property="type"    column="type"    />
+        <result property="quesId"    column="ques_id"    />
+        <result property="bmjzTime"    column="bmjz_time"    />
+        <result property="isRelease"    column="is_release"    />
+        <result property="inviteFile"    column="invite_file"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="teamId"    column="team_id"    />
+    </resultMap>
+
+    <sql id="selectXfptOrganizationModeVo">
+        select dept_id,ancestors,team_id,id, title, is_samples_pic, samples_pic, update_time, update_by, create_time, create_by, del_flag, remark, other_file, notice_file, type, ques_id, bmjz_time, is_release, invite_file from xfpt_organization_mode
+    </sql>
+
+    <select id="selectXfptOrganizationModeList" parameterType="XfptOrganizationMode" resultMap="XfptOrganizationModeResult">
+        <include refid="selectXfptOrganizationModeVo"/>
+        <include refid="search"/>
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="isSamplesPic != null  and isSamplesPic != ''"> and is_samples_pic = #{isSamplesPic}</if>
+            <if test="samplesPic != null  and samplesPic != ''"> and samples_pic = #{samplesPic}</if>
+            <if test="otherFile != null  and otherFile != ''"> and other_file = #{otherFile}</if>
+            <if test="noticeFile != null  and noticeFile != ''"> and notice_file = #{noticeFile}</if>
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="quesId != null "> and ques_id = #{quesId}</if>
+            <if test="bmjzTime != null "> and bmjz_time = #{bmjzTime}</if>
+            <if test="teamId != null "> and team_id = #{teamId}</if>
+            <if test="isRelease != null  and isRelease != ''"> and is_release = #{isRelease}</if>
+            <if test="inviteFile != null  and inviteFile != ''"> and invite_file = #{inviteFile}</if>
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+            </if>
+    </select>
+
+    <select id="selectXfptOrganizationModeById" parameterType="Long" resultMap="XfptOrganizationModeResult">
+        <include refid="selectXfptOrganizationModeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptOrganizationMode" parameterType="XfptOrganizationMode" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_organization_mode
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="isSamplesPic != null">is_samples_pic,</if>
+            <if test="samplesPic != null">samples_pic,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="otherFile != null">other_file,</if>
+            <if test="noticeFile != null">notice_file,</if>
+            <if test="type != null">type,</if>
+            <if test="quesId != null">ques_id,</if>
+            <if test="bmjzTime != null">bmjz_time,</if>
+            <if test="isRelease != null">is_release,</if>
+            <if test="inviteFile != null">invite_file,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="isSamplesPic != null">#{isSamplesPic},</if>
+            <if test="samplesPic != null">#{samplesPic},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="otherFile != null">#{otherFile},</if>
+            <if test="noticeFile != null">#{noticeFile},</if>
+            <if test="type != null">#{type},</if>
+            <if test="quesId != null">#{quesId},</if>
+            <if test="bmjzTime != null">#{bmjzTime},</if>
+            <if test="isRelease != null">#{isRelease},</if>
+            <if test="inviteFile != null">#{inviteFile},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptOrganizationMode" parameterType="XfptOrganizationMode">
+        update xfpt_organization_mode
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="isSamplesPic != null">is_samples_pic = #{isSamplesPic},</if>
+            <if test="samplesPic != null">samples_pic = #{samplesPic},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="otherFile != null">other_file = #{otherFile},</if>
+            <if test="noticeFile != null">notice_file = #{noticeFile},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="quesId != null">ques_id = #{quesId},</if>
+            <if test="bmjzTime != null">bmjz_time = #{bmjzTime},</if>
+            <if test="isRelease != null">is_release = #{isRelease},</if>
+            <if test="inviteFile != null">invite_file = #{inviteFile},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptOrganizationModeById" parameterType="Long">
+        delete from xfpt_organization_mode where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptOrganizationModeByIds" parameterType="String">
+        delete from xfpt_organization_mode where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

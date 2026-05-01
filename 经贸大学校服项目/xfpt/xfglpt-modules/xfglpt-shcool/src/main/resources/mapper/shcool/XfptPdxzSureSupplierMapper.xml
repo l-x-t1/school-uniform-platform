@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptPdxzSureSupplierMapper">
+
+    <resultMap type="XfptPdxzSureSupplier" id="XfptPdxzSureSupplierResult">
+        <result property="id"    column="id"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="title"    column="title"    />
+        <result property="userFile"    column="user_file"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="questId"    column="quest_id"    />
+        <result property="otherFile"    column="other_file"    />
+        <result property="type"    column="type"    />
+        <result property="count"    column="count"    />
+    </resultMap>
+
+    <sql id="selectXfptPdxzSureSupplierVo">
+        select count,type,other_file,id, team_id, ancestors, dept_id, title, user_file, update_time, update_by, create_time, create_by, remark, del_flag, quest_id from xfpt_pdxz_sure_supplier
+    </sql>
+
+    <select id="selectXfptPdxzSureSupplierList" parameterType="XfptPdxzSureSupplier" resultMap="XfptPdxzSureSupplierResult">
+        <include refid="selectXfptPdxzSureSupplierVo"/>
+        <include refid="search"/>
+        <if test="teamId != null "> and team_id = #{teamId}</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+        <if test="deptId != null "> and dept_id = #{deptId}</if>
+        <if test="title != null  and title != ''"> and title = #{title}</if>
+        <if test="userFile != null  and userFile != ''"> and user_file = #{userFile}</if>
+        <if test="questId != null  and questId != ''"> and quest_id = #{questId}</if>
+        <if test="teamId != null  and teamId != ''"> and team_id = #{teamId}</if>
+
+    </select>
+
+    <select id="selectXfptPdxzSureSupplierById" parameterType="Long" resultMap="XfptPdxzSureSupplierResult">
+        <include refid="selectXfptPdxzSureSupplierVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptPdxzSureSupplier" parameterType="XfptPdxzSureSupplier" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_pdxz_sure_supplier
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">team_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="title != null">title,</if>
+            <if test="userFile != null">user_file,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="questId != null">quest_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamId != null">#{teamId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="title != null">#{title},</if>
+            <if test="userFile != null">#{userFile},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="questId != null">#{questId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptPdxzSureSupplier" parameterType="XfptPdxzSureSupplier">
+        update xfpt_pdxz_sure_supplier
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="teamId != null">team_id = #{teamId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="title != null">title = #{title},</if>
+            <if test="userFile != null">user_file = #{userFile},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="questId != null">quest_id = #{questId},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptPdxzSureSupplierById" parameterType="Long">
+        delete from xfpt_pdxz_sure_supplier where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptPdxzSureSupplierByIds" parameterType="String">
+        delete from xfpt_pdxz_sure_supplier where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSupplierListMapper">
+
+    <resultMap type="XfptSupplierList" id="XfptSupplierListResult">
+        <result property="id"    column="id"    />
+        <result property="price"    column="price"    />
+        <result property="file"    column="file"    />
+        <result property="modeId"    column="mode_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="name"    column="name"    />
+        <result property="videoUrl"    column="video_url"    />
+        <result property="url"    column="url"    />
+    </resultMap>
+
+    <sql id="selectXfptSupplierListVo">
+        select url,video_url,name,id, price, file, mode_id, dept_id, ancestors, create_time, update_by, update_time, create_by, del_flag from xfpt_supplier_list
+    </sql>
+
+    <select id="selectXfptSupplierListList" parameterType="XfptSupplierList" resultMap="XfptSupplierListResult">
+        <include refid="selectXfptSupplierListVo"/>
+        <include refid="search"/>
+        <if test="price != null  and price != ''"> and price = #{price}</if>
+        <if test="file != null  and file != ''"> and file = #{file}</if>
+        <if test="modeId != null "> and mode_id = #{modeId}</if>
+        <if test="deptId != null "> and dept_id = #{deptId}</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+
+    </select>
+
+    <select id="selectXfptSupplierListById" parameterType="Long" resultMap="XfptSupplierListResult">
+        <include refid="selectXfptSupplierListVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSupplierList" parameterType="XfptSupplierList" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_supplier_list
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="price != null">price,</if>
+            <if test="file != null">file,</if>
+            <if test="modeId != null">mode_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="delFlag != null">del_flag,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="price != null">#{price},</if>
+            <if test="file != null">#{file},</if>
+            <if test="modeId != null">#{modeId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptSupplierList" parameterType="XfptSupplierList">
+        update xfpt_supplier_list
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="price != null">price = #{price},</if>
+            <if test="file != null">file = #{file},</if>
+            <if test="modeId != null">mode_id = #{modeId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSupplierListById" parameterType="Long">
+        delete from xfpt_supplier_list where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSupplierListByIds" parameterType="String">
+        delete from xfpt_supplier_list where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

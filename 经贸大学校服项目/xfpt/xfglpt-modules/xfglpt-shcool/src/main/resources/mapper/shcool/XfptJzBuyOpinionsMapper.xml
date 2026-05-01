@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptJzBuyOpinionsMapper">
+
+    <resultMap type="com.xfgl.school.domain.XfptJzBuyOpinions" id="XfptJzBuyOpinionsResult">
+        <result property="id" column="id"/>
+        <result property="teamMeetingId" column="team_meeting_id"/>
+        <result property="title" column="title"/>
+        <result property="zjlx" column="zjlx"/>
+        <result property="xzrq" column="xzrq"/>
+        <result property="yjzjqk" column="yjzjqk"/>
+        <result property="zw" column="zw"/>
+        <result property="dblb" column="dblb"/>
+        <result property="xm" column="xm"/>
+        <result property="tpqzsj" column="tpqzsj"/>
+        <result property="txxx" column="txxx"/>
+        <result property="fwnx" column="fwnx"/>
+        <result property="configContent" column="config_content"/>
+        <result property="createTime" column="create_time"/>
+        <result property="createBy" column="create_by"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="delFlag" column="del_flag"/>
+        <result property="remark" column="remark"/>
+        <result property="deptId" column="dept_id"/>
+        <result property="ancestors" column="ancestors"/>
+        <result property="questionConfigId" column="question_config_id"/>
+        <result property="questionBusinessId" column="question_business_id"/>
+        <result property="count" column="count"/>
+    </resultMap>
+
+    <sql id="selectXfptJzBuyOpinionsVo">
+        select id,
+               team_meeting_id,
+               title,
+               config_content,
+               fj,
+               zjlx,
+               xzrq,
+               yjzjqk,
+               zw,
+               dblb,
+               fwnx,
+               xm,
+               tpqzsj,
+               txxx,
+               create_time,
+               create_by,
+               update_by,
+               update_time,
+               del_flag,
+               remark,
+               dept_id,
+               ancestors,
+               question_config_id,question_business_id,count
+        from xfpt_jz_buy_opinions
+    </sql>
+
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+
+    <select id="selectXfptJzBuyOpinionsList" parameterType="com.xfgl.school.domain.XfptJzBuyOpinions"
+            resultMap="XfptJzBuyOpinionsResult">
+        <include refid="selectXfptJzBuyOpinionsVo"/>
+        <include refid="search"/>
+        <if test="teamMeetingId != null ">and team_meeting_id = #{teamMeetingId}</if>
+        <if test="title != null  and title != ''">and title like concat('%',#{title},'%')</if>
+        <if test="zjlx != null  and zjlx != ''">and zjlx = #{zjlx}</if>
+        <if test="xzrq != null ">and xzrq = #{xzrq}</if>
+        <if test="yjzjqk != null  and yjzjqk != ''">and yjzjqk = #{yjzjqk}</if>
+        <if test="zw != null  and zw != ''">and zw = #{zw}</if>
+        <if test="dblb != null  and dblb != ''">and dblb = #{dblb}</if>
+        <if test="xm != null  and xm != ''">and xm = #{xm}</if>
+        <if test="tpqzsj != null  and tpqzsj != ''">and tpqzsj = #{tpqzsj}</if>
+        <if test="txxx != null  and txxx != ''">and txxx = #{txxx}</if>
+        <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+        </if>
+        <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+            AND date_format(create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+        </if>
+        <if test="deptId != null">
+            and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
+        </if>
+        order by create_time desc
+    </select>
+
+    <select id="selectXfptJzBuyOpinionsById" parameterType="Long" resultMap="XfptJzBuyOpinionsResult">
+        <include refid="selectXfptJzBuyOpinionsVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptJzBuyOpinions" parameterType="com.xfgl.school.domain.XfptJzBuyOpinions"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_jz_buy_opinions
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="teamMeetingId != null">team_meeting_id,</if>
+            <if test="title != null and title != ''">title,</if>
+            <if test="zjlx != null and zjlx != ''">zjlx,</if>
+            <if test="xzrq != null">xzrq,</if>
+            <if test="yjzjqk != null and yjzjqk != ''">yjzjqk,</if>
+            <if test="zw != null and zw != ''">zw,</if>
+            <if test="dblb != null and dblb != ''">dblb,</if>
+            <if test="xm != null and xm != ''">xm,</if>
+            <if test="tpqzsj != null and tpqzsj != ''">tpqzsj,</if>
+            <if test="fwnx != null and fwnx != ''">fwnx,</if>
+            <if test="configContent != null and configContent != ''">config_content,</if>
+            <if test="fj != null and fj != ''">fj,</if>
+            <if test="txxx != null and txxx != ''">txxx,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="remark != null">remark,</if>
+            <if test="questionConfigId != null">question_config_id,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="teamMeetingId != null">#{teamMeetingId},</if>
+            <if test="title != null and title != ''">#{title},</if>
+            <if test="zjlx != null and zjlx != ''">#{zjlx},</if>
+            <if test="xzrq != null">#{xzrq},</if>
+            <if test="yjzjqk != null and yjzjqk != ''">#{yjzjqk},</if>
+            <if test="zw != null and zw != ''">#{zw},</if>
+            <if test="dblb != null and dblb != ''">#{dblb},</if>
+            <if test="xm != null and xm != ''">#{xm},</if>
+            <if test="tpqzsj != null and tpqzsj != ''">#{tpqzsj},</if>
+            <if test="fwnx != null and fwnx != ''">#{fwnx},</if>
+            <if test="configContent != null and configContent != ''">#{configContent},</if>
+            <if test="fj != null and fj != ''">#{fj},</if>
+            <if test="txxx != null and txxx != ''">#{txxx},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="questionConfigId != null">#{questionConfigId},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptJzBuyOpinions" parameterType="com.xfgl.school.domain.XfptJzBuyOpinions">
+        update xfpt_jz_buy_opinions
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null and title != ''">title = #{title},</if>
+            <if test="zjlx != null and zjlx != ''">zjlx = #{zjlx},</if>
+            <if test="xzrq != null">xzrq = #{xzrq},</if>
+            <if test="yjzjqk != null and yjzjqk != ''">yjzjqk = #{yjzjqk},</if>
+            <if test="zw != null and zw != ''">zw = #{zw},</if>
+            <if test="dblb != null and dblb != ''">dblb = #{dblb},</if>
+            <if test="xm != null and xm != ''">xm = #{xm},</if>
+            <if test="fwnx != null and fwnx != ''">fwnx = #{fwnx},</if>
+            <if test="tpqzsj != null and tpqzsj != ''">tpqzsj = #{tpqzsj},</if>
+            <if test="txxx != null and txxx != ''">txxx = #{txxx},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="questionConfigId != null">question_config_id = #{questionConfigId},</if>
+            <if test="configContent != null and configContent != ''">config_content = #{configContent},</if>
+            <if test="fj != null">fj = #{fj},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptJzBuyOpinionsById" parameterType="Long">
+        delete from xfpt_jz_buy_opinions
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptJzBuyOpinionsByIds" parameterType="String">
+        delete from xfpt_jz_buy_opinions where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

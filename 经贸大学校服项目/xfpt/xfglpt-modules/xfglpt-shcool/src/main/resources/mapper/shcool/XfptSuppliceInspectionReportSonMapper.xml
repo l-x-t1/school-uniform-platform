@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSuppliceInspectionReportSonMapper">
+    <resultMap type="XfptSuppliceInspectionReportSon" id="XfptSuppliceInspectionReportSonResult">
+        <result property="id" column="id"/>
+        <result property="inspectionReportTitle" column="inspection_report_title"/>
+        <result property="url" column="url"/>
+        <result property="createBy" column="create_by"/>
+        <result property="createTime" column="create_time"/>
+        <result property="updateBy" column="update_by"/>
+        <result property="updateTime" column="update_time"/>
+        <result property="remark" column="remark"/>
+        <result property="reportId" column="report_id"/>
+        <result property="fileName" column="file_name"/>
+        <result property="fileType" column="file_type"/>
+        <result property="type" column="type"/>
+    </resultMap>
+
+    <sql id="selectXfptSuppliceInspectionReportSonVo">
+        select id,
+               inspection_report_title,
+               url,
+               create_by,
+               create_time,
+               update_by,
+               update_time,
+               remark,
+               report_id,
+               file_name,
+               file_type,
+        type
+        from xfpt_supplice_inspection_report_son
+    </sql>
+
+    <select id="selectXfptSuppliceInspectionReportSonList" parameterType="XfptSuppliceInspectionReportSon"
+            resultMap="XfptSuppliceInspectionReportSonResult">
+        <include refid="selectXfptSuppliceInspectionReportSonVo"/>
+        <include refid="search"/>
+        <if test="inspectionReportTitle != null  and inspectionReportTitle != ''">
+            and inspection_report_title = #{inspectionReportTitle}
+        </if>
+        <if test="reportId != null  and reportId != ''">
+            and report_id = #{reportId}
+        </if>
+        
+        <if test="url != null  and url != ''">
+            and url = #{url}
+        </if>
+        <if test="type != null  and type != ''">
+            and type = #{type}
+        </if>
+
+    </select>
+
+    <select id="selectXfptSuppliceInspectionReportSonById" parameterType="Long"
+            resultMap="XfptSuppliceInspectionReportSonResult">
+        <include refid="selectXfptSuppliceInspectionReportSonVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptSuppliceInspectionReportSon" parameterType="XfptSuppliceInspectionReportSon"
+            useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_supplice_inspection_report_son
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="inspectionReportTitle != null">
+                inspection_report_title,
+            </if>
+            <if test="url != null">
+                url,
+            </if>
+            <if test="createBy != null">
+                create_by,
+            </if>
+            <if test="createTime != null">
+                create_time,
+            </if>
+            <if test="updateBy != null">
+                update_by,
+            </if>
+            <if test="updateTime != null">
+                update_time,
+            </if>
+            <if test="remark != null">
+                remark,
+            </if>
+            <if test="reportId != null">
+                report_id,
+            </if>
+            <if test="reportId != null">
+                report_id,
+            </if>
+            <if test="fileType != null">
+                file_type,
+            </if>
+            <if test="type != null">
+                type,
+            </if>
+
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="inspectionReportTitle != null">
+                #{inspectionReportTitle},
+            </if>
+            <if test="url != null">
+                #{url},
+            </if>
+            <if test="createBy != null">
+                #{createBy},
+            </if>
+            <if test="createTime != null">
+                #{createTime},
+            </if>
+            <if test="updateBy != null">
+                #{updateBy},
+            </if>
+            <if test="updateTime != null">
+                #{updateTime},
+            </if>
+            <if test="remark != null">
+                #{remark},
+            </if>
+            <if test="reportId != null">
+                #{reportId} ,
+            </if>
+            <if test="fileType != null">
+                #{fileType} ,
+            </if>
+            <if test="type != null">
+                #{type} ,
+            </if>
+
+        </trim>
+    </insert>
+
+    <update id="updateXfptSuppliceInspectionReportSon" parameterType="XfptSuppliceInspectionReportSon">
+        update xfpt_supplice_inspection_report_son
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="inspectionReportTitle != null">
+                inspection_report_title = #{inspectionReportTitle},
+            </if>
+            <if test="url != null">
+                url = #{url},
+            </if>
+            <if test="createBy != null">
+                create_by = #{createBy},
+            </if>
+            <if test="createTime != null">
+                create_time = #{createTime},
+            </if>
+            <if test="updateBy != null">
+                update_by = #{updateBy},
+            </if>
+            <if test="updateTime != null">
+                update_time = #{updateTime},
+            </if>
+            <if test="remark != null">
+                remark = #{remark},
+            </if>
+            <if test="reportId != null">
+                report_id = #{reportId},
+            </if>
+            <if test="fileType != null">
+                file_type = #{fileType},
+            </if>
+            <if test="type != null">
+                type = #{type},
+            </if>
+
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptSuppliceInspectionReportSonById" parameterType="Long">
+        delete
+        from xfpt_supplice_inspection_report_son
+        where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptSuppliceInspectionReportSonByIds" parameterType="String">
+        delete from xfpt_supplice_inspection_report_son where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

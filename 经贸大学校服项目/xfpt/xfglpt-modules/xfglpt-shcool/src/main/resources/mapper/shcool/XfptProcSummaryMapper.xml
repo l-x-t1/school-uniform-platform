@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptProcSummaryMapper">
+
+    <resultMap type="XfptProcSummary" id="XfptProcSummaryResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="money"    column="money"    />
+        <result property="inviteFile"    column="invite_file"    />
+        <result property="winBidFile"    column="win_bid_file"    />
+        <result property="enterprise"    column="enterprise"    />
+        <result property="count"    column="count"    />
+        <result property="schoolUniformFile"    column="school_uniform_file"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="buyTime"    column="buy_time"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="dj"    column="dj"    />
+    </resultMap>
+
+    <sql id="selectXfptProcSummaryVo">
+        select dj,team_id,buy_time,id, title, money, invite_file, win_bid_file, enterprise, count, school_uniform_file, school_name, dept_id, ancestors, remark, create_by, create_time, update_time, update_by from xfpt_proc_summary
+    </sql>
+
+    <select id="selectXfptProcSummaryList" parameterType="XfptProcSummary" resultMap="XfptProcSummaryResult">
+        <include refid="selectXfptProcSummaryVo"/>
+        <include refid="search"/>
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="money != null  and money != ''"> and money = #{money}</if>
+            <if test="inviteFile != null  and inviteFile != ''"> and invite_file = #{inviteFile}</if>
+            <if test="winBidFile != null  and winBidFile != ''"> and win_bid_file = #{winBidFile}</if>
+            <if test="enterprise != null  and enterprise != ''"> and enterprise = #{enterprise}</if>
+            <if test="count != null  and count != ''"> and count = #{count}</if>
+            <if test="schoolUniformFile != null  and schoolUniformFile != ''"> and school_uniform_file = #{schoolUniformFile}</if>
+            <if test="schoolName != null  and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+
+    </select>
+
+    <select id="selectXfptProcSummaryById" parameterType="Long" resultMap="XfptProcSummaryResult">
+        <include refid="selectXfptProcSummaryVo"/>
+        where id = #{id}
+    </select>
+    <select id="statistics" resultType="com.xfgl.school.domain.XfptProcSummary">
+        SELECT * FROM XFPT_PROC_SUMMARY proc LEFT JOIN SYS_DEPT dept ON proc.dept_id = dept.dept_id
+       <where>
+           <if test="deptId != null"> find_in_set(#{deptId},proc.ancestors)</if>
+           <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+               AND date_format(buy_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+           </if>
+           <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+               AND date_format(buy_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+           </if>
+           and dept.DEL_FLAG = '0'
+       </where>
+
+    </select>
+    <select id="statisticsTypeInfo" resultType="com.xfgl.school.domain.vo.OrderManagementStatisticsVo">
+        SELECT
+        dict.dict_label as district,
+        dict.dict_value as schoolType,
+        COALESCE(SUM(proc.count), 0) AS schoolUniformCount,
+        COALESCE(SUM(proc.money), 0) AS buyCount
+        FROM
+        SYS_DICT_DATA dict
+        LEFT JOIN (
+        SELECT sm.* FROM XFPT_SCHOOL_MESSAGE sm
+        LEFT JOIN SYS_DEPT dept ON sm.dept_id=dept.dept_id
+        WHERE find_in_set(#{deptId},dept.ancestors)
+        ) msg ON dict.dict_value = msg.school_type
+        LEFT JOIN (
+        SELECT * FROM XFPT_PROC_SUMMARY
+        WHERE find_in_set(#{deptId},ancestors)
+        AND date_format(buy_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+        AND date_format(buy_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+        ) proc ON proc.dept_id = msg.dept_id
+        WHERE dict_type = 'sc_sc_type'
+        GROUP BY dict.dict_label, dict.dict_value
+        ORDER BY buyCount desc;
+
+    </select>
+<!--    <select id="statisticsInfo" resultType="com.xfgl.school.domain.vo.OrderManagementStatisticsVo">-->
+<!--        SELECT-->
+<!--        dept.dept_name AS district,-->
+<!--        COALESCE(SUM(proc.count), 0) AS schoolUniformCount,-->
+<!--        COALESCE(SUM(proc.money), 0) AS buyCount,-->
+<!--        COUNT(team.id) AS ggCount,-->
+<!--        COALESCE(message.school_type, 4) AS school_type-->
+<!--        FROM SYS_DEPT dept-->
+<!--        LEFT JOIN (SELECT * FROM XFPT_PROC_SUMMARY where-->
+<!--         date_format(buy_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')-->
+<!--        AND date_format(buy_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d'))-->
+<!--            proc ON proc.dept_id = dept.dept_id-->
+<!--        LEFT JOIN XFPT_TEAM_MEETING team ON proc.dept_id = team.dept_id-->
+<!--        LEFT JOIN XFPT_SCHOOL_MESSAGE message ON message.dept_id = proc.dept_id-->
+<!--        WHERE dept.parent_id = #{deptId}-->
+<!--        GROUP BY dept.dept_name, message.school_type-->
+<!--        ORDER BY buyCount DESC;-->
+<!--    </select>-->
+    <select id="statisticsInfo" resultType="com.xfgl.school.domain.vo.OrderManagementStatisticsVo">
+        SELECT
+        dept.dept_name AS district,
+        COALESCE(SUM(proc.count), 0) AS schoolUniformCount,
+        COALESCE(SUM(proc.money), 0) AS buyCount,
+        COUNT(team.id) AS ggCount,
+        dept.school_type
+        FROM
+        (SELECT sdept.*,COALESCE(message.school_type, 4) AS school_type FROM SYS_DEPT sdept
+        LEFT JOIN XFPT_SCHOOL_MESSAGE message  ON message.dept_id = sdept.dept_id ) dept
+        LEFT JOIN (SELECT * FROM XFPT_PROC_SUMMARY where del_flag = '0' AND
+        date_format(buy_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+        AND date_format(buy_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d'))
+        proc ON proc.dept_id = dept.dept_id
+        LEFT JOIN XFPT_TEAM_MEETING team ON  proc.TEAM_ID = team.id
+        <where>
+            <if test="deptId != null">dept.parent_id = #{deptId}</if>
+            <if test="schoolType != null and  schoolType !='' ">and dept.school_type=#{schoolType} </if>
+            <if test="isBuy == '1' or isBuy== 1">and proc.money is NOT NULL </if>
+            <if test="isBuy == '0' or isBuy== 0">and proc.money is NULL </if>
+        </where>
+        GROUP BY dept.dept_name,dept.school_type
+        ORDER BY buyCount DESC;
+    </select>
+
+
+    <insert id="insertXfptProcSummary" parameterType="XfptProcSummary" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_proc_summary
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="money != null">money,</if>
+            <if test="inviteFile != null">invite_file,</if>
+            <if test="winBidFile != null">win_bid_file,</if>
+            <if test="enterprise != null">enterprise,</if>
+            <if test="count != null">count,</if>
+            <if test="schoolUniformFile != null">school_uniform_file,</if>
+            <if test="schoolName != null">school_name,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="money != null">#{money},</if>
+            <if test="inviteFile != null">#{inviteFile},</if>
+            <if test="winBidFile != null">#{winBidFile},</if>
+            <if test="enterprise != null">#{enterprise},</if>
+            <if test="count != null">#{count},</if>
+            <if test="schoolUniformFile != null">#{schoolUniformFile},</if>
+            <if test="schoolName != null">#{schoolName},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptProcSummary" parameterType="XfptProcSummary">
+        update xfpt_proc_summary
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="money != null">money = #{money},</if>
+            <if test="inviteFile != null">invite_file = #{inviteFile},</if>
+            <if test="winBidFile != null">win_bid_file = #{winBidFile},</if>
+            <if test="enterprise != null">enterprise = #{enterprise},</if>
+            <if test="count != null">count = #{count},</if>
+            <if test="schoolUniformFile != null">school_uniform_file = #{schoolUniformFile},</if>
+            <if test="schoolName != null">school_name = #{schoolName},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptProcSummaryById" parameterType="Long">
+        delete from xfpt_proc_summary where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptProcSummaryByIds" parameterType="String">
+        delete from xfpt_proc_summary where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

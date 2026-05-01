@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptHmdMapper">
+
+    <resultMap type="XfptHmd" id="XfptHmdResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="xydm"    column="xydm"    />
+        <result property="userName"    column="user_name"    />
+        <result property="remark"    column="remark"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectXfptHmdVo">
+        select id, name, xydm, user_name, remark, create_time, create_by, update_time, update_by, del_flag from xfpt_hmd
+    </sql>
+
+    <select id="selectXfptHmdList" parameterType="XfptHmd" resultMap="XfptHmdResult">
+        <include refid="selectXfptHmdVo"/>
+        <include refid="search"/>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="xydm != null  and xydm != ''"> and xydm = #{xydm}</if>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+
+    </select>
+
+    <select id="selectXfptHmdById" parameterType="Long" resultMap="XfptHmdResult">
+        <include refid="selectXfptHmdVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptHmd" parameterType="XfptHmd" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_hmd
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null">name,</if>
+            <if test="xydm != null">xydm,</if>
+            <if test="userName != null">user_name,</if>
+            <if test="remark != null">remark,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="delFlag != null">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null">#{name},</if>
+            <if test="xydm != null">#{xydm},</if>
+            <if test="userName != null">#{userName},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptHmd" parameterType="XfptHmd">
+        update xfpt_hmd
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null">name = #{name},</if>
+            <if test="xydm != null">xydm = #{xydm},</if>
+            <if test="userName != null">user_name = #{userName},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptHmdById" parameterType="Long">
+        delete from xfpt_hmd where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptHmdByIds" parameterType="String">
+        delete from xfpt_hmd where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

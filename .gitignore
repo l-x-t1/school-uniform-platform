@@ -1,0 +1,33 @@
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+.logs/
+
+# Java / Maven build output
+target/
+
+# Node dependencies and build output
+node_modules/
+dist/
+.npm/
+
+# Uni-app / HBuilder generated output
+unpackage/
+
+# Nacos runtime data
+经贸大学校服项目/nacos/data/
+经贸大学校服项目/nacos/logs/
+经贸大学校服项目/nacos/work/
+经贸大学校服项目/nacos/target/
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.swp

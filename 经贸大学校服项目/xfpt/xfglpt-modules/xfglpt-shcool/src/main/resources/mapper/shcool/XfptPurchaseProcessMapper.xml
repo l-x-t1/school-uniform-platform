@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptPurchaseProcessMapper">
+
+    <resultMap type="XfptPurchaseProcess" id="XfptPurchaseProcessResult">
+        <result property="id"    column="id"    />
+        <result property="purchaseName"    column="purchase_name"    />
+        <result property="purchaseYear"    column="purchase_year"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="cgTime"    column="cg_time"    />
+    </resultMap>
+
+    <sql id="selectXfptPurchaseProcessVo">
+        select cg_time,id, purchase_name, purchase_year, dept_id, ancestors, update_time, update_by, create_time, create_by from xfpt_purchase_process
+    </sql>
+
+    <select id="selectXfptPurchaseProcessList" parameterType="XfptPurchaseProcess" resultMap="XfptPurchaseProcessResult">
+        <include refid="selectXfptPurchaseProcessVo"/>
+        <include refid="search"/>
+            <if test="purchaseName != null  and purchaseName != ''"> and purchase_name like concat('%', #{purchaseName}, '%')</if>
+            <if test="purchaseYear != null  and purchaseYear != ''"> and purchase_year = #{purchaseYear}</if>
+            <if test="cgTime != null  and cgTime != ''"> and cg_time = #{cgTime}</if>
+            <if test="deptId != null ">  and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+            order by create_time desc
+
+    </select>
+
+    <select id="selectXfptPurchaseProcessById" parameterType="Long" resultMap="XfptPurchaseProcessResult">
+        <include refid="selectXfptPurchaseProcessVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptPurchaseProcess" parameterType="XfptPurchaseProcess">
+        insert into xfpt_purchase_process
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null">id,</if>
+            <if test="purchaseName != null">purchase_name,</if>
+            <if test="purchaseYear != null">purchase_year,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null">#{id},</if>
+            <if test="purchaseName != null">#{purchaseName},</if>
+            <if test="purchaseYear != null">#{purchaseYear},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptPurchaseProcess" parameterType="XfptPurchaseProcess">
+        update xfpt_purchase_process
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="purchaseName != null">purchase_name = #{purchaseName},</if>
+            <if test="purchaseYear != null">purchase_year = #{purchaseYear},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptPurchaseProcessById" parameterType="Long">
+        delete from xfpt_purchase_process where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptPurchaseProcessByIds" parameterType="String">
+        delete from xfpt_purchase_process where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

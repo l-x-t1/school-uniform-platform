@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSchoolStatisticsMapper">
+
+    <select id="getJYNoticeStatisticsList" resultType="com.xfgl.school.domain.vo.XfptJYNoticeStatisticsVO">
+        select t.ggName,
+        t.fbDate,
+        t.csName,
+        t.teamMeetingId,
+        t.deptId,
+        t.schoolName,
+        t.firstzj,
+        t.secondzj
+        from (select ar.notice_title ggName,
+        ar.create_time fbDate,
+        ar.transaction_company_name csName,
+        ar.team_id teamMeetingId,
+        ar.dept_id deptId,
+        dept.dept_name schoolName,
+        ar.ancestors,
+        case when exists (select 1 from xfpt_supplice_inspection_report_son s left join xfpt_supplice_inspection_report
+        sp on s.report_id = sp.id
+        where sp.dept_id = ar.dept_id
+        and sp.del_flag = 0 and s.del_flag = 0
+        and sp.team_meeting_id = ar.team_id
+        and s.type = 1) then '1' else '0' end as firstzj,
+        case when exists (select 1 from xfpt_supplice_inspection_report_son s left join xfpt_supplice_inspection_report
+        sp on s.report_id = sp.id
+        where sp.dept_id = ar.dept_id
+        and sp.del_flag = 0 and s.del_flag = 0
+        and sp.team_meeting_id = ar.team_id
+        and s.type = 2) then '1' else '0' end as secondzj
+        from xfpt_anno_results ar left join sys_dept dept on ar.dept_id = dept.dept_id
+        <where>
+            ar.del_flag = 0
+
+            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
+                AND date_format(ar.create_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
+            </if>
+            <if test="params.endTime != null and params.endTime != ''"><!-- 结束时间检索 -->
+                AND date_format(ar.create_time,'%Y%m%d') &lt;= date_format(#{params.endTime},'%Y%m%d')
+            </if>
+            <if test="teamMeetingIdList != null and teamMeetingIdList.size() > 0">
+                and ar.team_id in
+                <foreach collection="teamMeetingIdList" item="teamIdCurr" open="(" separator="," close=")">
+                    #{teamIdCurr}
+                </foreach>
+            </if>
+        </where>
+        order by ar.create_time desc
+        ) t
+        <where>
+            <if test="schoolName != null and schoolName != ''">
+                t.schoolName like concat('%',#{schoolName},'%')
+            </if>
+            <if test="csName != null and csName != ''">
+                and t.csName like concat('%',#{csName},'%')
+            </if>
+            <if test="firstzj != null and firstzj != ''">
+                and t.firstzj = #{firstzj}
+            </if>
+            <if test="secondzj != null and secondzj != ''">
+                and t.secondzj = #{secondzj}
+            </if>
+        </where>
+    </select>
+
+    <select id="getJYNoticeSchoolStatisticsList" resultType="com.xfgl.school.domain.vo.XfptJYNoticeSchoolStatisticsVO">
+        select t.schoolName,
+        t.ggCount,
+        t.hasZjCount,
+        t.noZjCount,
+        t.hasSecondZjCount
+        from (select ar.dept_id deptId,
+        dept.dept_name schoolName,
+        count(ar.dept_id) ggCount,
+        (select count(1) from xfpt_supplice_inspection_report_son s left join xfpt_supplice_inspection_report sp
+        on s.report_id = sp.id
+        where sp.dept_id = ar.dept_id and sp.del_flag = 0 and s.del_flag = 0
+        <if test="inspectIdList != null and inspectIdList.size() > 0">
+            and sp.id in
+            <foreach collection="inspectIdList" item="inspectIdCurr" open="(" separator="," close=")">
+                #{inspectIdCurr}
+            </foreach>
+        </if>
+        and s.type = 1) as hasZjCount,
+        (count(ar.dept_id) - (select count(1) from xfpt_supplice_inspection_report_son s
+        left join xfpt_supplice_inspection_report sp on s.report_id = sp.id
+        where sp.dept_id = ar.dept_id and sp.del_flag = 0 and s.del_flag = 0
+        <if test="inspectIdList != null and inspectIdList.size() > 0">
+            and sp.id in
+            <foreach collection="inspectIdList" item="inspectIdCurr" open="(" separator="," close=")">
+                #{inspectIdCurr}
+            </foreach>
+        </if>
+        and s.type = 1)) as noZjCount,
+        (select count(1) from xfpt_supplice_inspection_report_son s
+        left join xfpt_supplice_inspection_report sp on s.report_id = sp.id
+        where sp.dept_id = ar.dept_id and sp.del_flag = 0 and s.del_flag = 0
+        <if test="inspectIdList != null and inspectIdList.size() > 0">
+            and sp.id in
+            <foreach collection="inspectIdList" item="inspectIdCurr" open="(" separator="," close=")">
+                #{inspectIdCurr}
+            </foreach>
+        </if>
+        and s.type = 2) as hasSecondZjCount
+        from xfpt_anno_results ar left join sys_dept dept on ar.dept_id = dept.dept_id
+        where ar.del_flag = 0
+        <if test="teamMeetingIdList != null and teamMeetingIdList.size() > 0">
+            and ar.team_id in
+            <foreach collection="teamMeetingIdList" item="teamIdCurr" open="(" separator="," close=")">
+                #{teamIdCurr}
+            </foreach>
+        </if>
+        group by ar.dept_id,dept.dept_name) t
+        <where>
+            <if test="schoolName != null and schoolName != ''">
+                t.schoolName like concat('%',#{schoolName},'%')
+            </if>
+            <if test="conditionFirstOne != null and conditionFirstTwo != null">
+                and (t.hasZjCount &gt;= t.ggCount * #{conditionFirstOne} and t.hasZjCount &lt;= t.ggCount *
+                #{conditionFirstTwo} )
+            </if>
+            <if test="conditionSecondOne != null and conditionSecondTwo != null">
+                and (t.hasSecondZjCount &gt;= t.ggCount * #{conditionSecondOne} and t.hasSecondZjCount &lt;= t.ggCount *
+                #{conditionSecondTwo} )
+            </if>
+        </where>
+    </select>
+</mapper>

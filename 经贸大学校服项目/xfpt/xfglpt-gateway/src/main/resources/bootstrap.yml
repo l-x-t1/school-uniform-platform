@@ -1,0 +1,61 @@
+# Tomcat
+server:
+  port: 8080
+# Spring
+spring:
+  main:
+    allow-bean-definition-overriding: true
+  application:
+    # 应用名称
+    name: xfglpt-gateway
+  profiles:
+    # 环境配置
+    active: dev
+  web:
+    flux:
+      multipart:
+        max-file-size: 300MB   # 单个文件最大大小
+        max-request-size: 300MB # 整个请求最大大小
+  cloud:
+    nacos:
+      discovery:
+        # 服务注册地址
+        server-addr: localhost:8848
+        ip: 127.0.0.1
+        #server-addr: 172.16.25.27:8848
+        #ip: 172.16.25.27
+        #ip: 172.16.25.27
+        namespace: e4771fd7-40af-4918-96f5-90641c81b444
+        port: 8080
+        username: nacos
+        password: admin123W999*)^(!@#
+      config:
+        # 配置中心地址
+        #server-addr: 172.16.25.27:8848
+        server-addr: localhost:8848
+        username: nacos
+        password: admin123W999*)^(!@#
+        namespace: 5e3e155d-73b2-4a36-ab8b-e54454e8b351
+        # 配置文件格式
+        file-extension: yml
+        # 共享配置
+        shared-configs:
+          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+    sentinel:
+      # 取消控制台懒加载
+      eager: true
+      transport:
+        # 控制台地址
+        dashboard: 127.0.0.1:8718
+      # nacos配置持久化
+      datasource:
+        ds1:
+          nacos:
+            server-addr: localhost:8848
+            #server-addr: 172.16.25.27:8848
+            username: nacos
+            password: admin123W999*)^(!@#
+            dataId: sentinel-xfglpt-gateway
+            groupId: DEFAULT_GROUP
+            data-type: json
+            rule-type: gw-flow

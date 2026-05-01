@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.supplier.mapper.XfptStudentSizeExtMapper">
+
+    <resultMap type="XfptStudentSizeExt" id="XfptStudentSizeExtResult">
+        <result property="id"    column="id"    />
+        <result property="studentId"    column="student_id"    />
+        <result property="schoolId"    column="school_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="height"    column="height"    />
+        <result property="weight"    column="weight"    />
+        <result property="chest"    column="chest"    />
+        <result property="waistline"    column="waistline"    />
+        <result property="hipline"    column="hipline"    />
+        <result property="sizeId"    column="size_id"    />
+        <result property="measureTime"    column="measure_time"    />
+        <result property="measureRemark"    column="measure_remark"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectXfptStudentSizeExtVo">
+        select id, student_id, school_id, dept_id, ancestors, height, weight, chest, waistline, hipline, size_id, measure_time, measure_remark, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_student_size_ext
+    </sql>
+
+    <select id="selectXfptStudentSizeExtList" parameterType="XfptStudentSizeExt" resultMap="XfptStudentSizeExtResult">
+        <include refid="selectXfptStudentSizeExtVo"/>
+        <include refid="search"/>
+            <if test="studentId != null "> and student_id = #{studentId}</if>
+            <if test="schoolId != null "> and school_id = #{schoolId}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+            <if test="height != null "> and height = #{height}</if>
+            <if test="weight != null "> and weight = #{weight}</if>
+            <if test="chest != null "> and chest = #{chest}</if>
+            <if test="waistline != null "> and waistline = #{waistline}</if>
+            <if test="hipline != null "> and hipline = #{hipline}</if>
+            <if test="sizeId != null "> and size_id = #{sizeId}</if>
+            <if test="measureTime != null "> and measure_time = #{measureTime}</if>
+            <if test="measureRemark != null  and measureRemark != ''"> and measure_remark = #{measureRemark}</if>
+
+    </select>
+
+    <select id="selectXfptStudentSizeExtById" parameterType="Long" resultMap="XfptStudentSizeExtResult">
+        <include refid="selectXfptStudentSizeExtVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptStudentSizeExt" parameterType="XfptStudentSizeExt" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_student_size_ext
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="studentId != null">student_id,</if>
+            <if test="schoolId != null">school_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="height != null">height,</if>
+            <if test="weight != null">weight,</if>
+            <if test="chest != null">chest,</if>
+            <if test="waistline != null">waistline,</if>
+            <if test="hipline != null">hipline,</if>
+            <if test="sizeId != null">size_id,</if>
+            <if test="measureTime != null">measure_time,</if>
+            <if test="measureRemark != null">measure_remark,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="studentId != null">#{studentId},</if>
+            <if test="schoolId != null">#{schoolId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="height != null">#{height},</if>
+            <if test="weight != null">#{weight},</if>
+            <if test="chest != null">#{chest},</if>
+            <if test="waistline != null">#{waistline},</if>
+            <if test="hipline != null">#{hipline},</if>
+            <if test="sizeId != null">#{sizeId},</if>
+            <if test="measureTime != null">#{measureTime},</if>
+            <if test="measureRemark != null">#{measureRemark},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptStudentSizeExt" parameterType="XfptStudentSizeExt">
+        update xfpt_student_size_ext
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="studentId != null">student_id = #{studentId},</if>
+            <if test="schoolId != null">school_id = #{schoolId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="height != null">height = #{height},</if>
+            <if test="weight != null">weight = #{weight},</if>
+            <if test="chest != null">chest = #{chest},</if>
+            <if test="waistline != null">waistline = #{waistline},</if>
+            <if test="hipline != null">hipline = #{hipline},</if>
+            <if test="sizeId != null">size_id = #{sizeId},</if>
+            <if test="measureTime != null">measure_time = #{measureTime},</if>
+            <if test="measureRemark != null">measure_remark = #{measureRemark},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptStudentSizeExtById" parameterType="Long">
+        delete from xfpt_student_size_ext where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptStudentSizeExtByIds" parameterType="String">
+        delete from xfpt_student_size_ext where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

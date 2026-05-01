@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptYxwfModeMapper">
+
+    <resultMap type="XfptYxwfMode" id="XfptYxwfModeResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="isSamplesPic"    column="is_samples_pic"    />
+        <result property="samplesPic"    column="samples_pic"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="delFlag"    column="del_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="otherFile"    column="other_file"    />
+        <result property="bmjzTime"    column="bmjz_time"    />
+        <result property="isRelease"    column="is_release"    />
+        <result property="teamId"    column="team_id"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="type"    column="type"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="releaseTime"    column="release_time"    />
+        <result property="noticeFile"    column="notice_file"    />
+        <result property="modeType"    column="mode_type"    />
+    </resultMap>
+
+    <sql id="selectXfptYxwfModeVo">
+        select mode_type,notice_file,release_time,id, title, is_samples_pic, samples_pic, update_time, update_by, create_time, create_by, del_flag, remark, other_file, bmjz_time, is_release, team_id, dept_id, ancestors, type, school_name from xfpt_yxwf_mode
+    </sql>
+
+    <select id="selectXfptYxwfModeList" parameterType="XfptYxwfMode" resultMap="XfptYxwfModeResult">
+        <include refid="selectXfptYxwfModeVo"/>
+        <include refid="search"/>
+        <if test="title != null  and title != ''"> and title = #{title}</if>
+        <if test="isSamplesPic != null  and isSamplesPic != ''"> and is_samples_pic = #{isSamplesPic}</if>
+        <if test="samplesPic != null  and samplesPic != ''"> and samples_pic = #{samplesPic}</if>
+        <if test="otherFile != null  and otherFile != ''"> and other_file = #{otherFile}</if>
+        <if test="bmjzTime != null "> and bmjz_time = #{bmjzTime}</if>
+        <if test="isRelease != null  and isRelease != ''"> and is_release = #{isRelease}</if>
+        <if test="teamId != null "> and team_id = #{teamId}</if>
+        <if test="deptId != null "> and dept_id = #{deptId}</if>
+        <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
+        <if test="type != null  and type != ''"> and type = #{type}</if>
+        <if test="schoolName != null  and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
+
+    </select>
+
+    <select id="selectXfptYxwfModeById" parameterType="Long" resultMap="XfptYxwfModeResult">
+        <include refid="selectXfptYxwfModeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptYxwfMode" parameterType="XfptYxwfMode" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_yxwf_mode
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="title != null">title,</if>
+            <if test="isSamplesPic != null">is_samples_pic,</if>
+            <if test="samplesPic != null">samples_pic,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="delFlag != null">del_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="otherFile != null">other_file,</if>
+            <if test="bmjzTime != null">bmjz_time,</if>
+            <if test="isRelease != null">is_release,</if>
+            <if test="teamId != null">team_id,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="type != null">type,</if>
+            <if test="schoolName != null">school_name,</if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="title != null">#{title},</if>
+            <if test="isSamplesPic != null">#{isSamplesPic},</if>
+            <if test="samplesPic != null">#{samplesPic},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="delFlag != null">#{delFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="otherFile != null">#{otherFile},</if>
+            <if test="bmjzTime != null">#{bmjzTime},</if>
+            <if test="isRelease != null">#{isRelease},</if>
+            <if test="teamId != null">#{teamId},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="type != null">#{type},</if>
+            <if test="schoolName != null">#{schoolName},</if>
+        </trim>
+    </insert>
+
+    <update id="updateXfptYxwfMode" parameterType="XfptYxwfMode">
+        update xfpt_yxwf_mode
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null">title = #{title},</if>
+            <if test="isSamplesPic != null">is_samples_pic = #{isSamplesPic},</if>
+            <if test="samplesPic != null">samples_pic = #{samplesPic},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="otherFile != null">other_file = #{otherFile},</if>
+            <if test="bmjzTime != null">bmjz_time = #{bmjzTime},</if>
+            <if test="isRelease != null">is_release = #{isRelease},</if>
+            <if test="teamId != null">team_id = #{teamId},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="type != null">type = #{type},</if>
+            <if test="schoolName != null">school_name = #{schoolName},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptYxwfModeById" parameterType="Long">
+        delete from xfpt_yxwf_mode where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptYxwfModeByIds" parameterType="String">
+        delete from xfpt_yxwf_mode where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>
