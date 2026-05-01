@@ -56,9 +56,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "银行账户信息JSON文本")
     private String bankInfoJson;
 
-    /** 状态（0待审核 1已通过 2已驳回 3已打款） */
-            @Excel(name = "状态", readConverterExp = "0=待审核,1=已通过,2=已驳回,3=已打款")
-    @Schema(description = "状态（0待审核 1已通过 2已驳回 3已打款）")
+    /** 状态，0待审核 1已通过 2已驳回 3已打款 */
+            @Excel(name = "状态，0待审核 1已通过 2已驳回 3已打款")
+    @Schema(description = "状态，0待审核 1已通过 2已驳回 3已打款")
     private String status;
 
     /** 申请时间 */

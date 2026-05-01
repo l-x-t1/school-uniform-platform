@@ -11,7 +11,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 学校供应商商品关系对象 xfpt_school_supplier_goods_rel
+ * 学校供应商合作商品对象 xfpt_school_supplier_goods_rel
  *
  * @author yinet
  * @date 2026-05-01
@@ -23,7 +23,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_school_supplier_goods_rel")
-@Schema(description = "学校供应商商品关系")
+@Schema(description = "学校供应商合作商品")
 public class XfptSchoolSupplierGoodsRel extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -33,9 +33,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "主键")
     private Long id;
 
-    /** 合作关系ID */
-            @Excel(name = "合作关系ID")
-    @Schema(description = "合作关系ID")
+    /** 合作关系主表ID */
+            @Excel(name = "合作关系主表ID")
+    @Schema(description = "合作关系主表ID")
     private Long relId;
 
     /** 学校ID */
@@ -53,19 +53,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "商品ID")
     private Long goodsId;
 
-    /** 状态（0停用 1启用） */
-            @Excel(name = "状态", readConverterExp = "0=停用,1=启用")
-    @Schema(description = "状态（0停用 1启用）")
+    /** 状态，0停用 1启用 */
+            @Excel(name = "状态，0停用 1启用")
+    @Schema(description = "状态，0停用 1启用")
     private String status;
 
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
+    /** 当前归属部门/学校 */
+            @Excel(name = "当前归属部门/学校")
+    @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
+    /** 组织祖级链路 */
+            @Excel(name = "组织祖级链路")
+    @Schema(description = "组织祖级链路")
     private String ancestors;
 
         }

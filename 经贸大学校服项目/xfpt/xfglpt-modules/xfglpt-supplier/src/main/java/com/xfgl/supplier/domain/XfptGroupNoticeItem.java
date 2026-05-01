@@ -11,7 +11,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 统购公告商品明细对象 xfpt_group_notice_item
+ * 统购公告商品对象 xfpt_group_notice_item
  *
  * @author yinet
  * @date 2026-05-01
@@ -23,7 +23,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_group_notice_item")
-@Schema(description = "统购公告商品明细")
+@Schema(description = "统购公告商品")
 public class XfptGroupNoticeItem extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -48,9 +48,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "商品名称快照")
     private String goodsName;
 
-    /** 尺码规则JSON文本 */
-            @Excel(name = "尺码规则JSON文本")
-    @Schema(description = "尺码规则JSON文本")
+    /** 可选尺码规则JSON文本 */
+            @Excel(name = "可选尺码规则JSON文本")
+    @Schema(description = "可选尺码规则JSON文本")
     private String sizeRuleJson;
 
     /** 单位 */
@@ -61,7 +61,12 @@ private static final long serialVersionUID = 1L;
     /** 采购数量 */
             @Excel(name = "采购数量")
     @Schema(description = "采购数量")
-    private String buyNum;
+    private Integer buyNum;
+
+    /** 价格区间或价格说明 */
+            @Excel(name = "价格区间或价格说明")
+    @Schema(description = "价格区间或价格说明")
+    private String priceDesc;
 
     /** 适用年级ID */
             @Excel(name = "适用年级ID")
@@ -76,16 +81,16 @@ private static final long serialVersionUID = 1L;
     /** 排序值 */
             @Excel(name = "排序值")
     @Schema(description = "排序值")
-    private String sortNum;
+    private Integer sortNum;
 
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
+    /** 当前归属部门/学校 */
+            @Excel(name = "当前归属部门/学校")
+    @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
+    /** 组织祖级链路 */
+            @Excel(name = "组织祖级链路")
+    @Schema(description = "组织祖级链路")
     private String ancestors;
 
         }

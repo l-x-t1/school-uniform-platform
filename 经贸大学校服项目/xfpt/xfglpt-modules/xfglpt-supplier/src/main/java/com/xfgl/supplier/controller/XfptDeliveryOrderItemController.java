@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="发货单明细管理")
 @RestController
-@RequestMapping("/delivery_order_item")
+@RequestMapping("/deliveryOrderItem")
 public class XfptDeliveryOrderItemController extends BaseController {
     @Autowired
     private IXfptDeliveryOrderItemService xfptDeliveryOrderItemService;
@@ -44,7 +44,7 @@ public class XfptDeliveryOrderItemController extends BaseController {
  */
 
 @Operation(summary = "查询发货单明细列表")
-@RequiresPermissions("supplier:delivery_order_item:list")
+@RequiresPermissions("supplier:deliveryOrderItem:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptDeliveryOrderItem xfptDeliveryOrderItem) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptDeliveryOrderItemController extends BaseController {
      * 导出发货单明细列表
      */
     @Operation(summary = "导出发货单明细列表")
-    @RequiresPermissions("supplier:delivery_order_item:export")
+    @RequiresPermissions("supplier:deliveryOrderItem:export")
     @Log(title = "发货单明细" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptDeliveryOrderItem xfptDeliveryOrderItem) {
@@ -69,7 +69,7 @@ public class XfptDeliveryOrderItemController extends BaseController {
      * 获取发货单明细详细信息
      */
     @Operation(summary = "获取发货单明细详细信息")
-    @RequiresPermissions("supplier:delivery_order_item:query")
+    @RequiresPermissions("supplier:deliveryOrderItem:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptDeliveryOrderItemService.getById(id));
@@ -79,7 +79,7 @@ public class XfptDeliveryOrderItemController extends BaseController {
      * 新增发货单明细
      */
     @Operation(summary = "新增发货单明细")
-    @RequiresPermissions("supplier:delivery_order_item:add")
+    @RequiresPermissions("supplier:deliveryOrderItem:add")
     @Log(title = "发货单明细" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptDeliveryOrderItem xfptDeliveryOrderItem) {
@@ -90,7 +90,7 @@ public class XfptDeliveryOrderItemController extends BaseController {
      * 修改发货单明细
      */
     @Operation(summary = "修改发货单明细")
-    @RequiresPermissions("supplier:delivery_order_item:edit")
+    @RequiresPermissions("supplier:deliveryOrderItem:edit")
     @Log(title = "发货单明细" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptDeliveryOrderItem xfptDeliveryOrderItem) {
@@ -102,7 +102,7 @@ public class XfptDeliveryOrderItemController extends BaseController {
      * 删除发货单明细
      */
     @Operation(summary = "删除发货单明细")
-    @RequiresPermissions("supplier:delivery_order_item:remove")
+    @RequiresPermissions("supplier:deliveryOrderItem:remove")
     @Log(title = "发货单明细" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

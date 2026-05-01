@@ -27,24 +27,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 售后申请Controller
+ * 售后单Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="售后申请管理")
+@Tag(name="售后单管理")
 @RestController
-@RequestMapping("/after_sale")
+@RequestMapping("/afterSale")
 public class XfptAfterSaleController extends BaseController {
     @Autowired
     private IXfptAfterSaleService xfptAfterSaleService;
 
 /**
- * 查询售后申请列表
+ * 查询售后单列表
  */
 
-@Operation(summary = "查询售后申请列表")
-@RequiresPermissions("supplier:after_sale:list")
+@Operation(summary = "查询售后单列表")
+@RequiresPermissions("supplier:afterSale:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptAfterSale xfptAfterSale) {
         startPage();
@@ -53,45 +53,45 @@ public class XfptAfterSaleController extends BaseController {
     }
 
     /**
-     * 导出售后申请列表
+     * 导出售后单列表
      */
-    @Operation(summary = "导出售后申请列表")
-    @RequiresPermissions("supplier:after_sale:export")
-    @Log(title = "售后申请" , businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出售后单列表")
+    @RequiresPermissions("supplier:afterSale:export")
+    @Log(title = "售后单" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptAfterSale xfptAfterSale) {
         List<XfptAfterSale> list = xfptAfterSaleService.selectXfptAfterSaleList(xfptAfterSale);
         ExcelUtil<XfptAfterSale> util = new ExcelUtil<XfptAfterSale>(XfptAfterSale. class);
-        util.exportExcel(response, list, "售后申请数据");
+        util.exportExcel(response, list, "售后单数据");
     }
 
     /**
-     * 获取售后申请详细信息
+     * 获取售后单详细信息
      */
-    @Operation(summary = "获取售后申请详细信息")
-    @RequiresPermissions("supplier:after_sale:query")
+    @Operation(summary = "获取售后单详细信息")
+    @RequiresPermissions("supplier:afterSale:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptAfterSaleService.getById(id));
     }
 
     /**
-     * 新增售后申请
+     * 新增售后单
      */
-    @Operation(summary = "新增售后申请")
-    @RequiresPermissions("supplier:after_sale:add")
-    @Log(title = "售后申请" , businessType = BusinessType.INSERT)
+    @Operation(summary = "新增售后单")
+    @RequiresPermissions("supplier:afterSale:add")
+    @Log(title = "售后单" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptAfterSale xfptAfterSale) {
             return toAjax(xfptAfterSaleService.save(xfptAfterSale));
     }
 
     /**
-     * 修改售后申请
+     * 修改售后单
      */
-    @Operation(summary = "修改售后申请")
-    @RequiresPermissions("supplier:after_sale:edit")
-    @Log(title = "售后申请" , businessType = BusinessType.UPDATE)
+    @Operation(summary = "修改售后单")
+    @RequiresPermissions("supplier:afterSale:edit")
+    @Log(title = "售后单" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptAfterSale xfptAfterSale) {
             return toAjax(xfptAfterSaleService.updateById(xfptAfterSale));
@@ -99,11 +99,11 @@ public class XfptAfterSaleController extends BaseController {
 
 
     /**
-     * 删除售后申请
+     * 删除售后单
      */
-    @Operation(summary = "删除售后申请")
-    @RequiresPermissions("supplier:after_sale:remove")
-    @Log(title = "售后申请" , businessType = BusinessType.DELETE)
+    @Operation(summary = "删除售后单")
+    @RequiresPermissions("supplier:afterSale:remove")
+    @Log(title = "售后单" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptAfterSaleService.removeByIds(Arrays.asList(ids)));

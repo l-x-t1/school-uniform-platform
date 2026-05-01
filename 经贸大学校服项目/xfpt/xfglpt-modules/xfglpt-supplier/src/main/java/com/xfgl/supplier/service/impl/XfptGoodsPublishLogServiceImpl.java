@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptGoodsPublishLog;
 import com.xfgl.supplier.service.IXfptGoodsPublishLogService;
 
 /**
- * 商品上下架记录Service业务层处理
+ * 商品上下架日志Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptGoodsPublishLogServiceImpl extends ServiceImpl<XfptGoodsPublish
     private XfptGoodsPublishLogMapper xfptGoodsPublishLogMapper;
 
     /**
-     * 查询商品上下架记录列表
+     * 查询商品上下架日志列表
      *
-     * @param xfptGoodsPublishLog 商品上下架记录
-     * @return 商品上下架记录
+     * @param xfptGoodsPublishLog 商品上下架日志
+     * @return 商品上下架日志
      */
     @Override
     public List<XfptGoodsPublishLog> selectXfptGoodsPublishLogList(XfptGoodsPublishLog xfptGoodsPublishLog)

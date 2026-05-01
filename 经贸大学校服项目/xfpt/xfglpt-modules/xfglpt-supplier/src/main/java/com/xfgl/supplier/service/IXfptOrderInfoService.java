@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.supplier.domain.XfptOrderInfo;
 
 /**
- * 订单主Service接口
+ * 订单信息Service接口
  *
  * @author yinet
  * @date 2026-05-01
@@ -13,10 +13,10 @@ import com.xfgl.supplier.domain.XfptOrderInfo;
 public interface IXfptOrderInfoService extends IService<XfptOrderInfo> {
 
     /**
-     * 查询订单主列表
+     * 查询订单信息列表
      *
-     * @param xfptOrderInfo 订单主
-     * @return 订单主集合
+     * @param xfptOrderInfo 订单信息
+     * @return 订单信息集合
      */
     public List<XfptOrderInfo> selectXfptOrderInfoList(XfptOrderInfo xfptOrderInfo);
 

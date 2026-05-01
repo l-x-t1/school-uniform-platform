@@ -14,6 +14,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="applyStatus"    column="apply_status"    />
         <result property="qualificationStatus"    column="qualification_status"    />
         <result property="bidStageStatus"    column="bid_stage_status"    />
+        <result property="bidResultStatus"    column="bid_result_status"    />
         <result property="applyTime"    column="apply_time"    />
         <result property="auditTime"    column="audit_time"    />
         <result property="auditRemark"    column="audit_remark"    />
@@ -21,16 +22,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="compareFilesJson"    column="compare_files_json"    />
         <result property="deptId"    column="dept_id"    />
         <result property="ancestors"    column="ancestors"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptSupplierApplyVo">
-        select id, notice_id, school_id, supplier_id, supplier_name, apply_no, apply_status, qualification_status, bid_stage_status, apply_time, audit_time, audit_remark, apply_files_json, compare_files_json, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_supplier_apply
+        select id, notice_id, school_id, supplier_id, supplier_name, apply_no, apply_status, qualification_status, bid_stage_status, bid_result_status, apply_time, audit_time, audit_remark, apply_files_json, compare_files_json, dept_id, ancestors, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_supplier_apply
     </sql>
 
     <select id="selectXfptSupplierApplyList" parameterType="XfptSupplierApply" resultMap="XfptSupplierApplyResult">
@@ -44,6 +45,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyStatus != null  and applyStatus != ''"> and apply_status = #{applyStatus}</if>
             <if test="qualificationStatus != null  and qualificationStatus != ''"> and qualification_status = #{qualificationStatus}</if>
             <if test="bidStageStatus != null  and bidStageStatus != ''"> and bid_stage_status = #{bidStageStatus}</if>
+            <if test="bidResultStatus != null  and bidResultStatus != ''"> and bid_result_status = #{bidResultStatus}</if>
             <if test="applyTime != null "> and apply_time = #{applyTime}</if>
             <if test="auditTime != null "> and audit_time = #{auditTime}</if>
             <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
@@ -70,6 +72,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyStatus != null and applyStatus != ''">apply_status,</if>
             <if test="qualificationStatus != null and qualificationStatus != ''">qualification_status,</if>
             <if test="bidStageStatus != null">bid_stage_status,</if>
+            <if test="bidResultStatus != null">bid_result_status,</if>
             <if test="applyTime != null">apply_time,</if>
             <if test="auditTime != null">audit_time,</if>
             <if test="auditRemark != null">audit_remark,</if>
@@ -77,12 +80,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="compareFilesJson != null">compare_files_json,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="ancestors != null">ancestors,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="noticeId != null">#{noticeId},</if>
@@ -93,6 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyStatus != null and applyStatus != ''">#{applyStatus},</if>
             <if test="qualificationStatus != null and qualificationStatus != ''">#{qualificationStatus},</if>
             <if test="bidStageStatus != null">#{bidStageStatus},</if>
+            <if test="bidResultStatus != null">#{bidResultStatus},</if>
             <if test="applyTime != null">#{applyTime},</if>
             <if test="auditTime != null">#{auditTime},</if>
             <if test="auditRemark != null">#{auditRemark},</if>
@@ -100,12 +104,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="compareFilesJson != null">#{compareFilesJson},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="ancestors != null">#{ancestors},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -120,6 +124,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyStatus != null and applyStatus != ''">apply_status = #{applyStatus},</if>
             <if test="qualificationStatus != null and qualificationStatus != ''">qualification_status = #{qualificationStatus},</if>
             <if test="bidStageStatus != null">bid_stage_status = #{bidStageStatus},</if>
+            <if test="bidResultStatus != null">bid_result_status = #{bidResultStatus},</if>
             <if test="applyTime != null">apply_time = #{applyTime},</if>
             <if test="auditTime != null">audit_time = #{auditTime},</if>
             <if test="auditRemark != null">audit_remark = #{auditRemark},</if>
@@ -127,12 +132,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="compareFilesJson != null">compare_files_json = #{compareFilesJson},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="ancestors != null">ancestors = #{ancestors},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

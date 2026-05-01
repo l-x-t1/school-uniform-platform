@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptOrderInfo;
 import com.xfgl.supplier.service.IXfptOrderInfoService;
 
 /**
- * 订单主Service业务层处理
+ * 订单信息Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
     private XfptOrderInfoMapper xfptOrderInfoMapper;
 
     /**
-     * 查询订单主列表
+     * 查询订单信息列表
      *
-     * @param xfptOrderInfo 订单主
-     * @return 订单主
+     * @param xfptOrderInfo 订单信息
+     * @return 订单信息
      */
     @Override
     public List<XfptOrderInfo> selectXfptOrderInfoList(XfptOrderInfo xfptOrderInfo)

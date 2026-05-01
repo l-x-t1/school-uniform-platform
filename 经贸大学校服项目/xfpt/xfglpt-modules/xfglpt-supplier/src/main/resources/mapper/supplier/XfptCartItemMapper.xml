@@ -16,16 +16,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="unitPrice"    column="unit_price"    />
         <result property="buyNum"    column="buy_num"    />
         <result property="checkedFlag"    column="checked_flag"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="noticeId"    column="notice_id"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptCartItemVo">
-        select id, user_id, student_id, goods_id, size_id, goods_name, size_name, main_image, unit_price, buy_num, checked_flag, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_cart_item
+        select id, user_id, student_id, goods_id, size_id, goods_name, size_name, main_image, unit_price, buy_num, checked_flag, order_type, notice_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_cart_item
     </sql>
 
     <select id="selectXfptCartItemList" parameterType="XfptCartItem" resultMap="XfptCartItemResult">
@@ -39,8 +41,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sizeName != null  and sizeName != ''"> and size_name like concat('%', #{sizeName}, '%')</if>
             <if test="mainImage != null  and mainImage != ''"> and main_image = #{mainImage}</if>
             <if test="unitPrice != null "> and unit_price = #{unitPrice}</if>
-            <if test="buyNum != null  and buyNum != ''"> and buy_num = #{buyNum}</if>
+            <if test="buyNum != null "> and buy_num = #{buyNum}</if>
             <if test="checkedFlag != null  and checkedFlag != ''"> and checked_flag = #{checkedFlag}</if>
+            <if test="orderType != null  and orderType != ''"> and order_type = #{orderType}</if>
+            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
 
     </select>
 
@@ -60,14 +64,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sizeName != null and sizeName != ''">size_name,</if>
             <if test="mainImage != null">main_image,</if>
             <if test="unitPrice != null">unit_price,</if>
-            <if test="buyNum != null and buyNum != ''">buy_num,</if>
+            <if test="buyNum != null">buy_num,</if>
             <if test="checkedFlag != null and checkedFlag != ''">checked_flag,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null">del_flag,</if>
+            <if test="orderType != null and orderType != ''">order_type,</if>
+            <if test="noticeId != null">notice_id,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
@@ -78,14 +84,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sizeName != null and sizeName != ''">#{sizeName},</if>
             <if test="mainImage != null">#{mainImage},</if>
             <if test="unitPrice != null">#{unitPrice},</if>
-            <if test="buyNum != null and buyNum != ''">#{buyNum},</if>
+            <if test="buyNum != null">#{buyNum},</if>
             <if test="checkedFlag != null and checkedFlag != ''">#{checkedFlag},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null">#{delFlag},</if>
+            <if test="orderType != null and orderType != ''">#{orderType},</if>
+            <if test="noticeId != null">#{noticeId},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -100,14 +108,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="sizeName != null and sizeName != ''">size_name = #{sizeName},</if>
             <if test="mainImage != null">main_image = #{mainImage},</if>
             <if test="unitPrice != null">unit_price = #{unitPrice},</if>
-            <if test="buyNum != null and buyNum != ''">buy_num = #{buyNum},</if>
+            <if test="buyNum != null">buy_num = #{buyNum},</if>
             <if test="checkedFlag != null and checkedFlag != ''">checked_flag = #{checkedFlag},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null">del_flag = #{delFlag},</if>
+            <if test="orderType != null and orderType != ''">order_type = #{orderType},</if>
+            <if test="noticeId != null">notice_id = #{noticeId},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

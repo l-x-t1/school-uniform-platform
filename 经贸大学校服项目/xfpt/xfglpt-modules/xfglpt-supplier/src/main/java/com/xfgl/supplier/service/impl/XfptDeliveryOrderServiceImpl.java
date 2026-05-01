@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptDeliveryOrder;
 import com.xfgl.supplier.service.IXfptDeliveryOrderService;
 
 /**
- * 发货单主Service业务层处理
+ * 发货单Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
     private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
 
     /**
-     * 查询发货单主列表
+     * 查询发货单列表
      *
-     * @param xfptDeliveryOrder 发货单主
-     * @return 发货单主
+     * @param xfptDeliveryOrder 发货单
+     * @return 发货单
      */
     @Override
     public List<XfptDeliveryOrder> selectXfptDeliveryOrderList(XfptDeliveryOrder xfptDeliveryOrder)

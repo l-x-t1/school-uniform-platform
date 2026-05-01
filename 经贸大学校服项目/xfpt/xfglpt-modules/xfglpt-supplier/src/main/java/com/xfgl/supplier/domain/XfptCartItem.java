@@ -77,11 +77,21 @@ private static final long serialVersionUID = 1L;
     /** 购买数量 */
             @Excel(name = "购买数量")
     @Schema(description = "购买数量")
-    private String buyNum;
+    private Integer buyNum;
 
-    /** 选中状态（0未选中 1选中） */
-            @Excel(name = "选中状态", readConverterExp = "0=未选中,1=选中")
-    @Schema(description = "选中状态（0未选中 1选中）")
+    /** 选中标记，0未选中 1选中 */
+            @Excel(name = "选中标记，0未选中 1选中")
+    @Schema(description = "选中标记，0未选中 1选中")
     private String checkedFlag;
+
+    /** 订单类型，1统购 2零售 */
+            @Excel(name = "订单类型，1统购 2零售")
+    @Schema(description = "订单类型，1统购 2零售")
+    private String orderType;
+
+    /** 统购公告ID */
+            @Excel(name = "统购公告ID")
+    @Schema(description = "统购公告ID")
+    private Long noticeId;
 
         }

@@ -14,7 +14,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 订单主对象 xfpt_order_info
+ * 订单信息对象 xfpt_order_info
  *
  * @author yinet
  * @date 2026-05-01
@@ -26,7 +26,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_order_info")
-@Schema(description = "订单主")
+@Schema(description = "订单信息")
 public class XfptOrderInfo extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -41,9 +41,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "订单号")
     private String orderNo;
 
-    /** 订单类型（1统购 2零售） */
-            @Excel(name = "订单类型", readConverterExp = "1=统购,2=零售")
-    @Schema(description = "订单类型（1统购 2零售）")
+    /** 订单类型，1统购 2零售 */
+            @Excel(name = "订单类型，1统购 2零售")
+    @Schema(description = "订单类型，1统购 2零售")
     private String orderType;
 
     /** 统购公告ID */
@@ -106,24 +106,24 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "收货地址ID")
     private Long addressId;
 
-    /** 收货类型（1学校 2家庭） */
-            @Excel(name = "收货类型", readConverterExp = "1=学校,2=家庭")
-    @Schema(description = "收货类型（1学校 2家庭）")
+    /** 收货类型，1学校 2家庭 */
+            @Excel(name = "收货类型，1学校 2家庭")
+    @Schema(description = "收货类型，1学校 2家庭")
     private String receiveType;
 
-    /** 收货人 */
-            @Excel(name = "收货人")
-    @Schema(description = "收货人")
+    /** 收货人姓名快照 */
+            @Excel(name = "收货人姓名快照")
+    @Schema(description = "收货人姓名快照")
     private String receiverName;
 
-    /** 收货电话 */
-            @Excel(name = "收货电话")
-    @Schema(description = "收货电话")
+    /** 收货人电话快照 */
+            @Excel(name = "收货人电话快照")
+    @Schema(description = "收货人电话快照")
     private String receiverPhone;
 
-    /** 收货地址 */
-            @Excel(name = "收货地址")
-    @Schema(description = "收货地址")
+    /** 收货地址快照 */
+            @Excel(name = "收货地址快照")
+    @Schema(description = "收货地址快照")
     private String receiverAddress;
 
     /** 订单总金额 */
@@ -141,14 +141,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "已退款金额")
     private BigDecimal refundAmount;
 
-    /** 支付状态（0待支付 1已支付 2部分退款 3已退款） */
-            @Excel(name = "支付状态", readConverterExp = "0=待支付,1=已支付,2=部分退款,3=已退款")
-    @Schema(description = "支付状态（0待支付 1已支付 2部分退款 3已退款）")
+    /** 支付状态，0待支付 1已支付 2部分退款 3已退款 */
+            @Excel(name = "支付状态，0待支付 1已支付 2部分退款 3已退款")
+    @Schema(description = "支付状态，0待支付 1已支付 2部分退款 3已退款")
     private String payStatus;
 
-    /** 订单状态（0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中） */
-            @Excel(name = "订单状态", readConverterExp = "0=待支付,1=待生产,2=待发货,3=待收货,4=已完成,5=已取消,6=售后中")
-    @Schema(description = "订单状态（0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中）")
+    /** 订单状态，0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中 */
+            @Excel(name = "订单状态，0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中")
+    @Schema(description = "订单状态，0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中")
     private String orderStatus;
 
     /** 支付时间 */
@@ -169,14 +169,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "完成时间")
     private Date finishTime;
 
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
+    /** 当前归属部门/学校 */
+            @Excel(name = "当前归属部门/学校")
+    @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
+    /** 组织祖级链路 */
+            @Excel(name = "组织祖级链路")
+    @Schema(description = "组织祖级链路")
     private String ancestors;
 
         }

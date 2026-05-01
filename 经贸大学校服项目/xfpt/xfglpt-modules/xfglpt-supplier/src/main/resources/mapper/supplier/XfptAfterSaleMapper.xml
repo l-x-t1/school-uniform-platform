@@ -17,8 +17,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="userName"    column="user_name"    />
         <result property="studentName"    column="student_name"    />
         <result property="applyType"    column="apply_type"    />
+        <result property="targetSizeId"    column="target_size_id"    />
+        <result property="targetSizeName"    column="target_size_name"    />
         <result property="reason"    column="reason"    />
         <result property="imagesJson"    column="images_json"    />
+        <result property="applyNum"    column="apply_num"    />
         <result property="applyAmount"    column="apply_amount"    />
         <result property="status"    column="status"    />
         <result property="auditBy"    column="audit_by"    />
@@ -28,16 +31,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="finishTime"    column="finish_time"    />
         <result property="deptId"    column="dept_id"    />
         <result property="ancestors"    column="ancestors"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptAfterSaleVo">
-        select id, after_sale_no, order_id, order_item_id, order_no, order_type, school_id, supplier_id, user_id, user_name, student_name, apply_type, reason, images_json, apply_amount, status, audit_by, audit_time, handle_result, handle_remark, finish_time, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_after_sale
+        select id, after_sale_no, order_id, order_item_id, order_no, order_type, school_id, supplier_id, user_id, user_name, student_name, apply_type, target_size_id, target_size_name, reason, images_json, apply_num, apply_amount, status, audit_by, audit_time, handle_result, handle_remark, finish_time, dept_id, ancestors, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_after_sale
     </sql>
 
     <select id="selectXfptAfterSaleList" parameterType="XfptAfterSale" resultMap="XfptAfterSaleResult">
@@ -54,8 +57,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
             <if test="studentName != null  and studentName != ''"> and student_name like concat('%', #{studentName}, '%')</if>
             <if test="applyType != null  and applyType != ''"> and apply_type = #{applyType}</if>
+            <if test="targetSizeId != null "> and target_size_id = #{targetSizeId}</if>
+            <if test="targetSizeName != null  and targetSizeName != ''"> and target_size_name like concat('%', #{targetSizeName}, '%')</if>
             <if test="reason != null  and reason != ''"> and reason = #{reason}</if>
             <if test="imagesJson != null  and imagesJson != ''"> and images_json = #{imagesJson}</if>
+            <if test="applyNum != null "> and apply_num = #{applyNum}</if>
             <if test="applyAmount != null "> and apply_amount = #{applyAmount}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
             <if test="auditBy != null  and auditBy != ''"> and audit_by = #{auditBy}</if>
@@ -87,8 +93,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userName != null and userName != ''">user_name,</if>
             <if test="studentName != null">student_name,</if>
             <if test="applyType != null and applyType != ''">apply_type,</if>
+            <if test="targetSizeId != null">target_size_id,</if>
+            <if test="targetSizeName != null">target_size_name,</if>
             <if test="reason != null">reason,</if>
             <if test="imagesJson != null">images_json,</if>
+            <if test="applyNum != null">apply_num,</if>
             <if test="applyAmount != null">apply_amount,</if>
             <if test="status != null and status != ''">status,</if>
             <if test="auditBy != null">audit_by,</if>
@@ -98,12 +107,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="finishTime != null">finish_time,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="ancestors != null">ancestors,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="afterSaleNo != null and afterSaleNo != ''">#{afterSaleNo},</if>
@@ -117,8 +126,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userName != null and userName != ''">#{userName},</if>
             <if test="studentName != null">#{studentName},</if>
             <if test="applyType != null and applyType != ''">#{applyType},</if>
+            <if test="targetSizeId != null">#{targetSizeId},</if>
+            <if test="targetSizeName != null">#{targetSizeName},</if>
             <if test="reason != null">#{reason},</if>
             <if test="imagesJson != null">#{imagesJson},</if>
+            <if test="applyNum != null">#{applyNum},</if>
             <if test="applyAmount != null">#{applyAmount},</if>
             <if test="status != null and status != ''">#{status},</if>
             <if test="auditBy != null">#{auditBy},</if>
@@ -128,12 +140,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="finishTime != null">#{finishTime},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="ancestors != null">#{ancestors},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -151,8 +163,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userName != null and userName != ''">user_name = #{userName},</if>
             <if test="studentName != null">student_name = #{studentName},</if>
             <if test="applyType != null and applyType != ''">apply_type = #{applyType},</if>
+            <if test="targetSizeId != null">target_size_id = #{targetSizeId},</if>
+            <if test="targetSizeName != null">target_size_name = #{targetSizeName},</if>
             <if test="reason != null">reason = #{reason},</if>
             <if test="imagesJson != null">images_json = #{imagesJson},</if>
+            <if test="applyNum != null">apply_num = #{applyNum},</if>
             <if test="applyAmount != null">apply_amount = #{applyAmount},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="auditBy != null">audit_by = #{auditBy},</if>
@@ -162,12 +177,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="finishTime != null">finish_time = #{finishTime},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="ancestors != null">ancestors = #{ancestors},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

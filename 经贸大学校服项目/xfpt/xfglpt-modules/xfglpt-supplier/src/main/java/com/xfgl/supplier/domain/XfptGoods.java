@@ -65,9 +65,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "品牌名称")
     private String brandName;
 
-    /** 主图路径 */
-            @Excel(name = "主图路径")
-    @Schema(description = "主图路径")
+    /** 主图路径或URL */
+            @Excel(name = "主图路径或URL")
+    @Schema(description = "主图路径或URL")
     private String mainImage;
 
     /** 详情图JSON文本 */
@@ -80,19 +80,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "商品详情富文本")
     private String detailContent;
 
-    /** 销售类型（1统购 2零售 3统购零售） */
-            @Excel(name = "销售类型", readConverterExp = "1=统购,2=零售,3=统购零售")
-    @Schema(description = "销售类型（1统购 2零售 3统购零售）")
+    /** 销售类型，1统购 2零售 3统购零售 */
+            @Excel(name = "销售类型，1统购 2零售 3统购零售")
+    @Schema(description = "销售类型，1统购 2零售 3统购零售")
     private String saleType;
 
-    /** 状态（0草稿 1启用 2停用） */
-            @Excel(name = "状态", readConverterExp = "0=草稿,1=启用,2=停用")
-    @Schema(description = "状态（0草稿 1启用 2停用）")
+    /** 状态，0草稿 1启用 2停用 */
+            @Excel(name = "状态，0草稿 1启用 2停用")
+    @Schema(description = "状态，0草稿 1启用 2停用")
     private String status;
 
-    /** 上架状态（0未上架 1已上架 2已下架） */
-            @Excel(name = "上架状态", readConverterExp = "0=未上架,1=已上架,2=已下架")
-    @Schema(description = "上架状态（0未上架 1已上架 2已下架）")
+    /** 上架状态，0未上架 1已上架 2已下架 */
+            @Excel(name = "上架状态，0未上架 1已上架 2已下架")
+    @Schema(description = "上架状态，0未上架 1已上架 2已下架")
     private String publishStatus;
 
     /** 上架时间 */
@@ -110,6 +110,6 @@ private static final long serialVersionUID = 1L;
     /** 排序值 */
             @Excel(name = "排序值")
     @Schema(description = "排序值")
-    private String sortNum;
+    private Integer sortNum;
 
         }

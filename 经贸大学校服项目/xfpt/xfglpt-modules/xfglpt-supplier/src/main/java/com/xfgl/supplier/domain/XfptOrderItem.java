@@ -34,9 +34,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "主键")
     private Long id;
 
-    /** 订单ID */
-            @Excel(name = "订单ID")
-    @Schema(description = "订单ID")
+    /** 订单主表ID */
+            @Excel(name = "订单主表ID")
+    @Schema(description = "订单主表ID")
     private Long orderId;
 
     /** 商品ID */
@@ -64,9 +64,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "商品主图快照")
     private String mainImage;
 
-    /** 销售类型（1统购 2零售） */
-            @Excel(name = "销售类型", readConverterExp = "1=统购,2=零售")
-    @Schema(description = "销售类型（1统购 2零售）")
+    /** 销售类型，1统购 2零售 */
+            @Excel(name = "销售类型，1统购 2零售")
+    @Schema(description = "销售类型，1统购 2零售")
     private String saleType;
 
     /** 单价 */
@@ -77,21 +77,21 @@ private static final long serialVersionUID = 1L;
     /** 购买数量 */
             @Excel(name = "购买数量")
     @Schema(description = "购买数量")
-    private String buyNum;
+    private Integer buyNum;
 
     /** 行金额 */
             @Excel(name = "行金额")
     @Schema(description = "行金额")
     private BigDecimal itemAmount;
 
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
+    /** 当前归属部门/学校 */
+            @Excel(name = "当前归属部门/学校")
+    @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
+    /** 组织祖级链路 */
+            @Excel(name = "组织祖级链路")
+    @Schema(description = "组织祖级链路")
     private String ancestors;
 
         }

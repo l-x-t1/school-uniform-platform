@@ -13,7 +13,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 商品上下架记录对象 xfpt_goods_publish_log
+ * 商品上下架日志对象 xfpt_goods_publish_log
  *
  * @author yinet
  * @date 2026-05-01
@@ -25,7 +25,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_goods_publish_log")
-@Schema(description = "商品上下架记录")
+@Schema(description = "商品上下架日志")
 public class XfptGoodsPublishLog extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -40,9 +40,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "商品ID")
     private Long goodsId;
 
-    /** 操作类型（1上架 2下架） */
-            @Excel(name = "操作类型", readConverterExp = "1=上架,2=下架")
-    @Schema(description = "操作类型（1上架 2下架）")
+    /** 操作类型，1上架 2下架 */
+            @Excel(name = "操作类型，1上架 2下架")
+    @Schema(description = "操作类型，1上架 2下架")
     private String operateType;
 
     /** 操作人 */

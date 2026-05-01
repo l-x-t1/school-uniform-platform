@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="学校供应商合作关系管理")
 @RestController
-@RequestMapping("/school_supplier_rel")
+@RequestMapping("/schoolSupplierRel")
 public class XfptSchoolSupplierRelController extends BaseController {
     @Autowired
     private IXfptSchoolSupplierRelService xfptSchoolSupplierRelService;
@@ -44,7 +44,7 @@ public class XfptSchoolSupplierRelController extends BaseController {
  */
 
 @Operation(summary = "查询学校供应商合作关系列表")
-@RequiresPermissions("supplier:school_supplier_rel:list")
+@RequiresPermissions("supplier:schoolSupplierRel:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptSchoolSupplierRel xfptSchoolSupplierRel) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptSchoolSupplierRelController extends BaseController {
      * 导出学校供应商合作关系列表
      */
     @Operation(summary = "导出学校供应商合作关系列表")
-    @RequiresPermissions("supplier:school_supplier_rel:export")
+    @RequiresPermissions("supplier:schoolSupplierRel:export")
     @Log(title = "学校供应商合作关系" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptSchoolSupplierRel xfptSchoolSupplierRel) {
@@ -69,7 +69,7 @@ public class XfptSchoolSupplierRelController extends BaseController {
      * 获取学校供应商合作关系详细信息
      */
     @Operation(summary = "获取学校供应商合作关系详细信息")
-    @RequiresPermissions("supplier:school_supplier_rel:query")
+    @RequiresPermissions("supplier:schoolSupplierRel:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptSchoolSupplierRelService.getById(id));
@@ -79,7 +79,7 @@ public class XfptSchoolSupplierRelController extends BaseController {
      * 新增学校供应商合作关系
      */
     @Operation(summary = "新增学校供应商合作关系")
-    @RequiresPermissions("supplier:school_supplier_rel:add")
+    @RequiresPermissions("supplier:schoolSupplierRel:add")
     @Log(title = "学校供应商合作关系" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSchoolSupplierRel xfptSchoolSupplierRel) {
@@ -90,7 +90,7 @@ public class XfptSchoolSupplierRelController extends BaseController {
      * 修改学校供应商合作关系
      */
     @Operation(summary = "修改学校供应商合作关系")
-    @RequiresPermissions("supplier:school_supplier_rel:edit")
+    @RequiresPermissions("supplier:schoolSupplierRel:edit")
     @Log(title = "学校供应商合作关系" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptSchoolSupplierRel xfptSchoolSupplierRel) {
@@ -102,7 +102,7 @@ public class XfptSchoolSupplierRelController extends BaseController {
      * 删除学校供应商合作关系
      */
     @Operation(summary = "删除学校供应商合作关系")
-    @RequiresPermissions("supplier:school_supplier_rel:remove")
+    @RequiresPermissions("supplier:schoolSupplierRel:remove")
     @Log(title = "学校供应商合作关系" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

@@ -41,21 +41,6 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "学生ID")
     private Long studentId;
 
-    /** 学校ID */
-            @Excel(name = "学校ID")
-    @Schema(description = "学校ID")
-    private Long schoolId;
-
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
-    private Long deptId;
-
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
-    private String ancestors;
-
     /** 身高 */
             @Excel(name = "身高")
     @Schema(description = "身高")

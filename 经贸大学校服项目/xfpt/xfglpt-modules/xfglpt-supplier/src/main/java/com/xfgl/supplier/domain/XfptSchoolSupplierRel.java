@@ -70,9 +70,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "合同ID")
     private Long contractId;
 
-    /** 合作状态（1合作中 2已取消 3历史合作 4公告期内） */
-            @Excel(name = "合作状态", readConverterExp = "1=合作中,2=已取消,3=历史合作,4=公告期内")
-    @Schema(description = "合作状态（1合作中 2已取消 3历史合作 4公告期内）")
+    /** 合作状态，1合作中 2已取消 3历史合作 4公告期内 */
+            @Excel(name = "合作状态，1合作中 2已取消 3历史合作 4公告期内")
+    @Schema(description = "合作状态，1合作中 2已取消 3历史合作 4公告期内")
     private String cooperateStatus;
 
     /** 合作开始时间 */
@@ -92,14 +92,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "取消原因")
     private String cancelReason;
 
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
+    /** 当前归属部门/学校 */
+            @Excel(name = "当前归属部门/学校")
+    @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
+    /** 组织祖级链路 */
+            @Excel(name = "组织祖级链路")
+    @Schema(description = "组织祖级链路")
     private String ancestors;
 
         }

@@ -76,7 +76,7 @@ private static final long serialVersionUID = 1L;
     /** 订单数 */
             @Excel(name = "订单数")
     @Schema(description = "订单数")
-    private String orderCount;
+    private Integer orderCount;
 
     /** 结算金额 */
             @Excel(name = "结算金额")
@@ -98,9 +98,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "未付金额")
     private BigDecimal unpaidAmount;
 
-    /** 状态（0待申请 1待审核 2已通过 3已完成） */
-            @Excel(name = "状态", readConverterExp = "0=待申请,1=待审核,2=已通过,3=已完成")
-    @Schema(description = "状态（0待申请 1待审核 2已通过 3已完成）")
+    /** 状态，0待申请 1待审核 2已通过 3已完成 */
+            @Excel(name = "状态，0待申请 1待审核 2已通过 3已完成")
+    @Schema(description = "状态，0待申请 1待审核 2已通过 3已完成")
     private String status;
 
     /** 申请时间 */
@@ -125,14 +125,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "审核备注")
     private String auditRemark;
 
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
+    /** 当前归属部门/学校 */
+            @Excel(name = "当前归属部门/学校")
+    @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
+    /** 组织祖级链路 */
+            @Excel(name = "组织祖级链路")
+    @Schema(description = "组织祖级链路")
     private String ancestors;
 
         }

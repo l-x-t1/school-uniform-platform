@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptProductionOrder;
 import com.xfgl.supplier.service.IXfptProductionOrderService;
 
 /**
- * 生产单主Service业务层处理
+ * 生产单Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
     private XfptProductionOrderMapper xfptProductionOrderMapper;
 
     /**
-     * 查询生产单主列表
+     * 查询生产单列表
      *
-     * @param xfptProductionOrder 生产单主
-     * @return 生产单主
+     * @param xfptProductionOrder 生产单
+     * @return 生产单
      */
     @Override
     public List<XfptProductionOrder> selectXfptProductionOrderList(XfptProductionOrder xfptProductionOrder)

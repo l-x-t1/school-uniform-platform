@@ -4,17 +4,17 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xfgl.supplier.domain.XfptSupplierApply;
 
 /**
- * 企业报名及资格审查Mapper接口
+ * 供应商报名Mapper接口
  *
  * @author yinet
  * @date 2026-05-01
  */
 public interface XfptSupplierApplyMapper extends BaseMapper<XfptSupplierApply> {
     /**
-     * 查询企业报名及资格审查列表
+     * 查询供应商报名列表
      *
-     * @param xfptSupplierApply 企业报名及资格审查
-     * @return 企业报名及资格审查集合
+     * @param xfptSupplierApply 供应商报名
+     * @return 供应商报名集合
      */
     public List<XfptSupplierApply> selectXfptSupplierApplyList(XfptSupplierApply xfptSupplierApply);
 }

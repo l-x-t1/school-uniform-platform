@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptGroupNoticeItem;
 import com.xfgl.supplier.service.IXfptGroupNoticeItemService;
 
 /**
- * 统购公告商品明细Service业务层处理
+ * 统购公告商品Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptGroupNoticeItemServiceImpl extends ServiceImpl<XfptGroupNoticeI
     private XfptGroupNoticeItemMapper xfptGroupNoticeItemMapper;
 
     /**
-     * 查询统购公告商品明细列表
+     * 查询统购公告商品列表
      *
-     * @param xfptGroupNoticeItem 统购公告商品明细
-     * @return 统购公告商品明细
+     * @param xfptGroupNoticeItem 统购公告商品
+     * @return 统购公告商品
      */
     @Override
     public List<XfptGroupNoticeItem> selectXfptGroupNoticeItemList(XfptGroupNoticeItem xfptGroupNoticeItem)

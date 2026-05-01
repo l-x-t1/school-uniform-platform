@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptSupplierApply;
 import com.xfgl.supplier.service.IXfptSupplierApplyService;
 
 /**
- * 企业报名及资格审查Service业务层处理
+ * 供应商报名Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptSupplierApplyServiceImpl extends ServiceImpl<XfptSupplierApplyM
     private XfptSupplierApplyMapper xfptSupplierApplyMapper;
 
     /**
-     * 查询企业报名及资格审查列表
+     * 查询供应商报名列表
      *
-     * @param xfptSupplierApply 企业报名及资格审查
-     * @return 企业报名及资格审查
+     * @param xfptSupplierApply 供应商报名
+     * @return 供应商报名
      */
     @Override
     public List<XfptSupplierApply> selectXfptSupplierApplyList(XfptSupplierApply xfptSupplierApply)

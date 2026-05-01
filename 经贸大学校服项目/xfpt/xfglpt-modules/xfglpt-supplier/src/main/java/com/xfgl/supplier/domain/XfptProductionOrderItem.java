@@ -33,9 +33,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "主键")
     private Long id;
 
-    /** 生产单ID */
-            @Excel(name = "生产单ID")
-    @Schema(description = "生产单ID")
+    /** 生产单主表ID */
+            @Excel(name = "生产单主表ID")
+    @Schema(description = "生产单主表ID")
     private Long productionId;
 
     /** 订单明细ID */
@@ -66,26 +66,16 @@ private static final long serialVersionUID = 1L;
     /** 应生产数量 */
             @Excel(name = "应生产数量")
     @Schema(description = "应生产数量")
-    private String buyNum;
+    private Integer buyNum;
 
     /** 已完成数量 */
             @Excel(name = "已完成数量")
     @Schema(description = "已完成数量")
-    private String finishNum;
+    private Integer finishNum;
 
-    /** 状态（0待生产 1生产中 2已完成） */
-            @Excel(name = "状态", readConverterExp = "0=待生产,1=生产中,2=已完成")
-    @Schema(description = "状态（0待生产 1生产中 2已完成）")
+    /** 状态，0待生产 1生产中 2生产完成 */
+            @Excel(name = "状态，0待生产 1生产中 2生产完成")
+    @Schema(description = "状态，0待生产 1生产中 2生产完成")
     private String status;
-
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
-    private Long deptId;
-
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
-    private String ancestors;
 
         }

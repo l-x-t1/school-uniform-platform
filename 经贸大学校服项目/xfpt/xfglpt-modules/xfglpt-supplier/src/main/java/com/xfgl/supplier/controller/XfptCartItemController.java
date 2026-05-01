@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="购物车明细管理")
 @RestController
-@RequestMapping("/cart_item")
+@RequestMapping("/cartItem")
 public class XfptCartItemController extends BaseController {
     @Autowired
     private IXfptCartItemService xfptCartItemService;
@@ -44,7 +44,7 @@ public class XfptCartItemController extends BaseController {
  */
 
 @Operation(summary = "查询购物车明细列表")
-@RequiresPermissions("supplier:cart_item:list")
+@RequiresPermissions("supplier:cartItem:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptCartItem xfptCartItem) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptCartItemController extends BaseController {
      * 导出购物车明细列表
      */
     @Operation(summary = "导出购物车明细列表")
-    @RequiresPermissions("supplier:cart_item:export")
+    @RequiresPermissions("supplier:cartItem:export")
     @Log(title = "购物车明细" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptCartItem xfptCartItem) {
@@ -69,7 +69,7 @@ public class XfptCartItemController extends BaseController {
      * 获取购物车明细详细信息
      */
     @Operation(summary = "获取购物车明细详细信息")
-    @RequiresPermissions("supplier:cart_item:query")
+    @RequiresPermissions("supplier:cartItem:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptCartItemService.getById(id));
@@ -79,7 +79,7 @@ public class XfptCartItemController extends BaseController {
      * 新增购物车明细
      */
     @Operation(summary = "新增购物车明细")
-    @RequiresPermissions("supplier:cart_item:add")
+    @RequiresPermissions("supplier:cartItem:add")
     @Log(title = "购物车明细" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptCartItem xfptCartItem) {
@@ -90,7 +90,7 @@ public class XfptCartItemController extends BaseController {
      * 修改购物车明细
      */
     @Operation(summary = "修改购物车明细")
-    @RequiresPermissions("supplier:cart_item:edit")
+    @RequiresPermissions("supplier:cartItem:edit")
     @Log(title = "购物车明细" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptCartItem xfptCartItem) {
@@ -102,7 +102,7 @@ public class XfptCartItemController extends BaseController {
      * 删除购物车明细
      */
     @Operation(summary = "删除购物车明细")
-    @RequiresPermissions("supplier:cart_item:remove")
+    @RequiresPermissions("supplier:cartItem:remove")
     @Log(title = "购物车明细" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

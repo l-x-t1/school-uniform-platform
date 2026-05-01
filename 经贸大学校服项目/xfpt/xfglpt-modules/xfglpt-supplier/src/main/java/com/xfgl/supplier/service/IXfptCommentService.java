@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.supplier.domain.XfptComment;
 
 /**
- * 订单评价Service接口
+ * 商品评价Service接口
  *
  * @author yinet
  * @date 2026-05-01
@@ -13,10 +13,10 @@ import com.xfgl.supplier.domain.XfptComment;
 public interface IXfptCommentService extends IService<XfptComment> {
 
     /**
-     * 查询订单评价列表
+     * 查询商品评价列表
      *
-     * @param xfptComment 订单评价
-     * @return 订单评价集合
+     * @param xfptComment 商品评价
+     * @return 商品评价集合
      */
     public List<XfptComment> selectXfptCommentList(XfptComment xfptComment);
 

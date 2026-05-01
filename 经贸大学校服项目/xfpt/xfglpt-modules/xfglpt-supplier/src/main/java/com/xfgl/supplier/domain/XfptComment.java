@@ -13,7 +13,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 订单评价对象 xfpt_comment
+ * 商品评价对象 xfpt_comment
  *
  * @author yinet
  * @date 2026-05-01
@@ -25,7 +25,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_comment")
-@Schema(description = "订单评价")
+@Schema(description = "商品评价")
 public class XfptComment extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -78,7 +78,7 @@ private static final long serialVersionUID = 1L;
     /** 评分 */
             @Excel(name = "评分")
     @Schema(description = "评分")
-    private String score;
+    private Integer score;
 
     /** 评价内容 */
             @Excel(name = "评价内容")
@@ -90,9 +90,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "评价图片JSON文本")
     private String imagesJson;
 
-    /** 商家回复内容 */
-            @Excel(name = "商家回复内容")
-    @Schema(description = "商家回复内容")
+    /** 供应商回复内容 */
+            @Excel(name = "供应商回复内容")
+    @Schema(description = "供应商回复内容")
     private String replyContent;
 
     /** 回复时间 */
@@ -101,19 +101,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "回复时间")
     private Date replyTime;
 
-    /** 状态（0正常 1隐藏） */
-            @Excel(name = "状态", readConverterExp = "0=正常,1=隐藏")
-    @Schema(description = "状态（0正常 1隐藏）")
+    /** 状态，0正常 1隐藏 */
+            @Excel(name = "状态，0正常 1隐藏")
+    @Schema(description = "状态，0正常 1隐藏")
     private String status;
-
-    /** 部门ID */
-            @Excel(name = "部门ID")
-    @Schema(description = "部门ID")
-    private Long deptId;
-
-    /** 祖级列表 */
-            @Excel(name = "祖级列表")
-    @Schema(description = "祖级列表")
-    private String ancestors;
 
         }

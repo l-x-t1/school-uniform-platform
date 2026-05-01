@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="结算单管理")
 @RestController
-@RequestMapping("/settlement_order")
+@RequestMapping("/settlementOrder")
 public class XfptSettlementOrderController extends BaseController {
     @Autowired
     private IXfptSettlementOrderService xfptSettlementOrderService;
@@ -44,7 +44,7 @@ public class XfptSettlementOrderController extends BaseController {
  */
 
 @Operation(summary = "查询结算单列表")
-@RequiresPermissions("supplier:settlement_order:list")
+@RequiresPermissions("supplier:settlementOrder:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptSettlementOrder xfptSettlementOrder) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptSettlementOrderController extends BaseController {
      * 导出结算单列表
      */
     @Operation(summary = "导出结算单列表")
-    @RequiresPermissions("supplier:settlement_order:export")
+    @RequiresPermissions("supplier:settlementOrder:export")
     @Log(title = "结算单" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptSettlementOrder xfptSettlementOrder) {
@@ -69,7 +69,7 @@ public class XfptSettlementOrderController extends BaseController {
      * 获取结算单详细信息
      */
     @Operation(summary = "获取结算单详细信息")
-    @RequiresPermissions("supplier:settlement_order:query")
+    @RequiresPermissions("supplier:settlementOrder:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptSettlementOrderService.getById(id));
@@ -79,7 +79,7 @@ public class XfptSettlementOrderController extends BaseController {
      * 新增结算单
      */
     @Operation(summary = "新增结算单")
-    @RequiresPermissions("supplier:settlement_order:add")
+    @RequiresPermissions("supplier:settlementOrder:add")
     @Log(title = "结算单" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSettlementOrder xfptSettlementOrder) {
@@ -90,7 +90,7 @@ public class XfptSettlementOrderController extends BaseController {
      * 修改结算单
      */
     @Operation(summary = "修改结算单")
-    @RequiresPermissions("supplier:settlement_order:edit")
+    @RequiresPermissions("supplier:settlementOrder:edit")
     @Log(title = "结算单" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptSettlementOrder xfptSettlementOrder) {
@@ -102,7 +102,7 @@ public class XfptSettlementOrderController extends BaseController {
      * 删除结算单
      */
     @Operation(summary = "删除结算单")
-    @RequiresPermissions("supplier:settlement_order:remove")
+    @RequiresPermissions("supplier:settlementOrder:remove")
     @Log(title = "结算单" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

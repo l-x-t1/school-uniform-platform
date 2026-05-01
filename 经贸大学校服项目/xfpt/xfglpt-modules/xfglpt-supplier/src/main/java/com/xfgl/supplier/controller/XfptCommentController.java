@@ -27,12 +27,12 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 订单评价Controller
+ * 商品评价Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="订单评价管理")
+@Tag(name="商品评价管理")
 @RestController
 @RequestMapping("/comment")
 public class XfptCommentController extends BaseController {
@@ -40,10 +40,10 @@ public class XfptCommentController extends BaseController {
     private IXfptCommentService xfptCommentService;
 
 /**
- * 查询订单评价列表
+ * 查询商品评价列表
  */
 
-@Operation(summary = "查询订单评价列表")
+@Operation(summary = "查询商品评价列表")
 @RequiresPermissions("supplier:comment:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptComment xfptComment) {
@@ -53,22 +53,22 @@ public class XfptCommentController extends BaseController {
     }
 
     /**
-     * 导出订单评价列表
+     * 导出商品评价列表
      */
-    @Operation(summary = "导出订单评价列表")
+    @Operation(summary = "导出商品评价列表")
     @RequiresPermissions("supplier:comment:export")
-    @Log(title = "订单评价" , businessType = BusinessType.EXPORT)
+    @Log(title = "商品评价" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptComment xfptComment) {
         List<XfptComment> list = xfptCommentService.selectXfptCommentList(xfptComment);
         ExcelUtil<XfptComment> util = new ExcelUtil<XfptComment>(XfptComment. class);
-        util.exportExcel(response, list, "订单评价数据");
+        util.exportExcel(response, list, "商品评价数据");
     }
 
     /**
-     * 获取订单评价详细信息
+     * 获取商品评价详细信息
      */
-    @Operation(summary = "获取订单评价详细信息")
+    @Operation(summary = "获取商品评价详细信息")
     @RequiresPermissions("supplier:comment:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
@@ -76,22 +76,22 @@ public class XfptCommentController extends BaseController {
     }
 
     /**
-     * 新增订单评价
+     * 新增商品评价
      */
-    @Operation(summary = "新增订单评价")
+    @Operation(summary = "新增商品评价")
     @RequiresPermissions("supplier:comment:add")
-    @Log(title = "订单评价" , businessType = BusinessType.INSERT)
+    @Log(title = "商品评价" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptComment xfptComment) {
             return toAjax(xfptCommentService.save(xfptComment));
     }
 
     /**
-     * 修改订单评价
+     * 修改商品评价
      */
-    @Operation(summary = "修改订单评价")
+    @Operation(summary = "修改商品评价")
     @RequiresPermissions("supplier:comment:edit")
-    @Log(title = "订单评价" , businessType = BusinessType.UPDATE)
+    @Log(title = "商品评价" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptComment xfptComment) {
             return toAjax(xfptCommentService.updateById(xfptComment));
@@ -99,11 +99,11 @@ public class XfptCommentController extends BaseController {
 
 
     /**
-     * 删除订单评价
+     * 删除商品评价
      */
-    @Operation(summary = "删除订单评价")
+    @Operation(summary = "删除商品评价")
     @RequiresPermissions("supplier:comment:remove")
-    @Log(title = "订单评价" , businessType = BusinessType.DELETE)
+    @Log(title = "商品评价" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptCommentService.removeByIds(Arrays.asList(ids)));

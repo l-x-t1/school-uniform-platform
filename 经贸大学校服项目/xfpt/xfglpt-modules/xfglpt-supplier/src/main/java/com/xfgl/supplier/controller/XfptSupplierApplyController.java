@@ -27,24 +27,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 企业报名及资格审查Controller
+ * 供应商报名Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="企业报名及资格审查管理")
+@Tag(name="供应商报名管理")
 @RestController
-@RequestMapping("/supplier_apply")
+@RequestMapping("/supplierApply")
 public class XfptSupplierApplyController extends BaseController {
     @Autowired
     private IXfptSupplierApplyService xfptSupplierApplyService;
 
 /**
- * 查询企业报名及资格审查列表
+ * 查询供应商报名列表
  */
 
-@Operation(summary = "查询企业报名及资格审查列表")
-@RequiresPermissions("supplier:supplier_apply:list")
+@Operation(summary = "查询供应商报名列表")
+@RequiresPermissions("supplier:supplierApply:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptSupplierApply xfptSupplierApply) {
         startPage();
@@ -53,45 +53,45 @@ public class XfptSupplierApplyController extends BaseController {
     }
 
     /**
-     * 导出企业报名及资格审查列表
+     * 导出供应商报名列表
      */
-    @Operation(summary = "导出企业报名及资格审查列表")
-    @RequiresPermissions("supplier:supplier_apply:export")
-    @Log(title = "企业报名及资格审查" , businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出供应商报名列表")
+    @RequiresPermissions("supplier:supplierApply:export")
+    @Log(title = "供应商报名" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptSupplierApply xfptSupplierApply) {
         List<XfptSupplierApply> list = xfptSupplierApplyService.selectXfptSupplierApplyList(xfptSupplierApply);
         ExcelUtil<XfptSupplierApply> util = new ExcelUtil<XfptSupplierApply>(XfptSupplierApply. class);
-        util.exportExcel(response, list, "企业报名及资格审查数据");
+        util.exportExcel(response, list, "供应商报名数据");
     }
 
     /**
-     * 获取企业报名及资格审查详细信息
+     * 获取供应商报名详细信息
      */
-    @Operation(summary = "获取企业报名及资格审查详细信息")
-    @RequiresPermissions("supplier:supplier_apply:query")
+    @Operation(summary = "获取供应商报名详细信息")
+    @RequiresPermissions("supplier:supplierApply:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptSupplierApplyService.getById(id));
     }
 
     /**
-     * 新增企业报名及资格审查
+     * 新增供应商报名
      */
-    @Operation(summary = "新增企业报名及资格审查")
-    @RequiresPermissions("supplier:supplier_apply:add")
-    @Log(title = "企业报名及资格审查" , businessType = BusinessType.INSERT)
+    @Operation(summary = "新增供应商报名")
+    @RequiresPermissions("supplier:supplierApply:add")
+    @Log(title = "供应商报名" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSupplierApply xfptSupplierApply) {
             return toAjax(xfptSupplierApplyService.save(xfptSupplierApply));
     }
 
     /**
-     * 修改企业报名及资格审查
+     * 修改供应商报名
      */
-    @Operation(summary = "修改企业报名及资格审查")
-    @RequiresPermissions("supplier:supplier_apply:edit")
-    @Log(title = "企业报名及资格审查" , businessType = BusinessType.UPDATE)
+    @Operation(summary = "修改供应商报名")
+    @RequiresPermissions("supplier:supplierApply:edit")
+    @Log(title = "供应商报名" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptSupplierApply xfptSupplierApply) {
             return toAjax(xfptSupplierApplyService.updateById(xfptSupplierApply));
@@ -99,11 +99,11 @@ public class XfptSupplierApplyController extends BaseController {
 
 
     /**
-     * 删除企业报名及资格审查
+     * 删除供应商报名
      */
-    @Operation(summary = "删除企业报名及资格审查")
-    @RequiresPermissions("supplier:supplier_apply:remove")
-    @Log(title = "企业报名及资格审查" , businessType = BusinessType.DELETE)
+    @Operation(summary = "删除供应商报名")
+    @RequiresPermissions("supplier:supplierApply:remove")
+    @Log(title = "供应商报名" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptSupplierApplyService.removeByIds(Arrays.asList(ids)));

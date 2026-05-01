@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="财务流水管理")
 @RestController
-@RequestMapping("/finance_flow")
+@RequestMapping("/financeFlow")
 public class XfptFinanceFlowController extends BaseController {
     @Autowired
     private IXfptFinanceFlowService xfptFinanceFlowService;
@@ -44,7 +44,7 @@ public class XfptFinanceFlowController extends BaseController {
  */
 
 @Operation(summary = "查询财务流水列表")
-@RequiresPermissions("supplier:finance_flow:list")
+@RequiresPermissions("supplier:financeFlow:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptFinanceFlow xfptFinanceFlow) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptFinanceFlowController extends BaseController {
      * 导出财务流水列表
      */
     @Operation(summary = "导出财务流水列表")
-    @RequiresPermissions("supplier:finance_flow:export")
+    @RequiresPermissions("supplier:financeFlow:export")
     @Log(title = "财务流水" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptFinanceFlow xfptFinanceFlow) {
@@ -69,7 +69,7 @@ public class XfptFinanceFlowController extends BaseController {
      * 获取财务流水详细信息
      */
     @Operation(summary = "获取财务流水详细信息")
-    @RequiresPermissions("supplier:finance_flow:query")
+    @RequiresPermissions("supplier:financeFlow:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptFinanceFlowService.getById(id));
@@ -79,7 +79,7 @@ public class XfptFinanceFlowController extends BaseController {
      * 新增财务流水
      */
     @Operation(summary = "新增财务流水")
-    @RequiresPermissions("supplier:finance_flow:add")
+    @RequiresPermissions("supplier:financeFlow:add")
     @Log(title = "财务流水" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptFinanceFlow xfptFinanceFlow) {
@@ -90,7 +90,7 @@ public class XfptFinanceFlowController extends BaseController {
      * 修改财务流水
      */
     @Operation(summary = "修改财务流水")
-    @RequiresPermissions("supplier:finance_flow:edit")
+    @RequiresPermissions("supplier:financeFlow:edit")
     @Log(title = "财务流水" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptFinanceFlow xfptFinanceFlow) {
@@ -102,7 +102,7 @@ public class XfptFinanceFlowController extends BaseController {
      * 删除财务流水
      */
     @Operation(summary = "删除财务流水")
-    @RequiresPermissions("supplier:finance_flow:remove")
+    @RequiresPermissions("supplier:financeFlow:remove")
     @Log(title = "财务流水" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
