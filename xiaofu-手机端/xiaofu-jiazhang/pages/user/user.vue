@@ -143,11 +143,63 @@ export default {
   created() {
     
   },
-  onShow() { 
-    this.getFeedbackStats(); 
-	this.getStudentList();
+  onShow() {
+    this.ensureLogin(() => {
+      this.getFeedbackStats();
+      this.getStudentList();
+    });
   },
   methods: {
+    ensureLogin(callback) {
+      if (uni.getStorageSync("token") && uni.getStorageSync("simId")) {
+        callback && callback();
+        return;
+      }
+      if (this.isLocalDev()) {
+        this.devLogin(callback);
+        return;
+      }
+      uni.reLaunch({
+        url: "/pages/login/login",
+      });
+    },
+    isLocalDev() {
+      return typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+    },
+    devLogin(callback) {
+      uni.showLoading({
+        title: "本地登录中...",
+        mask: true,
+      });
+      uni.request({
+        url: `${this.baseUrl}/school/simOpen/devLogin`,
+        method: "GET",
+        success: ({ data }) => {
+          uni.hideLoading();
+          if (data.code === 200) {
+            uni.setStorageSync("token", data.data.access_token);
+            uni.setStorageSync("simId", data.data.user.id);
+            uni.setStorageSync("isImprove", data.data.is_improve);
+            uni.setStorageSync("phone", data.data.user.parm1);
+            uni.setStorageSync("isLoggedIn", true);
+            uni.setStorageSync("userInfo", data.data.user);
+            callback && callback();
+          } else {
+            uni.showToast({
+              title: data.msg || "本地登录失败",
+              icon: "none",
+            });
+          }
+        },
+        fail: () => {
+          uni.hideLoading();
+          uni.showToast({
+            title: "本地登录失败",
+            icon: "none",
+          });
+        },
+      });
+    },
     //获取学生列表
     getStudentList() {
       uni.request({
@@ -160,7 +212,7 @@ export default {
           simId: uni.getStorageSync("simId"),
         },
         success: ({ data }) => {
-          this.studentList = data.rows.map((item) => ({
+          this.studentList = (data.rows || []).map((item) => ({
             name: item.name,
             sex: item.sex,
             className:item.grade+'级'+item.classId+'班',

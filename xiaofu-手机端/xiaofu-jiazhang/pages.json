@@ -1,10 +1,10 @@
 {
   "pages": [
     {
-      "path": "pages/stats/stats",
+      "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "校服采购流程",
-        "enablePullDownRefresh": false
+        "navigationBarTitleText": "首页",
+        "enablePullDownRefresh": true
       }
     },
     {
@@ -218,10 +218,10 @@
       }
     },
     {
-      "path": "pages/index/index",
+      "path": "pages/stats/stats",
       "style": {
-        "navigationBarTitleText": "首页",
-        "enablePullDownRefresh": true
+        "navigationBarTitleText": "校服采购流程",
+        "enablePullDownRefresh": false
       }
     },
     {
@@ -471,7 +471,31 @@
     "selectedColor": "#30A3FF",
     "backgroundColor": "#FFFFFF",
     "borderStyle": "black",
-    "list": [ 
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "static/sy.png",
+        "selectedIconPath": "static/sy1.png"
+      },
+      {
+        "pagePath": "pages/notice/notice-list",
+        "text": "公告",
+        "iconPath": "static/dp.png",
+        "selectedIconPath": "static/dp1.png"
+      },
+      {
+        "pagePath": "pages/survey/survey-list",
+        "text": "问卷",
+        "iconPath": "static/dd.png",
+        "selectedIconPath": "static/dd1.png"
+      },
+      {
+        "pagePath": "pages/user/user",
+        "text": "我的",
+        "iconPath": "static/wd.png",
+        "selectedIconPath": "static/wd1.png"
+      }
     ]
   }
 }
