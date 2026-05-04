@@ -14,7 +14,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 售后单对象 xfpt_after_sale
+ * 售后申请对象 xfpt_after_sale
  *
  * @author yinet
  * @date 2026-05-01
@@ -26,7 +26,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_after_sale")
-@Schema(description = "售后单")
+@Schema(description = "售后申请")
 public class XfptAfterSale extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -56,9 +56,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "订单号快照")
     private String orderNo;
 
-    /** 订单类型，1统购 2零售 */
-            @Excel(name = "订单类型，1统购 2零售")
-    @Schema(description = "订单类型，1统购 2零售")
+    /** 订单类型（1统购 2零售） */
+            @Excel(name = "订单类型", readConverterExp = "1=统购,2=零售")
+    @Schema(description = "订单类型（1统购 2零售）")
     private String orderType;
 
     /** 学校ID */
@@ -81,25 +81,15 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "申请人姓名")
     private String userName;
 
-    /** 学生姓名快照 */
-            @Excel(name = "学生姓名快照")
-    @Schema(description = "学生姓名快照")
+    /** 学生姓名 */
+            @Excel(name = "学生姓名")
+    @Schema(description = "学生姓名")
     private String studentName;
 
-    /** 申请类型，1退货 2换货 3退款 4尺码调换 */
-            @Excel(name = "申请类型，1退货 2换货 3退款 4尺码调换")
-    @Schema(description = "申请类型，1退货 2换货 3退款 4尺码调换")
+    /** 申请类型（1退货 2换货 3退款） */
+            @Excel(name = "申请类型", readConverterExp = "1=退货,2=换货,3=退款")
+    @Schema(description = "申请类型（1退货 2换货 3退款）")
     private String applyType;
-
-    /** 目标尺码ID */
-            @Excel(name = "目标尺码ID")
-    @Schema(description = "目标尺码ID")
-    private Long targetSizeId;
-
-    /** 目标尺码名称快照 */
-            @Excel(name = "目标尺码名称快照")
-    @Schema(description = "目标尺码名称快照")
-    private String targetSizeName;
 
     /** 申请原因 */
             @Excel(name = "申请原因")
@@ -111,19 +101,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "凭证图片JSON文本")
     private String imagesJson;
 
-    /** 申请数量 */
-            @Excel(name = "申请数量")
-    @Schema(description = "申请数量")
-    private Integer applyNum;
-
     /** 申请金额 */
             @Excel(name = "申请金额")
     @Schema(description = "申请金额")
     private BigDecimal applyAmount;
 
-    /** 状态，0待审核 1通过 2驳回 3处理中 4已完成 */
-            @Excel(name = "状态，0待审核 1通过 2驳回 3处理中 4已完成")
-    @Schema(description = "状态，0待审核 1通过 2驳回 3处理中 4已完成")
+    /** 状态（0待审核 1通过 2驳回 3处理中 4已完成） */
+            @Excel(name = "状态", readConverterExp = "0=待审核,1=通过,2=驳回,3=处理中,4=已完成")
+    @Schema(description = "状态（0待审核 1通过 2驳回 3处理中 4已完成）")
     private String status;
 
     /** 审核人 */
@@ -153,14 +138,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "完成时间")
     private Date finishTime;
 
-    /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
-    @Schema(description = "当前归属部门/学校")
+    /** 部门ID */
+            @Excel(name = "部门ID")
+    @Schema(description = "部门ID")
     private Long deptId;
 
-    /** 组织祖级链路 */
-            @Excel(name = "组织祖级链路")
-    @Schema(description = "组织祖级链路")
+    /** 祖级列表 */
+            @Excel(name = "祖级列表")
+    @Schema(description = "祖级列表")
     private String ancestors;
 
         }

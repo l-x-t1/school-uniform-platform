@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptAfterSale;
 import com.xfgl.supplier.service.IXfptAfterSaleService;
 
 /**
- * 售后单Service业务层处理
+ * 售后申请Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptAfterSaleServiceImpl extends ServiceImpl<XfptAfterSaleMapper, X
     private XfptAfterSaleMapper xfptAfterSaleMapper;
 
     /**
-     * 查询售后单列表
+     * 查询售后申请列表
      *
-     * @param xfptAfterSale 售后单
-     * @return 售后单
+     * @param xfptAfterSale 售后申请
+     * @return 售后申请
      */
     @Override
     public List<XfptAfterSale> selectXfptAfterSaleList(XfptAfterSale xfptAfterSale)

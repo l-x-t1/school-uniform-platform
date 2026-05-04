@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="订单明细管理")
 @RestController
-@RequestMapping("/orderItem")
+@RequestMapping("/order_item")
 public class XfptOrderItemController extends BaseController {
     @Autowired
     private IXfptOrderItemService xfptOrderItemService;
@@ -44,7 +44,7 @@ public class XfptOrderItemController extends BaseController {
  */
 
 @Operation(summary = "查询订单明细列表")
-@RequiresPermissions("supplier:orderItem:list")
+@RequiresPermissions("supplier:order_item:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptOrderItem xfptOrderItem) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptOrderItemController extends BaseController {
      * 导出订单明细列表
      */
     @Operation(summary = "导出订单明细列表")
-    @RequiresPermissions("supplier:orderItem:export")
+    @RequiresPermissions("supplier:order_item:export")
     @Log(title = "订单明细" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptOrderItem xfptOrderItem) {
@@ -69,7 +69,7 @@ public class XfptOrderItemController extends BaseController {
      * 获取订单明细详细信息
      */
     @Operation(summary = "获取订单明细详细信息")
-    @RequiresPermissions("supplier:orderItem:query")
+    @RequiresPermissions("supplier:order_item:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptOrderItemService.getById(id));
@@ -79,7 +79,7 @@ public class XfptOrderItemController extends BaseController {
      * 新增订单明细
      */
     @Operation(summary = "新增订单明细")
-    @RequiresPermissions("supplier:orderItem:add")
+    @RequiresPermissions("supplier:order_item:add")
     @Log(title = "订单明细" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptOrderItem xfptOrderItem) {
@@ -90,7 +90,7 @@ public class XfptOrderItemController extends BaseController {
      * 修改订单明细
      */
     @Operation(summary = "修改订单明细")
-    @RequiresPermissions("supplier:orderItem:edit")
+    @RequiresPermissions("supplier:order_item:edit")
     @Log(title = "订单明细" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptOrderItem xfptOrderItem) {
@@ -102,7 +102,7 @@ public class XfptOrderItemController extends BaseController {
      * 删除订单明细
      */
     @Operation(summary = "删除订单明细")
-    @RequiresPermissions("supplier:orderItem:remove")
+    @RequiresPermissions("supplier:order_item:remove")
     @Log(title = "订单明细" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

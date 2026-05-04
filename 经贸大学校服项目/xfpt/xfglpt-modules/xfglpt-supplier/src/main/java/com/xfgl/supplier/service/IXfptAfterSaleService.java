@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.supplier.domain.XfptAfterSale;
 
 /**
- * 售后单Service接口
+ * 售后申请Service接口
  *
  * @author yinet
  * @date 2026-05-01
@@ -13,10 +13,10 @@ import com.xfgl.supplier.domain.XfptAfterSale;
 public interface IXfptAfterSaleService extends IService<XfptAfterSale> {
 
     /**
-     * 查询售后单列表
+     * 查询售后申请列表
      *
-     * @param xfptAfterSale 售后单
-     * @return 售后单集合
+     * @param xfptAfterSale 售后申请
+     * @return 售后申请集合
      */
     public List<XfptAfterSale> selectXfptAfterSaleList(XfptAfterSale xfptAfterSale);
 

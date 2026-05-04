@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.supplier.domain.XfptGroupNoticeItem;
 
 /**
- * 统购公告商品Service接口
+ * 统购公告商品明细Service接口
  *
  * @author yinet
  * @date 2026-05-01
@@ -13,10 +13,10 @@ import com.xfgl.supplier.domain.XfptGroupNoticeItem;
 public interface IXfptGroupNoticeItemService extends IService<XfptGroupNoticeItem> {
 
     /**
-     * 查询统购公告商品列表
+     * 查询统购公告商品明细列表
      *
-     * @param xfptGroupNoticeItem 统购公告商品
-     * @return 统购公告商品集合
+     * @param xfptGroupNoticeItem 统购公告商品明细
+     * @return 统购公告商品明细集合
      */
     public List<XfptGroupNoticeItem> selectXfptGroupNoticeItemList(XfptGroupNoticeItem xfptGroupNoticeItem);
 

@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="学生尺码扩展管理")
 @RestController
-@RequestMapping("/studentSizeExt")
+@RequestMapping("/student_size_ext")
 public class XfptStudentSizeExtController extends BaseController {
     @Autowired
     private IXfptStudentSizeExtService xfptStudentSizeExtService;
@@ -44,7 +44,7 @@ public class XfptStudentSizeExtController extends BaseController {
  */
 
 @Operation(summary = "查询学生尺码扩展列表")
-@RequiresPermissions("supplier:studentSizeExt:list")
+@RequiresPermissions("supplier:student_size_ext:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptStudentSizeExt xfptStudentSizeExt) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptStudentSizeExtController extends BaseController {
      * 导出学生尺码扩展列表
      */
     @Operation(summary = "导出学生尺码扩展列表")
-    @RequiresPermissions("supplier:studentSizeExt:export")
+    @RequiresPermissions("supplier:student_size_ext:export")
     @Log(title = "学生尺码扩展" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptStudentSizeExt xfptStudentSizeExt) {
@@ -69,7 +69,7 @@ public class XfptStudentSizeExtController extends BaseController {
      * 获取学生尺码扩展详细信息
      */
     @Operation(summary = "获取学生尺码扩展详细信息")
-    @RequiresPermissions("supplier:studentSizeExt:query")
+    @RequiresPermissions("supplier:student_size_ext:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptStudentSizeExtService.getById(id));
@@ -79,7 +79,7 @@ public class XfptStudentSizeExtController extends BaseController {
      * 新增学生尺码扩展
      */
     @Operation(summary = "新增学生尺码扩展")
-    @RequiresPermissions("supplier:studentSizeExt:add")
+    @RequiresPermissions("supplier:student_size_ext:add")
     @Log(title = "学生尺码扩展" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptStudentSizeExt xfptStudentSizeExt) {
@@ -90,7 +90,7 @@ public class XfptStudentSizeExtController extends BaseController {
      * 修改学生尺码扩展
      */
     @Operation(summary = "修改学生尺码扩展")
-    @RequiresPermissions("supplier:studentSizeExt:edit")
+    @RequiresPermissions("supplier:student_size_ext:edit")
     @Log(title = "学生尺码扩展" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptStudentSizeExt xfptStudentSizeExt) {
@@ -102,7 +102,7 @@ public class XfptStudentSizeExtController extends BaseController {
      * 删除学生尺码扩展
      */
     @Operation(summary = "删除学生尺码扩展")
-    @RequiresPermissions("supplier:studentSizeExt:remove")
+    @RequiresPermissions("supplier:student_size_ext:remove")
     @Log(title = "学生尺码扩展" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

@@ -20,16 +20,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="replyContent"    column="reply_content"    />
         <result property="replyTime"    column="reply_time"    />
         <result property="status"    column="status"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptCommentVo">
-        select id, order_id, order_item_id, order_no, goods_id, goods_name, user_id, user_name, supplier_id, score, content, images_json, reply_content, reply_time, status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_comment
+        select id, order_id, order_item_id, order_no, goods_id, goods_name, user_id, user_name, supplier_id, score, content, images_json, reply_content, reply_time, status, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_comment
     </sql>
 
     <select id="selectXfptCommentList" parameterType="XfptComment" resultMap="XfptCommentResult">
@@ -43,12 +45,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null "> and user_id = #{userId}</if>
             <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
             <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="score != null "> and score = #{score}</if>
+            <if test="score != null  and score != ''"> and score = #{score}</if>
             <if test="content != null  and content != ''"> and content = #{content}</if>
             <if test="imagesJson != null  and imagesJson != ''"> and images_json = #{imagesJson}</if>
             <if test="replyContent != null  and replyContent != ''"> and reply_content = #{replyContent}</if>
             <if test="replyTime != null "> and reply_time = #{replyTime}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="ancestors != null  and ancestors != ''"> and ancestors = #{ancestors}</if>
 
     </select>
 
@@ -68,18 +72,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null">user_id,</if>
             <if test="userName != null and userName != ''">user_name,</if>
             <if test="supplierId != null">supplier_id,</if>
-            <if test="score != null">score,</if>
+            <if test="score != null and score != ''">score,</if>
             <if test="content != null">content,</if>
             <if test="imagesJson != null">images_json,</if>
             <if test="replyContent != null">reply_content,</if>
             <if test="replyTime != null">reply_time,</if>
             <if test="status != null and status != ''">status,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="orderId != null">#{orderId},</if>
@@ -90,18 +96,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null">#{userId},</if>
             <if test="userName != null and userName != ''">#{userName},</if>
             <if test="supplierId != null">#{supplierId},</if>
-            <if test="score != null">#{score},</if>
+            <if test="score != null and score != ''">#{score},</if>
             <if test="content != null">#{content},</if>
             <if test="imagesJson != null">#{imagesJson},</if>
             <if test="replyContent != null">#{replyContent},</if>
             <if test="replyTime != null">#{replyTime},</if>
             <if test="status != null and status != ''">#{status},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -116,18 +124,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null">user_id = #{userId},</if>
             <if test="userName != null and userName != ''">user_name = #{userName},</if>
             <if test="supplierId != null">supplier_id = #{supplierId},</if>
-            <if test="score != null">score = #{score},</if>
+            <if test="score != null and score != ''">score = #{score},</if>
             <if test="content != null">content = #{content},</if>
             <if test="imagesJson != null">images_json = #{imagesJson},</if>
             <if test="replyContent != null">reply_content = #{replyContent},</if>
             <if test="replyTime != null">reply_time = #{replyTime},</if>
             <if test="status != null and status != ''">status = #{status},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

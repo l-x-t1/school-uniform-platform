@@ -15,17 +15,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="detailAddress"    column="detail_address"    />
         <result property="addressType"    column="address_type"    />
         <result property="isDefault"    column="is_default"    />
-        <result property="status"    column="status"    />
+        <result property="checkedFlag"    column="checked_flag"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptUserAddressVo">
-        select id, user_id, receiver_name, receiver_phone, province_name, city_name, district_name, detail_address, address_type, is_default, status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_user_address
+        select id, user_id, receiver_name, receiver_phone, province_name, city_name, district_name, detail_address, address_type, is_default, checked_flag, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_user_address
     </sql>
 
     <select id="selectXfptUserAddressList" parameterType="XfptUserAddress" resultMap="XfptUserAddressResult">
@@ -40,7 +40,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detailAddress != null  and detailAddress != ''"> and detail_address = #{detailAddress}</if>
             <if test="addressType != null  and addressType != ''"> and address_type = #{addressType}</if>
             <if test="isDefault != null  and isDefault != ''"> and is_default = #{isDefault}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="checkedFlag != null  and checkedFlag != ''"> and checked_flag = #{checkedFlag}</if>
 
     </select>
 
@@ -61,13 +61,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detailAddress != null and detailAddress != ''">detail_address,</if>
             <if test="addressType != null and addressType != ''">address_type,</if>
             <if test="isDefault != null and isDefault != ''">is_default,</if>
-            <if test="status != null">status,</if>
+            <if test="checkedFlag != null">checked_flag,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="userId != null">#{userId},</if>
@@ -79,13 +79,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detailAddress != null and detailAddress != ''">#{detailAddress},</if>
             <if test="addressType != null and addressType != ''">#{addressType},</if>
             <if test="isDefault != null and isDefault != ''">#{isDefault},</if>
-            <if test="status != null">#{status},</if>
+            <if test="checkedFlag != null">#{checkedFlag},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -101,13 +101,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="detailAddress != null and detailAddress != ''">detail_address = #{detailAddress},</if>
             <if test="addressType != null and addressType != ''">address_type = #{addressType},</if>
             <if test="isDefault != null and isDefault != ''">is_default = #{isDefault},</if>
-            <if test="status != null">status = #{status},</if>
+            <if test="checkedFlag != null">checked_flag = #{checkedFlag},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

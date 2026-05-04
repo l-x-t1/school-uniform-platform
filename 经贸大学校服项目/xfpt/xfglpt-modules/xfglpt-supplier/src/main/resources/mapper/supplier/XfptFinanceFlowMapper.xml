@@ -20,16 +20,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="tradeTime"    column="trade_time"    />
         <result property="deptId"    column="dept_id"    />
         <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptFinanceFlowVo">
-        select id, flow_no, business_type, order_id, after_sale_id, school_id, supplier_id, user_id, amount, pay_channel, trade_no, status, trade_time, dept_id, ancestors, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_finance_flow
+        select id, flow_no, business_type, order_id, after_sale_id, school_id, supplier_id, user_id, amount, pay_channel, trade_no, status, trade_time, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_finance_flow
     </sql>
 
     <select id="selectXfptFinanceFlowList" parameterType="XfptFinanceFlow" resultMap="XfptFinanceFlowResult">
@@ -74,12 +74,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="tradeTime != null">trade_time,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="flowNo != null and flowNo != ''">#{flowNo},</if>
@@ -96,12 +96,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="tradeTime != null">#{tradeTime},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -122,12 +122,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="tradeTime != null">trade_time = #{tradeTime},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

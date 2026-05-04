@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="用户收货地址管理")
 @RestController
-@RequestMapping("/userAddress")
+@RequestMapping("/user_address")
 public class XfptUserAddressController extends BaseController {
     @Autowired
     private IXfptUserAddressService xfptUserAddressService;
@@ -44,7 +44,7 @@ public class XfptUserAddressController extends BaseController {
  */
 
 @Operation(summary = "查询用户收货地址列表")
-@RequiresPermissions("supplier:userAddress:list")
+@RequiresPermissions("supplier:user_address:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptUserAddress xfptUserAddress) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptUserAddressController extends BaseController {
      * 导出用户收货地址列表
      */
     @Operation(summary = "导出用户收货地址列表")
-    @RequiresPermissions("supplier:userAddress:export")
+    @RequiresPermissions("supplier:user_address:export")
     @Log(title = "用户收货地址" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptUserAddress xfptUserAddress) {
@@ -69,7 +69,7 @@ public class XfptUserAddressController extends BaseController {
      * 获取用户收货地址详细信息
      */
     @Operation(summary = "获取用户收货地址详细信息")
-    @RequiresPermissions("supplier:userAddress:query")
+    @RequiresPermissions("supplier:user_address:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptUserAddressService.getById(id));
@@ -79,7 +79,7 @@ public class XfptUserAddressController extends BaseController {
      * 新增用户收货地址
      */
     @Operation(summary = "新增用户收货地址")
-    @RequiresPermissions("supplier:userAddress:add")
+    @RequiresPermissions("supplier:user_address:add")
     @Log(title = "用户收货地址" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptUserAddress xfptUserAddress) {
@@ -90,7 +90,7 @@ public class XfptUserAddressController extends BaseController {
      * 修改用户收货地址
      */
     @Operation(summary = "修改用户收货地址")
-    @RequiresPermissions("supplier:userAddress:edit")
+    @RequiresPermissions("supplier:user_address:edit")
     @Log(title = "用户收货地址" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptUserAddress xfptUserAddress) {
@@ -102,7 +102,7 @@ public class XfptUserAddressController extends BaseController {
      * 删除用户收货地址
      */
     @Operation(summary = "删除用户收货地址")
-    @RequiresPermissions("supplier:userAddress:remove")
+    @RequiresPermissions("supplier:user_address:remove")
     @Log(title = "用户收货地址" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

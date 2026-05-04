@@ -41,9 +41,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "流水号")
     private String flowNo;
 
-    /** 业务类型，1支付 2退款 3结算 4提现 */
-            @Excel(name = "业务类型，1支付 2退款 3结算 4提现")
-    @Schema(description = "业务类型，1支付 2退款 3结算 4提现")
+    /** 业务类型（1支付 2退款 3结算 4提现） */
+            @Excel(name = "业务类型", readConverterExp = "1=支付,2=退款,3=结算,4=提现")
+    @Schema(description = "业务类型（1支付 2退款 3结算 4提现）")
     private String businessType;
 
     /** 订单ID */
@@ -81,14 +81,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "支付渠道")
     private String payChannel;
 
-    /** 第三方交易号 */
-            @Excel(name = "第三方交易号")
-    @Schema(description = "第三方交易号")
+    /** 交易流水号 */
+            @Excel(name = "交易流水号")
+    @Schema(description = "交易流水号")
     private String tradeNo;
 
-    /** 状态，0待处理 1成功 2失败 3关闭 */
-            @Excel(name = "状态，0待处理 1成功 2失败 3关闭")
-    @Schema(description = "状态，0待处理 1成功 2失败 3关闭")
+    /** 状态（0待处理 1成功 2失败 3关闭） */
+            @Excel(name = "状态", readConverterExp = "0=待处理,1=成功,2=失败,3=关闭")
+    @Schema(description = "状态（0待处理 1成功 2失败 3关闭）")
     private String status;
 
     /** 交易完成时间 */
@@ -97,14 +97,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "交易完成时间")
     private Date tradeTime;
 
-    /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
-    @Schema(description = "当前归属部门/学校")
+    /** 部门ID */
+            @Excel(name = "部门ID")
+    @Schema(description = "部门ID")
     private Long deptId;
 
-    /** 组织祖级链路 */
-            @Excel(name = "组织祖级链路")
-    @Schema(description = "组织祖级链路")
+    /** 祖级列表 */
+            @Excel(name = "祖级列表")
+    @Schema(description = "祖级列表")
     private String ancestors;
 
         }

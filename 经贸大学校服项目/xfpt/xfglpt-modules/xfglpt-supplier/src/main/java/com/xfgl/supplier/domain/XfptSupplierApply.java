@@ -13,7 +13,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 供应商报名对象 xfpt_supplier_apply
+ * 企业报名及资格审查对象 xfpt_supplier_apply
  *
  * @author yinet
  * @date 2026-05-01
@@ -25,7 +25,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_supplier_apply")
-@Schema(description = "供应商报名")
+@Schema(description = "企业报名及资格审查")
 public class XfptSupplierApply extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -60,25 +60,20 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "报名单号")
     private String applyNo;
 
-    /** 报名状态，0待提交 1已提交 2已撤回 */
-            @Excel(name = "报名状态，0待提交 1已提交 2已撤回")
-    @Schema(description = "报名状态，0待提交 1已提交 2已撤回")
+    /** 报名状态（0待提交 1已提交 2已撤回） */
+            @Excel(name = "报名状态", readConverterExp = "0=待提交,1=已提交,2=已撤回")
+    @Schema(description = "报名状态（0待提交 1已提交 2已撤回）")
     private String applyStatus;
 
-    /** 资质审查状态，0待审查 1通过 2不通过 */
-            @Excel(name = "资质审查状态，0待审查 1通过 2不通过")
-    @Schema(description = "资质审查状态，0待审查 1通过 2不通过")
+    /** 资格审查状态（0待审查 1通过 2不通过） */
+            @Excel(name = "资格审查状态", readConverterExp = "0=待审查,1=通过,2=不通过")
+    @Schema(description = "资格审查状态（0待审查 1通过 2不通过）")
     private String qualificationStatus;
 
-    /** 比选阶段状态，0未进入 1已进入 2已完成 */
-            @Excel(name = "比选阶段状态，0未进入 1已进入 2已完成")
-    @Schema(description = "比选阶段状态，0未进入 1已进入 2已完成")
+    /** 比选阶段状态（0未参与 1已参与 2已中选 3未中选） */
+            @Excel(name = "比选阶段状态", readConverterExp = "0=未参与,1=已参与,2=已中选,3=未中选")
+    @Schema(description = "比选阶段状态（0未参与 1已参与 2已中选 3未中选）")
     private String bidStageStatus;
-
-    /** 比选结果状态，0未出结果 1已中选 2未中选 */
-            @Excel(name = "比选结果状态，0未出结果 1已中选 2未中选")
-    @Schema(description = "比选结果状态，0未出结果 1已中选 2未中选")
-    private String bidResultStatus;
 
     /** 报名时间 */
             @JsonFormat(pattern = "yyyy-MM-dd")
@@ -102,19 +97,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "报名附件JSON文本")
     private String applyFilesJson;
 
-    /** 比选资料JSON文本 */
-            @Excel(name = "比选资料JSON文本")
-    @Schema(description = "比选资料JSON文本")
+    /** 比选附件JSON文本 */
+            @Excel(name = "比选附件JSON文本")
+    @Schema(description = "比选附件JSON文本")
     private String compareFilesJson;
 
-    /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
-    @Schema(description = "当前归属部门/学校")
+    /** 部门ID */
+            @Excel(name = "部门ID")
+    @Schema(description = "部门ID")
     private Long deptId;
 
-    /** 组织祖级链路 */
-            @Excel(name = "组织祖级链路")
-    @Schema(description = "组织祖级链路")
+    /** 祖级列表 */
+            @Excel(name = "祖级列表")
+    @Schema(description = "祖级列表")
     private String ancestors;
 
         }

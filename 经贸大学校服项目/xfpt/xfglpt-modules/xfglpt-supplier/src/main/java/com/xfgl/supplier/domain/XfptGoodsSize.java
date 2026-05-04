@@ -34,9 +34,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "主键")
     private Long id;
 
-    /** 关联商品 */
-            @Excel(name = "关联商品")
-    @Schema(description = "关联商品")
+    /** 商品ID */
+            @Excel(name = "商品ID")
+    @Schema(description = "商品ID")
     private Long goodsId;
 
     /** 尺码编码 */
@@ -49,9 +49,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "尺码名称")
     private String sizeName;
 
-    /** 性别类型，0通用 1男 2女 */
-            @Excel(name = "性别类型，0通用 1男 2女")
-    @Schema(description = "性别类型，0通用 1男 2女")
+    /** 性别类型（0通用 1男 2女） */
+            @Excel(name = "性别类型", readConverterExp = "0=通用,1=男,2=女")
+    @Schema(description = "性别类型（0通用 1男 2女）")
     private String genderType;
 
     /** 量体规则JSON文本 */
@@ -72,11 +72,11 @@ private static final long serialVersionUID = 1L;
     /** 库存 */
             @Excel(name = "库存")
     @Schema(description = "库存")
-    private Integer stockNum;
+    private String stockNum;
 
-    /** 状态，0停用 1启用 */
-            @Excel(name = "状态，0停用 1启用")
-    @Schema(description = "状态，0停用 1启用")
+    /** 状态（0停用 1启用） */
+            @Excel(name = "状态", readConverterExp = "0=停用,1=启用")
+    @Schema(description = "状态（0停用 1启用）")
     private String status;
 
         }

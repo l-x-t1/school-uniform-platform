@@ -10,16 +10,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="operateType"    column="operate_type"    />
         <result property="operateBy"    column="operate_by"    />
         <result property="operateTime"    column="operate_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptGoodsPublishLogVo">
-        select id, goods_id, operate_type, operate_by, operate_time, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_goods_publish_log
+        select id, goods_id, operate_type, operate_by, operate_time, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_goods_publish_log
     </sql>
 
     <select id="selectXfptGoodsPublishLogList" parameterType="XfptGoodsPublishLog" resultMap="XfptGoodsPublishLogResult">
@@ -44,24 +44,24 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="operateType != null and operateType != ''">operate_type,</if>
             <if test="operateBy != null and operateBy != ''">operate_by,</if>
             <if test="operateTime != null">operate_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="goodsId != null">#{goodsId},</if>
             <if test="operateType != null and operateType != ''">#{operateType},</if>
             <if test="operateBy != null and operateBy != ''">#{operateBy},</if>
             <if test="operateTime != null">#{operateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -72,12 +72,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="operateType != null and operateType != ''">operate_type = #{operateType},</if>
             <if test="operateBy != null and operateBy != ''">operate_by = #{operateBy},</if>
             <if test="operateTime != null">operate_time = #{operateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

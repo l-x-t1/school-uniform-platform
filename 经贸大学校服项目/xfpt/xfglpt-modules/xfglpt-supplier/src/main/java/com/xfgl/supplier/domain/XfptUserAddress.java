@@ -68,19 +68,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "详细地址")
     private String detailAddress;
 
-    /** 地址类型，1家庭 2学校 */
-            @Excel(name = "地址类型，1家庭 2学校")
-    @Schema(description = "地址类型，1家庭 2学校")
+    /** 地址类型（1家庭 2学校） */
+            @Excel(name = "地址类型", readConverterExp = "1=家庭,2=学校")
+    @Schema(description = "地址类型（1家庭 2学校）")
     private String addressType;
 
-    /** 是否默认，0否 1是 */
-            @Excel(name = "是否默认，0否 1是")
-    @Schema(description = "是否默认，0否 1是")
+    /** 默认地址（0否 1是） */
+            @Excel(name = "默认地址", readConverterExp = "0=否,1=是")
+    @Schema(description = "默认地址（0否 1是）")
     private String isDefault;
 
-    /** 状态，0禁用 1启用 */
-            @Excel(name = "状态，0禁用 1启用")
-    @Schema(description = "状态，0禁用 1启用")
-    private String status;
+    /** 启用状态（0禁用 1启用） */
+            @Excel(name = "启用状态", readConverterExp = "0=禁用,1=启用")
+    @Schema(description = "启用状态（0禁用 1启用）")
+    private String checkedFlag;
 
         }

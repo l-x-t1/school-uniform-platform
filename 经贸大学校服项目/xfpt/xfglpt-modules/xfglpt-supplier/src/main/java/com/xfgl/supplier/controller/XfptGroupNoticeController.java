@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="统购公告管理")
 @RestController
-@RequestMapping("/groupNotice")
+@RequestMapping("/group_notice")
 public class XfptGroupNoticeController extends BaseController {
     @Autowired
     private IXfptGroupNoticeService xfptGroupNoticeService;
@@ -44,7 +44,7 @@ public class XfptGroupNoticeController extends BaseController {
  */
 
 @Operation(summary = "查询统购公告列表")
-@RequiresPermissions("supplier:groupNotice:list")
+@RequiresPermissions("supplier:group_notice:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptGroupNotice xfptGroupNotice) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptGroupNoticeController extends BaseController {
      * 导出统购公告列表
      */
     @Operation(summary = "导出统购公告列表")
-    @RequiresPermissions("supplier:groupNotice:export")
+    @RequiresPermissions("supplier:group_notice:export")
     @Log(title = "统购公告" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptGroupNotice xfptGroupNotice) {
@@ -69,7 +69,7 @@ public class XfptGroupNoticeController extends BaseController {
      * 获取统购公告详细信息
      */
     @Operation(summary = "获取统购公告详细信息")
-    @RequiresPermissions("supplier:groupNotice:query")
+    @RequiresPermissions("supplier:group_notice:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptGroupNoticeService.getById(id));
@@ -79,7 +79,7 @@ public class XfptGroupNoticeController extends BaseController {
      * 新增统购公告
      */
     @Operation(summary = "新增统购公告")
-    @RequiresPermissions("supplier:groupNotice:add")
+    @RequiresPermissions("supplier:group_notice:add")
     @Log(title = "统购公告" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptGroupNotice xfptGroupNotice) {
@@ -90,7 +90,7 @@ public class XfptGroupNoticeController extends BaseController {
      * 修改统购公告
      */
     @Operation(summary = "修改统购公告")
-    @RequiresPermissions("supplier:groupNotice:edit")
+    @RequiresPermissions("supplier:group_notice:edit")
     @Log(title = "统购公告" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptGroupNotice xfptGroupNotice) {
@@ -102,7 +102,7 @@ public class XfptGroupNoticeController extends BaseController {
      * 删除统购公告
      */
     @Operation(summary = "删除统购公告")
-    @RequiresPermissions("supplier:groupNotice:remove")
+    @RequiresPermissions("supplier:group_notice:remove")
     @Log(title = "统购公告" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

@@ -24,16 +24,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="resultPublishTime"    column="result_publish_time"    />
         <result property="deptId"    column="dept_id"    />
         <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptGroupNoticeVo">
-        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, ancestors, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_group_notice
+        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_group_notice
     </sql>
 
     <select id="selectXfptGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
@@ -46,7 +46,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeType != null  and noticeType != ''"> and notice_type = #{noticeType}</if>
             <if test="content != null  and content != ''"> and content = #{content}</if>
             <if test="gradeIds != null  and gradeIds != ''"> and grade_ids = #{gradeIds}</if>
-            <if test="gradeNames != null  and gradeNames != ''"> and grade_names like concat('%', #{gradeNames}, '%')</if>
+            <if test="gradeNames != null  and gradeNames != ''"> and grade_names = #{gradeNames}</if>
             <if test="teamMeetingId != null "> and team_meeting_id = #{teamMeetingId}</if>
             <if test="purchaseProcessId != null "> and purchase_process_id = #{purchaseProcessId}</if>
             <if test="startTime != null "> and start_time = #{startTime}</if>
@@ -86,12 +86,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="resultPublishTime != null">result_publish_time,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="schoolId != null">#{schoolId},</if>
@@ -112,12 +112,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="resultPublishTime != null">#{resultPublishTime},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -142,12 +142,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="resultPublishTime != null">result_publish_time = #{resultPublishTime},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

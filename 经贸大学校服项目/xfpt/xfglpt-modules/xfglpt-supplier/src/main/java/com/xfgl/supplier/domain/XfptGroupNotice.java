@@ -55,9 +55,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "公告编号")
     private String noticeCode;
 
-    /** 公告类型，1选购公告 2结果公告 */
-            @Excel(name = "公告类型，1选购公告 2结果公告")
-    @Schema(description = "公告类型，1选购公告 2结果公告")
+    /** 公告类型（1选购公告 2结果公告） */
+            @Excel(name = "公告类型", readConverterExp = "1=选购公告,2=结果公告")
+    @Schema(description = "公告类型（1选购公告 2结果公告）")
     private String noticeType;
 
     /** 公告正文 */
@@ -85,26 +85,26 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "采购流程ID")
     private Long purchaseProcessId;
 
-    /** 公告开始时间 */
+    /** 开始时间 */
             @JsonFormat(pattern = "yyyy-MM-dd")
-            @Excel(name = "公告开始时间", width = 30, dateFormat = "yyyy-MM-dd")
-    @Schema(description = "公告开始时间")
+            @Excel(name = "开始时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @Schema(description = "开始时间")
     private Date startTime;
 
-    /** 公告截止时间 */
+    /** 结束时间 */
             @JsonFormat(pattern = "yyyy-MM-dd")
-            @Excel(name = "公告截止时间", width = 30, dateFormat = "yyyy-MM-dd")
-    @Schema(description = "公告截止时间")
+            @Excel(name = "结束时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @Schema(description = "结束时间")
     private Date endTime;
 
-    /** 状态，0草稿 1已发布 2已结束 3已撤回 */
-            @Excel(name = "状态，0草稿 1已发布 2已结束 3已撤回")
-    @Schema(description = "状态，0草稿 1已发布 2已结束 3已撤回")
+    /** 状态（0草稿 1已发布 2已结束 3已撤回） */
+            @Excel(name = "状态", readConverterExp = "0=草稿,1=已发布,2=已结束,3=已撤回")
+    @Schema(description = "状态（0草稿 1已发布 2已结束 3已撤回）")
     private String status;
 
-    /** 报名状态，0未开放 1报名中 2报名结束 */
-            @Excel(name = "报名状态，0未开放 1报名中 2报名结束")
-    @Schema(description = "报名状态，0未开放 1报名中 2报名结束")
+    /** 报名状态（0未开放 1报名中 2报名结束） */
+            @Excel(name = "报名状态", readConverterExp = "0=未开放,1=报名中,2=报名结束")
+    @Schema(description = "报名状态（0未开放 1报名中 2报名结束）")
     private String applyStatus;
 
     /** 发布时间 */
@@ -119,14 +119,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "结果发布时间")
     private Date resultPublishTime;
 
-    /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
-    @Schema(description = "当前归属部门/学校")
+    /** 部门ID */
+            @Excel(name = "部门ID")
+    @Schema(description = "部门ID")
     private Long deptId;
 
-    /** 组织祖级链路 */
-            @Excel(name = "组织祖级链路")
-    @Schema(description = "组织祖级链路")
+    /** 祖级列表 */
+            @Excel(name = "祖级列表")
+    @Schema(description = "祖级列表")
     private String ancestors;
 
         }

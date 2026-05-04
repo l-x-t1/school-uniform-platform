@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="提现申请管理")
 @RestController
-@RequestMapping("/withdrawApply")
+@RequestMapping("/withdraw_apply")
 public class XfptWithdrawApplyController extends BaseController {
     @Autowired
     private IXfptWithdrawApplyService xfptWithdrawApplyService;
@@ -44,7 +44,7 @@ public class XfptWithdrawApplyController extends BaseController {
  */
 
 @Operation(summary = "查询提现申请列表")
-@RequiresPermissions("supplier:withdrawApply:list")
+@RequiresPermissions("supplier:withdraw_apply:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptWithdrawApply xfptWithdrawApply) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptWithdrawApplyController extends BaseController {
      * 导出提现申请列表
      */
     @Operation(summary = "导出提现申请列表")
-    @RequiresPermissions("supplier:withdrawApply:export")
+    @RequiresPermissions("supplier:withdraw_apply:export")
     @Log(title = "提现申请" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptWithdrawApply xfptWithdrawApply) {
@@ -69,7 +69,7 @@ public class XfptWithdrawApplyController extends BaseController {
      * 获取提现申请详细信息
      */
     @Operation(summary = "获取提现申请详细信息")
-    @RequiresPermissions("supplier:withdrawApply:query")
+    @RequiresPermissions("supplier:withdraw_apply:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptWithdrawApplyService.getById(id));
@@ -79,7 +79,7 @@ public class XfptWithdrawApplyController extends BaseController {
      * 新增提现申请
      */
     @Operation(summary = "新增提现申请")
-    @RequiresPermissions("supplier:withdrawApply:add")
+    @RequiresPermissions("supplier:withdraw_apply:add")
     @Log(title = "提现申请" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptWithdrawApply xfptWithdrawApply) {
@@ -90,7 +90,7 @@ public class XfptWithdrawApplyController extends BaseController {
      * 修改提现申请
      */
     @Operation(summary = "修改提现申请")
-    @RequiresPermissions("supplier:withdrawApply:edit")
+    @RequiresPermissions("supplier:withdraw_apply:edit")
     @Log(title = "提现申请" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptWithdrawApply xfptWithdrawApply) {
@@ -102,7 +102,7 @@ public class XfptWithdrawApplyController extends BaseController {
      * 删除提现申请
      */
     @Operation(summary = "删除提现申请")
-    @RequiresPermissions("supplier:withdrawApply:remove")
+    @RequiresPermissions("supplier:withdraw_apply:remove")
     @Log(title = "提现申请" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

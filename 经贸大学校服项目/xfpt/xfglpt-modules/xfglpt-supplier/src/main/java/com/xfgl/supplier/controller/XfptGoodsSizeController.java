@@ -34,7 +34,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="商品尺码管理")
 @RestController
-@RequestMapping("/goodsSize")
+@RequestMapping("/goods_size")
 public class XfptGoodsSizeController extends BaseController {
     @Autowired
     private IXfptGoodsSizeService xfptGoodsSizeService;
@@ -44,7 +44,7 @@ public class XfptGoodsSizeController extends BaseController {
  */
 
 @Operation(summary = "查询商品尺码列表")
-@RequiresPermissions("supplier:goodsSize:list")
+@RequiresPermissions("supplier:goods_size:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptGoodsSize xfptGoodsSize) {
         startPage();
@@ -56,7 +56,7 @@ public class XfptGoodsSizeController extends BaseController {
      * 导出商品尺码列表
      */
     @Operation(summary = "导出商品尺码列表")
-    @RequiresPermissions("supplier:goodsSize:export")
+    @RequiresPermissions("supplier:goods_size:export")
     @Log(title = "商品尺码" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptGoodsSize xfptGoodsSize) {
@@ -69,7 +69,7 @@ public class XfptGoodsSizeController extends BaseController {
      * 获取商品尺码详细信息
      */
     @Operation(summary = "获取商品尺码详细信息")
-    @RequiresPermissions("supplier:goodsSize:query")
+    @RequiresPermissions("supplier:goods_size:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptGoodsSizeService.getById(id));
@@ -79,7 +79,7 @@ public class XfptGoodsSizeController extends BaseController {
      * 新增商品尺码
      */
     @Operation(summary = "新增商品尺码")
-    @RequiresPermissions("supplier:goodsSize:add")
+    @RequiresPermissions("supplier:goods_size:add")
     @Log(title = "商品尺码" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptGoodsSize xfptGoodsSize) {
@@ -90,7 +90,7 @@ public class XfptGoodsSizeController extends BaseController {
      * 修改商品尺码
      */
     @Operation(summary = "修改商品尺码")
-    @RequiresPermissions("supplier:goodsSize:edit")
+    @RequiresPermissions("supplier:goods_size:edit")
     @Log(title = "商品尺码" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptGoodsSize xfptGoodsSize) {
@@ -102,7 +102,7 @@ public class XfptGoodsSizeController extends BaseController {
      * 删除商品尺码
      */
     @Operation(summary = "删除商品尺码")
-    @RequiresPermissions("supplier:goodsSize:remove")
+    @RequiresPermissions("supplier:goods_size:remove")
     @Log(title = "商品尺码" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {

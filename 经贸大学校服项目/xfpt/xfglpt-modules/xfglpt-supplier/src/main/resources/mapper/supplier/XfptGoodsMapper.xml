@@ -21,16 +21,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="publishTime"    column="publish_time"    />
         <result property="offShelfTime"    column="off_shelf_time"    />
         <result property="sortNum"    column="sort_num"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptGoodsVo">
-        select id, goods_name, goods_code, category_name, supplier_id, supplier_name, brand_name, main_image, detail_images_json, detail_content, sale_type, status, publish_status, publish_time, off_shelf_time, sort_num, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_goods
+        select id, goods_name, goods_code, category_name, supplier_id, supplier_name, brand_name, main_image, detail_images_json, detail_content, sale_type, status, publish_status, publish_time, off_shelf_time, sort_num, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_goods
     </sql>
 
     <select id="selectXfptGoodsList" parameterType="XfptGoods" resultMap="XfptGoodsResult">
@@ -50,7 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="publishStatus != null  and publishStatus != ''"> and publish_status = #{publishStatus}</if>
             <if test="publishTime != null "> and publish_time = #{publishTime}</if>
             <if test="offShelfTime != null "> and off_shelf_time = #{offShelfTime}</if>
-            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
+            <if test="sortNum != null  and sortNum != ''"> and sort_num = #{sortNum}</if>
 
     </select>
 
@@ -77,12 +77,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="publishTime != null">publish_time,</if>
             <if test="offShelfTime != null">off_shelf_time,</if>
             <if test="sortNum != null">sort_num,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="goodsName != null and goodsName != ''">#{goodsName},</if>
@@ -100,12 +100,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="publishTime != null">#{publishTime},</if>
             <if test="offShelfTime != null">#{offShelfTime},</if>
             <if test="sortNum != null">#{sortNum},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -127,12 +127,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="publishTime != null">publish_time = #{publishTime},</if>
             <if test="offShelfTime != null">off_shelf_time = #{offShelfTime},</if>
             <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

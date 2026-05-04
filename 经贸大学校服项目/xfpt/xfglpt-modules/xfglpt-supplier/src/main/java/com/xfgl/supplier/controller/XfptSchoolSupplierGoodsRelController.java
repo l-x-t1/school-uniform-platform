@@ -27,24 +27,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 学校供应商合作商品Controller
+ * 学校供应商商品关系Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="学校供应商合作商品管理")
+@Tag(name="学校供应商商品关系管理")
 @RestController
-@RequestMapping("/schoolSupplierGoodsRel")
+@RequestMapping("/school_supplier_goods_rel")
 public class XfptSchoolSupplierGoodsRelController extends BaseController {
     @Autowired
     private IXfptSchoolSupplierGoodsRelService xfptSchoolSupplierGoodsRelService;
 
 /**
- * 查询学校供应商合作商品列表
+ * 查询学校供应商商品关系列表
  */
 
-@Operation(summary = "查询学校供应商合作商品列表")
-@RequiresPermissions("supplier:schoolSupplierGoodsRel:list")
+@Operation(summary = "查询学校供应商商品关系列表")
+@RequiresPermissions("supplier:school_supplier_goods_rel:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel) {
         startPage();
@@ -53,45 +53,45 @@ public class XfptSchoolSupplierGoodsRelController extends BaseController {
     }
 
     /**
-     * 导出学校供应商合作商品列表
+     * 导出学校供应商商品关系列表
      */
-    @Operation(summary = "导出学校供应商合作商品列表")
-    @RequiresPermissions("supplier:schoolSupplierGoodsRel:export")
-    @Log(title = "学校供应商合作商品" , businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出学校供应商商品关系列表")
+    @RequiresPermissions("supplier:school_supplier_goods_rel:export")
+    @Log(title = "学校供应商商品关系" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel) {
         List<XfptSchoolSupplierGoodsRel> list = xfptSchoolSupplierGoodsRelService.selectXfptSchoolSupplierGoodsRelList(xfptSchoolSupplierGoodsRel);
         ExcelUtil<XfptSchoolSupplierGoodsRel> util = new ExcelUtil<XfptSchoolSupplierGoodsRel>(XfptSchoolSupplierGoodsRel. class);
-        util.exportExcel(response, list, "学校供应商合作商品数据");
+        util.exportExcel(response, list, "学校供应商商品关系数据");
     }
 
     /**
-     * 获取学校供应商合作商品详细信息
+     * 获取学校供应商商品关系详细信息
      */
-    @Operation(summary = "获取学校供应商合作商品详细信息")
-    @RequiresPermissions("supplier:schoolSupplierGoodsRel:query")
+    @Operation(summary = "获取学校供应商商品关系详细信息")
+    @RequiresPermissions("supplier:school_supplier_goods_rel:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptSchoolSupplierGoodsRelService.getById(id));
     }
 
     /**
-     * 新增学校供应商合作商品
+     * 新增学校供应商商品关系
      */
-    @Operation(summary = "新增学校供应商合作商品")
-    @RequiresPermissions("supplier:schoolSupplierGoodsRel:add")
-    @Log(title = "学校供应商合作商品" , businessType = BusinessType.INSERT)
+    @Operation(summary = "新增学校供应商商品关系")
+    @RequiresPermissions("supplier:school_supplier_goods_rel:add")
+    @Log(title = "学校供应商商品关系" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel) {
             return toAjax(xfptSchoolSupplierGoodsRelService.save(xfptSchoolSupplierGoodsRel));
     }
 
     /**
-     * 修改学校供应商合作商品
+     * 修改学校供应商商品关系
      */
-    @Operation(summary = "修改学校供应商合作商品")
-    @RequiresPermissions("supplier:schoolSupplierGoodsRel:edit")
-    @Log(title = "学校供应商合作商品" , businessType = BusinessType.UPDATE)
+    @Operation(summary = "修改学校供应商商品关系")
+    @RequiresPermissions("supplier:school_supplier_goods_rel:edit")
+    @Log(title = "学校供应商商品关系" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel) {
             return toAjax(xfptSchoolSupplierGoodsRelService.updateById(xfptSchoolSupplierGoodsRel));
@@ -99,11 +99,11 @@ public class XfptSchoolSupplierGoodsRelController extends BaseController {
 
 
     /**
-     * 删除学校供应商合作商品
+     * 删除学校供应商商品关系
      */
-    @Operation(summary = "删除学校供应商合作商品")
-    @RequiresPermissions("supplier:schoolSupplierGoodsRel:remove")
-    @Log(title = "学校供应商合作商品" , businessType = BusinessType.DELETE)
+    @Operation(summary = "删除学校供应商商品关系")
+    @RequiresPermissions("supplier:school_supplier_goods_rel:remove")
+    @Log(title = "学校供应商商品关系" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptSchoolSupplierGoodsRelService.removeByIds(Arrays.asList(ids)));

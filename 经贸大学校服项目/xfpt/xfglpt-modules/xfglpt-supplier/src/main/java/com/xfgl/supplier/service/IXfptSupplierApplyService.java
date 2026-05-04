@@ -5,7 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.supplier.domain.XfptSupplierApply;
 
 /**
- * 供应商报名Service接口
+ * 企业报名及资格审查Service接口
  *
  * @author yinet
  * @date 2026-05-01
@@ -13,10 +13,10 @@ import com.xfgl.supplier.domain.XfptSupplierApply;
 public interface IXfptSupplierApplyService extends IService<XfptSupplierApply> {
 
     /**
-     * 查询供应商报名列表
+     * 查询企业报名及资格审查列表
      *
-     * @param xfptSupplierApply 供应商报名
-     * @return 供应商报名集合
+     * @param xfptSupplierApply 企业报名及资格审查
+     * @return 企业报名及资格审查集合
      */
     public List<XfptSupplierApply> selectXfptSupplierApplyList(XfptSupplierApply xfptSupplierApply);
 

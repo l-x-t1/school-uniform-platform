@@ -27,24 +27,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 生产单Controller
+ * 生产单主Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="生产单管理")
+@Tag(name="生产单主管理")
 @RestController
-@RequestMapping("/productionOrder")
+@RequestMapping("/production_order")
 public class XfptProductionOrderController extends BaseController {
     @Autowired
     private IXfptProductionOrderService xfptProductionOrderService;
 
 /**
- * 查询生产单列表
+ * 查询生产单主列表
  */
 
-@Operation(summary = "查询生产单列表")
-@RequiresPermissions("supplier:productionOrder:list")
+@Operation(summary = "查询生产单主列表")
+@RequiresPermissions("supplier:production_order:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptProductionOrder xfptProductionOrder) {
         startPage();
@@ -53,45 +53,45 @@ public class XfptProductionOrderController extends BaseController {
     }
 
     /**
-     * 导出生产单列表
+     * 导出生产单主列表
      */
-    @Operation(summary = "导出生产单列表")
-    @RequiresPermissions("supplier:productionOrder:export")
-    @Log(title = "生产单" , businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出生产单主列表")
+    @RequiresPermissions("supplier:production_order:export")
+    @Log(title = "生产单主" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptProductionOrder xfptProductionOrder) {
         List<XfptProductionOrder> list = xfptProductionOrderService.selectXfptProductionOrderList(xfptProductionOrder);
         ExcelUtil<XfptProductionOrder> util = new ExcelUtil<XfptProductionOrder>(XfptProductionOrder. class);
-        util.exportExcel(response, list, "生产单数据");
+        util.exportExcel(response, list, "生产单主数据");
     }
 
     /**
-     * 获取生产单详细信息
+     * 获取生产单主详细信息
      */
-    @Operation(summary = "获取生产单详细信息")
-    @RequiresPermissions("supplier:productionOrder:query")
+    @Operation(summary = "获取生产单主详细信息")
+    @RequiresPermissions("supplier:production_order:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptProductionOrderService.getById(id));
     }
 
     /**
-     * 新增生产单
+     * 新增生产单主
      */
-    @Operation(summary = "新增生产单")
-    @RequiresPermissions("supplier:productionOrder:add")
-    @Log(title = "生产单" , businessType = BusinessType.INSERT)
+    @Operation(summary = "新增生产单主")
+    @RequiresPermissions("supplier:production_order:add")
+    @Log(title = "生产单主" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptProductionOrder xfptProductionOrder) {
             return toAjax(xfptProductionOrderService.save(xfptProductionOrder));
     }
 
     /**
-     * 修改生产单
+     * 修改生产单主
      */
-    @Operation(summary = "修改生产单")
-    @RequiresPermissions("supplier:productionOrder:edit")
-    @Log(title = "生产单" , businessType = BusinessType.UPDATE)
+    @Operation(summary = "修改生产单主")
+    @RequiresPermissions("supplier:production_order:edit")
+    @Log(title = "生产单主" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptProductionOrder xfptProductionOrder) {
             return toAjax(xfptProductionOrderService.updateById(xfptProductionOrder));
@@ -99,11 +99,11 @@ public class XfptProductionOrderController extends BaseController {
 
 
     /**
-     * 删除生产单
+     * 删除生产单主
      */
-    @Operation(summary = "删除生产单")
-    @RequiresPermissions("supplier:productionOrder:remove")
-    @Log(title = "生产单" , businessType = BusinessType.DELETE)
+    @Operation(summary = "删除生产单主")
+    @RequiresPermissions("supplier:production_order:remove")
+    @Log(title = "生产单主" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptProductionOrderService.removeByIds(Arrays.asList(ids)));

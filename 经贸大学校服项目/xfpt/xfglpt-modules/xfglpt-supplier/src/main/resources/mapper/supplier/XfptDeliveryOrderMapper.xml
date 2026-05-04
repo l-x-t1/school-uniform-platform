@@ -7,7 +7,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="XfptDeliveryOrder" id="XfptDeliveryOrderResult">
         <result property="id"    column="id"    />
         <result property="deliveryNo"    column="delivery_no"    />
-        <result property="noticeId"    column="notice_id"    />
         <result property="orderId"    column="order_id"    />
         <result property="orderNo"    column="order_no"    />
         <result property="productionId"    column="production_id"    />
@@ -23,23 +22,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="signTime"    column="sign_time"    />
         <result property="deptId"    column="dept_id"    />
         <result property="ancestors"    column="ancestors"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
         <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
     <sql id="selectXfptDeliveryOrderVo">
-        select id, delivery_no, notice_id, order_id, order_no, production_id, school_id, supplier_id, receiver_name, receiver_phone, receiver_address, logistics_company, logistics_no, delivery_status, delivery_time, sign_time, dept_id, ancestors, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_delivery_order
+        select id, delivery_no, order_id, order_no, production_id, school_id, supplier_id, receiver_name, receiver_phone, receiver_address, logistics_company, logistics_no, delivery_status, delivery_time, sign_time, dept_id, ancestors, remark, del_flag, create_by, create_time, update_by, update_time from xfpt_delivery_order
     </sql>
 
     <select id="selectXfptDeliveryOrderList" parameterType="XfptDeliveryOrder" resultMap="XfptDeliveryOrderResult">
         <include refid="selectXfptDeliveryOrderVo"/>
         <include refid="search"/>
             <if test="deliveryNo != null  and deliveryNo != ''"> and delivery_no = #{deliveryNo}</if>
-            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
             <if test="orderId != null "> and order_id = #{orderId}</if>
             <if test="orderNo != null  and orderNo != ''"> and order_no = #{orderNo}</if>
             <if test="productionId != null "> and production_id = #{productionId}</if>
@@ -67,9 +65,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         insert into xfpt_delivery_order
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="deliveryNo != null and deliveryNo != ''">delivery_no,</if>
-            <if test="noticeId != null">notice_id,</if>
             <if test="orderId != null">order_id,</if>
-            <if test="orderNo != null">order_no,</if>
+            <if test="orderNo != null and orderNo != ''">order_no,</if>
             <if test="productionId != null">production_id,</if>
             <if test="schoolId != null">school_id,</if>
             <if test="supplierId != null">supplier_id,</if>
@@ -83,18 +80,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="signTime != null">sign_time,</if>
             <if test="deptId != null">dept_id,</if>
             <if test="ancestors != null">ancestors,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null">del_flag,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="updateTime != null">update_time,</if>
-            <if test="remark != null">remark,</if>
-            <if test="delFlag != null and delFlag != ''">del_flag,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="deliveryNo != null and deliveryNo != ''">#{deliveryNo},</if>
-            <if test="noticeId != null">#{noticeId},</if>
             <if test="orderId != null">#{orderId},</if>
-            <if test="orderNo != null">#{orderNo},</if>
+            <if test="orderNo != null and orderNo != ''">#{orderNo},</if>
             <if test="productionId != null">#{productionId},</if>
             <if test="schoolId != null">#{schoolId},</if>
             <if test="supplierId != null">#{supplierId},</if>
@@ -108,12 +104,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="signTime != null">#{signTime},</if>
             <if test="deptId != null">#{deptId},</if>
             <if test="ancestors != null">#{ancestors},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null">#{delFlag},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="updateTime != null">#{updateTime},</if>
-            <if test="remark != null">#{remark},</if>
-            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
          </trim>
     </insert>
 
@@ -121,9 +117,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         update xfpt_delivery_order
         <trim prefix="SET" suffixOverrides=",">
             <if test="deliveryNo != null and deliveryNo != ''">delivery_no = #{deliveryNo},</if>
-            <if test="noticeId != null">notice_id = #{noticeId},</if>
             <if test="orderId != null">order_id = #{orderId},</if>
-            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="orderNo != null and orderNo != ''">order_no = #{orderNo},</if>
             <if test="productionId != null">production_id = #{productionId},</if>
             <if test="schoolId != null">school_id = #{schoolId},</if>
             <if test="supplierId != null">supplier_id = #{supplierId},</if>
@@ -137,12 +132,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="signTime != null">sign_time = #{signTime},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="ancestors != null">ancestors = #{ancestors},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null">del_flag = #{delFlag},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="updateTime != null">update_time = #{updateTime},</if>
-            <if test="remark != null">remark = #{remark},</if>
-            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
         </trim>
         where id = #{id}
     </update>

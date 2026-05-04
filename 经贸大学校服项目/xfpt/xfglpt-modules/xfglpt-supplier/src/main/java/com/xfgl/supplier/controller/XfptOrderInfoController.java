@@ -27,24 +27,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 订单信息Controller
+ * 订单主Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="订单信息管理")
+@Tag(name="订单主管理")
 @RestController
-@RequestMapping("/orderInfo")
+@RequestMapping("/order_info")
 public class XfptOrderInfoController extends BaseController {
     @Autowired
     private IXfptOrderInfoService xfptOrderInfoService;
 
 /**
- * 查询订单信息列表
+ * 查询订单主列表
  */
 
-@Operation(summary = "查询订单信息列表")
-@RequiresPermissions("supplier:orderInfo:list")
+@Operation(summary = "查询订单主列表")
+@RequiresPermissions("supplier:order_info:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptOrderInfo xfptOrderInfo) {
         startPage();
@@ -53,45 +53,45 @@ public class XfptOrderInfoController extends BaseController {
     }
 
     /**
-     * 导出订单信息列表
+     * 导出订单主列表
      */
-    @Operation(summary = "导出订单信息列表")
-    @RequiresPermissions("supplier:orderInfo:export")
-    @Log(title = "订单信息" , businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出订单主列表")
+    @RequiresPermissions("supplier:order_info:export")
+    @Log(title = "订单主" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptOrderInfo xfptOrderInfo) {
         List<XfptOrderInfo> list = xfptOrderInfoService.selectXfptOrderInfoList(xfptOrderInfo);
         ExcelUtil<XfptOrderInfo> util = new ExcelUtil<XfptOrderInfo>(XfptOrderInfo. class);
-        util.exportExcel(response, list, "订单信息数据");
+        util.exportExcel(response, list, "订单主数据");
     }
 
     /**
-     * 获取订单信息详细信息
+     * 获取订单主详细信息
      */
-    @Operation(summary = "获取订单信息详细信息")
-    @RequiresPermissions("supplier:orderInfo:query")
+    @Operation(summary = "获取订单主详细信息")
+    @RequiresPermissions("supplier:order_info:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptOrderInfoService.getById(id));
     }
 
     /**
-     * 新增订单信息
+     * 新增订单主
      */
-    @Operation(summary = "新增订单信息")
-    @RequiresPermissions("supplier:orderInfo:add")
-    @Log(title = "订单信息" , businessType = BusinessType.INSERT)
+    @Operation(summary = "新增订单主")
+    @RequiresPermissions("supplier:order_info:add")
+    @Log(title = "订单主" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptOrderInfo xfptOrderInfo) {
             return toAjax(xfptOrderInfoService.save(xfptOrderInfo));
     }
 
     /**
-     * 修改订单信息
+     * 修改订单主
      */
-    @Operation(summary = "修改订单信息")
-    @RequiresPermissions("supplier:orderInfo:edit")
-    @Log(title = "订单信息" , businessType = BusinessType.UPDATE)
+    @Operation(summary = "修改订单主")
+    @RequiresPermissions("supplier:order_info:edit")
+    @Log(title = "订单主" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptOrderInfo xfptOrderInfo) {
             return toAjax(xfptOrderInfoService.updateById(xfptOrderInfo));
@@ -99,11 +99,11 @@ public class XfptOrderInfoController extends BaseController {
 
 
     /**
-     * 删除订单信息
+     * 删除订单主
      */
-    @Operation(summary = "删除订单信息")
-    @RequiresPermissions("supplier:orderInfo:remove")
-    @Log(title = "订单信息" , businessType = BusinessType.DELETE)
+    @Operation(summary = "删除订单主")
+    @RequiresPermissions("supplier:order_info:remove")
+    @Log(title = "订单主" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptOrderInfoService.removeByIds(Arrays.asList(ids)));

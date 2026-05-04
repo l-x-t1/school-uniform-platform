@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptComment;
 import com.xfgl.supplier.service.IXfptCommentService;
 
 /**
- * 商品评价Service业务层处理
+ * 订单评价Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
     private XfptCommentMapper xfptCommentMapper;
 
     /**
-     * 查询商品评价列表
+     * 查询订单评价列表
      *
-     * @param xfptComment 商品评价
-     * @return 商品评价
+     * @param xfptComment 订单评价
+     * @return 订单评价
      */
     @Override
     public List<XfptComment> selectXfptCommentList(XfptComment xfptComment)

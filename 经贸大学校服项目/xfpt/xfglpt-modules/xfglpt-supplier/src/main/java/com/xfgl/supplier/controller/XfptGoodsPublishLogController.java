@@ -27,24 +27,24 @@ import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
 
 /**
- * 商品上下架日志Controller
+ * 商品上下架记录Controller
  *
  * @author yinet
  * @date 2026-05-01
  */
-@Tag(name="商品上下架日志管理")
+@Tag(name="商品上下架记录管理")
 @RestController
-@RequestMapping("/goodsPublishLog")
+@RequestMapping("/goods_publish_log")
 public class XfptGoodsPublishLogController extends BaseController {
     @Autowired
     private IXfptGoodsPublishLogService xfptGoodsPublishLogService;
 
 /**
- * 查询商品上下架日志列表
+ * 查询商品上下架记录列表
  */
 
-@Operation(summary = "查询商品上下架日志列表")
-@RequiresPermissions("supplier:goodsPublishLog:list")
+@Operation(summary = "查询商品上下架记录列表")
+@RequiresPermissions("supplier:goods_publish_log:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptGoodsPublishLog xfptGoodsPublishLog) {
         startPage();
@@ -53,45 +53,45 @@ public class XfptGoodsPublishLogController extends BaseController {
     }
 
     /**
-     * 导出商品上下架日志列表
+     * 导出商品上下架记录列表
      */
-    @Operation(summary = "导出商品上下架日志列表")
-    @RequiresPermissions("supplier:goodsPublishLog:export")
-    @Log(title = "商品上下架日志" , businessType = BusinessType.EXPORT)
+    @Operation(summary = "导出商品上下架记录列表")
+    @RequiresPermissions("supplier:goods_publish_log:export")
+    @Log(title = "商品上下架记录" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptGoodsPublishLog xfptGoodsPublishLog) {
         List<XfptGoodsPublishLog> list = xfptGoodsPublishLogService.selectXfptGoodsPublishLogList(xfptGoodsPublishLog);
         ExcelUtil<XfptGoodsPublishLog> util = new ExcelUtil<XfptGoodsPublishLog>(XfptGoodsPublishLog. class);
-        util.exportExcel(response, list, "商品上下架日志数据");
+        util.exportExcel(response, list, "商品上下架记录数据");
     }
 
     /**
-     * 获取商品上下架日志详细信息
+     * 获取商品上下架记录详细信息
      */
-    @Operation(summary = "获取商品上下架日志详细信息")
-    @RequiresPermissions("supplier:goodsPublishLog:query")
+    @Operation(summary = "获取商品上下架记录详细信息")
+    @RequiresPermissions("supplier:goods_publish_log:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptGoodsPublishLogService.getById(id));
     }
 
     /**
-     * 新增商品上下架日志
+     * 新增商品上下架记录
      */
-    @Operation(summary = "新增商品上下架日志")
-    @RequiresPermissions("supplier:goodsPublishLog:add")
-    @Log(title = "商品上下架日志" , businessType = BusinessType.INSERT)
+    @Operation(summary = "新增商品上下架记录")
+    @RequiresPermissions("supplier:goods_publish_log:add")
+    @Log(title = "商品上下架记录" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptGoodsPublishLog xfptGoodsPublishLog) {
             return toAjax(xfptGoodsPublishLogService.save(xfptGoodsPublishLog));
     }
 
     /**
-     * 修改商品上下架日志
+     * 修改商品上下架记录
      */
-    @Operation(summary = "修改商品上下架日志")
-    @RequiresPermissions("supplier:goodsPublishLog:edit")
-    @Log(title = "商品上下架日志" , businessType = BusinessType.UPDATE)
+    @Operation(summary = "修改商品上下架记录")
+    @RequiresPermissions("supplier:goods_publish_log:edit")
+    @Log(title = "商品上下架记录" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptGoodsPublishLog xfptGoodsPublishLog) {
             return toAjax(xfptGoodsPublishLogService.updateById(xfptGoodsPublishLog));
@@ -99,11 +99,11 @@ public class XfptGoodsPublishLogController extends BaseController {
 
 
     /**
-     * 删除商品上下架日志
+     * 删除商品上下架记录
      */
-    @Operation(summary = "删除商品上下架日志")
-    @RequiresPermissions("supplier:goodsPublishLog:remove")
-    @Log(title = "商品上下架日志" , businessType = BusinessType.DELETE)
+    @Operation(summary = "删除商品上下架记录")
+    @RequiresPermissions("supplier:goods_publish_log:remove")
+    @Log(title = "商品上下架记录" , businessType = BusinessType.DELETE)
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptGoodsPublishLogService.removeByIds(Arrays.asList(ids)));

@@ -13,7 +13,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 生产单对象 xfpt_production_order
+ * 生产单主对象 xfpt_production_order
  *
  * @author yinet
  * @date 2026-05-01
@@ -25,7 +25,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_production_order")
-@Schema(description = "生产单")
+@Schema(description = "生产单主")
 public class XfptProductionOrder extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -40,11 +40,6 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "生产单号")
     private String productionNo;
 
-    /** 统购公告ID */
-            @Excel(name = "统购公告ID")
-    @Schema(description = "统购公告ID")
-    private Long noticeId;
-
     /** 订单ID */
             @Excel(name = "订单ID")
     @Schema(description = "订单ID")
@@ -55,9 +50,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "订单号快照")
     private String orderNo;
 
-    /** 订单类型，1统购 2零售 */
-            @Excel(name = "订单类型，1统购 2零售")
-    @Schema(description = "订单类型，1统购 2零售")
+    /** 订单类型（1统购 2零售） */
+            @Excel(name = "订单类型", readConverterExp = "1=统购,2=零售")
+    @Schema(description = "订单类型（1统购 2零售）")
     private String orderType;
 
     /** 学校ID */
@@ -70,9 +65,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "供应商ID")
     private Long supplierId;
 
-    /** 状态，0待生产 1生产中 2生产完成 */
-            @Excel(name = "状态，0待生产 1生产中 2生产完成")
-    @Schema(description = "状态，0待生产 1生产中 2生产完成")
+    /** 状态（0待生产 1生产中 2生产完成） */
+            @Excel(name = "状态", readConverterExp = "0=待生产,1=生产中,2=生产完成")
+    @Schema(description = "状态（0待生产 1生产中 2生产完成）")
     private String status;
 
     /** 计划完成时间 */
@@ -87,20 +82,20 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "开始生产时间")
     private Date startTime;
 
-    /** 生产完成时间 */
+    /** 完成时间 */
             @JsonFormat(pattern = "yyyy-MM-dd")
-            @Excel(name = "生产完成时间", width = 30, dateFormat = "yyyy-MM-dd")
-    @Schema(description = "生产完成时间")
+            @Excel(name = "完成时间", width = 30, dateFormat = "yyyy-MM-dd")
+    @Schema(description = "完成时间")
     private Date finishTime;
 
-    /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
-    @Schema(description = "当前归属部门/学校")
+    /** 部门ID */
+            @Excel(name = "部门ID")
+    @Schema(description = "部门ID")
     private Long deptId;
 
-    /** 组织祖级链路 */
-            @Excel(name = "组织祖级链路")
-    @Schema(description = "组织祖级链路")
+    /** 祖级列表 */
+            @Excel(name = "祖级列表")
+    @Schema(description = "祖级列表")
     private String ancestors;
 
         }

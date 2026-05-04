@@ -12,7 +12,7 @@ import com.xfgl.supplier.domain.XfptSchoolSupplierGoodsRel;
 import com.xfgl.supplier.service.IXfptSchoolSupplierGoodsRelService;
 
 /**
- * 学校供应商合作商品Service业务层处理
+ * 学校供应商商品关系Service业务层处理
  *
  * @author yinet
  * @date 2026-05-01
@@ -24,10 +24,10 @@ public class XfptSchoolSupplierGoodsRelServiceImpl extends ServiceImpl<XfptSchoo
     private XfptSchoolSupplierGoodsRelMapper xfptSchoolSupplierGoodsRelMapper;
 
     /**
-     * 查询学校供应商合作商品列表
+     * 查询学校供应商商品关系列表
      *
-     * @param xfptSchoolSupplierGoodsRel 学校供应商合作商品
-     * @return 学校供应商合作商品
+     * @param xfptSchoolSupplierGoodsRel 学校供应商商品关系
+     * @return 学校供应商商品关系
      */
     @Override
     public List<XfptSchoolSupplierGoodsRel> selectXfptSchoolSupplierGoodsRelList(XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel)

@@ -13,7 +13,7 @@ import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
 
 /**
- * 发货单对象 xfpt_delivery_order
+ * 发货单主对象 xfpt_delivery_order
  *
  * @author yinet
  * @date 2026-05-01
@@ -25,7 +25,7 @@ import com.xfgl.common.core.web.domain.BaseEntity;
 @Builder
 @Accessors(chain = true)
 @TableName("xfpt_delivery_order")
-@Schema(description = "发货单")
+@Schema(description = "发货单主")
 public class XfptDeliveryOrder extends BaseEntity
         {
 private static final long serialVersionUID = 1L;
@@ -39,11 +39,6 @@ private static final long serialVersionUID = 1L;
             @Excel(name = "发货单号")
     @Schema(description = "发货单号")
     private String deliveryNo;
-
-    /** 统购公告ID */
-            @Excel(name = "统购公告ID")
-    @Schema(description = "统购公告ID")
-    private Long noticeId;
 
     /** 订单ID */
             @Excel(name = "订单ID")
@@ -70,19 +65,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "供应商ID")
     private Long supplierId;
 
-    /** 收货人姓名快照 */
-            @Excel(name = "收货人姓名快照")
-    @Schema(description = "收货人姓名快照")
+    /** 收货人 */
+            @Excel(name = "收货人")
+    @Schema(description = "收货人")
     private String receiverName;
 
-    /** 收货人电话快照 */
-            @Excel(name = "收货人电话快照")
-    @Schema(description = "收货人电话快照")
+    /** 收货电话 */
+            @Excel(name = "收货电话")
+    @Schema(description = "收货电话")
     private String receiverPhone;
 
-    /** 收货地址快照 */
-            @Excel(name = "收货地址快照")
-    @Schema(description = "收货地址快照")
+    /** 收货地址 */
+            @Excel(name = "收货地址")
+    @Schema(description = "收货地址")
     private String receiverAddress;
 
     /** 物流公司 */
@@ -95,9 +90,9 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "物流单号")
     private String logisticsNo;
 
-    /** 发货状态，0待发货 1已发货 2已签收 */
-            @Excel(name = "发货状态，0待发货 1已发货 2已签收")
-    @Schema(description = "发货状态，0待发货 1已发货 2已签收")
+    /** 发货状态（0待发货 1已发货 2已签收） */
+            @Excel(name = "发货状态", readConverterExp = "0=待发货,1=已发货,2=已签收")
+    @Schema(description = "发货状态（0待发货 1已发货 2已签收）")
     private String deliveryStatus;
 
     /** 发货时间 */
@@ -112,14 +107,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "签收时间")
     private Date signTime;
 
-    /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
-    @Schema(description = "当前归属部门/学校")
+    /** 部门ID */
+            @Excel(name = "部门ID")
+    @Schema(description = "部门ID")
     private Long deptId;
 
-    /** 组织祖级链路 */
-            @Excel(name = "组织祖级链路")
-    @Schema(description = "组织祖级链路")
+    /** 祖级列表 */
+            @Excel(name = "祖级列表")
+    @Schema(description = "祖级列表")
     private String ancestors;
 
         }
