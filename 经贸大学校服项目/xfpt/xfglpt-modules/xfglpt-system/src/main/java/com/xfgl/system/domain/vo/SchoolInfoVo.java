@@ -83,4 +83,20 @@ public class SchoolInfoVo {
     @Excel(name = "学校区域")
     @Schema(description = "学校区域")
     private String schoolArea;
+
+    @Excel(name = "银行账户户名")
+    @Schema(description = "银行账户户名")
+    private String bankAccountName;
+
+    @Excel(name = "开户银行")
+    @Schema(description = "开户银行")
+    private String bankName;
+
+    @Excel(name = "开户支行")
+    @Schema(description = "开户支行")
+    private String bankBranchName;
+
+    @Excel(name = "银行卡号")
+    @Schema(description = "银行卡号")
+    private String bankAccountNo;
 }

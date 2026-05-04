@@ -123,6 +123,35 @@
           ></el-input>
         </el-form-item>
 
+        <el-form-item label="银行账户户名:" prop="bankAccountName">
+          <el-input
+            v-model="schoolForm.bankAccountName"
+            placeholder="请输入银行账户户名"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item label="开户银行:" prop="bankName">
+          <el-input
+            v-model="schoolForm.bankName"
+            placeholder="请输入开户银行"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item label="开户支行:" prop="bankBranchName">
+          <el-input
+            v-model="schoolForm.bankBranchName"
+            placeholder="请输入开户支行"
+          ></el-input>
+        </el-form-item>
+
+        <el-form-item label="银行卡号:" prop="bankAccountNo">
+          <el-input
+            v-model="schoolForm.bankAccountNo"
+            placeholder="请输入银行卡号"
+            maxlength="32"
+          ></el-input>
+        </el-form-item>
+
         <el-form-item label="学校地区:" prop="area">
           <el-row>
             <!-- <el-col :span="12">
@@ -327,6 +356,10 @@ export default {
         schoolBadge: "",
         principalName: "",
         principalPhone: "",
+        bankAccountName: "",
+        bankName: "",
+        bankBranchName: "",
+        bankAccountNo: "",
         remark: "",
       },
       areaList: [],
@@ -354,6 +387,20 @@ export default {
           {
             pattern: /^1[3-9]\d{9}$/,
             message: "请输入正确的手机号码",
+            trigger: "blur",
+          },
+        ],
+        bankAccountName: [
+          { required: true, message: "请输入银行账户户名", trigger: "blur" },
+        ],
+        bankName: [
+          { required: true, message: "请输入开户银行", trigger: "blur" },
+        ],
+        bankAccountNo: [
+          { required: true, message: "请输入银行卡号", trigger: "blur" },
+          {
+            pattern: /^\d{8,32}$/,
+            message: "银行卡号只能填写8到32位数字",
             trigger: "blur",
           },
         ],

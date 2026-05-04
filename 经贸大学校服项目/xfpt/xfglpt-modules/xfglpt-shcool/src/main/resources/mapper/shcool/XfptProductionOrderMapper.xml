@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptProductionOrderMapper">
+
+    <resultMap type="XfptProductionOrder" id="XfptProductionOrderResult">
+        <result property="id"    column="id"    />
+        <result property="productionNo"    column="production_no"    />
+        <result property="noticeId"    column="notice_id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
+        <result property="orderType"    column="order_type"    />
+        <result property="schoolId"    column="school_id"    />
+        <result property="supplierId"    column="supplier_id"    />
+        <result property="status"    column="status"    />
+        <result property="plannedFinishTime"    column="planned_finish_time"    />
+        <result property="startTime"    column="start_time"    />
+        <result property="finishTime"    column="finish_time"    />
+        <result property="deptId"    column="dept_id"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <resultMap id="XfptProductionOrderXfptProductionOrderItemResult" type="XfptProductionOrder" extends="XfptProductionOrderResult">
+        <collection property="xfptProductionOrderItemList" ofType="XfptProductionOrderItem" column="id" select="selectXfptProductionOrderItemList" />
+    </resultMap>
+
+    <resultMap type="XfptProductionOrderItem" id="XfptProductionOrderItemResult">
+        <result property="id"    column="id"    />
+        <result property="productionId"    column="production_id"    />
+        <result property="orderItemId"    column="order_item_id"    />
+        <result property="goodsId"    column="goods_id"    />
+        <result property="sizeId"    column="size_id"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="sizeName"    column="size_name"    />
+        <result property="buyNum"    column="buy_num"    />
+        <result property="finishNum"    column="finish_num"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectXfptProductionOrderVo">
+        select id, production_no, notice_id, order_id, order_no, order_type, school_id, supplier_id, status, planned_finish_time, start_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_production_order
+    </sql>
+
+    <select id="selectXfptProductionOrderList" parameterType="XfptProductionOrder" resultMap="XfptProductionOrderResult">
+        <include refid="selectXfptProductionOrderVo"/>
+        <include refid="search"/>
+            <if test="productionNo != null  and productionNo != ''"> and production_no like concat('%', #{productionNo}, '%')</if>
+            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderType != null  and orderType != ''"> and order_type = #{orderType}</if>
+            <if test="schoolId != null "> and school_id = #{schoolId}</if>
+            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="plannedFinishTime != null "> and planned_finish_time = #{plannedFinishTime}</if>
+            <if test="startTime != null "> and start_time = #{startTime}</if>
+            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
+
+    </select>
+
+    <select id="selectXfptProductionOrderById" parameterType="Long" resultMap="XfptProductionOrderXfptProductionOrderItemResult">
+        select id, production_no, notice_id, order_id, order_no, order_type, school_id, supplier_id, status, planned_finish_time, start_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_production_order
+        where id = #{id}
+    </select>
+
+    <select id="selectXfptProductionOrderItemList" resultMap="XfptProductionOrderItemResult">
+        select id, production_id, order_item_id, goods_id, size_id, goods_name, size_name, buy_num, finish_num, status, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_production_order_item
+        where production_id = #{production_id}
+    </select>
+
+    <insert id="insertXfptProductionOrder" parameterType="XfptProductionOrder" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_production_order
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="productionNo != null and productionNo != ''">production_no,</if>
+            <if test="noticeId != null">notice_id,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="orderNo != null">order_no,</if>
+            <if test="orderType != null and orderType != ''">order_type,</if>
+            <if test="schoolId != null">school_id,</if>
+            <if test="supplierId != null">supplier_id,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="plannedFinishTime != null">planned_finish_time,</if>
+            <if test="startTime != null">start_time,</if>
+            <if test="finishTime != null">finish_time,</if>
+            <if test="deptId != null">dept_id,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="productionNo != null and productionNo != ''">#{productionNo},</if>
+            <if test="noticeId != null">#{noticeId},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderNo != null">#{orderNo},</if>
+            <if test="orderType != null and orderType != ''">#{orderType},</if>
+            <if test="schoolId != null">#{schoolId},</if>
+            <if test="supplierId != null">#{supplierId},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="plannedFinishTime != null">#{plannedFinishTime},</if>
+            <if test="startTime != null">#{startTime},</if>
+            <if test="finishTime != null">#{finishTime},</if>
+            <if test="deptId != null">#{deptId},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptProductionOrder" parameterType="XfptProductionOrder">
+        update xfpt_production_order
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="productionNo != null and productionNo != ''">production_no = #{productionNo},</if>
+            <if test="noticeId != null">notice_id = #{noticeId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderNo != null">order_no = #{orderNo},</if>
+            <if test="orderType != null and orderType != ''">order_type = #{orderType},</if>
+            <if test="schoolId != null">school_id = #{schoolId},</if>
+            <if test="supplierId != null">supplier_id = #{supplierId},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="plannedFinishTime != null">planned_finish_time = #{plannedFinishTime},</if>
+            <if test="startTime != null">start_time = #{startTime},</if>
+            <if test="finishTime != null">finish_time = #{finishTime},</if>
+            <if test="deptId != null">dept_id = #{deptId},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptProductionOrderById" parameterType="Long">
+        delete from xfpt_production_order where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptProductionOrderByIds" parameterType="String">
+        delete from xfpt_production_order where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+    <delete id="deleteXfptProductionOrderItemByProductionIds" parameterType="String">
+        delete from xfpt_production_order_item where production_id in
+        <foreach item="productionId" collection="array" open="(" separator="," close=")">
+            #{productionId}
+        </foreach>
+    </delete>
+
+    <delete id="deleteXfptProductionOrderItemByProductionId" parameterType="Long">
+        delete from xfpt_production_order_item where production_id = #{productionId}
+    </delete>
+
+    <insert id="batchXfptProductionOrderItem">
+        insert into xfpt_production_order_item( id, production_id, order_item_id, goods_id, size_id, goods_name, size_name, buy_num, finish_num, status, create_by, create_time, update_by, update_time, remark, del_flag) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            ( #{item.id}, #{item.productionId}, #{item.orderItemId}, #{item.goodsId}, #{item.sizeId}, #{item.goodsName}, #{item.sizeName}, #{item.buyNum}, #{item.finishNum}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
+        </foreach>
+    </insert>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

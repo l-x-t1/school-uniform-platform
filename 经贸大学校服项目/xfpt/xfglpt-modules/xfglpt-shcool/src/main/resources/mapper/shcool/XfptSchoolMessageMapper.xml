@@ -24,6 +24,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="schoolArea"    column="school_area"    />
         <result property="principalName"    column="principal_name"    />
         <result property="principalPhone"    column="principal_phone"    />
+        <result property="bankAccountName"    column="bank_account_name"    />
+        <result property="bankName"    column="bank_name"    />
+        <result property="bankBranchName"    column="bank_branch_name"    />
+        <result property="bankAccountNo"    column="bank_account_no"    />
         <result property="area"    column="area"    />
         <result property="peopleCount"    column="people_count"    />
 
@@ -32,7 +36,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptSchoolMessageVo">
-        select people_count,area,id, dept_id, school_name, academy_type, region_province, region_city, region_county, detailed_address, school_type, school_badge, create_by, create_time, update_by, update_time, remark, del_flag,school_area,principal_name,principal_phone from xfpt_school_message
+        select people_count,area,id, dept_id, school_name, academy_type, region_province, region_city, region_county, detailed_address, school_type, school_badge, create_by, create_time, update_by, update_time, remark, del_flag,school_area,principal_name,principal_phone,bank_account_name,bank_name,bank_branch_name,bank_account_no from xfpt_school_message
     </sql>
 
     <select id="selectXfptSchoolMessageList" parameterType="XfptSchoolMessage" resultMap="XfptSchoolMessageResult">
@@ -50,6 +54,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="schoolArea != null  and schoolArea != ''"> and school_area = #{schoolArea}</if>
         <if test="principalName != null  and principalName != ''"> and principal_name = #{principalName}</if>
         <if test="principalPhone != null  and principalPhone != ''"> and principal_phone = #{principalPhone}</if>
+        <if test="bankAccountName != null  and bankAccountName != ''"> and bank_account_name like concat('%', #{bankAccountName}, '%')</if>
+        <if test="bankName != null  and bankName != ''"> and bank_name like concat('%', #{bankName}, '%')</if>
+        <if test="bankAccountNo != null  and bankAccountNo != ''"> and bank_account_no = #{bankAccountNo}</if>
     </select>
 
     <select id="selectXfptSchoolMessageById" parameterType="Long" resultMap="XfptSchoolMessageResult">
@@ -78,6 +85,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="schoolArea != null">school_area,</if>
             <if test="principalName != null">principal_name,</if>
             <if test="principalPhone != null">principal_phone,</if>
+            <if test="bankAccountName != null">bank_account_name,</if>
+            <if test="bankName != null">bank_name,</if>
+            <if test="bankBranchName != null">bank_branch_name,</if>
+            <if test="bankAccountNo != null">bank_account_no,</if>
 
 
          </trim>
@@ -100,6 +111,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="schoolArea != null">#{schoolArea},</if>
             <if test="principalName != null">#{principalName},</if>
             <if test="principalPhone != null">#{principalPhone},</if>
+            <if test="bankAccountName != null">#{bankAccountName},</if>
+            <if test="bankName != null">#{bankName},</if>
+            <if test="bankBranchName != null">#{bankBranchName},</if>
+            <if test="bankAccountNo != null">#{bankAccountNo},</if>
          </trim>
     </insert>
 
@@ -125,6 +140,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
             <if test="principalName != null">principal_name = #{principalName},</if>
             <if test="principalPhone != null">principal_phone = #{principalPhone},</if>
+            <if test="bankAccountName != null">bank_account_name = #{bankAccountName},</if>
+            <if test="bankName != null">bank_name = #{bankName},</if>
+            <if test="bankBranchName != null">bank_branch_name = #{bankBranchName},</if>
+            <if test="bankAccountNo != null">bank_account_no = #{bankAccountNo},</if>
 
         </trim>
         where id = #{id}

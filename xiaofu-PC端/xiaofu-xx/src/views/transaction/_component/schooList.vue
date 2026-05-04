@@ -146,6 +146,31 @@
 
           <div class="info-section full-width">
             <h3 class="section-title">
+              <i class="el-icon-bank-card"></i>
+              银行账户
+            </h3>
+            <div class="info-list">
+              <div class="info-item">
+                <span class="label">账户户名：</span>
+                <span class="value">{{ schoolDetail.bankAccountName || '暂无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">开户银行：</span>
+                <span class="value">{{ schoolDetail.bankName || '暂无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">开户支行：</span>
+                <span class="value">{{ schoolDetail.bankBranchName || '暂无' }}</span>
+              </div>
+              <div class="info-item">
+                <span class="label">银行卡号：</span>
+                <span class="value">{{ formatBankAccountNo(schoolDetail.bankAccountNo) }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="info-section full-width">
+            <h3 class="section-title">
               <i class="el-icon-map-location"></i>
               地址信息
             </h3>
@@ -281,6 +306,12 @@ export default {
         '3': '其他'
       };
       return typeMap[type] || '未知';
+    },
+    formatBankAccountNo(accountNo) {
+      if (!accountNo) return '暂无';
+      const value = String(accountNo);
+      if (value.length <= 4) return value;
+      return `${'*'.repeat(Math.max(value.length - 4, 0))}${value.slice(-4)}`;
     },
     // 格式化日期时间
     formatDateTime(dateTime) {

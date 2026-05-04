@@ -109,6 +109,23 @@ public class XfptSchoolMessage extends BaseEntity {
     @Excel(name = "负责人电话")
     @Schema(description = "负责人电话")
     private String principalPhone;
+
+    @Excel(name = "银行账户户名")
+    @Schema(description = "银行账户户名")
+    private String bankAccountName;
+
+    @Excel(name = "开户银行")
+    @Schema(description = "开户银行")
+    private String bankName;
+
+    @Excel(name = "开户支行")
+    @Schema(description = "开户支行")
+    private String bankBranchName;
+
+    @Excel(name = "银行卡号")
+    @Schema(description = "银行卡号")
+    private String bankAccountNo;
+
     //学校类型数量
     @TableField(exist = false)
     private int number;

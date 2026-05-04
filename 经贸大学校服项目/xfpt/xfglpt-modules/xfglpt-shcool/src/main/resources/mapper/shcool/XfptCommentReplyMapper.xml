@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptCommentReplyMapper">
+
+    <resultMap type="XfptCommentReply" id="XfptCommentReplyResult">
+        <result property="id"    column="id"    />
+        <result property="commentId"    column="comment_id"    />
+        <result property="orderId"    column="order_id"    />
+        <result property="orderItemId"    column="order_item_id"    />
+        <result property="goodsId"    column="goods_id"    />
+        <result property="supplierId"    column="supplier_id"    />
+        <result property="fromUserId"    column="from_user_id"    />
+        <result property="fromUserName"    column="from_user_name"    />
+        <result property="fromRoleType"    column="from_role_type"    />
+        <result property="fromRoleTitle"    column="from_role_title"    />
+        <result property="toUserId"    column="to_user_id"    />
+        <result property="toUserName"    column="to_user_name"    />
+        <result property="toRoleType"    column="to_role_type"    />
+        <result property="toRoleTitle"    column="to_role_title"    />
+        <result property="content"    column="content"    />
+        <result property="status"    column="status"    />
+        <result property="sortNum"    column="sort_num"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectXfptCommentReplyVo">
+        select id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_comment_reply
+    </sql>
+
+    <select id="selectXfptCommentReplyList" parameterType="XfptCommentReply" resultMap="XfptCommentReplyResult">
+        <include refid="selectXfptCommentReplyVo"/>
+        <include refid="search"/>
+            <if test="commentId != null "> and comment_id = #{commentId}</if>
+            <if test="orderId != null "> and order_id = #{orderId}</if>
+            <if test="orderItemId != null "> and order_item_id = #{orderItemId}</if>
+            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
+            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
+            <if test="fromUserId != null "> and from_user_id = #{fromUserId}</if>
+            <if test="fromUserName != null  and fromUserName != ''"> and from_user_name like concat('%', #{fromUserName}, '%')</if>
+            <if test="fromRoleType != null  and fromRoleType != ''"> and from_role_type = #{fromRoleType}</if>
+            <if test="fromRoleTitle != null  and fromRoleTitle != ''"> and from_role_title = #{fromRoleTitle}</if>
+            <if test="toUserId != null "> and to_user_id = #{toUserId}</if>
+            <if test="toUserName != null  and toUserName != ''"> and to_user_name like concat('%', #{toUserName}, '%')</if>
+            <if test="toRoleType != null  and toRoleType != ''"> and to_role_type = #{toRoleType}</if>
+            <if test="toRoleTitle != null  and toRoleTitle != ''"> and to_role_title = #{toRoleTitle}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
+
+    </select>
+
+    <select id="selectXfptCommentReplyById" parameterType="Long" resultMap="XfptCommentReplyResult">
+        <include refid="selectXfptCommentReplyVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptCommentReply" parameterType="XfptCommentReply" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_comment_reply
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="commentId != null">comment_id,</if>
+            <if test="orderId != null">order_id,</if>
+            <if test="orderItemId != null">order_item_id,</if>
+            <if test="goodsId != null">goods_id,</if>
+            <if test="supplierId != null">supplier_id,</if>
+            <if test="fromUserId != null">from_user_id,</if>
+            <if test="fromUserName != null and fromUserName != ''">from_user_name,</if>
+            <if test="fromRoleType != null and fromRoleType != ''">from_role_type,</if>
+            <if test="fromRoleTitle != null and fromRoleTitle != ''">from_role_title,</if>
+            <if test="toUserId != null">to_user_id,</if>
+            <if test="toUserName != null">to_user_name,</if>
+            <if test="toRoleType != null">to_role_type,</if>
+            <if test="toRoleTitle != null">to_role_title,</if>
+            <if test="content != null">content,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="sortNum != null">sort_num,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="commentId != null">#{commentId},</if>
+            <if test="orderId != null">#{orderId},</if>
+            <if test="orderItemId != null">#{orderItemId},</if>
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="supplierId != null">#{supplierId},</if>
+            <if test="fromUserId != null">#{fromUserId},</if>
+            <if test="fromUserName != null and fromUserName != ''">#{fromUserName},</if>
+            <if test="fromRoleType != null and fromRoleType != ''">#{fromRoleType},</if>
+            <if test="fromRoleTitle != null and fromRoleTitle != ''">#{fromRoleTitle},</if>
+            <if test="toUserId != null">#{toUserId},</if>
+            <if test="toUserName != null">#{toUserName},</if>
+            <if test="toRoleType != null">#{toRoleType},</if>
+            <if test="toRoleTitle != null">#{toRoleTitle},</if>
+            <if test="content != null">#{content},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="sortNum != null">#{sortNum},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptCommentReply" parameterType="XfptCommentReply">
+        update xfpt_comment_reply
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="commentId != null">comment_id = #{commentId},</if>
+            <if test="orderId != null">order_id = #{orderId},</if>
+            <if test="orderItemId != null">order_item_id = #{orderItemId},</if>
+            <if test="goodsId != null">goods_id = #{goodsId},</if>
+            <if test="supplierId != null">supplier_id = #{supplierId},</if>
+            <if test="fromUserId != null">from_user_id = #{fromUserId},</if>
+            <if test="fromUserName != null and fromUserName != ''">from_user_name = #{fromUserName},</if>
+            <if test="fromRoleType != null and fromRoleType != ''">from_role_type = #{fromRoleType},</if>
+            <if test="fromRoleTitle != null and fromRoleTitle != ''">from_role_title = #{fromRoleTitle},</if>
+            <if test="toUserId != null">to_user_id = #{toUserId},</if>
+            <if test="toUserName != null">to_user_name = #{toUserName},</if>
+            <if test="toRoleType != null">to_role_type = #{toRoleType},</if>
+            <if test="toRoleTitle != null">to_role_title = #{toRoleTitle},</if>
+            <if test="content != null">content = #{content},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptCommentReplyById" parameterType="Long">
+        delete from xfpt_comment_reply where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptCommentReplyByIds" parameterType="String">
+        delete from xfpt_comment_reply where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>

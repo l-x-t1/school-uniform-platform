@@ -71,6 +71,12 @@ public class GenUtils
             {
                 column.setJavaType(GenConstants.TYPE_INTEGER);
             }
+            // MySQL 8 不再保留 int(11) 这类显示宽度，information_schema 可能只返回 int/tinyint。
+            else if ("tinyint".equals(dataType) || "smallint".equals(dataType) || "mediumint".equals(dataType)
+                    || "int".equals(dataType) || "integer".equals(dataType) || "bit".equals(dataType))
+            {
+                column.setJavaType(GenConstants.TYPE_INTEGER);
+            }
             // 长整形
             else
             {

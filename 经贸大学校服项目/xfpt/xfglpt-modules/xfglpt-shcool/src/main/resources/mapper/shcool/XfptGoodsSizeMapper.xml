@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptGoodsSizeMapper">
+
+    <resultMap type="XfptGoodsSize" id="XfptGoodsSizeResult">
+        <result property="id"    column="id"    />
+        <result property="goodsId"    column="goods_id"    />
+        <result property="sizeCode"    column="size_code"    />
+        <result property="sortNum"    column="sort_num"    />
+        <result property="genderType"    column="gender_type"    />
+        <result property="measureJson"    column="measure_json"    />
+        <result property="retailPrice"    column="retail_price"    />
+        <result property="groupPrice"    column="group_price"    />
+        <result property="stockNum"    column="stock_num"    />
+        <result property="status"    column="status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+        <result property="remark"    column="remark"    />
+        <result property="delFlag"    column="del_flag"    />
+    </resultMap>
+
+    <sql id="selectXfptGoodsSizeVo">
+        select id, goods_id, size_code, sort_num, gender_type, measure_json, retail_price, group_price, stock_num, status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_goods_size
+    </sql>
+
+    <select id="selectXfptGoodsSizeList" parameterType="XfptGoodsSize" resultMap="XfptGoodsSizeResult">
+        <include refid="selectXfptGoodsSizeVo"/>
+        <include refid="search"/>
+            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
+            <if test="sizeCode != null  and sizeCode != ''"> and size_code like concat('%', #{sizeCode}, '%')</if>
+            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
+            <if test="genderType != null  and genderType != ''"> and gender_type = #{genderType}</if>
+            <if test="retailPrice != null "> and retail_price = #{retailPrice}</if>
+            <if test="groupPrice != null "> and group_price = #{groupPrice}</if>
+            <if test="stockNum != null "> and stock_num = #{stockNum}</if>
+            <if test="status != null  and status != ''"> and status = #{status}</if>
+
+    </select>
+
+    <select id="selectXfptGoodsSizeById" parameterType="Long" resultMap="XfptGoodsSizeResult">
+        <include refid="selectXfptGoodsSizeVo"/>
+        where id = #{id}
+    </select>
+
+    <insert id="insertXfptGoodsSize" parameterType="XfptGoodsSize" useGeneratedKeys="true" keyProperty="id">
+        insert into xfpt_goods_size
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="goodsId != null">goods_id,</if>
+            <if test="sizeCode != null and sizeCode != ''">size_code,</if>
+            <if test="sortNum != null">sort_num,</if>
+            <if test="genderType != null">gender_type,</if>
+            <if test="measureJson != null">measure_json,</if>
+            <if test="retailPrice != null">retail_price,</if>
+            <if test="groupPrice != null">group_price,</if>
+            <if test="stockNum != null">stock_num,</if>
+            <if test="status != null and status != ''">status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="remark != null">remark,</if>
+            <if test="delFlag != null and delFlag != ''">del_flag,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="goodsId != null">#{goodsId},</if>
+            <if test="sizeCode != null and sizeCode != ''">#{sizeCode},</if>
+            <if test="sortNum != null">#{sortNum},</if>
+            <if test="genderType != null">#{genderType},</if>
+            <if test="measureJson != null">#{measureJson},</if>
+            <if test="retailPrice != null">#{retailPrice},</if>
+            <if test="groupPrice != null">#{groupPrice},</if>
+            <if test="stockNum != null">#{stockNum},</if>
+            <if test="status != null and status != ''">#{status},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="remark != null">#{remark},</if>
+            <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
+         </trim>
+    </insert>
+
+    <update id="updateXfptGoodsSize" parameterType="XfptGoodsSize">
+        update xfpt_goods_size
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="goodsId != null">goods_id = #{goodsId},</if>
+            <if test="sizeCode != null and sizeCode != ''">size_code = #{sizeCode},</if>
+            <if test="sortNum != null">sort_num = #{sortNum},</if>
+            <if test="genderType != null">gender_type = #{genderType},</if>
+            <if test="measureJson != null">measure_json = #{measureJson},</if>
+            <if test="retailPrice != null">retail_price = #{retailPrice},</if>
+            <if test="groupPrice != null">group_price = #{groupPrice},</if>
+            <if test="stockNum != null">stock_num = #{stockNum},</if>
+            <if test="status != null and status != ''">status = #{status},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="remark != null">remark = #{remark},</if>
+            <if test="delFlag != null and delFlag != ''">del_flag = #{delFlag},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteXfptGoodsSizeById" parameterType="Long">
+        delete from xfpt_goods_size where id = #{id}
+    </delete>
+
+    <delete id="deleteXfptGoodsSizeByIds" parameterType="String">
+        delete from xfpt_goods_size where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <sql id="search">
+        where del_flag = 0
+    </sql>
+</mapper>
