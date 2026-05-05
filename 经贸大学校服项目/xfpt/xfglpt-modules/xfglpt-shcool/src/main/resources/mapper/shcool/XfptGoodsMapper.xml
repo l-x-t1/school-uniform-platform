@@ -30,7 +30,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptGoodsXfptGoodsSizeResult" type="XfptGoods" extends="XfptGoodsResult">
-        <collection property="xfptGoodsSizeList" ofType="XfptGoodsSize" column="id" select="selectXfptGoodsSizeList" />
+        <collection property="xfptGoodsSizeList" ofType="XfptGoodsSize" column="id" select="selectXfptGoodsSizeById" />
     </resultMap>
 
     <resultMap type="XfptGoodsSize" id="XfptGoodsSizeResult">
@@ -88,10 +88,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptGoodsSizeList" resultMap="XfptGoodsSizeResult">
+    <select id="selectXfptGoodsSizeById" resultMap="XfptGoodsSizeResult">
         select id, goods_id, size_code, sort_num, gender_type, measure_json, retail_price, group_price, stock_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_goods_size
-        where goods_id = #{goods_id}
+        where goods_id = #{id}
     </select>
 
     <insert id="insertXfptGoods" parameterType="XfptGoods" useGeneratedKeys="true" keyProperty="id">
@@ -191,7 +191,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptGoodsSizeByGoodsId" parameterType="Long">
-        delete from xfpt_goods_size where goods_id = #{goodsId}
+        delete from xfpt_goods_size where goods_id = #{id}
     </delete>
 
     <insert id="batchInsertXfptGoodsSize">
