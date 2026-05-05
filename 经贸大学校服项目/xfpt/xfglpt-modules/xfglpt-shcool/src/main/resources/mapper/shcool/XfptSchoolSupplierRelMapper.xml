@@ -63,10 +63,19 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptSchoolSupplierGoodsRelList" resultMap="XfptSchoolSupplierGoodsRelResult">
+    <sql id="selectXfptSchoolSupplierGoodsRelVo">
         select id, rel_id, school_id, supplier_id, goods_id, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_school_supplier_goods_rel
-        where rel_id = #{rel_id}
+    </sql>
+
+    <select id="selectXfptSchoolSupplierGoodsRelList" resultMap="XfptSchoolSupplierGoodsRelResult">
+        <include refid="selectXfptSchoolSupplierGoodsRelVo"/>
+        where rel_id = #{id}
+    </select>
+
+    <select id="selectXfptSchoolSupplierGoodsRelById" resultMap="XfptSchoolSupplierGoodsRelResult">
+        <include refid="selectXfptSchoolSupplierGoodsRelVo"/>
+        where rel_id = #{id}
     </select>
 
     <insert id="insertXfptSchoolSupplierRel" parameterType="XfptSchoolSupplierRel" useGeneratedKeys="true" keyProperty="id">
@@ -142,10 +151,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptSchoolSupplierGoodsRelByRelId" parameterType="Long">
-        delete from xfpt_school_supplier_goods_rel where rel_id = #{relId}
+        delete from xfpt_school_supplier_goods_rel where rel_id = #{id}
     </delete>
 
-    <insert id="batchXfptSchoolSupplierGoodsRel">
+    <insert id="batchInsertXfptSchoolSupplierGoodsRel">
         insert into xfpt_school_supplier_goods_rel( id, rel_id, school_id, supplier_id, goods_id, status, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.relId}, #{item.schoolId}, #{item.supplierId}, #{item.goodsId}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
