@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
+import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.mapper.XfptProductionOrderItemMapper;
 import com.xfgl.school.domain.XfptProductionOrderItem;
 import com.xfgl.school.service.IXfptProductionOrderItemService;
@@ -22,6 +23,13 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
     @Autowired
     private XfptProductionOrderItemMapper xfptProductionOrderItemMapper;
 
+    @Override
+    public boolean save(XfptProductionOrderItem xfptProductionOrderItem)
+    {
+        initDefaultValue(xfptProductionOrderItem);
+        return super.save(xfptProductionOrderItem);
+    }
+
     /**
      * 查询生产单明细列表
      *
@@ -34,5 +42,14 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
         return xfptProductionOrderItemMapper.selectXfptProductionOrderItemList(xfptProductionOrderItem);
     }
 
+    private void initDefaultValue(XfptProductionOrderItem xfptProductionOrderItem)
+    {
+        if (StringUtils.isEmpty(xfptProductionOrderItem.getStatus())) {
+            xfptProductionOrderItem.setStatus("0");
+        }
+        if (xfptProductionOrderItem.getFinishNum() == null) {
+            xfptProductionOrderItem.setFinishNum(0);
+        }
+    }
 
 }
