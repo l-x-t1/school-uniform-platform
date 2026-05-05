@@ -96,9 +96,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
             <if test="payStatus != null  and payStatus != ''"> and pay_status = #{payStatus}</if>
             <if test="orderStatus != null  and orderStatus != ''"> and order_status = #{orderStatus}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
-            <if test="cancelTime != null "> and cancel_time = #{cancelTime}</if>
-            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="payTime != null ">
+                and pay_time &gt;= #{payTime}
+                and pay_time &lt; date_add(#{payTime}, interval 1 day)
+            </if>
+            <if test="cancelTime != null ">
+                and cancel_time &gt;= #{cancelTime}
+                and cancel_time &lt; date_add(#{cancelTime}, interval 1 day)
+            </if>
+            <if test="finishTime != null ">
+                and finish_time &gt;= #{finishTime}
+                and finish_time &lt; date_add(#{finishTime}, interval 1 day)
+            </if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>
@@ -248,7 +257,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptOrderItemByOrderId" parameterType="Long">
-        delete from xfpt_order_item where order_id = #{orderId}
+        delete from xfpt_order_item where order_id = #{id}
     </delete>
 
     <insert id="batchXfptOrderItem">

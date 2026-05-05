@@ -63,7 +63,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="payeeAccountName != null  and payeeAccountName != ''"> and payee_account_name like concat('%', #{payeeAccountName}, '%')</if>
             <if test="payeeBankName != null  and payeeBankName != ''"> and payee_bank_name like concat('%', #{payeeBankName}, '%')</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="tradeTime != null "> and trade_time = #{tradeTime}</if>
+            <if test="tradeTime != null ">
+                and trade_time &gt;= #{tradeTime}
+                and trade_time &lt; date_add(#{tradeTime}, interval 1 day)
+            </if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>
