@@ -199,7 +199,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         delete from xfpt_delivery_order_item where delivery_id = #{deliveryId}
     </delete>
 
-    <insert id="batchXfptDeliveryOrderItem">
+    <insert id="batchInsertXfptDeliveryOrderItem">
         insert into xfpt_delivery_order_item( id, delivery_id, order_item_id, goods_id, size_id, goods_name, size_name, delivery_num, sign_num, status, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.deliveryId}, #{item.orderItemId}, #{item.goodsId}, #{item.sizeId}, #{item.goodsName}, #{item.sizeName}, #{item.deliveryNum}, #{item.signNum}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
