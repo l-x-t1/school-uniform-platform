@@ -196,7 +196,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptDeliveryOrderItemByDeliveryId" parameterType="Long">
-        delete from xfpt_delivery_order_item where delivery_id = #{deliveryId}
+        delete from xfpt_delivery_order_item where delivery_id = #{id}
     </delete>
 
     <insert id="batchInsertXfptDeliveryOrderItem">
