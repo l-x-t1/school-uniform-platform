@@ -87,10 +87,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptDeliveryOrderItemList" resultMap="XfptDeliveryOrderItemResult">
+    <select id="selectXfptDeliveryOrderItemById" resultMap="XfptDeliveryOrderItemResult">
         select id, delivery_id, order_item_id, goods_id, size_id, goods_name, size_name, delivery_num, sign_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_delivery_order_item
-        where delivery_id = #{delivery_id}
+        where delivery_id = #{id}
     </select>
 
     <insert id="insertXfptDeliveryOrder" parameterType="XfptDeliveryOrder" useGeneratedKeys="true" keyProperty="id">
