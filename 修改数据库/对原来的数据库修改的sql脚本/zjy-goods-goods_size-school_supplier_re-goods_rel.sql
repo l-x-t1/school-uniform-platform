@@ -119,6 +119,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
   `notice_id` bigint DEFAULT NULL COMMENT '统购公告ID',
   `contract_id` bigint DEFAULT NULL COMMENT '合同ID',
   `cooperate_status` char(1) NOT NULL COMMENT '合作状态，1合作中 2已取消 3历史合作 4公告期内',
+  `service_phone` varchar(50) DEFAULT NULL COMMENT '服务电话',
   `create_by` varchar(64) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` varchar(64) DEFAULT NULL COMMENT '更新人',
@@ -137,7 +138,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
 
 LOCK TABLES `xfpt_school_supplier_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_rel` VALUES (910000701,442,'石家庄市麒麟小学',223,'测试一',910000501,910030001,'1','seed','2026-05-01 11:00:00',NULL,NULL,'SEED_SUPPLIER_CLOSED_LOOP_20260501','0');
+INSERT INTO `xfpt_school_supplier_rel` VALUES (910000701,442,'石家庄市麒麟小学',223,'测试一',910000501,910030001,'1',NULL,'seed','2026-05-01 11:00:00',NULL,NULL,'SEED_SUPPLIER_CLOSED_LOOP_20260501','0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -13,6 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="noticeId"    column="notice_id"    />
         <result property="contractId"    column="contract_id"    />
         <result property="cooperateStatus"    column="cooperate_status"    />
+        <result property="servicePhone"    column="service_phone"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -41,7 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptSchoolSupplierRelVo">
-        select id, school_id, school_name, supplier_id, supplier_name, notice_id, contract_id, cooperate_status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_school_supplier_rel
+        select id, school_id, school_name, supplier_id, supplier_name, notice_id, contract_id, cooperate_status, service_phone, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_school_supplier_rel
     </sql>
 
     <select id="selectXfptSchoolSupplierRelList" parameterType="XfptSchoolSupplierRel" resultMap="XfptSchoolSupplierRelResult">
@@ -54,11 +55,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeId != null "> and notice_id = #{noticeId}</if>
             <if test="contractId != null "> and contract_id = #{contractId}</if>
             <if test="cooperateStatus != null  and cooperateStatus != ''"> and cooperate_status = #{cooperateStatus}</if>
+            <if test="servicePhone != null  and servicePhone != ''"> and service_phone like concat('%', #{servicePhone}, '%')</if>
 
     </select>
 
     <select id="selectXfptSchoolSupplierRelById" parameterType="Long" resultMap="XfptSchoolSupplierRelXfptSchoolSupplierGoodsRelResult">
-        select id, school_id, school_name, supplier_id, supplier_name, notice_id, contract_id, cooperate_status, create_by, create_time, update_by, update_time, remark, del_flag
+        select id, school_id, school_name, supplier_id, supplier_name, notice_id, contract_id, cooperate_status, service_phone, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_school_supplier_rel
         where id = #{id}
     </select>
@@ -88,6 +90,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeId != null">notice_id,</if>
             <if test="contractId != null">contract_id,</if>
             <if test="cooperateStatus != null and cooperateStatus != ''">cooperate_status,</if>
+            <if test="servicePhone != null and servicePhone != ''">service_phone,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
@@ -103,6 +106,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeId != null">#{noticeId},</if>
             <if test="contractId != null">#{contractId},</if>
             <if test="cooperateStatus != null and cooperateStatus != ''">#{cooperateStatus},</if>
+            <if test="servicePhone != null and servicePhone != ''">#{servicePhone},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
@@ -122,6 +126,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeId != null">notice_id = #{noticeId},</if>
             <if test="contractId != null">contract_id = #{contractId},</if>
             <if test="cooperateStatus != null and cooperateStatus != ''">cooperate_status = #{cooperateStatus},</if>
+            <if test="servicePhone != null">service_phone = #{servicePhone},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
