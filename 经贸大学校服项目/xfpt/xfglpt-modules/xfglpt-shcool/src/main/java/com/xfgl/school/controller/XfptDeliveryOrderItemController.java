@@ -81,6 +81,9 @@ public class XfptDeliveryOrderItemController extends BaseController {
     @Log(title = "发货单明细" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptDeliveryOrderItem xfptDeliveryOrderItem) {
+            if (xfptDeliveryOrderItem.getStatus() == null || "".equals(xfptDeliveryOrderItem.getStatus())) {
+                    xfptDeliveryOrderItem.setStatus("0");
+            }
             return toAjax(xfptDeliveryOrderItemService.save(xfptDeliveryOrderItem));
     }
 
