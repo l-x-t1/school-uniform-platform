@@ -87,10 +87,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptDeliveryOrderItemList" resultMap="XfptDeliveryOrderItemResult">
+    <select id="selectXfptDeliveryOrderItemById" resultMap="XfptDeliveryOrderItemResult">
         select id, delivery_id, order_item_id, goods_id, size_id, goods_name, size_name, delivery_num, sign_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_delivery_order_item
-        where delivery_id = #{delivery_id}
+        where delivery_id = #{id}
     </select>
 
     <insert id="insertXfptDeliveryOrder" parameterType="XfptDeliveryOrder" useGeneratedKeys="true" keyProperty="id">
@@ -196,10 +196,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptDeliveryOrderItemByDeliveryId" parameterType="Long">
-        delete from xfpt_delivery_order_item where delivery_id = #{deliveryId}
+        delete from xfpt_delivery_order_item where delivery_id = #{id}
     </delete>
 
-    <insert id="batchXfptDeliveryOrderItem">
+    <insert id="batchInsertXfptDeliveryOrderItem">
         insert into xfpt_delivery_order_item( id, delivery_id, order_item_id, goods_id, size_id, goods_name, size_name, delivery_num, sign_num, status, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.deliveryId}, #{item.orderItemId}, #{item.goodsId}, #{item.sizeId}, #{item.goodsName}, #{item.sizeName}, #{item.deliveryNum}, #{item.signNum}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})

@@ -93,6 +93,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where notice_id = #{notice_id}
     </select>
 
+    <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
+        select id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_group_notice_item
+        where notice_id = #{id}
+    </select>
+
     <insert id="insertXfptGroupNotice" parameterType="XfptGroupNotice" useGeneratedKeys="true" keyProperty="id">
         insert into xfpt_group_notice
         <trim prefix="(" suffix=")" suffixOverrides=",">
@@ -196,10 +202,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptGroupNoticeItemByNoticeId" parameterType="Long">
-        delete from xfpt_group_notice_item where notice_id = #{noticeId}
+        delete from xfpt_group_notice_item where notice_id = #{id}
     </delete>
 
-    <insert id="batchXfptGroupNoticeItem">
+    <insert id="batchInsertXfptGroupNoticeItem">
         insert into xfpt_group_notice_item( id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.noticeId}, #{item.goodsId}, #{item.goodsName}, #{item.sizeRuleJson}, #{item.unitName}, #{item.buyNum}, #{item.priceDesc}, #{item.gradeIds}, #{item.gradeNames}, #{item.deptId}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
