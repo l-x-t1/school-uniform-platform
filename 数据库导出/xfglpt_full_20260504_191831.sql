@@ -3482,7 +3482,7 @@ DROP TABLE IF EXISTS `xfpt_supplice_inspection_report`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_supplice_inspection_report` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `DEPT_ID` varchar(100) DEFAULT NULL,
   `DEPT_NAME` varchar(100) DEFAULT NULL,
   `SUPPLIER_ID` varchar(100) DEFAULT NULL,
