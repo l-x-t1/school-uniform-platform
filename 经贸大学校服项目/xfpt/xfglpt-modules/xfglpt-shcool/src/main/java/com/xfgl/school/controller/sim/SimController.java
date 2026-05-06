@@ -32,19 +32,19 @@ import java.util.Map;
 @Slf4j
 public class SimController {
 
-    @Value("${sim.ip}")
+    @Value("${sim.ip:}")
     private String simIp;
 
-    @Value("${sim.getCode}")
+    @Value("${sim.getCode:}")
     private String simGetCodeUri;
 
-    @Value("${sim.getToken}")
+    @Value("${sim.getToken:}")
     private String simGetTokenUri;
 
-    @Value("${sim.redirecturi}")
+    @Value("${sim.redirecturi:}")
     private String simRedirectUri;
 
-    @Value("${sim.getUser}")
+    @Value("${sim.getUser:}")
     private String simGetUserUri;
 
     @Autowired

@@ -42,6 +42,8 @@ public class SysLoginService
     @Autowired
     private MpUtil mpUtil;
 
+    private static final String[] BCRYPT_PREFIXES = {"$2a$", "$2b$", "$2y$"};
+
     /**
      * 登录
      */
@@ -95,9 +97,12 @@ public class SysLoginService
             throw new ServiceException("对不起，您的账号：" + username + " 已停用");
         }
         //解密user的密码
-        String token = mpUtil.getToken();
-        String decrypt = mpUtil.decrypt(user.getPassword(), token);
-        user.setPassword(decrypt);
+        if (!isBcryptPassword(user.getPassword()))
+        {
+            String token = mpUtil.getToken();
+            String decrypt = mpUtil.decrypt(user.getPassword(), token);
+            user.setPassword(decrypt);
+        }
         passwordService.validate(user, password);
         recordLogService.recordLogininfor(username, Constants.LOGIN_SUCCESS, "登录成功");
         recordLoginInfo(user.getUserId());
@@ -158,5 +163,20 @@ public class SysLoginService
             throw new ServiceException(registerResult.getMsg());
         }
         recordLogService.recordLogininfor(username, Constants.REGISTER, "注册成功");
+    }
+    private boolean isBcryptPassword(String password)
+    {
+        if (StringUtils.isBlank(password))
+        {
+            return false;
+        }
+        for (String prefix : BCRYPT_PREFIXES)
+        {
+            if (password.startsWith(prefix))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }
