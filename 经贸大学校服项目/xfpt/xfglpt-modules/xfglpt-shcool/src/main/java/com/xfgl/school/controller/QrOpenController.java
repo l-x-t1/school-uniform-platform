@@ -672,7 +672,7 @@ public class QrOpenController extends BaseController {
     private IXfptSuppliceContractSonService xfptSuppliceContractSonService;
     @Autowired
     private IXfptSuppliceContractService iXfptSuppliceContractService;
-    @Value("${fileUrl}")
+    @Value("${fileUrl:}")
     public String fileUrl;
     @Autowired
     private MpUtil mpUtil;

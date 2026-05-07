@@ -72,7 +72,7 @@ public class XfptSuppliceContractSonController extends BaseController {
     @Autowired
     private ITeamMeetingSonService iTeamMeetingSonService;
 
-    @Value("${fileUrl}")
+    @Value("${fileUrl:}")
     public String fileUrl;
     @Autowired
     private MpUtil mpUtil;

@@ -16,24 +16,24 @@ import java.util.LinkedHashMap;
 @Component
 public class SimRequestUtil {
 
-    @Value("${sim.ip}")
+    @Value("${sim.ip:}")
     private String simIp;
 
-    @Value("${sim.getCode}")
+    @Value("${sim.getCode:}")
     private String simGetCodeUri;
 
-    @Value("${sim.getToken}")
+    @Value("${sim.getToken:}")
     private String simGetTokenUri;
 
-    @Value("${sim.redirecturi}")
+    @Value("${sim.redirecturi:}")
     private String simRedirectUri;
 
-    @Value("${sim.getUser}")
+    @Value("${sim.getUser:}")
     private String simGetUserUri;
 
-    @Value("${sim.clientId}")
+    @Value("${sim.clientId:}")
     private String clientId;
-    @Value("${sim.clientSecret}")
+    @Value("${sim.clientSecret:}")
     private String clientSecret;
 
     public void getCode() {

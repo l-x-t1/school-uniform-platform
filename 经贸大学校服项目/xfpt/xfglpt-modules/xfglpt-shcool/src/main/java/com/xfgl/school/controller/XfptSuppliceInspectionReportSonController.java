@@ -41,7 +41,7 @@ import java.util.zip.ZipOutputStream;
 public class XfptSuppliceInspectionReportSonController extends BaseController {
     @Autowired
     private IXfptSuppliceInspectionReportSonService xfptSuppliceInspectionReportSonService;
-    @Value("${fileUrl}")
+    @Value("${fileUrl:}")
     public String fileUrl;
     /**
      * 查询学校与供应商检验报告从列表
