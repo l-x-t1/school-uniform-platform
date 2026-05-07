@@ -25,7 +25,7 @@ public interface XfptOrderInfoMapper extends BaseMapper<XfptOrderInfo> {
          * @param id 订单信息主键
          * @return 订单信息
          */
-        List<XfptOrderItem> selectXfptOrderItemById(@Param("id")Long id);
+        List<XfptOrderItem> selectXfptOrderItemList(@Param("order_id") Long orderId);
 
         /**
          * 删除订单信息信息

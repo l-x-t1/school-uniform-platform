@@ -48,7 +48,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         public XfptOrderInfo selectXfptOrderInfoById(Long id)
         {
             XfptOrderInfo xfptOrderInfo = xfptOrderInfoMapper.selectById(id);
-            List<XfptOrderItem> xfptOrderItemList = xfptOrderInfoMapper.selectXfptOrderItemById(id);
+            List<XfptOrderItem> xfptOrderItemList = xfptOrderInfoMapper.selectXfptOrderItemList(id);
             xfptOrderInfo.setXfptOrderItemList(xfptOrderItemList);
             return xfptOrderInfo;
         }
