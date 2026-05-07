@@ -115,6 +115,19 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/school/accountBalance",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/accountBalance/index"),
+        name: "AccountBalance",
+        meta: { title: "账户余额", activeMenu: "/newFeature/accountBalance" },
+      },
+    ],
+  },
+  {
     path: "/bxactiveAdd",
     component: Layout,
     name: "Bxactive",
