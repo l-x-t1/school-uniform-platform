@@ -49,6 +49,14 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="服务电话" prop="servicePhone">
+        <el-input
+          v-model="queryParams.servicePhone"
+          placeholder="请输入服务电话"
+          clearable
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -111,6 +119,7 @@
       <el-table-column label="统购公告ID" align="center" prop="noticeId" />
       <el-table-column label="合同ID" align="center" prop="contractId" />
       <el-table-column label="合作状态，1合作中 2已取消 3历史合作 4公告期内" align="center" prop="cooperateStatus" />
+      <el-table-column label="服务电话" align="center" prop="servicePhone" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -160,6 +169,9 @@
         </el-form-item>
         <el-form-item label="合同ID" prop="contractId">
           <el-input v-model="form.contractId" placeholder="请输入合同ID" />
+        </el-form-item>
+        <el-form-item label="服务电话" prop="servicePhone">
+          <el-input v-model="form.servicePhone" placeholder="请输入服务电话" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -251,6 +263,7 @@ export default {
         noticeId: null,
         contractId: null,
         cooperateStatus: null,
+        servicePhone: null,
       },
       // 表单参数
       form: {},
@@ -306,6 +319,7 @@ export default {
         noticeId: null,
         contractId: null,
         cooperateStatus: null,
+        servicePhone: null,
         createBy: null,
         createTime: null,
         updateBy: null,

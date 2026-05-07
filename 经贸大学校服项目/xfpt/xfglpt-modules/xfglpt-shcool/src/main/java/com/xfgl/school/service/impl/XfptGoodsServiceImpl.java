@@ -123,7 +123,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         {
             List<XfptGoodsSize> xfptGoodsSizeList = xfptGoods.getXfptGoodsSizeList();
             Long id = xfptGoods.getId();
-            if (StringUtils.isNotNull(xfptGoodsSizeList)) {
+            if (StringUtils.isNotEmpty(xfptGoodsSizeList)) {
                 for (XfptGoodsSize xfptGoodsSize : xfptGoodsSizeList) {
                     xfptGoodsSize.setGoodsId(id);
                 }

@@ -123,7 +123,7 @@ public class XfptSchoolSupplierRelServiceImpl extends ServiceImpl<XfptSchoolSupp
         {
             List<XfptSchoolSupplierGoodsRel> xfptSchoolSupplierGoodsRelList = xfptSchoolSupplierRel.getXfptSchoolSupplierGoodsRelList();
             Long id = xfptSchoolSupplierRel.getId();
-            if (StringUtils.isNotNull(xfptSchoolSupplierGoodsRelList)) {
+            if (StringUtils.isNotNull(xfptSchoolSupplierGoodsRelList) && !xfptSchoolSupplierGoodsRelList.isEmpty()) {
                 for (XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel : xfptSchoolSupplierGoodsRelList) {
                     xfptSchoolSupplierGoodsRel.setRelId(id);
                 }

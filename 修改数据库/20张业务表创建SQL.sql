@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS `xfpt_school_supplier_rel` (
   `notice_id` bigint DEFAULT NULL COMMENT '统购公告ID',
   `contract_id` bigint DEFAULT NULL COMMENT '合同ID',
   `cooperate_status` char(1) NOT NULL COMMENT '合作状态，1合作中 2已取消 3历史合作 4公告期内',
+  `service_phone` varchar(50) DEFAULT NULL COMMENT '服务电话',
   `create_by` varchar(64) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` varchar(64) DEFAULT NULL COMMENT '更新人',
