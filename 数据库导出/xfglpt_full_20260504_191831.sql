@@ -2870,7 +2870,7 @@ DROP TABLE IF EXISTS `xfpt_questionnaire_config`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_questionnaire_config` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(200) NOT NULL,
   `USE_STATUS` decimal(10,0) NOT NULL DEFAULT '1',
   `CREATE_BY` varchar(100) DEFAULT NULL,
@@ -2913,7 +2913,7 @@ DROP TABLE IF EXISTS `xfpt_questionnaire_result`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_questionnaire_result` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `QUESTIONNAIRE_SURVEY_ID` varchar(100) DEFAULT NULL,
   `SURVEY_ID` varchar(100) DEFAULT NULL,
   `QUESTIONNAIRE_RESULT` varchar(100) DEFAULT NULL,
@@ -2949,7 +2949,7 @@ DROP TABLE IF EXISTS `xfpt_questionnaire_signature`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_questionnaire_signature` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `USER_ID` decimal(19,0) DEFAULT NULL,
   `IMAGE` text,
   `DEL_FLAG` varchar(10) DEFAULT '0',
@@ -2980,7 +2980,7 @@ DROP TABLE IF EXISTS `xfpt_questionnaire_survey`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_questionnaire_survey` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `SURVEY_CONTENT` varchar(255) DEFAULT NULL,
   `SURVEY_RESULT` varchar(255) DEFAULT NULL,
   `CREATE_BY` varchar(100) DEFAULT NULL,
