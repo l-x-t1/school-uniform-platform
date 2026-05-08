@@ -1116,7 +1116,7 @@ DROP TABLE IF EXISTS `sys_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_user` (
-  `USER_ID` bigint NOT NULL,
+  `USER_ID` bigint NOT NULL AUTO_INCREMENT,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
   `USER_NAME` varchar(120) NOT NULL,
   `NICK_NAME` varchar(120) NOT NULL,

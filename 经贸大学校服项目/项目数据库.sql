@@ -17757,7 +17757,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user`;
 CREATE TABLE `sys_user` (
-  `USER_ID` bigint NOT NULL,
+  `USER_ID` bigint NOT NULL AUTO_INCREMENT,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
   `USER_NAME` varchar(120) NOT NULL,
   `NICK_NAME` varchar(120) NOT NULL,
