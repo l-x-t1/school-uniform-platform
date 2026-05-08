@@ -1032,7 +1032,7 @@ DROP TABLE IF EXISTS `sys_role`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_role` (
-  `ROLE_ID` bigint NOT NULL,
+  `ROLE_ID` bigint NOT NULL AUTO_INCREMENT,
   `ROLE_NAME` varchar(120) NOT NULL,
   `ROLE_KEY` varchar(400) NOT NULL,
   `ROLE_SORT` decimal(10,0) NOT NULL,
