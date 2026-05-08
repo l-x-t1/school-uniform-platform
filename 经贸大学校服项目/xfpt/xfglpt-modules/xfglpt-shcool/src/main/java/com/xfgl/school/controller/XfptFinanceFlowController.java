@@ -32,7 +32,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="资金流水管理")
 @RestController
-@RequestMapping("/financeFlow")
+@RequestMapping({"/financeFlow", "/school/financeFlow", "/xfglpt-school/financeFlow"})
 public class XfptFinanceFlowController extends BaseController {
     @Autowired
     private IXfptFinanceFlowService xfptFinanceFlowService;
@@ -88,7 +88,6 @@ public class XfptFinanceFlowController extends BaseController {
      * 修改资金流水
      */
     @Operation(summary = "修改资金流水")
-    @RequiresPermissions("school:financeFlow:edit")
     @Log(title = "资金流水" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptFinanceFlow xfptFinanceFlow) {

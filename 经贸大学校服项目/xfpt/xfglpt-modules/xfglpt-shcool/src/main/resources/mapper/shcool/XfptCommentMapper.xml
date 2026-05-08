@@ -9,6 +9,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderId"    column="order_id"    />
         <result property="orderItemId"    column="order_item_id"    />
         <result property="orderNo"    column="order_no"    />
+        <result property="orderType"    column="order_type"    />
         <result property="goodsId"    column="goods_id"    />
         <result property="goodsName"    column="goods_name"    />
         <result property="userId"    column="user_id"    />
@@ -29,7 +30,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptCommentXfptCommentReplyResult" type="XfptComment" extends="XfptCommentResult">
-        <collection property="xfptCommentReplyList" ofType="XfptCommentReply" column="id" select="selectXfptCommentReplyList" />
+        <collection property="xfptCommentReplyList" ofType="XfptCommentReply" column="id" select="selectXfptCommentReplyById" />
     </resultMap>
 
     <resultMap type="XfptCommentReply" id="XfptCommentReplyResult">
@@ -59,23 +60,26 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptCommentVo">
-        select id, order_id, order_item_id, order_no, goods_id, goods_name, user_id, user_name, supplier_id, score, content, images_json, reply_content, reply_time, status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_comment
+        select c.id, c.order_id, c.order_item_id, c.order_no, o.order_type, c.goods_id, c.goods_name, c.user_id, c.user_name, c.supplier_id, c.score, c.content, c.images_json, c.reply_content, c.reply_time, c.status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag
+        from xfpt_comment c
+        left join xfpt_order_info o on c.order_id = o.id
     </sql>
 
     <select id="selectXfptCommentList" parameterType="XfptComment" resultMap="XfptCommentResult">
         <include refid="selectXfptCommentVo"/>
         <include refid="search"/>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="orderItemId != null "> and order_item_id = #{orderItemId}</if>
-            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="score != null "> and score = #{score}</if>
-            <if test="replyTime != null "> and reply_time = #{replyTime}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="orderId != null "> and c.order_id = #{orderId}</if>
+            <if test="orderItemId != null "> and c.order_item_id = #{orderItemId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and c.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderType != null and orderType != ''"> and o.order_type = #{orderType}</if>
+            <if test="goodsId != null "> and c.goods_id = #{goodsId}</if>
+            <if test="goodsName != null  and goodsName != ''"> and c.goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="userId != null "> and c.user_id = #{userId}</if>
+            <if test="userName != null  and userName != ''"> and c.user_name like concat('%', #{userName}, '%')</if>
+            <if test="supplierId != null "> and c.supplier_id = #{supplierId}</if>
+            <if test="score != null "> and c.score = #{score}</if>
+            <if test="replyTime != null "> and c.reply_time = #{replyTime}</if>
+            <if test="status != null  and status != ''"> and c.status = #{status}</if>
 
     </select>
 
@@ -85,10 +89,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptCommentReplyList" resultMap="XfptCommentReplyResult">
+    <select id="selectXfptCommentReplyById" resultMap="XfptCommentReplyResult">
         select id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_comment_reply
-        where comment_id = #{comment_id}
+        where comment_id = #{id}
     </select>
 
     <insert id="insertXfptComment" parameterType="XfptComment" useGeneratedKeys="true" keyProperty="id">
@@ -185,16 +189,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptCommentReplyByCommentId" parameterType="Long">
-        delete from xfpt_comment_reply where comment_id = #{commentId}
+        delete from xfpt_comment_reply where comment_id = #{id}
     </delete>
 
-    <insert id="batchXfptCommentReply">
+    <insert id="batchInsertXfptCommentReply">
         insert into xfpt_comment_reply( id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.commentId}, #{item.orderId}, #{item.orderItemId}, #{item.goodsId}, #{item.supplierId}, #{item.fromUserId}, #{item.fromUserName}, #{item.fromRoleType}, #{item.fromRoleTitle}, #{item.toUserId}, #{item.toUserName}, #{item.toRoleType}, #{item.toRoleTitle}, #{item.content}, #{item.status}, #{item.sortNum}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
         </foreach>
     </insert>
     <sql id="search">
-        where del_flag = 0
+        where c.del_flag = 0
     </sql>
 </mapper>

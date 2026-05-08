@@ -64,9 +64,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="schoolId != null "> and school_id = #{schoolId}</if>
             <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="plannedFinishTime != null "> and planned_finish_time = #{plannedFinishTime}</if>
-            <if test="startTime != null "> and start_time = #{startTime}</if>
-            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="plannedFinishTime != null "> and date(planned_finish_time) = date(#{plannedFinishTime})</if>
+            <if test="startTime != null "> and date(start_time) = date(#{startTime})</if>
+            <if test="finishTime != null "> and date(finish_time) = date(#{finishTime})</if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>
@@ -77,10 +77,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptProductionOrderItemList" resultMap="XfptProductionOrderItemResult">
+    <select id="selectXfptProductionOrderItemById" resultMap="XfptProductionOrderItemResult">
         select id, production_id, order_item_id, goods_id, size_id, goods_name, size_name, buy_num, finish_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_production_order_item
-        where production_id = #{production_id}
+        where production_id = #{id}
     </select>
 
     <insert id="insertXfptProductionOrder" parameterType="XfptProductionOrder" useGeneratedKeys="true" keyProperty="id">
@@ -171,10 +171,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptProductionOrderItemByProductionId" parameterType="Long">
-        delete from xfpt_production_order_item where production_id = #{productionId}
+        delete from xfpt_production_order_item where production_id = #{id}
     </delete>
 
-    <insert id="batchXfptProductionOrderItem">
+    <insert id="batchInsertXfptProductionOrderItem">
         insert into xfpt_production_order_item( id, production_id, order_item_id, goods_id, size_id, goods_name, size_name, buy_num, finish_num, status, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.productionId}, #{item.orderItemId}, #{item.goodsId}, #{item.sizeId}, #{item.goodsName}, #{item.sizeName}, #{item.buyNum}, #{item.finishNum}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})

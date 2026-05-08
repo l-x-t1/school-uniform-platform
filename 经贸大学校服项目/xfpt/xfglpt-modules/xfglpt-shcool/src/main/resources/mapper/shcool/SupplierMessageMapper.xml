@@ -3,7 +3,7 @@
 PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
     <mapper namespace="com.xfgl.school.mapper.SupplierMessageMapper">
-    <resultMap type="SupplierMessage" id="SupplierMessageResult">
+    <resultMap type="com.xfgl.school.domain.SupplierMessage" id="SupplierMessageResult">
         <result property="id"    column="id"    />
         <result property="supplierName"    column="supplier_name"    />
         <result property="supplierPhone"    column="supplier_phone"    />
@@ -33,7 +33,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select violation_reason,id, supplier_name, supplier_phone, supplier_type, legal_representative, turnover_time, staff_number, established_time, supplier_address, supplier_introduce, equipment_conditions, business_license, create_by, create_time, update_by, update_time, remark,registered_capital,insured_number,blacklist_status,dept_id,dept_name,ancestors from xfpt_supplier_message
     </sql>
 
-    <select id="selectSupplierMessageList" parameterType="SupplierMessage" resultMap="SupplierMessageResult">
+    <select id="selectSupplierMessageList" parameterType="com.xfgl.school.domain.SupplierMessage" resultMap="SupplierMessageResult">
         <include refid="selectSupplierMessageVo"/>
         <include refid="search"/>
             <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
@@ -60,7 +60,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <insert id="insertSupplierMessage" parameterType="SupplierMessage" useGeneratedKeys="true" keyProperty="id">
+    <insert id="insertSupplierMessage" parameterType="com.xfgl.school.domain.SupplierMessage" useGeneratedKeys="true" keyProperty="id">
         insert into xfpt_supplier_message
         <trim prefix="(" suffix=")" suffixOverrides=",">
             <if test="supplierName != null">supplier_name,</if>
@@ -113,7 +113,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
          </trim>
     </insert>
 
-    <update id="updateSupplierMessage" parameterType="SupplierMessage">
+    <update id="updateSupplierMessage" parameterType="com.xfgl.school.domain.SupplierMessage">
         update xfpt_supplier_message
         <trim prefix="SET" suffixOverrides=",">
             <if test="supplierName != null">supplier_name = #{supplierName},</if>
