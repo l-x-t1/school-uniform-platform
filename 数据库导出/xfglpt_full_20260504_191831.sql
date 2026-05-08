@@ -961,7 +961,7 @@ DROP TABLE IF EXISTS `sys_oper_log`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_oper_log` (
-  `OPER_ID` bigint NOT NULL,
+  `OPER_ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(200) DEFAULT '',
   `BUSINESS_TYPE` decimal(10,0) DEFAULT '0',
   `METHOD` varchar(800) DEFAULT '',
@@ -980,7 +980,7 @@ CREATE TABLE `sys_oper_log` (
   `COST_TIME` decimal(19,0) DEFAULT '0',
   `integrity` text,
   PRIMARY KEY (`OPER_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --

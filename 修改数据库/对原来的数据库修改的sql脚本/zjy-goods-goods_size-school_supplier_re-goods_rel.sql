@@ -177,6 +177,76 @@ LOCK TABLES `xfpt_school_supplier_goods_rel` WRITE;
 INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (910000711,910000701,442,223,910000001,'1','seed','2026-05-01 11:05:00',NULL,NULL,'SEED_SUPPLIER_CLOSED_LOOP_20260501','0'),(910000712,910000701,442,223,910000002,'1','seed','2026-05-01 11:06:00',NULL,NULL,'SEED_SUPPLIER_CLOSED_LOOP_20260501','0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Menu updates for 商品管理
+--
+
+SET @product_parent_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `MENU_NAME` = '商品管理' AND `PARENT_ID` = 0
+  LIMIT 1
+);
+SET @product_parent_id := IFNULL(@product_parent_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @product_parent_id, '商品管理', 0, 99, 'goodsManage', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', NOW(), '', NULL, '商品管理目录', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = @product_parent_id);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '商品库管理',
+    `PARENT_ID` = @product_parent_id,
+    `ORDER_NUM` = 1,
+    `ICON` = 'shopping',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '商品库管理菜单'
+WHERE `PERMS` = 'school:goods:list';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '合作学校管理',
+    `PARENT_ID` = @product_parent_id,
+    `ORDER_NUM` = 2,
+    `ICON` = 'peoples',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '合作学校管理菜单'
+WHERE `PERMS` = 'school:schoolSupplierRel:list';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '商品尺码管理',
+    `PARENT_ID` = @product_parent_id,
+    `ORDER_NUM` = 3,
+    `ICON` = 'size',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '商品尺码管理菜单'
+WHERE `PERMS` = 'school:goodsSize:list';
+
+SET @goods_menu_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `PERMS` = 'school:goods:list'
+  LIMIT 1
+);
+SET @goods_import_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `PERMS` = 'school:goods:import'
+  LIMIT 1
+);
+SET @goods_import_id := IFNULL(@goods_import_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @goods_import_id, '商品库管理导入', @goods_menu_id, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:goods:import', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE @goods_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:goods:import');
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
