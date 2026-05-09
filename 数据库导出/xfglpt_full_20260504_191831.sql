@@ -655,7 +655,7 @@ DROP TABLE IF EXISTS `sys_dept`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_dept` (
-  `DEPT_ID` bigint NOT NULL,
+  `DEPT_ID` bigint NOT NULL AUTO_INCREMENT,
   `PARENT_ID` decimal(19,0) DEFAULT '0',
   `ANCESTORS` varchar(200) DEFAULT '',
   `DEPT_NAME` varchar(120) DEFAULT '',
@@ -695,7 +695,7 @@ DROP TABLE IF EXISTS `sys_dict_data`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_dict_data` (
-  `DICT_CODE` bigint NOT NULL,
+  `DICT_CODE` bigint NOT NULL AUTO_INCREMENT,
   `DICT_SORT` decimal(10,0) DEFAULT '0',
   `DICT_LABEL` varchar(400) DEFAULT '',
   `DICT_VALUE` varchar(400) DEFAULT '',
@@ -731,7 +731,7 @@ DROP TABLE IF EXISTS `sys_dict_type`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_dict_type` (
-  `DICT_ID` bigint NOT NULL,
+  `DICT_ID` bigint NOT NULL AUTO_INCREMENT,
   `DICT_NAME` varchar(400) DEFAULT '',
   `DICT_TYPE` varchar(400) DEFAULT '',
   `STATUS` char(4) DEFAULT '0',
@@ -886,7 +886,7 @@ DROP TABLE IF EXISTS `sys_menu`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_menu` (
-  `MENU_ID` bigint NOT NULL,
+  `MENU_ID` bigint NOT NULL AUTO_INCREMENT,
   `MENU_NAME` varchar(200) NOT NULL,
   `PARENT_ID` decimal(19,0) DEFAULT '0',
   `ORDER_NUM` decimal(10,0) DEFAULT '0',
@@ -929,7 +929,7 @@ DROP TABLE IF EXISTS `sys_notice`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_notice` (
-  `NOTICE_ID` bigint NOT NULL,
+  `NOTICE_ID` bigint NOT NULL AUTO_INCREMENT,
   `NOTICE_TITLE` varchar(200) NOT NULL,
   `NOTICE_TYPE` char(4) NOT NULL,
   `STATUS` char(4) DEFAULT '0',
@@ -1000,7 +1000,7 @@ DROP TABLE IF EXISTS `sys_post`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `sys_post` (
-  `POST_ID` bigint NOT NULL,
+  `POST_ID` bigint NOT NULL AUTO_INCREMENT,
   `POST_CODE` varchar(256) NOT NULL,
   `POST_NAME` varchar(200) NOT NULL,
   `POST_SORT` decimal(10,0) NOT NULL,
