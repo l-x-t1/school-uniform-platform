@@ -373,7 +373,7 @@ CREATE TABLE IF NOT EXISTS `xfpt_delivery_order` (
   `receiver_address` varchar(500) NOT NULL COMMENT '收货地址快照',
   `logistics_company` varchar(100) DEFAULT NULL COMMENT '物流公司',
   `logistics_no` varchar(100) DEFAULT NULL COMMENT '物流单号',
-  `delivery_status` char(1) NOT NULL COMMENT '发货状态，0待发货 1已发货 2已签收',
+  `delivery_status` char(1) NOT NULL DEFAULT '0' COMMENT '发货状态，0待发货 1已发货 2已签收',
   `delivery_time` datetime DEFAULT NULL COMMENT '发货时间',
   `sign_time` datetime DEFAULT NULL COMMENT '签收时间',
   `carriage_fee` decimal(18,2) DEFAULT NULL COMMENT '运费',

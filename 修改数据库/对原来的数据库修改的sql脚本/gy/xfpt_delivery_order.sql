@@ -35,7 +35,7 @@ CREATE TABLE `xfpt_delivery_order`  (
   `receiver_address` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '收货地址快照',
   `logistics_company` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '物流公司',
   `logistics_no` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT '物流单号',
-  `delivery_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL COMMENT '发货状态，0待发货 1已发货 2已签收',
+  `delivery_status` char(1) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT '0' COMMENT '发货状态，0待发货 1已发货 2已签收',
   `delivery_time` datetime NULL DEFAULT NULL COMMENT '发货时间',
   `sign_time` datetime NULL DEFAULT NULL COMMENT '签收时间',
   `dept_id` bigint(20) NULL DEFAULT NULL COMMENT '当前归属部门/学校',
