@@ -212,6 +212,27 @@
         <el-form-item label="商品详情富文本">
           <editor v-model="form.detailContent" :min-height="192"/>
         </el-form-item>
+        <el-form-item label="销售类型" prop="saleType">
+          <el-select v-model="form.saleType" placeholder="请选择销售类型">
+            <el-option label="统购" value="1" />
+            <el-option label="零售" value="2" />
+            <el-option label="统购零售" value="3" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="商品状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择商品状态">
+            <el-option label="草稿" value="0" />
+            <el-option label="启用" value="1" />
+            <el-option label="停用" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="上架状态" prop="publishStatus">
+          <el-select v-model="form.publishStatus" placeholder="请选择上架状态">
+            <el-option label="未上架" value="0" />
+            <el-option label="已上架" value="1" />
+            <el-option label="已下架" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="上架时间" prop="publishTime">
           <el-date-picker clearable
             v-model="form.publishTime"
@@ -262,7 +283,9 @@
           <el-table-column label="性别类型，0通用 1男 2女" prop="genderType" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.genderType" placeholder="请选择性别类型，0通用 1男 2女">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="通用" value="0" />
+                <el-option label="男" value="1" />
+                <el-option label="女" value="2" />
               </el-select>
             </template>
           </el-table-column>
@@ -284,7 +307,8 @@
           <el-table-column label="状态，0停用 1启用" prop="status" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.status" placeholder="请选择状态，0停用 1启用">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="停用" value="0" />
+                <el-option label="启用" value="1" />
               </el-select>
             </template>
           </el-table-column>
@@ -338,9 +362,9 @@ export default {
         supplierName: null,
         brandName: null,
         mainImage: null,
-        saleType: null,
-        status: null,
-        publishStatus: null,
+        saleType: "3",
+        status: "1",
+        publishStatus: "0",
         publishTime: null,
         offShelfTime: null,
         sortNum: null,
@@ -421,7 +445,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptGoodsSizeList = [];
       this.resetForm("form");
