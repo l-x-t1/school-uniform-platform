@@ -404,7 +404,7 @@ CREATE TABLE IF NOT EXISTS `xfpt_delivery_order_item` (
   `size_name` varchar(50) DEFAULT NULL COMMENT '尺码名称快照',
   `delivery_num` int NOT NULL COMMENT '发货数量',
   `sign_num` int DEFAULT NULL COMMENT '签收数量',
-  `status` char(1) NOT NULL COMMENT '状态，0待发货 1已发货 2已签收',
+  `status` char(1) NOT NULL DEFAULT '0' COMMENT '状态，0待发货 1已发货 2已签收',
   `create_by` varchar(64) DEFAULT NULL COMMENT '创建人',
   `create_time` datetime DEFAULT NULL COMMENT '创建时间',
   `update_by` varchar(64) DEFAULT NULL COMMENT '更新人',
