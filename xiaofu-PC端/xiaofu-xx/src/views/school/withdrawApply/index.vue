@@ -207,6 +207,15 @@
         <el-form-item label="银行卡或收款账户信息JSON快照" prop="bankInfoJson">
           <el-input v-model="form.bankInfoJson" type="textarea" placeholder="请输入内容" />
         </el-form-item>
+        <el-form-item label="提现状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择提现状态">
+            <el-option label="待审核" value="0" />
+            <el-option label="审核通过" value="1" />
+            <el-option label="审核拒绝" value="2" />
+            <el-option label="已打款" value="3" />
+            <el-option label="已取消" value="4" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="申请时间" prop="applyTime">
           <el-date-picker clearable
             v-model="form.applyTime"
@@ -349,7 +358,7 @@ export default {
         supplierName: null,
         applyAmount: null,
         bankInfoJson: null,
-        status: null,
+        status: "0",
         applyTime: null,
         auditUserId: null,
         auditUserName: null,

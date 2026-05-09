@@ -188,6 +188,34 @@
         <el-form-item label="报名单号" prop="applyNo">
           <el-input v-model="form.applyNo" placeholder="请输入报名单号" />
         </el-form-item>
+        <el-form-item label="报名状态" prop="applyStatus">
+          <el-select v-model="form.applyStatus" placeholder="请选择报名状态">
+            <el-option label="待提交" value="0" />
+            <el-option label="已提交" value="1" />
+            <el-option label="已撤回" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="资质审查状态" prop="qualificationStatus">
+          <el-select v-model="form.qualificationStatus" placeholder="请选择资质审查状态">
+            <el-option label="待审查" value="0" />
+            <el-option label="通过" value="1" />
+            <el-option label="不通过" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="比选阶段状态" prop="bidStageStatus">
+          <el-select v-model="form.bidStageStatus" placeholder="请选择比选阶段状态" clearable>
+            <el-option label="未进入" value="0" />
+            <el-option label="已进入" value="1" />
+            <el-option label="已完成" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="比选结果状态" prop="bidResultStatus">
+          <el-select v-model="form.bidResultStatus" placeholder="请选择比选结果状态" clearable>
+            <el-option label="未出结果" value="0" />
+            <el-option label="已中选" value="1" />
+            <el-option label="未中选" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="报名时间" prop="applyTime">
           <el-date-picker clearable
             v-model="form.applyTime"
@@ -332,8 +360,8 @@ export default {
         supplierId: null,
         supplierName: null,
         applyNo: null,
-        applyStatus: null,
-        qualificationStatus: null,
+        applyStatus: "0",
+        qualificationStatus: "0",
         bidStageStatus: null,
         bidResultStatus: null,
         applyTime: null,
