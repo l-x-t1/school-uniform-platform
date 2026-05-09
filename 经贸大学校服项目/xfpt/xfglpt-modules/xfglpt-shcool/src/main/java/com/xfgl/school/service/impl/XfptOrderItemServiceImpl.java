@@ -34,5 +34,28 @@ public class XfptOrderItemServiceImpl extends ServiceImpl<XfptOrderItemMapper, X
         return xfptOrderItemMapper.selectXfptOrderItemList(xfptOrderItem);
     }
 
+    @Override
+    public boolean save(XfptOrderItem xfptOrderItem)
+    {
+        fillOrderItemDefaults(xfptOrderItem);
+        return super.save(xfptOrderItem);
+    }
+
+    @Override
+    public boolean updateById(XfptOrderItem xfptOrderItem)
+    {
+        fillOrderItemDefaults(xfptOrderItem);
+        return super.updateById(xfptOrderItem);
+    }
+
+    private void fillOrderItemDefaults(XfptOrderItem xfptOrderItem)
+    {
+        if (xfptOrderItem.getSaleType() == null || "".equals(xfptOrderItem.getSaleType())) {
+            xfptOrderItem.setSaleType("1");
+        }
+        if (xfptOrderItem.getDelFlag() == null || "".equals(xfptOrderItem.getDelFlag())) {
+            xfptOrderItem.setDelFlag("0");
+        }
+    }
 
 }

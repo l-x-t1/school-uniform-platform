@@ -63,6 +63,7 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         @Override
         public int insertXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder)
         {
+            fillDeliveryOrderDefaults(xfptDeliveryOrder);
             int rows = xfptDeliveryOrderMapper.insert(xfptDeliveryOrder);
             insertXfptDeliveryOrderItem(xfptDeliveryOrder);
             return rows;
@@ -78,6 +79,7 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         @Override
         public int updateXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder)
         {
+            fillDeliveryOrderDefaults(xfptDeliveryOrder);
                 xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(xfptDeliveryOrder.getId());
             insertXfptDeliveryOrderItem(xfptDeliveryOrder);
             return xfptDeliveryOrderMapper.updateById(xfptDeliveryOrder);
@@ -129,8 +131,21 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
                     if (xfptDeliveryOrderItem.getStatus() == null || "".equals(xfptDeliveryOrderItem.getStatus())) {
                         xfptDeliveryOrderItem.setStatus("0");
                     }
+                    if (xfptDeliveryOrderItem.getDelFlag() == null || "".equals(xfptDeliveryOrderItem.getDelFlag())) {
+                        xfptDeliveryOrderItem.setDelFlag("0");
+                    }
                 }
                     xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(xfptDeliveryOrderItemList);
+            }
+        }
+
+        private void fillDeliveryOrderDefaults(XfptDeliveryOrder xfptDeliveryOrder)
+        {
+            if (xfptDeliveryOrder.getDeliveryStatus() == null || "".equals(xfptDeliveryOrder.getDeliveryStatus())) {
+                xfptDeliveryOrder.setDeliveryStatus("0");
+            }
+            if (xfptDeliveryOrder.getDelFlag() == null || "".equals(xfptDeliveryOrder.getDelFlag())) {
+                xfptDeliveryOrder.setDelFlag("0");
             }
         }
 
