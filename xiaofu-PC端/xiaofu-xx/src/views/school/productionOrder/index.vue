@@ -293,7 +293,9 @@
           <el-table-column label="状态，0待生产 1生产中 2生产完成" prop="status" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.status" placeholder="请选择状态，0待生产 1生产中 2生产完成">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="待生产" value="0" />
+                <el-option label="生产中" value="1" />
+                <el-option label="生产完成" value="2" />
               </el-select>
             </template>
           </el-table-column>
