@@ -54,11 +54,11 @@ public class OrderManagementController {
                 OrderManagementStatisticsVo orderManagementStatisticsVo1 = new OrderManagementStatisticsVo();
                 List<XfptProcSummary> collect1 = list.stream().filter(item -> item.getAncestors().contains(deptId.toString())).collect(Collectors.toList());
                 if (CollUtil.isNotEmpty(collect1)) {
-                    orderManagementStatisticsVo1.setDistrict(deptIdMap.get(deptId).get(0).getDeptName());
+                    orderManagementStatisticsVo1.setDistrict(resolveDeptName(deptId, deptIdMap));
                     orderManagementStatisticsVo1.setBuyCount(collect1.stream().mapToLong(XfptProcSummary::getMoney).sum());
                     orderManagementStatisticsVo1.setSchoolUniformCount(collect1.stream().mapToLong(XfptProcSummary::getCount).sum());
                 } else {
-                    orderManagementStatisticsVo1.setDistrict(deptIdMap.get(deptId).get(0).getDeptName());
+                    orderManagementStatisticsVo1.setDistrict(resolveDeptName(deptId, deptIdMap));
                     orderManagementStatisticsVo1.setBuyCount(0l);
                     orderManagementStatisticsVo1.setSchoolUniformCount(0l);
                 }
@@ -72,11 +72,11 @@ public class OrderManagementController {
             OrderManagementStatisticsVo orderManagementStatisticsVo1 = new OrderManagementStatisticsVo();
             List<XfptProcSummary> list = xfptProcSummaryMapper.statistics(orderManagementStatisticsVo);
             if (CollUtil.isNotEmpty(list)) {
-                orderManagementStatisticsVo1.setDistrict(deptIdMap.get(sysUser.getDeptId()).get(0).getDeptName());
+                orderManagementStatisticsVo1.setDistrict(resolveDeptName(sysUser.getDeptId(), deptIdMap));
                 orderManagementStatisticsVo1.setBuyCount(list.stream().mapToLong(XfptProcSummary::getMoney).sum());
                 orderManagementStatisticsVo1.setSchoolUniformCount(list.stream().mapToLong(XfptProcSummary::getCount).sum());
             } else {
-                orderManagementStatisticsVo1.setDistrict(deptIdMap.get(sysUser.getDeptId()).get(0).getDeptName());
+                orderManagementStatisticsVo1.setDistrict(resolveDeptName(sysUser.getDeptId(), deptIdMap));
                 orderManagementStatisticsVo1.setBuyCount(0l);
                 orderManagementStatisticsVo1.setSchoolUniformCount(0l);
             }
@@ -122,6 +122,18 @@ public class OrderManagementController {
         });
 
         return AjaxResult.success(result);
+    }
+
+    private String resolveDeptName(Long deptId, Map<Long, List<SysDept>> deptIdMap) {
+        List<SysDept> depts = deptIdMap.get(deptId);
+        if (CollUtil.isNotEmpty(depts)) {
+            return depts.get(0).getDeptName();
+        }
+        List<SysDept> currentDept = xfptProcSummaryMapper.selectDeptList2(deptId);
+        if (CollUtil.isNotEmpty(currentDept)) {
+            return currentDept.get(0).getDeptName();
+        }
+        return "";
     }
 
     @PostMapping("/statisticsTypeInfo")

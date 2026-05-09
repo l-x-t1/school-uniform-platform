@@ -1,6 +1,7 @@
 package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xfgl.school.domain.XfptSchoolSupplierGoodsRel;
 import com.xfgl.school.domain.XfptSchoolSupplierRel;
 
 /**
@@ -42,6 +43,32 @@ public interface IXfptSchoolSupplierRelService extends IService<XfptSchoolSuppli
          * @return 结果
          */
         public int updateXfptSchoolSupplierRel(XfptSchoolSupplierRel xfptSchoolSupplierRel);
+
+        /**
+         * 取消合作
+         *
+         * @param id 学校供应商合作关系主键
+         * @return 结果
+         */
+        public int cancelCooperation(Long id);
+
+        /**
+         * 设置服务电话
+         *
+         * @param id 学校供应商合作关系主键
+         * @param servicePhone 服务电话
+         * @return 结果
+         */
+        public int updateServicePhone(Long id, String servicePhone);
+
+        /**
+         * 替换合作商品
+         *
+         * @param id 学校供应商合作关系主键
+         * @param goodsRelList 合作商品列表
+         * @return 结果
+         */
+        public int replaceGoodsRel(Long id, List<XfptSchoolSupplierGoodsRel> goodsRelList);
 
         /**
          * 批量删除学校供应商合作关系

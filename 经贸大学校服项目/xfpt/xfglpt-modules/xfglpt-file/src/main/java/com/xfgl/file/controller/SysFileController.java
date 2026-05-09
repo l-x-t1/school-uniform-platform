@@ -1,5 +1,8 @@
 package com.xfgl.file.controller;
 
+import com.xfgl.common.core.domain.R;
+import com.xfgl.file.service.ISysFileService;
+import com.xfgl.system.api.domain.SysFile;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -7,10 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.xfgl.common.core.domain.R;
-import com.xfgl.common.core.utils.file.FileUtils;
-import com.xfgl.file.service.ISysFileService;
-import com.xfgl.system.api.domain.SysFile;
 
 /**
  * 文件请求处理
@@ -26,7 +25,6 @@ public class SysFileController
     @Autowired
     private ISysFileService sysFileService;
 
-
     /**
      * 文件上传请求
      */
@@ -35,7 +33,7 @@ public class SysFileController
     {
         try
         {
-            log.error("上传文件。。。。。。。");
+            log.info("开始上传文件");
             // 上传并返回访问地址
             String url = sysFileService.uploadFile(file);
             SysFile sysFile = new SysFile();
