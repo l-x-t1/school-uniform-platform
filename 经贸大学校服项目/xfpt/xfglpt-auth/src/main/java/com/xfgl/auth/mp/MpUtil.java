@@ -17,18 +17,26 @@ import java.util.HashMap;
 @Component
 public class MpUtil {
 
-    @Value("${mp.ip}")
+    @Value("${mp.ip:}")
     private String ip;
 
-    @Value("${mp.keyId}")
+    @Value("${mp.keyId:}")
     private String keyId;
 
-    @Value("${mp.clientId}")
+    @Value("${mp.clientId:}")
     private String clientid;
 
-    @Value("${mp.clientSecret}")
+    @Value("${mp.clientSecret:}")
     private String clientSecret;
+
+    private void validateConfig() {
+        if (StrUtil.hasBlank(ip, keyId, clientid, clientSecret)) {
+            throw new IllegalStateException("mp configuration is missing, please configure mp.ip, mp.keyId, mp.clientId and mp.clientSecret");
+        }
+    }
+
     public String getToken(){
+        validateConfig();
         String clientId = clientid+":"+clientSecret;
         String clientIdBase64 = RequestUtils.base64Encode(clientId.getBytes());
         HashMap<String, Object> parm=new HashMap<>();

@@ -34,3 +34,6 @@ spring:
         # 共享配置
         shared-configs:
           - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+
+mybatis-plus:
+  type-aliases-package: com.xfgl.system.domain,com.xfgl.system.api.domain
