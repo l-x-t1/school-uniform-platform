@@ -96,9 +96,18 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
             <if test="payStatus != null  and payStatus != ''"> and pay_status = #{payStatus}</if>
             <if test="orderStatus != null  and orderStatus != ''"> and order_status = #{orderStatus}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
-            <if test="cancelTime != null "> and cancel_time = #{cancelTime}</if>
-            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="payTime != null ">
+                and pay_time &gt;= #{payTime}
+                and pay_time &lt; date_add(#{payTime}, interval 1 day)
+            </if>
+            <if test="cancelTime != null ">
+                and cancel_time &gt;= #{cancelTime}
+                and cancel_time &lt; date_add(#{cancelTime}, interval 1 day)
+            </if>
+            <if test="finishTime != null ">
+                and finish_time &gt;= #{finishTime}
+                and finish_time &lt; date_add(#{finishTime}, interval 1 day)
+            </if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>
@@ -248,10 +257,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptOrderItemByOrderId" parameterType="Long">
-        delete from xfpt_order_item where order_id = #{orderId}
+        delete from xfpt_order_item where order_id = #{id}
     </delete>
 
-    <insert id="batchXfptOrderItem">
+    <insert id="batchInsertXfptOrderItem">
         insert into xfpt_order_item( id, order_id, goods_id, size_id, goods_name, size_name, main_image, sale_type, unit_price, buy_num, item_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.orderId}, #{item.goodsId}, #{item.sizeId}, #{item.goodsName}, #{item.sizeName}, #{item.mainImage}, #{item.saleType}, #{item.unitPrice}, #{item.buyNum}, #{item.itemAmount}, #{item.deptId}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})

@@ -569,7 +569,7 @@ export default {
       obj.sizeName = "";
       obj.deliveryNum = "";
       obj.signNum = "";
-      obj.status = "";
+      obj.status = "0";
       obj.remark = "";
       this.xfptDeliveryOrderItemList.push(obj);
     },

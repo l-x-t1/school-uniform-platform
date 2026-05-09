@@ -53,7 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="statistics" resultType="com.xfgl.school.domain.XfptProcSummary">
         SELECT * FROM XFPT_PROC_SUMMARY proc LEFT JOIN SYS_DEPT dept ON proc.dept_id = dept.dept_id
        <where>
-           <if test="deptId != null"> find_in_set(#{deptId},proc.ancestors)</if>
+           <if test="deptId != null"> (proc.dept_id = #{deptId} OR find_in_set(#{deptId},proc.ancestors))</if>
            <if test="params.beginTime != null and params.beginTime != ''"><!-- 开始时间检索 -->
                AND date_format(buy_time,'%Y%m%d') &gt;= date_format(#{params.beginTime},'%Y%m%d')
            </if>

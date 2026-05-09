@@ -1024,7 +1024,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_dept`;
 CREATE TABLE `sys_dept` (
-  `DEPT_ID` bigint NOT NULL,
+  `DEPT_ID` bigint NOT NULL AUTO_INCREMENT,
   `PARENT_ID` decimal(19,0) DEFAULT '0',
   `ANCESTORS` varchar(200) DEFAULT '',
   `DEPT_NAME` varchar(120) DEFAULT '',
@@ -3091,7 +3091,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_dict_data`;
 CREATE TABLE `sys_dict_data` (
-  `DICT_CODE` bigint NOT NULL,
+  `DICT_CODE` bigint NOT NULL AUTO_INCREMENT,
   `DICT_SORT` decimal(10,0) DEFAULT '0',
   `DICT_LABEL` varchar(400) DEFAULT '',
   `DICT_VALUE` varchar(400) DEFAULT '',
@@ -3242,7 +3242,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_dict_type`;
 CREATE TABLE `sys_dict_type` (
-  `DICT_ID` bigint NOT NULL,
+  `DICT_ID` bigint NOT NULL AUTO_INCREMENT,
   `DICT_NAME` varchar(400) DEFAULT '',
   `DICT_TYPE` varchar(400) DEFAULT '',
   `STATUS` char(4) DEFAULT '0',
@@ -16906,7 +16906,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_menu`;
 CREATE TABLE `sys_menu` (
-  `MENU_ID` bigint NOT NULL,
+  `MENU_ID` bigint NOT NULL AUTO_INCREMENT,
   `MENU_NAME` varchar(200) NOT NULL,
   `PARENT_ID` decimal(19,0) DEFAULT '0',
   `ORDER_NUM` decimal(10,0) DEFAULT '0',
@@ -17142,7 +17142,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_notice`;
 CREATE TABLE `sys_notice` (
-  `NOTICE_ID` bigint NOT NULL,
+  `NOTICE_ID` bigint NOT NULL AUTO_INCREMENT,
   `NOTICE_TITLE` varchar(200) NOT NULL,
   `NOTICE_TYPE` char(4) NOT NULL,
   `STATUS` char(4) DEFAULT '0',
@@ -17168,7 +17168,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_oper_log`;
 CREATE TABLE `sys_oper_log` (
-  `OPER_ID` bigint NOT NULL,
+  `OPER_ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(200) DEFAULT '',
   `BUSINESS_TYPE` decimal(10,0) DEFAULT '0',
   `METHOD` varchar(800) DEFAULT '',
@@ -17187,7 +17187,7 @@ CREATE TABLE `sys_oper_log` (
   `COST_TIME` decimal(19,0) DEFAULT '0',
   `integrity` text,
   PRIMARY KEY (`OPER_ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=100 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- ----------------------------
 -- Records of sys_oper_log
@@ -17200,7 +17200,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_post`;
 CREATE TABLE `sys_post` (
-  `POST_ID` bigint NOT NULL,
+  `POST_ID` bigint NOT NULL AUTO_INCREMENT,
   `POST_CODE` varchar(256) NOT NULL,
   `POST_NAME` varchar(200) NOT NULL,
   `POST_SORT` decimal(10,0) NOT NULL,
@@ -17228,7 +17228,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_role`;
 CREATE TABLE `sys_role` (
-  `ROLE_ID` bigint NOT NULL,
+  `ROLE_ID` bigint NOT NULL AUTO_INCREMENT,
   `ROLE_NAME` varchar(120) NOT NULL,
   `ROLE_KEY` varchar(400) NOT NULL,
   `ROLE_SORT` decimal(10,0) NOT NULL,
@@ -17260,6 +17260,8 @@ INSERT INTO `sys_role` (`ROLE_ID`, `ROLE_NAME`, `ROLE_KEY`, `ROLE_SORT`, `DATA_S
 INSERT INTO `sys_role` (`ROLE_ID`, `ROLE_NAME`, `ROLE_KEY`, `ROLE_SORT`, `DATA_SCOPE`, `MENU_CHECK_STRICTLY`, `DEPT_CHECK_STRICTLY`, `STATUS`, `DEL_FLAG`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `integrity`) VALUES (105, '测试', '11', 1, '1', 1, 1, '0', '2', 'admin', NULL, '', NULL, NULL, NULL);
 INSERT INTO `sys_role` (`ROLE_ID`, `ROLE_NAME`, `ROLE_KEY`, `ROLE_SORT`, `DATA_SCOPE`, `MENU_CHECK_STRICTLY`, `DEPT_CHECK_STRICTLY`, `STATUS`, `DEL_FLAG`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `integrity`) VALUES (106, '管理员', 'gly', 0, '1', 1, 1, '0', '0', 'admin', NULL, 'admin', NULL, NULL, NULL);
 INSERT INTO `sys_role` (`ROLE_ID`, `ROLE_NAME`, `ROLE_KEY`, `ROLE_SORT`, `DATA_SCOPE`, `MENU_CHECK_STRICTLY`, `DEPT_CHECK_STRICTLY`, `STATUS`, `DEL_FLAG`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `integrity`) VALUES (113, '测试123', '123', 0, '1', 1, 1, '0', '0', 'admin', NULL, '', NULL, NULL, 'qp9TtTfCEfxUqFcCr9HL7g==');
+-- testUser 学校端测试角色（供学校端测试账户使用）
+INSERT INTO `sys_role` (`ROLE_ID`, `ROLE_NAME`, `ROLE_KEY`, `ROLE_SORT`, `DATA_SCOPE`, `MENU_CHECK_STRICTLY`, `DEPT_CHECK_STRICTLY`, `STATUS`, `DEL_FLAG`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `integrity`) VALUES (114, 'testUser', 'testXiaofu', 0, '1', 1, 1, '0', '0', 'admin', NULL, 'admin', NULL, NULL, 'HoAzKKZvZT5Rs4PyRSqi9g==');
 COMMIT;
 
 -- ----------------------------
@@ -17750,6 +17752,8 @@ INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES (106, 2208);
 INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES (106, 2209);
 INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES (106, 2210);
 INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES (106, 2211);
+-- testUser 学校端测试角色菜单权限
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES (114, 2021), (114, 2096), (114, 2105), (114, 2106), (114, 2109), (114, 2116), (114, 2117), (114, 2129), (114, 2130), (114, 2131), (114, 2132), (114, 2133), (114, 2134), (114, 2135), (114, 2136), (114, 2137), (114, 2138), (114, 2139), (114, 2140), (114, 2141), (114, 2142), (114, 2143), (114, 2144), (114, 2145), (114, 2146), (114, 2147), (114, 2148), (114, 2149), (114, 2150), (114, 2151), (114, 2152), (114, 2153), (114, 2154), (114, 2155), (114, 2156), (114, 2157), (114, 2158), (114, 2159), (114, 2160), (114, 2161), (114, 2162), (114, 2163), (114, 2164), (114, 2165), (114, 2166), (114, 2167), (114, 2168), (114, 2169), (114, 2170), (114, 2171), (114, 2172), (114, 2173), (114, 2174), (114, 2175), (114, 2184), (114, 2185), (114, 2186), (114, 2187), (114, 2188), (114, 2189), (114, 2190), (114, 2191), (114, 2192), (114, 2193), (114, 2194), (114, 2208), (114, 2209), (114, 2210), (114, 2211), (114, 2212), (114, 2213), (114, 2214), (114, 2215), (114, 2216), (114, 2217), (114, 2218), (114, 2219), (114, 2220), (114, 2221), (114, 2222), (114, 2223), (114, 2224), (114, 2225), (114, 2226), (114, 2227), (114, 2228), (114, 2229), (114, 2230), (114, 2231), (114, 2232), (114, 2233), (114, 2234), (114, 2235), (114, 2236), (114, 2237), (114, 2238), (114, 2239), (114, 2240), (114, 2241), (114, 2242), (114, 2243), (114, 2244), (114, 2245), (114, 2246), (114, 2247), (114, 2248), (114, 2249), (114, 2250), (114, 2251), (114, 2252), (114, 2253), (114, 2254), (114, 2255), (114, 2256), (114, 2257), (114, 2258), (114, 2259), (114, 2260), (114, 2267), (114, 2268), (114, 2269), (114, 2270), (114, 2271), (114, 2272), (114, 2273), (114, 2274), (114, 2275), (114, 2276), (114, 2277), (114, 2278), (114, 2279), (114, 2280), (114, 2281), (114, 2282), (114, 2283), (114, 2284), (114, 2285), (114, 2286), (114, 2287), (114, 2288), (114, 2289), (114, 2290), (114, 2291), (114, 2292), (114, 2293), (114, 2294), (114, 2295), (114, 2296), (114, 2297), (114, 2298), (114, 2299), (114, 2300), (114, 2301), (114, 2302), (114, 2303), (114, 2304), (114, 2305), (114, 2306), (114, 2307), (114, 2308), (114, 2309), (114, 2310), (114, 2311), (114, 2312), (114, 2313), (114, 2314), (114, 2327), (114, 2328), (114, 2329), (114, 2330), (114, 2331), (114, 2332), (114, 2333);
 COMMIT;
 
 -- ----------------------------
@@ -17757,7 +17761,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `sys_user`;
 CREATE TABLE `sys_user` (
-  `USER_ID` bigint NOT NULL,
+  `USER_ID` bigint NOT NULL AUTO_INCREMENT,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
   `USER_NAME` varchar(120) NOT NULL,
   `NICK_NAME` varchar(120) NOT NULL,
@@ -19872,6 +19876,8 @@ INSERT INTO `sys_user` (`USER_ID`, `DEPT_ID`, `USER_NAME`, `NICK_NAME`, `USER_TY
 INSERT INTO `sys_user` (`USER_ID`, `DEPT_ID`, `USER_NAME`, `NICK_NAME`, `USER_TYPE`, `EMAIL`, `PHONENUMBER`, `SEX`, `AVATAR`, `PASSWORD`, `STATUS`, `DEL_FLAG`, `LOGIN_IP`, `LOGIN_DATE`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `pwdtime`, `phone`, `integrity`, `caid`) VALUES (2191, 2237, '?石家庄市汇宁街小学', '?石家庄市汇宁街小学', '00', '', '', '0', '', 'n5N/2sTQPfjaX1FNZARumasu4QGMujD0PKidKhykpenFAXzLlRBT2rHUj7P7gbTY420AxCKr6wpJq/RecMcOyA==', '0', '2', '', NULL, 'admin', '2025-12-17 23:58:33', 'admin', NULL, NULL, NULL, NULL, 'yJu/Kfx6vZ6lo1WUozVyEw==', NULL);
 INSERT INTO `sys_user` (`USER_ID`, `DEPT_ID`, `USER_NAME`, `NICK_NAME`, `USER_TYPE`, `EMAIL`, `PHONENUMBER`, `SEX`, `AVATAR`, `PASSWORD`, `STATUS`, `DEL_FLAG`, `LOGIN_IP`, `LOGIN_DATE`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `pwdtime`, `phone`, `integrity`, `caid`) VALUES (2192, 2237, '石家庄市汇宁街小学', '石家庄市汇宁街小学', '00', '', '', '0', '/filestatics/2025/12/17/汇宁校徽_20251217163022A323.jpg', 'ki9Lw+7JRKSeVVpYe9M3KcI/f3EEsbckwiA0I333zTIMcUy/d3OAv6MPLPFcjXgqskeLb/iRNihZRUTrgiTNyg==', '0', '0', '172.16.25.25', '2025-12-18 00:11:05', 'admin', '2025-12-18 00:11:51', '', NULL, NULL, '2025-12-18 00:14:07', 'KKviDdXf1CztetAOBx0D7Q==', 'mXJgGLZ6xKgP8tQEUzYz4w==', NULL);
 INSERT INTO `sys_user` (`USER_ID`, `DEPT_ID`, `USER_NAME`, `NICK_NAME`, `USER_TYPE`, `EMAIL`, `PHONENUMBER`, `SEX`, `AVATAR`, `PASSWORD`, `STATUS`, `DEL_FLAG`, `LOGIN_IP`, `LOGIN_DATE`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `pwdtime`, `phone`, `integrity`, `caid`) VALUES (2193, 2238, '鹿泉区上寨乡上寨小学', '鹿泉区上寨乡上寨小学', '00', '', '', '0', '', 'wv2f4LCuWJqiBycHc/peU0iZgonW02Zi4GzbwKxV3QiDWOk2UW4ocpCVcE5KlLyuhx9pJiZ7d/JweYEqH5xqqg==', '0', '0', '172.16.25.25', '2025-12-25 16:34:38', 'admin', '2025-12-22 16:42:35', '', NULL, NULL, '2025-12-22 16:44:20', NULL, '7VVHV3sZ3Q+XSTeoRgtSng==', NULL);
+-- 学校端测试账户：登录账号 testUser，初始密码 admin123W999!
+INSERT INTO `sys_user` (`USER_ID`, `DEPT_ID`, `USER_NAME`, `NICK_NAME`, `USER_TYPE`, `EMAIL`, `PHONENUMBER`, `SEX`, `AVATAR`, `PASSWORD`, `STATUS`, `DEL_FLAG`, `LOGIN_IP`, `LOGIN_DATE`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `pwdtime`, `phone`, `integrity`, `caid`) VALUES (2194, 222, 'testUser', 'testUser', '00', '', '', '0', '', 'R08Ol4SEYDh0wq+qbFdIzWHUFUawK++IpbgCIXy47zmzXeDqtnQe6Wr8K4IKs338vXsGPeLgc/XWE1MM7tb29g==', '0', '0', '127.0.0.1', '2026-05-09 16:29:39', 'admin', '2026-05-08 21:28:15', '', NULL, '学校端测试账户', '2026-05-08 21:29:43', 'zOXDuww6b4QyCgnPs4H1+g==', 'sbVIAFQOH36EZwZVzcRBaA==', NULL);
 COMMIT;
 
 -- ----------------------------
@@ -21958,6 +21964,9 @@ INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`) VALUES (2120, 101);
 INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`) VALUES (2121, 101);
 INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`) VALUES (2122, 101);
 INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`) VALUES (2123, 101);
+-- testUser 默认绑定学校角色和测试角色
+INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`) VALUES (2194, 101);
+INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`) VALUES (2194, 114);
 COMMIT;
 
 -- ----------------------------
@@ -62308,7 +62317,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `xfpt_questionnaire_config`;
 CREATE TABLE `xfpt_questionnaire_config` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(200) NOT NULL,
   `USE_STATUS` decimal(10,0) NOT NULL DEFAULT '1',
   `CREATE_BY` varchar(100) DEFAULT NULL,
@@ -63343,7 +63352,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `xfpt_questionnaire_result`;
 CREATE TABLE `xfpt_questionnaire_result` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `QUESTIONNAIRE_SURVEY_ID` varchar(100) DEFAULT NULL,
   `SURVEY_ID` varchar(100) DEFAULT NULL,
   `QUESTIONNAIRE_RESULT` varchar(100) DEFAULT NULL,
@@ -63372,7 +63381,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `xfpt_questionnaire_signature`;
 CREATE TABLE `xfpt_questionnaire_signature` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `USER_ID` decimal(19,0) DEFAULT NULL,
   `IMAGE` text,
   `DEL_FLAG` varchar(10) DEFAULT '0',
@@ -63396,7 +63405,7 @@ COMMIT;
 -- ----------------------------
 DROP TABLE IF EXISTS `xfpt_questionnaire_survey`;
 CREATE TABLE `xfpt_questionnaire_survey` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `SURVEY_CONTENT` varchar(255) DEFAULT NULL,
   `SURVEY_RESULT` varchar(255) DEFAULT NULL,
   `CREATE_BY` varchar(100) DEFAULT NULL,

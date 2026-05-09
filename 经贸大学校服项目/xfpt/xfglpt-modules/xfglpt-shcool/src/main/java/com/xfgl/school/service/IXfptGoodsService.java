@@ -36,6 +36,16 @@ public interface IXfptGoodsService extends IService<XfptGoods> {
         public int insertXfptGoods(XfptGoods xfptGoods);
 
         /**
+         * 导入商品信息
+         *
+         * @param goodsList 商品信息列表
+         * @param updateSupport 是否更新已存在数据
+         * @param operName 操作人
+         * @return 导入结果
+         */
+        public String importGoods(List<XfptGoods> goodsList, boolean updateSupport, String operName);
+
+        /**
          * 修改商品信息
          *
          * @param xfptGoods 商品信息

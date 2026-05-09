@@ -237,7 +237,7 @@ export default {
         sizeName: null,
         deliveryNum: null,
         signNum: null,
-        status: null,
+        status: "0",
       },
       // 表单参数
       form: {},

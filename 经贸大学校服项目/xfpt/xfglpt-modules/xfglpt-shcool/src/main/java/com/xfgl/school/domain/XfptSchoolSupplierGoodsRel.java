@@ -52,7 +52,7 @@ private static final long serialVersionUID = 1L;
     private Long goodsId;
 
     /** 状态，0停用 1启用 */
-            @Excel(name = "状态，0停用 1启用")
+            @Excel(name = "状态", readConverterExp = "0=停用,1=启用")
     @Schema(description = "状态，0停用 1启用")
     private String status;
 
