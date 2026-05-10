@@ -1,30 +1,55 @@
 import request from "@/utils/request";
 
-//获取人数金额统计
-export const getPersonMoney = () => {
+const statsBaseUrl = "/stats-api";
+
+function statsRequest(config) {
   return request({
-    url: "/school/index/statistics/peopleCount",
+    baseURL: "",
+    headers: {
+      silentError: true,
+      ...(config.headers || {}),
+    },
+    ...config,
+  });
+}
+
+export const getPersonMoney = () => {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/peopleCount`,
     method: "get",
   });
 };
 
-//获取今年订购人数
 export function getOrderCount() {
-  return request({
-    url: "/school/index/statistics/getCount",
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/getCount`,
     method: "get",
   });
 }
 
-//获取今年金额统计柱状图
 export function getOrderAmount() {
-  return request({
-    url: "/school/index/statistics/getMoney",
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/getMoney`,
     method: "get",
   });
 }
 
-//查询是否需要修改密码
+export function getSchoolTopList(query) {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/school/topList`,
+    params: query,
+    method: "get",
+  });
+}
+
+export function getJyjTopList(query) {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/jyj/topList`,
+    params: query,
+    method: "get",
+  });
+}
+
 export function isChangePassword(userName) {
   return request({
     url: `/system/user/isPwdExpire?username=${userName}`,
@@ -32,33 +57,41 @@ export function isChangePassword(userName) {
   });
 }
 
-
-
-
-//学校订购人数统计
-export function getSchoolOrderCount() {
-  return request({
-    url: "/school/index/statistics/getSchool5YearCountData",
+export function getSchoolOrderCount(query) {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/getSchool5YearCountData`,
+    params: query,
     method: "get",
   });
 }
 
-
-//学校订购金额统计
-export function getSchoolOrderAmount() {
-  return request({
-    url: "/school/index/statistics/getSchool5YearMoneyData",
+export function getSchoolOrderAmount(query) {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/getSchool5YearMoneyData`,
+    params: query,
     method: "get",
   });
 }
 
-
-//查询校服品类种类统计图
 export function getSchoolUniformType() {
-  return request({
-    url: "/school/index/statistics/schoolUniformType",
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/schoolUniformType`,
     method: "get",
   });
 }
 
+export function getPlatformUsage(query) {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/platformUsage`,
+    params: query,
+    method: "get",
+  });
+}
 
+export function getPriceTrendData(query) {
+  return statsRequest({
+    url: `${statsBaseUrl}/index/statistics/priceTrendData`,
+    params: query,
+    method: "get",
+  });
+}
