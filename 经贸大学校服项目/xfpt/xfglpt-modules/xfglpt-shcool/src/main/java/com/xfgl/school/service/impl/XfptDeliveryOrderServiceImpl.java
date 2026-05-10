@@ -63,6 +63,9 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         @Override
         public int insertXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder)
         {
+            if (StringUtils.isEmpty(xfptDeliveryOrder.getDeliveryStatus())) {
+                xfptDeliveryOrder.setDeliveryStatus("0");
+            }
             int rows = xfptDeliveryOrderMapper.insert(xfptDeliveryOrder);
             insertXfptDeliveryOrderItem(xfptDeliveryOrder);
             return rows;

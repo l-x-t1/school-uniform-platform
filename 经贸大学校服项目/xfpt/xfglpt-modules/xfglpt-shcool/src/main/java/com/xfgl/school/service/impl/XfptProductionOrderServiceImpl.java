@@ -63,6 +63,12 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
         @Override
         public int insertXfptProductionOrder(XfptProductionOrder xfptProductionOrder)
         {
+            if (StringUtils.isEmpty(xfptProductionOrder.getOrderType())) {
+                xfptProductionOrder.setOrderType("1");
+            }
+            if (StringUtils.isEmpty(xfptProductionOrder.getStatus())) {
+                xfptProductionOrder.setStatus("0");
+            }
             int rows = xfptProductionOrderMapper.insert(xfptProductionOrder);
             insertXfptProductionOrderItem(xfptProductionOrder);
             return rows;
