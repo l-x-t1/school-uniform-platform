@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptProductionOrderItem;
@@ -63,6 +64,11 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
         @Override
         public int insertXfptProductionOrder(XfptProductionOrder xfptProductionOrder)
         {
+            if (xfptProductionOrder.getStartTime() != null
+                    && xfptProductionOrder.getFinishTime() != null
+                    && !xfptProductionOrder.getStartTime().before(xfptProductionOrder.getFinishTime())) {
+                throw new ServiceException("开始生产时间必须早于生产完成时间");
+            }
             if (StringUtils.isEmpty(xfptProductionOrder.getOrderType())) {
                 xfptProductionOrder.setOrderType("1");
             }
