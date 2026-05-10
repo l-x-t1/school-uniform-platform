@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.mapper.XfptProductionOrderItemMapper;
 import com.xfgl.school.domain.XfptProductionOrderItem;
@@ -38,6 +39,9 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
     @Override
     public boolean save(XfptProductionOrderItem xfptProductionOrderItem)
     {
+        if (xfptProductionOrderItem.getGoodsId() == null) {
+            throw new ServiceException("生产单明细商品不能为空");
+        }
         if (StringUtils.isEmpty(xfptProductionOrderItem.getStatus())) {
             xfptProductionOrderItem.setStatus("0");
         }

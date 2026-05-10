@@ -136,8 +136,20 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
             List<XfptProductionOrderItem> xfptProductionOrderItemList = xfptProductionOrder.getXfptProductionOrderItemList();
             Long id = xfptProductionOrder.getId();
             if (StringUtils.isNotNull(xfptProductionOrderItemList)) {
+                if (xfptProductionOrderItemList.isEmpty()) {
+                    throw new ServiceException("生产单明细不能为空");
+                }
                 for (XfptProductionOrderItem xfptProductionOrderItem : xfptProductionOrderItemList) {
+                    if (xfptProductionOrderItem.getGoodsId() == null) {
+                        throw new ServiceException("生产单明细商品不能为空");
+                    }
                     xfptProductionOrderItem.setProductionId(id);
+                    if (StringUtils.isEmpty(xfptProductionOrderItem.getStatus())) {
+                        xfptProductionOrderItem.setStatus("0");
+                    }
+                    if (xfptProductionOrderItem.getFinishNum() == null) {
+                        xfptProductionOrderItem.setFinishNum(0);
+                    }
                 }
                     xfptProductionOrderMapper.batchInsertXfptProductionOrderItem(xfptProductionOrderItemList);
             }

@@ -133,8 +133,23 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
             List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList = xfptDeliveryOrder.getXfptDeliveryOrderItemList();
             Long id = xfptDeliveryOrder.getId();
             if (StringUtils.isNotNull(xfptDeliveryOrderItemList)) {
+                if (xfptDeliveryOrderItemList.isEmpty()) {
+                    throw new ServiceException("发货单明细不能为空");
+                }
                 for (XfptDeliveryOrderItem xfptDeliveryOrderItem : xfptDeliveryOrderItemList) {
+                    if (xfptDeliveryOrderItem.getGoodsId() == null) {
+                        throw new ServiceException("发货单明细商品不能为空");
+                    }
                     xfptDeliveryOrderItem.setDeliveryId(id);
+                    if (StringUtils.isEmpty(xfptDeliveryOrderItem.getStatus())) {
+                        xfptDeliveryOrderItem.setStatus("0");
+                    }
+                    if (xfptDeliveryOrderItem.getSignNum() == null) {
+                        xfptDeliveryOrderItem.setSignNum(0);
+                    }
+                    if (StringUtils.isEmpty(xfptDeliveryOrderItem.getDelFlag())) {
+                        xfptDeliveryOrderItem.setDelFlag("0");
+                    }
                 }
                     xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(xfptDeliveryOrderItemList);
             }
