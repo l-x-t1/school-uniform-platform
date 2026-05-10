@@ -9,7 +9,7 @@ export function listRetailGoods(query) {
   })
 }
 
-// 查询学校端零售商品详细
+// 查询学校端零售商品详情
 export function getRetailGoods(id) {
   return request({
     url: '/school/retailGoods/' + id,
@@ -17,11 +17,11 @@ export function getRetailGoods(id) {
   })
 }
 
-// 更新学校端零售商品上下架状态
-export function updateRetailGoodsStatus(id, data) {
+// 修改学校端零售商品上下架状态
+export function updateRetailGoodsStatus(id, status) {
   return request({
     url: '/school/retailGoods/' + id + '/status',
     method: 'put',
-    data
+    data: { status }
   })
 }

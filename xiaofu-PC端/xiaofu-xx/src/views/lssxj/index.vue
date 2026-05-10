@@ -1,123 +1,149 @@
 <template>
   <div class="app-container retail-goods-page">
-    <el-form
-      v-show="showSearch"
-      ref="queryForm"
-      :model="queryParams"
-      :inline="true"
-      size="small"
-      label-width="88px"
-      class="query-form"
-    >
-      <el-form-item label="商品名称" prop="goodsName">
-        <el-input
-          v-model="queryParams.goodsName"
-          placeholder="请输入商品名称"
-          clearable
-          style="width: 220px"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="商品款号" prop="goodsCode">
-        <el-input
-          v-model="queryParams.goodsCode"
-          placeholder="请输入商品款号"
-          clearable
-          style="width: 220px"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="商品品类" prop="categoryName">
-        <el-input
-          v-model="queryParams.categoryName"
-          placeholder="请输入商品品类"
-          clearable
-          style="width: 220px"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="厂商名称" prop="supplierName">
-        <el-input
-          v-model="queryParams.supplierName"
-          placeholder="请输入厂商名称"
-          clearable
-          style="width: 220px"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="上下架状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择" clearable style="width: 220px">
-          <el-option label="上架中" value="1" />
-          <el-option label="已下架" value="0" />
-        </el-select>
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
+    <el-card shadow="never" class="search-card">
+      <el-form
+        v-show="showSearch"
+        ref="queryForm"
+        :model="queryParams"
+        size="small"
+        :inline="true"
+        label-width="82px"
+      >
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input
+            v-model="queryParams.goodsName"
+            placeholder="请输入商品名称"
+            clearable
+            style="width: 220px"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="商品款号" prop="goodsCode">
+          <el-input
+            v-model="queryParams.goodsCode"
+            placeholder="请输入商品款号"
+            clearable
+            style="width: 220px"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="商品品类" prop="categoryName">
+          <el-input
+            v-model="queryParams.categoryName"
+            placeholder="请输入商品品类"
+            clearable
+            style="width: 220px"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="厂商名称" prop="supplierName">
+          <el-input
+            v-model="queryParams.supplierName"
+            placeholder="请输入厂商名称"
+            clearable
+            style="width: 220px"
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="上下架状态" prop="status">
+          <el-select v-model="queryParams.status" placeholder="请选择" clearable style="width: 220px">
+            <el-option
+              v-for="item in shelfStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        </el-form-item>
+      </el-form>
+    </el-card>
 
-    <el-row :gutter="10" class="mb8">
+    <el-row :gutter="10" class="mb8 action-row">
       <el-col :span="1.5">
         <el-button type="primary" plain icon="el-icon-refresh" size="mini" @click="getList">刷新</el-button>
       </el-col>
       <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="tableData" border>
-      <el-table-column label="商品信息" min-width="300">
+    <el-table v-loading="loading" :data="retailGoodsList" border>
+      <el-table-column label="商品信息" min-width="320">
         <template slot-scope="scope">
           <div class="goods-cell">
-            <image-preview :src="scope.row.mainImage" :width="56" :height="56" />
+            <el-image
+              v-if="scope.row.mainImage"
+              class="goods-cover"
+              :src="scope.row.mainImage"
+              fit="cover"
+              :preview-src-list="[scope.row.mainImage]"
+            >
+              <div slot="error" class="goods-cover-placeholder">无图</div>
+            </el-image>
+            <div v-else class="goods-cover goods-cover-placeholder">无图</div>
             <div class="goods-meta">
-              <div class="goods-name">{{ scope.row.goodsName || '--' }}</div>
-              <div class="goods-code">款号：{{ scope.row.goodsCode || '--' }}</div>
-              <div class="goods-category">品类：{{ scope.row.categoryName || '--' }}</div>
+              <div class="goods-name">{{ scope.row.goodsName || '-' }}</div>
+              <div class="goods-sub">款号：{{ scope.row.goodsCode || '-' }}</div>
+              <div class="goods-sub">
+                {{ scope.row.categoryName || '未分类' }}
+                <span v-if="scope.row.brandName"> / {{ scope.row.brandName }}</span>
+              </div>
             </div>
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="厂商名称" prop="supplierName" min-width="160" />
-      <el-table-column label="零售价区间" min-width="150" align="center">
+      <el-table-column label="厂商名称" prop="supplierName" min-width="180" show-overflow-tooltip />
+      <el-table-column label="销售类型" width="120" align="center">
         <template slot-scope="scope">
-          {{ formatPriceRange(scope.row) }}
+          <el-tag size="mini" type="warning">{{ getSaleTypeLabel(scope.row.saleType) }}</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column label="零售价区间" min-width="120" align="center">
+        <template slot-scope="scope">
+          <span>{{ formatRetailPrice(scope.row) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="库存" prop="stockTotal" width="90" align="center">
+        <template slot-scope="scope">
+          <span>{{ scope.row.stockTotal == null ? '-' : scope.row.stockTotal }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="110" align="center">
         <template slot-scope="scope">
-          <el-tag :type="scope.row.status === '1' ? 'success' : 'info'">
-            {{ scope.row.status === '1' ? '上架中' : '已下架' }}
+          <el-tag :type="scope.row.status === '1' ? 'success' : 'info'" size="mini">
+            {{ getShelfStatusLabel(scope.row.status) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="操作时间" width="180" align="center">
+      <el-table-column label="操作时间" width="160" align="center">
         <template slot-scope="scope">
-          {{ parseTime(scope.row.operateTime, '{y}-{m}-{d} {h}:{i}') || '--' }}
+          <span>{{ parseTime(scope.row.operateTime, '{y}-{m}-{d} {h}:{i}') || '-' }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="170" align="center" fixed="right">
+      <el-table-column label="操作" width="180" align="center" fixed="right">
         <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button
-            v-hasPermi="['school:retailGoods:query']"
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="handleView(scope.row)"
-          >查看</el-button>
-          <el-button
+            v-if="scope.row.status !== '1'"
             v-hasPermi="['school:retailGoods:edit']"
             size="mini"
             type="text"
-            :icon="scope.row.status === '1' ? 'el-icon-bottom' : 'el-icon-top'"
-            @click="handleToggleStatus(scope.row)"
-          >{{ scope.row.status === '1' ? '下架' : '上架' }}</el-button>
+            icon="el-icon-top"
+            @click="handleStatus(scope.row, '1')"
+          >上架</el-button>
+          <el-button
+            v-if="scope.row.status === '1'"
+            v-hasPermi="['school:retailGoods:edit']"
+            size="mini"
+            type="text"
+            icon="el-icon-bottom"
+            @click="handleStatus(scope.row, '0')"
+          >下架</el-button>
         </template>
       </el-table-column>
     </el-table>
-
-    <div v-if="!loading && tableData.length === 0" class="empty-data">
-      <span>暂无零售商品数据</span>
-    </div>
 
     <pagination
       v-show="total > 0"
@@ -129,151 +155,119 @@
 
     <el-drawer
       title="零售商品详情"
-      :visible.sync="detailVisible"
-      :size="'620px'"
-      direction="rtl"
+      :visible.sync="detailOpen"
+      :size="560"
       :destroy-on-close="true"
-      @close="resetDetail"
+      direction="rtl"
     >
-      <div v-loading="detailLoading" class="detail-panel">
-        <template v-if="detailData">
-          <div class="detail-header">
-            <image-preview :src="detailData.mainImage" :width="96" :height="96" />
-            <div class="detail-header-main">
-              <h3 class="detail-title">{{ detailData.goodsName || '--' }}</h3>
-              <div class="detail-subtitle">
-                <span>款号：{{ detailData.goodsCode || '--' }}</span>
-                <span>厂商：{{ detailData.supplierName || '--' }}</span>
-              </div>
-              <div class="detail-tags">
-                <el-tag :type="detailData.status === '1' ? 'success' : 'info'">
-                  {{ detailData.status === '1' ? '上架中' : '已下架' }}
+      <div v-if="detail" v-loading="detailLoading" class="detail-drawer">
+        <div class="detail-header">
+          <el-image v-if="detail.mainImage" class="detail-cover" :src="detail.mainImage" fit="cover" />
+          <div v-else class="detail-cover detail-cover-placeholder">无图</div>
+          <div>
+            <div class="detail-title">{{ detail.goodsName || '-' }}</div>
+            <div class="detail-sub">款号：{{ detail.goodsCode || '-' }}</div>
+            <el-tag :type="detail.status === '1' ? 'success' : 'info'" size="mini">
+              {{ getShelfStatusLabel(detail.status) }}
+            </el-tag>
+          </div>
+        </div>
+
+        <el-descriptions :column="1" border size="small" class="detail-section">
+          <el-descriptions-item label="厂商名称">{{ detail.supplierName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="商品品类">{{ detail.categoryName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="品牌名称">{{ detail.brandName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="销售类型">{{ getSaleTypeLabel(detail.saleType) }}</el-descriptions-item>
+          <el-descriptions-item label="零售价区间">{{ formatRetailPrice(detail) }}</el-descriptions-item>
+          <el-descriptions-item label="库存">{{ detail.stockTotal == null ? '-' : detail.stockTotal }}</el-descriptions-item>
+          <el-descriptions-item label="最近操作">
+            {{ detail.operateBy || '-' }} / {{ parseTime(detail.operateTime, '{y}-{m}-{d} {h}:{i}') || '-' }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <div class="detail-section">
+          <div class="section-title">商品尺码</div>
+          <el-table :data="detail.xfptGoodsSizeList || []" size="mini" border>
+            <el-table-column label="尺码" prop="sizeCode" align="center" />
+            <el-table-column label="零售价" prop="retailPrice" align="center">
+              <template slot-scope="scope">{{ scope.row.retailPrice == null ? '-' : '￥' + scope.row.retailPrice }}</template>
+            </el-table-column>
+            <el-table-column label="统购价" prop="groupPrice" align="center">
+              <template slot-scope="scope">{{ scope.row.groupPrice == null ? '-' : '￥' + scope.row.groupPrice }}</template>
+            </el-table-column>
+            <el-table-column label="库存" prop="stockNum" align="center" />
+            <el-table-column label="状态" prop="status" align="center">
+              <template slot-scope="scope">
+                <el-tag size="mini" :type="scope.row.status === '1' ? 'success' : 'info'">
+                  {{ scope.row.status === '1' ? '启用' : '停用' }}
                 </el-tag>
-                <el-tag type="warning">{{ getSaleTypeLabel(detailData.saleType) }}</el-tag>
-                <el-tag type="info">{{ getPublishStatusLabel(detailData.publishStatus) }}</el-tag>
-              </div>
-            </div>
-          </div>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
 
-          <div class="detail-grid">
-            <div class="detail-item">
-              <span class="label">商品品类</span>
-              <span class="value">{{ detailData.categoryName || '--' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">品牌名称</span>
-              <span class="value">{{ detailData.brandName || '--' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">零售价区间</span>
-              <span class="value">{{ formatPriceRange(detailData) }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">库存总数</span>
-              <span class="value">{{ detailData.stockTotal != null ? detailData.stockTotal : '--' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">操作人</span>
-              <span class="value">{{ detailData.operateBy || '--' }}</span>
-            </div>
-            <div class="detail-item">
-              <span class="label">操作时间</span>
-              <span class="value">{{ parseTime(detailData.operateTime, '{y}-{m}-{d} {h}:{i}') || '--' }}</span>
-            </div>
-          </div>
-
-          <div v-if="detailImageList.length" class="detail-section">
-            <div class="section-title">详情图片</div>
-            <div class="image-list">
-              <image-preview
-                v-for="image in detailImageList"
-                :key="image"
-                :src="image"
-                :width="110"
-                :height="110"
-              />
-            </div>
-          </div>
-
-          <div class="detail-section">
-            <div class="section-title">商品详情</div>
-            <div v-if="detailData.detailContent" class="html-content" v-html="detailData.detailContent" />
-            <div v-else class="empty-text">暂无详情</div>
-          </div>
-
-          <div class="detail-section">
-            <div class="section-title">尺码信息</div>
-            <el-table :data="detailData.xfptGoodsSizeList || []" size="mini" border>
-              <el-table-column label="尺码" prop="sizeCode" width="100" />
-              <el-table-column label="零售价" min-width="120" align="center">
-                <template slot-scope="scope">
-                  ￥{{ formatMoney(scope.row.retailPrice) }}
-                </template>
-              </el-table-column>
-              <el-table-column label="统购价" min-width="120" align="center">
-                <template slot-scope="scope">
-                  {{ scope.row.groupPrice != null ? '￥' + formatMoney(scope.row.groupPrice) : '--' }}
-                </template>
-              </el-table-column>
-              <el-table-column label="库存" prop="stockNum" width="90" align="center" />
-              <el-table-column label="状态" width="90" align="center">
-                <template slot-scope="scope">
-                  <el-tag :type="scope.row.status === '1' ? 'success' : 'info'">
-                    {{ scope.row.status === '1' ? '启用' : '停用' }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-            </el-table>
-            <div v-if="!detailData.xfptGoodsSizeList || detailData.xfptGoodsSizeList.length === 0" class="empty-text">
-              暂无尺码信息
-            </div>
-          </div>
-        </template>
+        <div v-if="detail.detailContent" class="detail-section">
+          <div class="section-title">商品详情</div>
+          <div class="detail-content" v-html="detail.detailContent" />
+        </div>
       </div>
     </el-drawer>
   </div>
 </template>
 
 <script>
-import { getRetailGoods, listRetailGoods, updateRetailGoodsStatus } from '@/api/school/retailGoods'
+import { listRetailGoods, getRetailGoods, updateRetailGoodsStatus } from '@/api/school/retailGoods'
 
 export default {
   name: 'LssxjIndex',
   data() {
     return {
       loading: false,
+      detailLoading: false,
       showSearch: true,
       total: 0,
-      tableData: [],
-      detailVisible: false,
-      detailLoading: false,
-      detailData: null,
-      detailImageList: [],
+      retailGoodsList: [],
+      detailOpen: false,
+      detail: null,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        goodsName: '',
-        goodsCode: '',
-        categoryName: '',
-        supplierName: '',
-        status: ''
-      }
+        goodsName: null,
+        goodsCode: null,
+        categoryName: null,
+        supplierName: null,
+        status: null
+      },
+      shelfStatusOptions: [
+        { value: '1', label: '上架中' },
+        { value: '0', label: '已下架' }
+      ],
+      saleTypeOptions: [
+        { value: '1', label: '统购' },
+        { value: '2', label: '零售' },
+        { value: '3', label: '统购零售' }
+      ],
+      hasLoaded: false
     }
   },
   created() {
     this.getList()
   },
+  activated() {
+    if (this.hasLoaded) {
+      this.getList()
+    }
+  },
   methods: {
     getList() {
       this.loading = true
-      listRetailGoods(this.queryParams)
-        .then(response => {
-          this.tableData = response.rows || []
-          this.total = response.total || 0
-        })
-        .finally(() => {
-          this.loading = false
-        })
+      return listRetailGoods(this.queryParams).then(response => {
+        this.retailGoodsList = response.rows || []
+        this.total = response.total || 0
+        this.hasLoaded = true
+      }).finally(() => {
+        this.loading = false
+      })
     },
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -284,97 +278,43 @@ export default {
       this.handleQuery()
     },
     handleView(row) {
-      this.detailVisible = true
-      this.loadDetail(row.id)
-    },
-    loadDetail(id) {
+      this.detailOpen = true
       this.detailLoading = true
-      return getRetailGoods(id)
-        .then(response => {
-          this.detailData = response.data || null
-          this.detailImageList = this.resolveImages(this.detailData && this.detailData.detailImagesJson)
-        })
-        .finally(() => {
-          this.detailLoading = false
-        })
+      this.detail = null
+      getRetailGoods(row.id).then(response => {
+        this.detail = response.data || {}
+      }).finally(() => {
+        this.detailLoading = false
+      })
     },
-    handleToggleStatus(row) {
-      const nextStatus = row.status === '1' ? '0' : '1'
-      const actionText = nextStatus === '1' ? '上架' : '下架'
-      this.$modal.confirm(`确认${actionText}该商品吗？`).then(() => {
-        return updateRetailGoodsStatus(row.id, { status: nextStatus })
+    handleStatus(row, status) {
+      const actionName = status === '1' ? '上架' : '下架'
+      this.$modal.confirm('确认要' + actionName + '商品“' + row.goodsName + '”吗？').then(() => {
+        return updateRetailGoodsStatus(row.id, status)
       }).then(() => {
-        this.$modal.msgSuccess(`${actionText}成功`)
+        this.$modal.msgSuccess(actionName + '成功')
         this.getList()
-        if (this.detailVisible && this.detailData && this.detailData.id === row.id) {
-          this.loadDetail(row.id)
-        }
       }).catch(() => {})
     },
-    resetDetail() {
-      this.detailData = null
-      this.detailImageList = []
-      this.detailLoading = false
+    getSaleTypeLabel(value) {
+      const item = this.saleTypeOptions.find(option => option.value === value)
+      return item ? item.label : '-'
     },
-    resolveImages(detailImagesJson) {
-      if (!detailImagesJson) {
-        return []
-      }
-      if (Array.isArray(detailImagesJson)) {
-        return detailImagesJson.filter(item => !!item)
-      }
-      try {
-        const parsed = JSON.parse(detailImagesJson)
-        return Array.isArray(parsed) ? parsed.filter(item => !!item) : []
-      } catch (e) {
-        return String(detailImagesJson)
-          .split(',')
-          .map(item => item.trim())
-          .filter(item => !!item)
-      }
+    getShelfStatusLabel(value) {
+      const item = this.shelfStatusOptions.find(option => option.value === value)
+      return item ? item.label : '-'
     },
-    formatMoney(value) {
-      if (value === null || value === undefined || value === '') {
-        return '--'
-      }
-      const number = Number(value)
-      if (Number.isNaN(number)) {
-        return '--'
-      }
-      return number.toFixed(2)
-    },
-    formatPriceRange(row) {
+    formatRetailPrice(row) {
       if (!row) {
-        return '--'
+        return '-'
       }
       if (row.retailPriceRange) {
-        return `￥${row.retailPriceRange}`
+        return '￥' + row.retailPriceRange
       }
-      const min = this.formatMoney(row.retailMinPrice)
-      const max = this.formatMoney(row.retailMaxPrice)
-      if (min === '--' && max === '--') {
-        return '--'
+      if (row.retailMinPrice != null) {
+        return '￥' + row.retailMinPrice
       }
-      if (min === max) {
-        return min === '--' ? '--' : `￥${min}`
-      }
-      return `￥${min} - ￥${max}`
-    },
-    getSaleTypeLabel(value) {
-      const map = {
-        '1': '统购商品',
-        '2': '零售商品',
-        '3': '统购零售'
-      }
-      return map[value] || '商品类型'
-    },
-    getPublishStatusLabel(value) {
-      const map = {
-        '0': '未上架',
-        '1': '已上架',
-        '2': '已下架'
-      }
-      return map[value] || '全局状态'
+      return '-'
     }
   }
 }
@@ -382,26 +322,47 @@ export default {
 
 <style scoped>
 .retail-goods-page {
-  background: linear-gradient(180deg, #f8fbff 0%, #ffffff 36%);
+  background: linear-gradient(180deg, #f7fbff 0%, #ffffff 180px);
 }
 
-.query-form {
-  padding: 16px 18px 4px;
-  background: rgba(255, 255, 255, 0.92);
-  border: 1px solid #e9eef6;
-  border-radius: 14px;
-  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04);
-  margin-bottom: 16px;
+.search-card {
+  margin-bottom: 14px;
+  border-radius: 12px;
 }
 
-.mb8 {
-  margin-bottom: 8px;
+.search-card ::v-deep .el-card__body {
+  padding-bottom: 4px;
+}
+
+.action-row {
+  display: flex;
+  align-items: center;
 }
 
 .goods-cell {
   display: flex;
   align-items: center;
-  gap: 12px;
+  min-height: 66px;
+}
+
+.goods-cover {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 56px;
+  margin-right: 12px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e8edf5;
+  background: #f6f8fb;
+}
+
+.goods-cover-placeholder,
+.detail-cover-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #a8b0bd;
+  font-size: 12px;
 }
 
 .goods-meta {
@@ -409,88 +370,47 @@ export default {
 }
 
 .goods-name {
-  font-size: 14px;
+  color: #1f2d3d;
   font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 4px;
+  line-height: 22px;
 }
 
-.goods-code,
-.goods-category {
+.goods-sub {
+  color: #7a869a;
   font-size: 12px;
-  color: #6b7280;
-  line-height: 1.6;
+  line-height: 20px;
 }
 
-.empty-data {
-  text-align: center;
-  color: #909399;
-  padding: 28px 0 16px;
-}
-
-.detail-panel {
-  padding: 20px 20px 24px;
+.detail-drawer {
+  padding: 0 22px 24px;
 }
 
 .detail-header {
   display: flex;
-  gap: 16px;
-  padding: 16px;
-  background: linear-gradient(135deg, #f8fafc 0%, #eef4ff 100%);
-  border-radius: 14px;
+  align-items: center;
+  padding: 4px 0 18px;
 }
 
-.detail-header-main {
-  flex: 1;
-  min-width: 0;
+.detail-cover {
+  width: 96px;
+  height: 96px;
+  margin-right: 16px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 1px solid #e8edf5;
+  background: #f6f8fb;
 }
 
 .detail-title {
-  margin: 0 0 10px;
+  color: #1f2d3d;
   font-size: 18px;
-  color: #111827;
+  font-weight: 700;
+  margin-bottom: 8px;
 }
 
-.detail-subtitle {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  font-size: 13px;
-  color: #4b5563;
+.detail-sub {
+  color: #7a869a;
   margin-bottom: 10px;
-}
-
-.detail-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px 18px;
-  margin: 18px 0 10px;
-}
-
-.detail-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: #f8fafc;
-}
-
-.detail-item .label {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.detail-item .value {
-  font-size: 14px;
-  color: #111827;
-  word-break: break-all;
 }
 
 .detail-section {
@@ -498,35 +418,17 @@ export default {
 }
 
 .section-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #1f2937;
-  margin-bottom: 12px;
+  color: #1f2d3d;
+  font-weight: 700;
+  margin-bottom: 10px;
 }
 
-.image-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.html-content {
-  padding: 14px;
-  border: 1px solid #e5e7eb;
-  border-radius: 12px;
-  background: #fff;
-  color: #374151;
-  line-height: 1.8;
-  overflow: hidden;
-}
-
-::v-deep .html-content img {
-  max-width: 100%;
-}
-
-.empty-text {
-  padding: 18px 0;
-  color: #9ca3af;
-  text-align: center;
+.detail-content {
+  padding: 12px;
+  border: 1px solid #edf1f7;
+  border-radius: 10px;
+  background: #fbfcfe;
+  color: #4e5969;
+  line-height: 1.7;
 }
 </style>

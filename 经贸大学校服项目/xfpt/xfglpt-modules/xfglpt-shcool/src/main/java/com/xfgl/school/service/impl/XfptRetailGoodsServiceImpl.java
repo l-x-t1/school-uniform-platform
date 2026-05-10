@@ -1,20 +1,19 @@
 package com.xfgl.school.service.impl;
 
 import java.util.List;
-
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 import com.xfgl.common.core.exception.ServiceException;
-import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.domain.XfptGoodsSize;
 import com.xfgl.school.domain.vo.XfptRetailGoodsVo;
 import com.xfgl.school.mapper.XfptGoodsSizeMapper;
 import com.xfgl.school.mapper.XfptRetailGoodsMapper;
 import com.xfgl.school.service.IXfptRetailGoodsService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 
 /**
- * 学校端零售商品上下架Service业务层处理
+ * 学校端零售商品Service业务层处理
+ *
+ * @author yinet
  */
 @Service
 public class XfptRetailGoodsServiceImpl implements IXfptRetailGoodsService {
@@ -24,35 +23,50 @@ public class XfptRetailGoodsServiceImpl implements IXfptRetailGoodsService {
     @Autowired
     private XfptGoodsSizeMapper xfptGoodsSizeMapper;
 
+    /**
+     * 查询学校端零售商品列表
+     *
+     * @param query 查询条件
+     * @return 零售商品集合
+     */
     @Override
     public List<XfptRetailGoodsVo> selectXfptRetailGoodsList(XfptRetailGoodsVo query) {
         return xfptRetailGoodsMapper.selectXfptRetailGoodsList(query);
     }
 
+    /**
+     * 查询学校端零售商品详情
+     *
+     * @param id 学校商品关联主键
+     * @param schoolId 学校ID
+     * @return 零售商品详情
+     */
     @Override
     public XfptRetailGoodsVo selectXfptRetailGoodsById(Long id, Long schoolId) {
-        XfptRetailGoodsVo retailGoodsVo = xfptRetailGoodsMapper.selectXfptRetailGoodsById(id, schoolId);
-        if (StringUtils.isNull(retailGoodsVo)) {
-            throw new ServiceException("商品不存在或无权限查看");
+        XfptRetailGoodsVo retailGoods = xfptRetailGoodsMapper.selectXfptRetailGoodsById(id, schoolId);
+        if (retailGoods == null) {
+            return null;
         }
-        List<XfptGoodsSize> goodsSizeList = xfptGoodsSizeMapper.selectList(new LambdaQueryWrapper<XfptGoodsSize>()
-                .eq(XfptGoodsSize::getGoodsId, retailGoodsVo.getGoodsId())
-                .eq(XfptGoodsSize::getDelFlag, "0")
-                .orderByAsc(XfptGoodsSize::getSortNum)
-                .orderByAsc(XfptGoodsSize::getId));
-        retailGoodsVo.setXfptGoodsSizeList(goodsSizeList);
-        return retailGoodsVo;
+        XfptGoodsSize query = new XfptGoodsSize();
+        query.setGoodsId(retailGoods.getGoodsId());
+        retailGoods.setXfptGoodsSizeList(xfptGoodsSizeMapper.selectXfptGoodsSizeList(query));
+        return retailGoods;
     }
 
+    /**
+     * 更新学校端零售商品上下架状态
+     *
+     * @param id 学校商品关联主键
+     * @param schoolId 学校ID
+     * @param status 上下架状态
+     * @param updateBy 操作人
+     * @return 影响行数
+     */
     @Override
     public int updateXfptRetailGoodsStatus(Long id, Long schoolId, String status, String updateBy) {
         if (!"0".equals(status) && !"1".equals(status)) {
-            throw new ServiceException("上下架状态不合法");
+            throw new ServiceException("上下架状态只能为0或1");
         }
-        int rows = xfptRetailGoodsMapper.updateXfptRetailGoodsStatus(id, schoolId, status, updateBy);
-        if (rows <= 0) {
-            throw new ServiceException("商品不存在或无权限操作");
-        }
-        return rows;
+        return xfptRetailGoodsMapper.updateXfptRetailGoodsStatus(id, schoolId, status, updateBy);
     }
 }
