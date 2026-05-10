@@ -32,7 +32,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptDeliveryOrderXfptDeliveryOrderItemResult" type="XfptDeliveryOrder" extends="XfptDeliveryOrderResult">
-        <collection property="xfptDeliveryOrderItemList" ofType="XfptDeliveryOrderItem" column="id" select="selectXfptDeliveryOrderItemList" />
+        <collection property="xfptDeliveryOrderItemList" ofType="XfptDeliveryOrderItem" column="id" select="selectXfptDeliveryOrderItemById" />
     </resultMap>
 
     <resultMap type="XfptDeliveryOrderItem" id="XfptDeliveryOrderItemResult">

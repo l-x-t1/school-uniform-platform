@@ -126,8 +126,23 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
             if (StringUtils.isNotNull(xfptOrderItemList)) {
                 for (XfptOrderItem xfptOrderItem : xfptOrderItemList) {
                     xfptOrderItem.setOrderId(id);
+                    fillOrderItemDefaults(xfptOrderItem, xfptOrderInfo.getOrderType());
                 }
                     xfptOrderInfoMapper.batchInsertXfptOrderItem(xfptOrderItemList);
+            }
+        }
+
+        private void fillOrderItemDefaults(XfptOrderItem xfptOrderItem, String orderType)
+        {
+            if (xfptOrderItem.getSaleType() == null || "".equals(xfptOrderItem.getSaleType())) {
+                if (orderType != null && !"".equals(orderType)) {
+                    xfptOrderItem.setSaleType(orderType);
+                } else {
+                    xfptOrderItem.setSaleType("1");
+                }
+            }
+            if (xfptOrderItem.getDelFlag() == null || "".equals(xfptOrderItem.getDelFlag())) {
+                xfptOrderItem.setDelFlag("0");
             }
         }
 

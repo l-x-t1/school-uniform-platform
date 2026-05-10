@@ -94,6 +94,7 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   (res) => {
+    const silentError = Boolean(res.config && res.config.headers && res.config.headers.silentError);
     // 未设置状态码则默认成功状态
     const code = res.data.code || 200;
     // 获取错误信息
@@ -129,13 +130,19 @@ service.interceptors.response.use(
       }
       return Promise.reject("无效的会话，或者会话已过期，请重新登录。");
     } else if (code === 500) {
-      Message({ message: msg, type: "error" });
+      if (!silentError) {
+        Message({ message: msg, type: "error" });
+      }
       return Promise.reject(new Error(msg));
     } else if (code === 601) {
-      Message({ message: msg, type: "warning" });
+      if (!silentError) {
+        Message({ message: msg, type: "warning" });
+      }
       return Promise.reject("error");
     } else if (code !== 200) {
-      Notification.error({ title: msg });
+      if (!silentError) {
+        Notification.error({ title: msg });
+      }
       return Promise.reject("error");
     } else {
       return res.data;
@@ -144,6 +151,12 @@ service.interceptors.response.use(
   (error) => {
     console.log("err" + error);
     let { message } = error;
+    const silentError = Boolean(
+      error &&
+        error.config &&
+        error.config.headers &&
+        error.config.headers.silentError
+    );
     if (message == "Network Error") {
       message = "后端接口连接异常";
     } else if (message.includes("timeout")) {
@@ -151,7 +164,9 @@ service.interceptors.response.use(
     } else if (message.includes("Request failed with status code")) {
       message = "系统接口" + message.substr(message.length - 3) + "异常";
     }
-    Message({ message: message, type: "error", duration: 5 * 1000 });
+    if (!silentError) {
+      Message({ message: message, type: "error", duration: 5 * 1000 });
+    }
     return Promise.reject(error);
   }
 );

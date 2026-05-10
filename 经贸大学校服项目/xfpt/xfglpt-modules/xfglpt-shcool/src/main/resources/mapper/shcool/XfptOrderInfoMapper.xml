@@ -42,7 +42,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptOrderInfoXfptOrderItemResult" type="XfptOrderInfo" extends="XfptOrderInfoResult">
-        <collection property="xfptOrderItemList" ofType="XfptOrderItem" column="id" select="selectXfptOrderItemList" />
+        <collection property="xfptOrderItemList" ofType="XfptOrderItem" column="id" select="selectXfptOrderItemById" />
     </resultMap>
 
     <resultMap type="XfptOrderItem" id="XfptOrderItemResult">
@@ -118,10 +118,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptOrderItemList" resultMap="XfptOrderItemResult">
+    <select id="selectXfptOrderItemById" resultMap="XfptOrderItemResult">
         select id, order_id, goods_id, size_id, goods_name, size_name, main_image, sale_type, unit_price, buy_num, item_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_order_item
-        where order_id = #{order_id}
+        where order_id = #{id}
     </select>
 
     <insert id="insertXfptOrderInfo" parameterType="XfptOrderInfo" useGeneratedKeys="true" keyProperty="id">

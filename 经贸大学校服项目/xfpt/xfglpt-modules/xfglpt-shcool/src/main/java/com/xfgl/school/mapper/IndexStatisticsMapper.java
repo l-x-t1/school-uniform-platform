@@ -42,6 +42,29 @@ public interface IndexStatisticsMapper {
             "group by dept.dept_name order by value desc")
     List<KeyValueVo> getSchoolCount();
 
+    @Select("SELECT COALESCE(COUNT(DISTINCT u.user_id), 0) " +
+            "FROM sys_user u " +
+            "LEFT JOIN sys_dept d ON u.dept_id = d.dept_id " +
+            "WHERE u.del_flag = '0' " +
+            "AND (d.dept_id = #{deptId} OR FIND_IN_SET(#{deptId}, d.ancestors))")
+    Long getDistrictPlatformUserCount(@Param("deptId") Long deptId);
+
+    @Select("SELECT COALESCE(COUNT(DISTINCT oi.school_id), 0) " +
+            "FROM xfpt_order_info oi " +
+            "LEFT JOIN sys_dept d ON oi.school_id = d.dept_id " +
+            "WHERE oi.school_id IS NOT NULL " +
+            "AND (d.dept_id = #{deptId} OR FIND_IN_SET(#{deptId}, d.ancestors))")
+    Long getSchoolPlatformCount(@Param("deptId") Long deptId);
+
+    @Select("SELECT COALESCE(COUNT(DISTINCT oi.student_id), 0) " +
+            "FROM xfpt_order_info oi " +
+            "LEFT JOIN sys_dept d ON oi.school_id = d.dept_id " +
+            "WHERE oi.student_id IS NOT NULL " +
+            "AND (d.dept_id = #{deptId} OR FIND_IN_SET(#{deptId}, d.ancestors))")
+    Long getStudentPlatformCount(@Param("deptId") Long deptId);
+
+    List<KeyValueVo> getPriceTrendData(@Param("deptId") Long deptId);
+
 
     List<KeyValueVo> getSchool5YearCountData(Long deptId);
 
