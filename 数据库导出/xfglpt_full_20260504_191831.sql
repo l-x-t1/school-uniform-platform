@@ -3329,7 +3329,7 @@ CREATE TABLE `xfpt_school_supplier_goods_rel` (
   PRIMARY KEY (`id`),
   KEY `idx_xfpt_school_supplier_goods_rel_rel` (`rel_id`),
   KEY `idx_xfpt_school_supplier_goods_rel_goods` (`goods_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作商品';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作商品';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3338,7 +3338,7 @@ CREATE TABLE `xfpt_school_supplier_goods_rel` (
 
 LOCK TABLES `xfpt_school_supplier_goods_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (1,1,237,1,1,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(2,1,237,1,2,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(3,2,274,2,3,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(4,3,237,8,4,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0');
+INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (1,1,237,1,1,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(2,1,237,1,2,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(3,2,274,2,3,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(4,3,237,8,4,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(5,4,222,1,1,'1','管理员','2026-05-10 23:10:53','管理员','2026-05-10 23:10:53','','0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3368,7 +3368,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
   PRIMARY KEY (`id`),
   KEY `idx_xfpt_school_supplier_rel_status` (`school_id`,`supplier_id`,`cooperate_status`),
   KEY `idx_xfpt_school_supplier_rel_notice` (`notice_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作关系';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作关系';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3377,7 +3377,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
 
 LOCK TABLES `xfpt_school_supplier_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_rel` VALUES (1,237,'石家庄市第四十七中学',1,'河北超享纺织服装有限公司',1,NULL,'1',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(2,274,'石家庄市第八十一中学',2,'河北春风树服饰有限公司',2,NULL,'4',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(3,237,'石家庄市第四十七中学',8,'河北蓝雁纺织服装有限公司',1,NULL,'3',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0');
+INSERT INTO `xfpt_school_supplier_rel` VALUES (1,237,'石家庄市第四十七中学',1,'河北超享纺织服装有限公司',1,NULL,'1',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(2,274,'石家庄市第八十一中学',2,'河北春风树服饰有限公司',2,NULL,'4',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(3,237,'石家庄市第四十七中学',8,'河北蓝雁纺织服装有限公司',1,NULL,'3',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(4,222,'石家庄交通运输学校',1,'河北超享纺织服装有限公司',NULL,NULL,'1',NULL,'管理员','2026-05-10 23:10:53',NULL,NULL,NULL,'0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 
