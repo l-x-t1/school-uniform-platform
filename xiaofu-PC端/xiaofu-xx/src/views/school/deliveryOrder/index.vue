@@ -269,6 +269,13 @@
         <el-form-item label="物流单号" prop="logisticsNo">
           <el-input v-model="form.logisticsNo" placeholder="请输入物流单号" />
         </el-form-item>
+        <el-form-item label="发货状态" prop="deliveryStatus">
+          <el-select v-model="form.deliveryStatus" placeholder="请选择发货状态">
+            <el-option label="待发货" value="0" />
+            <el-option label="已发货" value="1" />
+            <el-option label="已签收" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="发货时间" prop="deliveryTime">
           <el-date-picker clearable
             v-model="form.deliveryTime"
@@ -347,7 +354,9 @@
           <el-table-column label="状态，0待发货 1已发货 2已签收" prop="status" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.status" placeholder="请选择状态，0待发货 1已发货 2已签收">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="待发货" value="0" />
+                <el-option label="已发货" value="1" />
+                <el-option label="已签收" value="2" />
               </el-select>
             </template>
           </el-table-column>
@@ -406,7 +415,7 @@ export default {
         receiverAddress: null,
         logisticsCompany: null,
         logisticsNo: null,
-        deliveryStatus: null,
+        deliveryStatus: "0",
         deliveryTime: null,
         signTime: null,
         carriageFee: null,
@@ -484,7 +493,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptDeliveryOrderItemList = [];
       this.resetForm("form");
@@ -567,7 +576,7 @@ export default {
       obj.sizeName = "";
       obj.deliveryNum = "";
       obj.signNum = "";
-      obj.status = "";
+      obj.status = "0";
       obj.remark = "";
       this.xfptDeliveryOrderItemList.push(obj);
     },

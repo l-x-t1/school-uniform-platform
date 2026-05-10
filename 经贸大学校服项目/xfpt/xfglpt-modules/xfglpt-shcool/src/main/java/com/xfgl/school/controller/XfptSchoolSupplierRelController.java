@@ -2,6 +2,7 @@ package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
+import com.xfgl.school.domain.XfptSchoolSupplierGoodsRel;
 import com.xfgl.school.domain.XfptSchoolSupplierRel;
 import com.xfgl.school.service.IXfptSchoolSupplierRelService;
 import com.xfgl.common.core.web.controller.BaseController;
@@ -93,6 +95,39 @@ public class XfptSchoolSupplierRelController extends BaseController {
     @PutMapping
     public AjaxResult edit(@RequestBody XfptSchoolSupplierRel xfptSchoolSupplierRel) {
             return toAjax(xfptSchoolSupplierRelService.updateXfptSchoolSupplierRel(xfptSchoolSupplierRel));
+    }
+
+    /**
+     * 取消学校供应商合作
+     */
+    @Operation(summary = "取消学校供应商合作")
+    @RequiresPermissions("school:schoolSupplierRel:edit")
+    @Log(title = "学校供应商合作关系" , businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/cancel")
+    public AjaxResult cancel(@PathVariable("id") Long id) {
+            return toAjax(xfptSchoolSupplierRelService.cancelCooperation(id));
+    }
+
+    /**
+     * 设置学校供应商合作服务电话
+     */
+    @Operation(summary = "设置学校供应商合作服务电话")
+    @RequiresPermissions("school:schoolSupplierRel:edit")
+    @Log(title = "学校供应商合作关系" , businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/servicePhone")
+    public AjaxResult servicePhone(@PathVariable("id") Long id, @RequestBody Map<String, String> body) {
+            return toAjax(xfptSchoolSupplierRelService.updateServicePhone(id, body.get("servicePhone")));
+    }
+
+    /**
+     * 替换学校供应商合作商品
+     */
+    @Operation(summary = "替换学校供应商合作商品")
+    @RequiresPermissions("school:schoolSupplierRel:edit")
+    @Log(title = "学校供应商合作商品" , businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/goods")
+    public AjaxResult goods(@PathVariable("id") Long id, @RequestBody List<XfptSchoolSupplierGoodsRel> goodsRelList) {
+            return toAjax(xfptSchoolSupplierRelService.replaceGoodsRel(id, goodsRelList));
     }
 
 

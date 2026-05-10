@@ -81,6 +81,12 @@
           placeholder="请选择历史商家回复时间">
         </el-date-picker>
       </el-form-item>
+      <el-form-item label="订单类型" prop="orderType">
+        <el-select v-model="queryParams.orderType" placeholder="请选择订单类型" clearable>
+          <el-option label="统购" value="1" />
+          <el-option label="零售" value="2" />
+        </el-select>
+      </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
         <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
@@ -139,6 +145,11 @@
       <el-table-column label="订单主表ID" align="center" prop="orderId" />
       <el-table-column label="订单明细ID" align="center" prop="orderItemId" />
       <el-table-column label="订单编号快照" align="center" prop="orderNo" />
+      <el-table-column label="订单类型" align="center" prop="orderType">
+        <template slot-scope="scope">
+          <span>{{ scope.row.orderType === '1' ? '统购' : scope.row.orderType === '2' ? '零售' : '' }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="商品ID" align="center" prop="goodsId" />
       <el-table-column label="商品名称快照" align="center" prop="goodsName" />
       <el-table-column label="评价用户ID" align="center" prop="userId" />
@@ -367,6 +378,7 @@ export default {
         orderId: null,
         orderItemId: null,
         orderNo: null,
+        orderType: null,
         goodsId: null,
         goodsName: null,
         userId: null,
