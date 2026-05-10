@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptRetailGoodsMapper">
+
+    <resultMap type="com.xfgl.school.domain.vo.XfptRetailGoodsVo" id="XfptRetailGoodsResult">
+        <result property="id" column="id"/>
+        <result property="relId" column="rel_id"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="supplierId" column="supplier_id"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="goodsId" column="goods_id"/>
+        <result property="goodsName" column="goods_name"/>
+        <result property="goodsCode" column="goods_code"/>
+        <result property="categoryName" column="category_name"/>
+        <result property="brandName" column="brand_name"/>
+        <result property="mainImage" column="main_image"/>
+        <result property="detailImagesJson" column="detail_images_json"/>
+        <result property="detailContent" column="detail_content"/>
+        <result property="saleType" column="sale_type"/>
+        <result property="status" column="status"/>
+        <result property="goodsStatus" column="goods_status"/>
+        <result property="publishStatus" column="publish_status"/>
+        <result property="operateBy" column="operate_by"/>
+        <result property="operateTime" column="operate_time"/>
+        <result property="retailMinPrice" column="retail_min_price"/>
+        <result property="retailMaxPrice" column="retail_max_price"/>
+        <result property="stockTotal" column="stock_total"/>
+        <result property="retailPriceRange" column="retail_price_range"/>
+    </resultMap>
+
+    <sql id="selectRetailGoodsVo">
+        SELECT
+            rel.id,
+            rel.rel_id,
+            rel.school_id,
+            rel.supplier_id,
+            sr.supplier_name,
+            rel.goods_id,
+            g.goods_name,
+            g.goods_code,
+            g.category_name,
+            g.brand_name,
+            g.main_image,
+            g.detail_images_json,
+            g.detail_content,
+            g.sale_type,
+            rel.status,
+            g.status AS goods_status,
+            g.publish_status,
+            COALESCE(rel.update_by, rel.create_by) AS operate_by,
+            COALESCE(rel.update_time, rel.create_time) AS operate_time,
+            size_stat.retail_min_price,
+            size_stat.retail_max_price,
+            size_stat.stock_total,
+            CASE
+                WHEN size_stat.retail_min_price IS NULL THEN NULL
+                WHEN size_stat.retail_min_price = size_stat.retail_max_price THEN CAST(size_stat.retail_min_price AS CHAR)
+                ELSE CONCAT(CAST(size_stat.retail_min_price AS CHAR), '-', CAST(size_stat.retail_max_price AS CHAR))
+            END AS retail_price_range
+        FROM xfpt_school_supplier_goods_rel rel
+        INNER JOIN xfpt_school_supplier_rel sr
+            ON sr.id = rel.rel_id
+           AND sr.school_id = rel.school_id
+           AND sr.cooperate_status = '1'
+           AND sr.del_flag = 0
+        INNER JOIN xfpt_goods g
+            ON g.id = rel.goods_id
+           AND g.del_flag = 0
+           AND g.status = '1'
+           AND g.publish_status = '1'
+           AND g.sale_type IN ('2', '3')
+        LEFT JOIN (
+            SELECT
+                goods_id,
+                MIN(retail_price) AS retail_min_price,
+                MAX(retail_price) AS retail_max_price,
+                SUM(stock_num) AS stock_total
+            FROM xfpt_goods_size
+            WHERE del_flag = 0
+              AND status = '1'
+            GROUP BY goods_id
+        ) size_stat
+            ON size_stat.goods_id = rel.goods_id
+    </sql>
+
+    <select id="selectXfptRetailGoodsList" parameterType="com.xfgl.school.domain.vo.XfptRetailGoodsVo" resultMap="XfptRetailGoodsResult">
+        <include refid="selectRetailGoodsVo"/>
+        WHERE rel.del_flag = 0
+          AND rel.school_id = #{schoolId}
+        <if test="status != null and status != ''"> AND rel.status = #{status}</if>
+        <if test="goodsName != null and goodsName != ''"> AND g.goods_name LIKE concat('%', #{goodsName}, '%')</if>
+        <if test="goodsCode != null and goodsCode != ''"> AND g.goods_code LIKE concat('%', #{goodsCode}, '%')</if>
+        <if test="categoryName != null and categoryName != ''"> AND g.category_name LIKE concat('%', #{categoryName}, '%')</if>
+        <if test="supplierName != null and supplierName != ''"> AND sr.supplier_name LIKE concat('%', #{supplierName}, '%')</if>
+        ORDER BY COALESCE(rel.update_time, rel.create_time) DESC, rel.id DESC
+    </select>
+
+    <select id="selectXfptRetailGoodsById" resultMap="XfptRetailGoodsResult">
+        <include refid="selectRetailGoodsVo"/>
+        WHERE rel.del_flag = 0
+          AND rel.id = #{id}
+          AND rel.school_id = #{schoolId}
+        LIMIT 1
+    </select>
+
+    <update id="updateXfptRetailGoodsStatus">
+        UPDATE xfpt_school_supplier_goods_rel rel
+        INNER JOIN xfpt_school_supplier_rel sr
+            ON sr.id = rel.rel_id
+           AND sr.school_id = rel.school_id
+           AND sr.cooperate_status = '1'
+           AND sr.del_flag = 0
+        INNER JOIN xfpt_goods g
+            ON g.id = rel.goods_id
+           AND g.del_flag = 0
+           AND g.status = '1'
+           AND g.publish_status = '1'
+           AND g.sale_type IN ('2', '3')
+        SET rel.status = #{status},
+            rel.update_by = #{updateBy},
+            rel.update_time = NOW()
+        WHERE rel.id = #{id}
+          AND rel.school_id = #{schoolId}
+          AND rel.del_flag = 0
+    </update>
+
+</mapper>

@@ -122,6 +122,16 @@
           v-hasPermi="['school:goods:export']"
         >导出</el-button>
       </el-col>
+      <el-col :span="1.5">
+        <el-button
+          type="info"
+          plain
+          icon="el-icon-upload2"
+          size="mini"
+          @click="handleImport"
+          v-hasPermi="['school:goods:import']"
+        >导入</el-button>
+      </el-col>
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
@@ -319,11 +329,46 @@
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
+
+    <!-- 商品信息导入对话框 -->
+    <el-dialog :title="upload.title" :visible.sync="upload.open" width="400px" append-to-body>
+      <el-upload
+        ref="upload"
+        :limit="1"
+        accept=".xlsx, .xls"
+        :headers="upload.headers"
+        :action="upload.url + '?updateSupport=' + upload.updateSupport"
+        :disabled="upload.isUploading"
+        :on-progress="handleFileUploadProgress"
+        :on-success="handleFileSuccess"
+        :auto-upload="false"
+        drag
+      >
+        <i class="el-icon-upload"></i>
+        <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+        <div class="el-upload__tip text-center" slot="tip">
+          <div class="el-upload__tip" slot="tip">
+            <el-checkbox v-model="upload.updateSupport" />是否更新已经存在的商品数据
+          </div>
+          <span>仅允许导入 xls、xlsx 格式文件。</span>
+          <el-link
+            :underline="false"
+            style="font-size: 12px; vertical-align: baseline"
+            @click.stop="importTemplate"
+          >下载模板</el-link>
+        </div>
+      </el-upload>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitFileForm">确 定</el-button>
+        <el-button @click="upload.open = false">取 消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
 import { listGoods, getGoods, delGoods, addGoods, updateGoods } from "@/api/school/goods";
+import { getToken } from "@/utils/auth";
 
 export default {
   name: "Goods",
@@ -351,6 +396,16 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      pageActivated: false,
+      // 商品导入参数
+      upload: {
+        open: false,
+        title: "",
+        isUploading: false,
+        updateSupport: 0,
+        headers: { Authorization: "Bearer " + getToken() },
+        url: process.env.VUE_APP_BASE_API + "/school/goods/importData"
+      },
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -362,9 +417,9 @@ export default {
         supplierName: null,
         brandName: null,
         mainImage: null,
-        saleType: "3",
-        status: "1",
-        publishStatus: "0",
+        saleType: null,
+        status: null,
+        publishStatus: null,
         publishTime: null,
         offShelfTime: null,
         sortNum: null,
@@ -405,6 +460,13 @@ export default {
   },
   created() {
     this.getList();
+  },
+  activated() {
+    if (this.pageActivated) {
+      this.getList();
+      return;
+    }
+    this.pageActivated = true;
   },
   methods: {
     /** 查询商品信息列表 */
@@ -552,6 +614,32 @@ export default {
       this.download('school/goods/export', {
         ...this.queryParams
       }, `goods_${new Date().getTime()}.xlsx`)
+    },
+    /** 导入按钮操作 */
+    handleImport() {
+      this.upload.title = "商品信息导入";
+      this.upload.open = true;
+    },
+    /** 下载模板操作 */
+    importTemplate() {
+      this.download('school/goods/importTemplate', {
+      }, `goods_template_${new Date().getTime()}.xlsx`)
+    },
+    // 文件上传中处理
+    handleFileUploadProgress(event, file, fileList) {
+      this.upload.isUploading = true;
+    },
+    // 文件上传成功处理
+    handleFileSuccess(response, file, fileList) {
+      this.upload.open = false;
+      this.upload.isUploading = false;
+      this.$refs.upload.clearFiles();
+      this.$alert("<div style='overflow: auto;overflow-x: hidden;max-height: 70vh;padding: 10px 20px 0;'>" + response.msg + "</div>", "导入结果", { dangerouslyUseHTMLString: true });
+      this.getList();
+    },
+    // 提交上传文件
+    submitFileForm() {
+      this.$refs.upload.submit();
     }
   }
 };

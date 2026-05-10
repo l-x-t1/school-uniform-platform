@@ -921,6 +921,104 @@ INSERT INTO `sys_menu` VALUES (1,'系统管理',0,70,'system',NULL,'','',1,0,'M'
 /*!40000 ALTER TABLE `sys_menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- Menu updates for 商品信息导入权限
+SET @goods_menu_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `PERMS` = 'school:goods:list'
+  LIMIT 1
+);
+SET @goods_import_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `PERMS` = 'school:goods:import'
+  LIMIT 1
+);
+SET @goods_import_id := IFNULL(@goods_import_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @goods_import_id, '商品库管理导入', @goods_menu_id, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:goods:import', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE @goods_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:goods:import');
+
+-- Menu updates for 学校端零购管理 / 零售商品上下架
+SET @retail_parent_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '零购管理'
+    AND `PARENT_ID` = 2333
+  LIMIT 1
+);
+SET @retail_parent_id := IFNULL(@retail_parent_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_parent_id, '零购管理', 2333, 4, 'retailManage', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', NOW(), '', NULL, '零购管理目录', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '零购管理'
+    AND `PARENT_ID` = 2333
+);
+
+SET @retail_goods_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '零售商品上下架'
+    AND `PARENT_ID` = @retail_parent_id
+  LIMIT 1
+);
+SET @retail_goods_id := IFNULL(@retail_goods_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_goods_id, '零售商品上下架', @retail_parent_id, 1, 'lssxj', 'lssxj/index', NULL, '', 1, 0, 'C', '0', '0', 'school:retailGoods:list', 'shopping', 'admin', NOW(), '', NULL, '零售商品上下架菜单', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:retailGoods:list'
+);
+
+SET @retail_query_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:retailGoods:query'
+  LIMIT 1
+);
+SET @retail_query_id := IFNULL(@retail_query_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_query_id, '零售商品查看', @retail_goods_id, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:retailGoods:query', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:retailGoods:query');
+
+SET @retail_edit_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:retailGoods:edit'
+  LIMIT 1
+);
+SET @retail_edit_id := IFNULL(@retail_edit_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_edit_id, '零售商品上下架', @retail_goods_id, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:retailGoods:edit', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:retailGoods:edit');
+
 --
 -- Table structure for table `sys_notice`
 --
