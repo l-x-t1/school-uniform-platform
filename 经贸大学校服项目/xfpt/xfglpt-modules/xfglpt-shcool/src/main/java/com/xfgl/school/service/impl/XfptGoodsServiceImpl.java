@@ -63,6 +63,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public int insertXfptGoods(XfptGoods xfptGoods)
         {
+            fillGoodsDefaults(xfptGoods);
             int rows = xfptGoodsMapper.insert(xfptGoods);
             insertXfptGoodsSize(xfptGoods);
             return rows;
@@ -78,6 +79,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public int updateXfptGoods(XfptGoods xfptGoods)
         {
+            fillGoodsDefaults(xfptGoods);
                 xfptGoodsMapper.deleteXfptGoodsSizeByGoodsId(xfptGoods.getId());
             insertXfptGoodsSize(xfptGoods);
             return xfptGoodsMapper.updateById(xfptGoods);
@@ -126,8 +128,35 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
             if (StringUtils.isNotNull(xfptGoodsSizeList)) {
                 for (XfptGoodsSize xfptGoodsSize : xfptGoodsSizeList) {
                     xfptGoodsSize.setGoodsId(id);
+                    fillGoodsSizeDefaults(xfptGoodsSize);
                 }
                     xfptGoodsMapper.batchInsertXfptGoodsSize(xfptGoodsSizeList);
+            }
+        }
+
+        private void fillGoodsDefaults(XfptGoods xfptGoods)
+        {
+            if (xfptGoods.getSaleType() == null || "".equals(xfptGoods.getSaleType())) {
+                xfptGoods.setSaleType("3");
+            }
+            if (xfptGoods.getStatus() == null || "".equals(xfptGoods.getStatus())) {
+                xfptGoods.setStatus("1");
+            }
+            if (xfptGoods.getPublishStatus() == null || "".equals(xfptGoods.getPublishStatus())) {
+                xfptGoods.setPublishStatus("0");
+            }
+            if (xfptGoods.getDelFlag() == null || "".equals(xfptGoods.getDelFlag())) {
+                xfptGoods.setDelFlag("0");
+            }
+        }
+
+        private void fillGoodsSizeDefaults(XfptGoodsSize xfptGoodsSize)
+        {
+            if (xfptGoodsSize.getStatus() == null || "".equals(xfptGoodsSize.getStatus())) {
+                xfptGoodsSize.setStatus("1");
+            }
+            if (xfptGoodsSize.getDelFlag() == null || "".equals(xfptGoodsSize.getDelFlag())) {
+                xfptGoodsSize.setDelFlag("0");
             }
         }
 

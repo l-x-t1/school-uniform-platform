@@ -227,6 +227,12 @@
             placeholder="请选择历史商家回复时间">
           </el-date-picker>
         </el-form-item>
+        <el-form-item label="评价状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择评价状态">
+            <el-option label="正常" value="0" />
+            <el-option label="隐藏" value="1" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
@@ -278,7 +284,8 @@
           <el-table-column label="回复人角色，1家长 2供应商" prop="fromRoleType" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.fromRoleType" placeholder="请选择回复人角色，1家长 2供应商">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="家长" value="1" />
+                <el-option label="供应商" value="2" />
               </el-select>
             </template>
           </el-table-column>
@@ -300,7 +307,8 @@
           <el-table-column label="被回复人角色，1家长 2供应商" prop="toRoleType" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.toRoleType" placeholder="请选择被回复人角色，1家长 2供应商">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="家长" value="1" />
+                <el-option label="供应商" value="2" />
               </el-select>
             </template>
           </el-table-column>
@@ -312,7 +320,8 @@
           <el-table-column label="状态，0正常 1隐藏" prop="status" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.status" placeholder="请选择状态，0正常 1隐藏">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="正常" value="0" />
+                <el-option label="隐藏" value="1" />
               </el-select>
             </template>
           </el-table-column>
@@ -448,13 +457,13 @@ export default {
         imagesJson: null,
         replyContent: null,
         replyTime: null,
-        status: null,
+        status: "0",
         createBy: null,
         createTime: null,
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptCommentReplyList = [];
       this.resetForm("form");
@@ -542,7 +551,7 @@ export default {
       obj.toUserName = "";
       obj.toRoleType = "";
       obj.toRoleTitle = "";
-      obj.status = "";
+      obj.status = "0";
       obj.sortNum = "";
       obj.remark = "";
       this.xfptCommentReplyList.push(obj);

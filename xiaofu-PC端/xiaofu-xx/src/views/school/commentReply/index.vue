@@ -220,6 +220,12 @@
         <el-form-item label="回复人姓名快照" prop="fromUserName">
           <el-input v-model="form.fromUserName" placeholder="请输入回复人姓名快照" />
         </el-form-item>
+        <el-form-item label="回复人角色" prop="fromRoleType">
+          <el-select v-model="form.fromRoleType" placeholder="请选择回复人角色">
+            <el-option label="家长" value="1" />
+            <el-option label="供应商" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="回复人角色标题快照" prop="fromRoleTitle">
           <el-input v-model="form.fromRoleTitle" placeholder="请输入回复人角色标题快照" />
         </el-form-item>
@@ -229,11 +235,23 @@
         <el-form-item label="被回复人姓名快照" prop="toUserName">
           <el-input v-model="form.toUserName" placeholder="请输入被回复人姓名快照" />
         </el-form-item>
+        <el-form-item label="被回复角色" prop="toRoleType">
+          <el-select v-model="form.toRoleType" placeholder="请选择被回复人角色">
+            <el-option label="家长" value="1" />
+            <el-option label="供应商" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="被回复人角色标题快照" prop="toRoleTitle">
           <el-input v-model="form.toRoleTitle" placeholder="请输入被回复人角色标题快照" />
         </el-form-item>
         <el-form-item label="回复内容">
           <editor v-model="form.content" :min-height="192"/>
+        </el-form-item>
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择状态">
+            <el-option label="正常" value="0" />
+            <el-option label="隐藏" value="1" />
+          </el-select>
         </el-form-item>
         <el-form-item label="排序值" prop="sortNum">
           <el-input v-model="form.sortNum" placeholder="请输入排序值" />
@@ -362,14 +380,14 @@ export default {
         toRoleType: null,
         toRoleTitle: null,
         content: null,
-        status: null,
+        status: "0",
         sortNum: null,
         createBy: null,
         createTime: null,
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.resetForm("form");
     },

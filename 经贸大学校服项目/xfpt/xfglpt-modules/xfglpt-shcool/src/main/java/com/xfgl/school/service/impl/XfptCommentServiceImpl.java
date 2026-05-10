@@ -63,6 +63,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         @Override
         public int insertXfptComment(XfptComment xfptComment)
         {
+            fillCommentDefaults(xfptComment);
             int rows = xfptCommentMapper.insert(xfptComment);
             insertXfptCommentReply(xfptComment);
             return rows;
@@ -78,6 +79,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         @Override
         public int updateXfptComment(XfptComment xfptComment)
         {
+            fillCommentDefaults(xfptComment);
                 xfptCommentMapper.deleteXfptCommentReplyByCommentId(xfptComment.getId());
             insertXfptCommentReply(xfptComment);
             return xfptCommentMapper.updateById(xfptComment);
@@ -123,11 +125,32 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         {
             List<XfptCommentReply> xfptCommentReplyList = xfptComment.getXfptCommentReplyList();
             Long id = xfptComment.getId();
-            if (StringUtils.isNotNull(xfptCommentReplyList)) {
+            if (StringUtils.isNotNull(xfptCommentReplyList) && xfptCommentReplyList.size() > 0) {
                 for (XfptCommentReply xfptCommentReply : xfptCommentReplyList) {
                     xfptCommentReply.setCommentId(id);
+                    fillCommentReplyDefaults(xfptCommentReply);
                 }
-                    xfptCommentMapper.batchInsertXfptCommentReply(xfptCommentReplyList);
+                xfptCommentMapper.batchInsertXfptCommentReply(xfptCommentReplyList);
+            }
+        }
+
+        private void fillCommentDefaults(XfptComment xfptComment)
+        {
+            if (xfptComment.getStatus() == null || "".equals(xfptComment.getStatus())) {
+                xfptComment.setStatus("0");
+            }
+            if (xfptComment.getDelFlag() == null || "".equals(xfptComment.getDelFlag())) {
+                xfptComment.setDelFlag("0");
+            }
+        }
+
+        private void fillCommentReplyDefaults(XfptCommentReply xfptCommentReply)
+        {
+            if (xfptCommentReply.getStatus() == null || "".equals(xfptCommentReply.getStatus())) {
+                xfptCommentReply.setStatus("0");
+            }
+            if (xfptCommentReply.getDelFlag() == null || "".equals(xfptCommentReply.getDelFlag())) {
+                xfptCommentReply.setDelFlag("0");
             }
         }
 

@@ -96,9 +96,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
             <if test="payStatus != null  and payStatus != ''"> and pay_status = #{payStatus}</if>
             <if test="orderStatus != null  and orderStatus != ''"> and order_status = #{orderStatus}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
-            <if test="cancelTime != null "> and cancel_time = #{cancelTime}</if>
-            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="payTime != null "> and date_format(pay_time, '%Y-%m-%d') = date_format(#{payTime}, '%Y-%m-%d')</if>
+            <if test="cancelTime != null "> and date_format(cancel_time, '%Y-%m-%d') = date_format(#{cancelTime}, '%Y-%m-%d')</if>
+            <if test="finishTime != null "> and date_format(finish_time, '%Y-%m-%d') = date_format(#{finishTime}, '%Y-%m-%d')</if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>

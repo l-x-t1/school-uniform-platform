@@ -145,6 +145,26 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="支付状态" prop="payStatus">
+        <el-select v-model="queryParams.payStatus" placeholder="请选择支付状态" clearable>
+          <el-option
+            v-for="item in payStatusOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="订单状态" prop="orderStatus">
+        <el-select v-model="queryParams.orderStatus" placeholder="请选择订单状态" clearable>
+          <el-option
+            v-for="item in orderStatusOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="支付时间" prop="payTime">
         <el-date-picker clearable
           v-model="queryParams.payTime"
@@ -253,8 +273,16 @@
       <el-table-column label="订单总金额" align="center" prop="totalAmount" />
       <el-table-column label="实付金额" align="center" prop="payAmount" />
       <el-table-column label="已退款金额" align="center" prop="refundAmount" />
-      <el-table-column label="支付状态，0待支付 1已支付 2部分退款 3已退款" align="center" prop="payStatus" />
-      <el-table-column label="订单状态，0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中" align="center" prop="orderStatus" />
+      <el-table-column label="支付状态" align="center" prop="payStatus">
+        <template slot-scope="scope">
+          <span>{{ formatPayStatus(scope.row.payStatus) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="订单状态" align="center" prop="orderStatus">
+        <template slot-scope="scope">
+          <span>{{ formatOrderStatus(scope.row.orderStatus) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="支付时间" align="center" prop="payTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.payTime, '{y}-{m}-{d}') }}</span>
@@ -359,6 +387,26 @@
         </el-form-item>
         <el-form-item label="已退款金额" prop="refundAmount">
           <el-input v-model="form.refundAmount" placeholder="请输入已退款金额" />
+        </el-form-item>
+        <el-form-item label="支付状态" prop="payStatus">
+          <el-select v-model="form.payStatus" placeholder="请选择支付状态">
+            <el-option
+              v-for="item in payStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="订单状态" prop="orderStatus">
+          <el-select v-model="form.orderStatus" placeholder="请选择订单状态">
+            <el-option
+              v-for="item in orderStatusOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="支付时间" prop="payTime">
           <el-date-picker clearable
@@ -489,6 +537,21 @@ export default {
       orderInfoList: [],
       // 订单明细表格数据
       xfptOrderItemList: [],
+      payStatusOptions: [
+        { label: "待支付", value: "0" },
+        { label: "已支付", value: "1" },
+        { label: "部分退款", value: "2" },
+        { label: "已退款", value: "3" }
+      ],
+      orderStatusOptions: [
+        { label: "待付款", value: "0" },
+        { label: "待生产", value: "1" },
+        { label: "待发货", value: "2" },
+        { label: "待收货", value: "3" },
+        { label: "已完成", value: "4" },
+        { label: "已取消", value: "5" },
+        { label: "售后中", value: "6" }
+      ],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -518,8 +581,8 @@ export default {
         totalAmount: null,
         payAmount: null,
         refundAmount: null,
-        payStatus: null,
-        orderStatus: null,
+        payStatus: "0",
+        orderStatus: "0",
         payTime: null,
         cancelTime: null,
         finishTime: null,
@@ -628,10 +691,18 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptOrderItemList = [];
       this.resetForm("form");
+    },
+    formatPayStatus(status) {
+      const item = this.payStatusOptions.find(item => item.value === String(status));
+      return item ? item.label : status;
+    },
+    formatOrderStatus(status) {
+      const item = this.orderStatusOptions.find(item => item.value === String(status));
+      return item ? item.label : status;
     },
     /** 搜索按钮操作 */
     handleQuery() {

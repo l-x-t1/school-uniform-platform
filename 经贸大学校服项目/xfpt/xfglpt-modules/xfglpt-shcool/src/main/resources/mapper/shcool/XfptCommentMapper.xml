@@ -29,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptCommentXfptCommentReplyResult" type="XfptComment" extends="XfptCommentResult">
-        <collection property="xfptCommentReplyList" ofType="XfptCommentReply" column="id" select="selectXfptCommentReplyList" />
+        <collection property="xfptCommentReplyList" ofType="XfptCommentReply" column="id" select="selectXfptCommentReplyById" />
     </resultMap>
 
     <resultMap type="XfptCommentReply" id="XfptCommentReplyResult">
@@ -74,7 +74,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
             <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
             <if test="score != null "> and score = #{score}</if>
-            <if test="replyTime != null "> and reply_time = #{replyTime}</if>
+            <if test="replyTime != null "> and date_format(reply_time, '%Y-%m-%d') = date_format(#{replyTime}, '%Y-%m-%d')</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
 
     </select>
@@ -85,10 +85,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptCommentReplyList" resultMap="XfptCommentReplyResult">
+    <select id="selectXfptCommentReplyById" resultMap="XfptCommentReplyResult">
         select id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_comment_reply
-        where comment_id = #{comment_id}
+        where comment_id = #{id}
     </select>
 
     <insert id="insertXfptComment" parameterType="XfptComment" useGeneratedKeys="true" keyProperty="id">
@@ -185,10 +185,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptCommentReplyByCommentId" parameterType="Long">
-        delete from xfpt_comment_reply where comment_id = #{commentId}
+        delete from xfpt_comment_reply where comment_id = #{id}
     </delete>
 
-    <insert id="batchXfptCommentReply">
+    <insert id="batchInsertXfptCommentReply">
         insert into xfpt_comment_reply( id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.commentId}, #{item.orderId}, #{item.orderItemId}, #{item.goodsId}, #{item.supplierId}, #{item.fromUserId}, #{item.fromUserName}, #{item.fromRoleType}, #{item.fromRoleTitle}, #{item.toUserId}, #{item.toUserName}, #{item.toRoleType}, #{item.toRoleTitle}, #{item.content}, #{item.status}, #{item.sortNum}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})

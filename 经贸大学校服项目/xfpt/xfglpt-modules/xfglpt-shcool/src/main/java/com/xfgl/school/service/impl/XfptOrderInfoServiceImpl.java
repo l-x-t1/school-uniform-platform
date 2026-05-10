@@ -63,6 +63,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public int insertXfptOrderInfo(XfptOrderInfo xfptOrderInfo)
         {
+            fillOrderInfoDefaults(xfptOrderInfo);
             int rows = xfptOrderInfoMapper.insert(xfptOrderInfo);
             insertXfptOrderItem(xfptOrderInfo);
             return rows;
@@ -78,7 +79,8 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public int updateXfptOrderInfo(XfptOrderInfo xfptOrderInfo)
         {
-                xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(xfptOrderInfo.getId());
+            fillOrderInfoDefaults(xfptOrderInfo);
+            xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(xfptOrderInfo.getId());
             insertXfptOrderItem(xfptOrderInfo);
             return xfptOrderInfoMapper.updateById(xfptOrderInfo);
         }
@@ -123,12 +125,25 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         {
             List<XfptOrderItem> xfptOrderItemList = xfptOrderInfo.getXfptOrderItemList();
             Long id = xfptOrderInfo.getId();
-            if (StringUtils.isNotNull(xfptOrderItemList)) {
+            if (StringUtils.isNotNull(xfptOrderItemList) && xfptOrderItemList.size() > 0) {
                 for (XfptOrderItem xfptOrderItem : xfptOrderItemList) {
                     xfptOrderItem.setOrderId(id);
                     fillOrderItemDefaults(xfptOrderItem, xfptOrderInfo.getOrderType());
                 }
-                    xfptOrderInfoMapper.batchInsertXfptOrderItem(xfptOrderItemList);
+                xfptOrderInfoMapper.batchInsertXfptOrderItem(xfptOrderItemList);
+            }
+        }
+
+        private void fillOrderInfoDefaults(XfptOrderInfo xfptOrderInfo)
+        {
+            if (xfptOrderInfo.getPayStatus() == null || "".equals(xfptOrderInfo.getPayStatus())) {
+                xfptOrderInfo.setPayStatus("0");
+            }
+            if (xfptOrderInfo.getOrderStatus() == null || "".equals(xfptOrderInfo.getOrderStatus())) {
+                xfptOrderInfo.setOrderStatus("0");
+            }
+            if (xfptOrderInfo.getDelFlag() == null || "".equals(xfptOrderInfo.getDelFlag())) {
+                xfptOrderInfo.setDelFlag("0");
             }
         }
 

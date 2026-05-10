@@ -34,5 +34,28 @@ public class XfptCommentReplyServiceImpl extends ServiceImpl<XfptCommentReplyMap
         return xfptCommentReplyMapper.selectXfptCommentReplyList(xfptCommentReply);
     }
 
+    @Override
+    public boolean save(XfptCommentReply xfptCommentReply)
+    {
+        fillCommentReplyDefaults(xfptCommentReply);
+        return super.save(xfptCommentReply);
+    }
+
+    @Override
+    public boolean updateById(XfptCommentReply xfptCommentReply)
+    {
+        fillCommentReplyDefaults(xfptCommentReply);
+        return super.updateById(xfptCommentReply);
+    }
+
+    private void fillCommentReplyDefaults(XfptCommentReply xfptCommentReply)
+    {
+        if (xfptCommentReply.getStatus() == null || "".equals(xfptCommentReply.getStatus())) {
+            xfptCommentReply.setStatus("0");
+        }
+        if (xfptCommentReply.getDelFlag() == null || "".equals(xfptCommentReply.getDelFlag())) {
+            xfptCommentReply.setDelFlag("0");
+        }
+    }
 
 }
