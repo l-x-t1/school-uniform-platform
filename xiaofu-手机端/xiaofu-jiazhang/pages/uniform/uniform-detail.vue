@@ -106,6 +106,10 @@
 </template>
 
 <script>
+import config from '@/config'
+import { getUniform } from '@/api/uniform'
+import { addCart } from '@/api/cart'
+
 export default {
   data() {
     return {
@@ -140,10 +144,6 @@ export default {
       }
     }
   },
-  onShow() {
-    // 确保页面每次显示时都能看到数据
-    this.initData();
-  },
   onLoad(options) {
     if (options.id) {
       this.id = options.id;
@@ -151,21 +151,41 @@ export default {
     this.initData();
   },
   methods: {
+    normalizeUniform(data = {}) {
+      const images = data.images || data.imageList || [data.image || data.coverImage || data.mainImage || '/static/nanxf.png'];
+      const sizes = data.sizes || data.skuList || data.skus || this.uniform.sizes;
+      return {
+        ...this.uniform,
+        id: data.id || data.uniformId || data.productId || this.id || this.uniform.id,
+        name: data.name || data.uniformName || data.productName || this.uniform.name,
+        price: data.price || data.salePrice || data.minPrice || this.uniform.price,
+        originalPrice: data.originalPrice || data.marketPrice || this.uniform.originalPrice,
+        tags: data.tags || data.tagList || this.uniform.tags,
+        images,
+        sizes: sizes.map((item) => ({
+          name: item.name || item.size || item.sizeName,
+          inStock: item.inStock !== undefined ? item.inStock : (item.stock === undefined ? true : item.stock > 0),
+          skuId: item.skuId || item.id
+        })),
+        specs: data.specs || data.specList || this.uniform.specs,
+        displayImages: data.displayImages || data.detailImages || images
+      };
+    },
+
     initData() {
-      // 如果后端API还没准备好，可以先使用本地数据
-      try {
-        // 这里可以调用API
-        // const res = await this.fetchUniformDetail();
-        // this.uniform = res.data;
-        
-        // 暂时使用本地数据
-        console.log('初始化数据成功');
-      } catch (error) {
-        uni.showToast({
-          title: '加载失败，请重试',
-          icon: 'none'
+      if (!this.id) return;
+
+      getUniform(this.id)
+        .then((res) => {
+          this.uniform = this.normalizeUniform(res.data || res);
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) return;
+          uni.showToast({
+            title: error.message || '加载失败，请重试',
+            icon: 'none'
+          });
         });
-      }
     },
     
     selectSize(size) {
@@ -181,7 +201,7 @@ export default {
     
     viewReport() {
       uni.navigateTo({
-        url: '/pages/report/report-detail?id=1'
+        url: `/pages/uniform/quality-report?id=${this.uniform.id}`
       });
     },
     
@@ -203,6 +223,34 @@ export default {
     navigateTo(url) {
       uni.navigateTo({ url });
     },
+
+    buildOrderItem() {
+      const selectedSku = this.uniform.sizes.find((item) => item.name === this.selectedSize) || {};
+      return {
+        id: this.uniform.id,
+        uniformId: this.uniform.id,
+        skuId: selectedSku.skuId,
+        name: this.uniform.name,
+        image: this.uniform.images[0],
+        price: this.uniform.price,
+        quantity: 1,
+        size: this.selectedSize,
+        color: '默认款',
+        spec: this.selectedSize
+      };
+    },
+
+    syncLocalCartItem(item) {
+      const cartList = uni.getStorageSync('cartList') || [];
+      const existed = cartList.find((cart) => String(cart.uniformId) === String(item.uniformId) && cart.size === item.size);
+      if (existed) {
+        existed.quantity = Number(existed.quantity || 1) + Number(item.quantity || 1);
+        existed.selected = true;
+      } else {
+        cartList.push({ ...item, selected: true });
+      }
+      uni.setStorageSync('cartList', cartList);
+    },
     
     addToCart() {
       if (!this.selectedSize) {
@@ -211,12 +259,34 @@ export default {
           icon: 'none'
         });
       }
-      
-      // 模拟添加到购物车
-      uni.showToast({
-        title: '已加入购物车',
-        icon: 'success'
-      });
+
+      const item = this.buildOrderItem();
+      addCart({
+        uniformId: item.uniformId,
+        skuId: item.skuId,
+        size: item.size,
+        quantity: item.quantity
+      })
+        .catch((error) => {
+          if (!config.enableMockFallback) return Promise.reject(error);
+          this.syncLocalCartItem(item);
+          return { localOnly: true };
+        })
+        .then((res) => {
+          if (!res || !res.localOnly) {
+            this.syncLocalCartItem(item);
+          }
+          uni.showToast({
+            title: '已加入购物车',
+            icon: 'success'
+          });
+        })
+        .catch((error) => {
+          uni.showToast({
+            title: error.message || '加入购物车失败',
+            icon: 'none'
+          });
+        });
     },
     
     buyNow() {
@@ -226,9 +296,9 @@ export default {
           icon: 'none'
         });
       }
-      
+      uni.setStorageSync('confirmOrderItems', [this.buildOrderItem()]);
       uni.navigateTo({
-        url: `/pages/order/order-confirm?id=${this.uniform.id}&size=${this.selectedSize}`
+        url: '/pages/order/order-confirm?source=buyNow'
       });
     }
   }

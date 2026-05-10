@@ -95,7 +95,7 @@
       
       <!-- 无数据提示 -->
       <view class="empty-state" v-if="orderList.length === 0 && !isLoading">
-        <image class="empty-image" src="/static/images/empty-order.png" mode="aspectFit"></image>
+        <image class="empty-image" src="/static/uni.png" mode="aspectFit"></image>
         <text class="empty-text">暂无相关订单</text>
         <button class="go-shop-btn" @click="goToShop">去购买校服</button>
       </view>
@@ -104,16 +104,21 @@
 </template>
 
 <script>
+import config from '@/config'
+import { listOrders, cancelOrder as cancelOrderApi, confirmOrder } from '@/api/order'
+
 export default {
   data() {
     return {
-      currentStatus: 'unpaid', // 当前选中的状态
+      currentStatus: 'all', // 当前选中的状态
       isLoading: false, // 是否正在加载
       isLoadingMore: false, // 是否正在加载更多
       isRefreshing: false, // 是否正在刷新
       page: 1, // 当前页码
+      hasMore: true,
       orderList: [], // 订单列表
       orderStatus: [
+        { status: 'all', name: '全部' },
         { status: 'unpaid', name: '待付款' },
         { status: 'unshipped', name: '待发货' },
         { status: 'shipped', name: '已发货' },
@@ -122,68 +127,151 @@ export default {
       ]
     }
   },
-  onLoad() {
+  onShow() {
+    this.page = 1;
+    this.hasMore = true;
+    this.orderList = [];
     this.loadOrders();
   },
   methods: {
+    normalizeOrder(item) {
+      const products = item.products || item.items || item.orderItems || [];
+      return {
+        id: item.id || item.orderId,
+        orderNo: item.orderNo || item.orderSn || item.orderCode,
+        status: this.normalizeStatus(item.status),
+        createTime: item.createTime,
+        totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
+        products: products.map((product) => ({
+          id: product.id || product.productId || product.uniformId,
+          name: product.name || product.productName || product.uniformName || '校服',
+          image: product.image || product.productImage || product.coverImage || '/static/qjxf.png',
+          price: product.price || product.salePrice || product.unitPrice || '0.00',
+          quantity: product.quantity || product.num || 1,
+          size: product.size || product.sizeName || '-',
+          color: product.color || product.colorName || '-'
+        }))
+      };
+    },
+
+    getLocalOrders() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      return Object.keys(localOrders)
+        .map((key) => this.normalizeOrder(localOrders[key]))
+        .filter((order) => order.id)
+        .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')));
+    },
+
+    mergeLocalOrders(list) {
+      if (!config.enableMockFallback) return list;
+      const localOrders = this.filterOrdersByStatus(this.getLocalOrders(), this.currentStatus);
+      const existedIds = list.map((item) => String(item.id));
+      const merged = [
+        ...localOrders.filter((item) => !existedIds.includes(String(item.id))),
+        ...list
+      ];
+      return merged;
+    },
+
+    saveLocalOrderStatus(orderId, status) {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      if (localOrders[orderId]) {
+        localOrders[orderId].status = status;
+        if (status === 'completed') {
+          localOrders[orderId].completeTime = this.getCurrentTime();
+        }
+        uni.setStorageSync('devOrders', localOrders);
+      }
+    },
+
+    normalizeStatus(status) {
+      const statusMap = {
+        0: 'unpaid',
+        1: 'unshipped',
+        2: 'shipped',
+        3: 'completed',
+        4: 'cancelled',
+        unpaid: 'unpaid',
+        unshipped: 'unshipped',
+        shipped: 'shipped',
+        completed: 'completed',
+        cancelled: 'cancelled'
+      };
+      return statusMap[status] || status;
+    },
+
+    getQueryParams() {
+      return {
+        pageNum: this.page,
+        pageSize: 10,
+        status: this.currentStatus === 'all' ? undefined : this.currentStatus
+      };
+    },
+
+    finishLoading() {
+      this.isLoading = false;
+      this.isLoadingMore = false;
+      this.isRefreshing = false;
+    },
+
     // 切换订单状态
     switchStatus(status) {
       if (this.currentStatus === status) return;
       this.currentStatus = status;
       this.page = 1;
+      this.hasMore = true;
       this.orderList = [];
       this.loadOrders();
     },
     
     // 加载订单数据
     loadOrders() {
+      if (!this.hasMore || this.isLoading) return;
       this.isLoading = true;
-      // 模拟API请求
-      setTimeout(() => {
-        // 模拟数据，实际应从API获取
-        const mockOrders = this.getMockOrders();
-        this.orderList = this.filterOrdersByStatus(mockOrders, this.currentStatus);
-        this.isLoading = false;
-      }, 800);
+      listOrders(this.getQueryParams())
+        .then((res) => {
+          const rows = res.rows || res.data || res.list || [];
+          const list = rows.map((item) => this.normalizeOrder(item));
+          const displayList = this.page === 1 ? this.mergeLocalOrders(list) : list;
+          this.orderList = this.page === 1 ? displayList : [...this.orderList, ...displayList];
+          this.hasMore = res.total ? this.orderList.length < res.total : list.length >= 10;
+          if (this.hasMore) this.page += 1;
+          this.finishLoading();
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            const mockOrders = this.getMockOrders(this.page);
+            const filteredOrders = this.filterOrdersByStatus(mockOrders, this.currentStatus);
+            const displayList = this.page === 1 ? this.mergeLocalOrders(filteredOrders) : filteredOrders;
+            this.orderList = this.page === 1 ? displayList : [...this.orderList, ...displayList];
+            this.hasMore = this.page < 2;
+            if (this.hasMore) this.page += 1;
+            this.finishLoading();
+            return;
+          }
+
+          this.finishLoading();
+          uni.showToast({
+            title: error.message || '订单加载失败',
+            icon: 'none'
+          });
+        });
     },
     
     // 加载更多订单
     loadMore() {
-      if (this.isLoadingMore) return;
+      if (!this.hasMore || this.isLoadingMore || this.isLoading) return;
       this.isLoadingMore = true;
-      
-      // 模拟加载更多
-      setTimeout(() => {
-        this.page += 1;
-        // 模拟没有更多数据
-        if (this.page > 2) {
-          uni.showToast({
-            title: '没有更多订单了',
-            icon: 'none'
-          });
-          this.isLoadingMore = false;
-          return;
-        }
-        
-        // 模拟加载更多数据
-        const moreOrders = this.getMockOrders(this.page);
-        const filteredOrders = this.filterOrdersByStatus(moreOrders, this.currentStatus);
-        this.orderList = [...this.orderList, ...filteredOrders];
-        this.isLoadingMore = false;
-      }, 1000);
+      this.loadOrders();
     },
     
     // 下拉刷新
     onRefresh() {
       this.isRefreshing = true;
       this.page = 1;
-      
-      // 模拟刷新
-      setTimeout(() => {
-        this.orderList = [];
-        this.loadOrders();
-        this.isRefreshing = false;
-      }, 1000);
+      this.hasMore = true;
+      this.orderList = [];
+      this.loadOrders();
     },
     
     // 跳转到订单详情
@@ -195,7 +283,7 @@ export default {
     
     // 跳转到商城
     goToShop() {
-      uni.switchTab({
+      uni.navigateTo({
         url: '/pages/uniform/uniform-list'
       });
     },
@@ -207,17 +295,30 @@ export default {
         content: '确定要取消此订单吗？',
         success: (res) => {
           if (res.confirm) {
-            // 模拟取消订单
             uni.showLoading({ title: '处理中' });
-            setTimeout(() => {
-              uni.hideLoading();
-              uni.showToast({
-                title: '订单已取消',
-                icon: 'success'
+            cancelOrderApi(orderId)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+              })
+              .then(() => {
+                uni.hideLoading();
+                this.saveLocalOrderStatus(orderId, 'cancelled');
+                uni.showToast({
+                  title: '订单已取消',
+                  icon: 'success'
+                });
+                this.page = 1;
+                this.hasMore = true;
+                this.orderList = [];
+                this.loadOrders();
+              })
+              .catch((error) => {
+                uni.hideLoading();
+                uni.showToast({
+                  title: error.message || '取消失败',
+                  icon: 'none'
+                });
               });
-              // 重新加载订单数据
-              this.loadOrders();
-            }, 1000);
           }
         }
       });
@@ -237,17 +338,30 @@ export default {
         content: '确认已收到商品吗？',
         success: (res) => {
           if (res.confirm) {
-            // 模拟确认收货
             uni.showLoading({ title: '处理中' });
-            setTimeout(() => {
-              uni.hideLoading();
-              uni.showToast({
-                title: '已确认收货',
-                icon: 'success'
+            confirmOrder(orderId)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+              })
+              .then(() => {
+                uni.hideLoading();
+                this.saveLocalOrderStatus(orderId, 'completed');
+                uni.showToast({
+                  title: '已确认收货',
+                  icon: 'success'
+                });
+                this.page = 1;
+                this.hasMore = true;
+                this.orderList = [];
+                this.loadOrders();
+              })
+              .catch((error) => {
+                uni.hideLoading();
+                uni.showToast({
+                  title: error.message || '确认失败',
+                  icon: 'none'
+                });
               });
-              // 重新加载订单数据
-              this.loadOrders();
-            }, 1000);
           }
         }
       });
@@ -255,8 +369,9 @@ export default {
     
     // 申请退换
     applyReturn(orderId) {
-      uni.navigateTo({
-        url: `/pages/order/return-apply?id=${orderId}`
+      uni.showToast({
+        title: '退换申请待后端接入',
+        icon: 'none'
       });
     },
     
@@ -435,6 +550,12 @@ export default {
     // 计算订单总商品数量
     getTotalProducts(products) {
       return products.reduce((total, product) => total + product.quantity, 0);
+    },
+
+    getCurrentTime() {
+      const now = new Date();
+      const pad = (num) => String(num).padStart(2, '0');
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     },
     
     // 是否可以取消订单
