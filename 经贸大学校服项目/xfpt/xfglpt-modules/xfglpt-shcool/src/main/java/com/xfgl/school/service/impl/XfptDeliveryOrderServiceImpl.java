@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
@@ -63,12 +64,16 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         @Override
         public int insertXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder)
         {
+            if (xfptDeliveryOrder.getDeliveryTime() != null
+                    && xfptDeliveryOrder.getSignTime() != null
+                    && !xfptDeliveryOrder.getDeliveryTime().before(xfptDeliveryOrder.getSignTime())) {
+                throw new ServiceException("发货时间必须早于签收时间");
+            }
             fillDeliveryOrderDefaults(xfptDeliveryOrder);
             int rows = xfptDeliveryOrderMapper.insert(xfptDeliveryOrder);
             insertXfptDeliveryOrderItem(xfptDeliveryOrder);
             return rows;
         }
-
         /**
          * 修改发货单
          *
@@ -138,15 +143,15 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
                     xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(xfptDeliveryOrderItemList);
             }
         }
-
-        private void fillDeliveryOrderDefaults(XfptDeliveryOrder xfptDeliveryOrder)
-        {
-            if (xfptDeliveryOrder.getDeliveryStatus() == null || "".equals(xfptDeliveryOrder.getDeliveryStatus())) {
-                xfptDeliveryOrder.setDeliveryStatus("0");
-            }
-            if (xfptDeliveryOrder.getDelFlag() == null || "".equals(xfptDeliveryOrder.getDelFlag())) {
-                xfptDeliveryOrder.setDelFlag("0");
-            }
+    private void fillDeliveryOrderDefaults(XfptDeliveryOrder xfptDeliveryOrder)
+    {
+        if (xfptDeliveryOrder.getDeliveryStatus() == null || "".equals(xfptDeliveryOrder.getDeliveryStatus())) {
+            xfptDeliveryOrder.setDeliveryStatus("0");
         }
+        if (xfptDeliveryOrder.getDelFlag() == null || "".equals(xfptDeliveryOrder.getDelFlag())) {
+            xfptDeliveryOrder.setDelFlag("0");
+        }
+    }
+
 
 }

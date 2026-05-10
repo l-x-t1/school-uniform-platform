@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Calendar;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptProductionOrderItem;
@@ -79,6 +80,11 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
         @Override
         public int insertXfptProductionOrder(XfptProductionOrder xfptProductionOrder)
         {
+            if (xfptProductionOrder.getStartTime() != null
+                    && xfptProductionOrder.getFinishTime() != null
+                    && !xfptProductionOrder.getStartTime().before(xfptProductionOrder.getFinishTime())) {
+                throw new ServiceException("开始生产时间必须早于生产完成时间");
+            }
             if (StringUtils.isEmpty(xfptProductionOrder.getOrderType())) {
                 xfptProductionOrder.setOrderType("2");
             }
@@ -154,26 +160,26 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
                     if (xfptProductionOrderItem.getFinishNum() == null) {
                         xfptProductionOrderItem.setFinishNum(0);
                     }
+
                 }
                     xfptProductionOrderMapper.batchInsertXfptProductionOrderItem(xfptProductionOrderItemList);
             }
         }
-
-        private <T> void applyDayRange(LambdaQueryWrapper<XfptProductionOrder> queryWrapper, Date value, com.baomidou.mybatisplus.core.toolkit.support.SFunction<XfptProductionOrder, T> column)
-        {
-            if (value == null) {
-                return;
-            }
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(value);
-            calendar.set(Calendar.HOUR_OF_DAY, 0);
-            calendar.set(Calendar.MINUTE, 0);
-            calendar.set(Calendar.SECOND, 0);
-            calendar.set(Calendar.MILLISECOND, 0);
-            Date start = calendar.getTime();
-            calendar.add(Calendar.DAY_OF_MONTH, 1);
-            Date end = calendar.getTime();
-            queryWrapper.ge(column, start).lt(column, end);
+    private <T> void applyDayRange(LambdaQueryWrapper<XfptProductionOrder> queryWrapper, Date value, com.baomidou.mybatisplus.core.toolkit.support.SFunction<XfptProductionOrder, T> column)
+    {
+        if (value == null) {
+            return;
         }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(value);
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        Date start = calendar.getTime();
+        calendar.add(Calendar.DAY_OF_MONTH, 1);
+        Date end = calendar.getTime();
+        queryWrapper.ge(column, start).lt(column, end);
+    }
 
 }
