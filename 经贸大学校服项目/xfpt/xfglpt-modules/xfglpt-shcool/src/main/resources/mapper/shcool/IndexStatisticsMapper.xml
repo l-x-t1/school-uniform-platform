@@ -23,8 +23,8 @@
         -- 筛选条件：指定部门 + 近5年时间范围
         dept_id = #{deptId} -- 替换为具体部门ID，如 dept_id = 101
         AND del_flag=0
-        AND BUY_TIME &gt;= DATE_TRUNC('year', CURRENT_DATE - INTERVAL '5' YEAR)
-        AND BUY_TIME &lt; DATE_TRUNC('year', CURRENT_DATE + INTERVAL '1' YEAR)
+        AND BUY_TIME &gt;= MAKEDATE(YEAR(CURDATE()) - 4, 1)
+        AND BUY_TIME &lt; MAKEDATE(YEAR(CURDATE()) + 1, 1)
         GROUP BY dept_id, EXTRACT(YEAR FROM BUY_TIME)
         )
         SELECT
@@ -53,8 +53,8 @@
         WHERE
         dept_id = #{deptId}
         and del_flag = '0'
-        AND BUY_TIME &gt;= DATE_TRUNC('year', CURRENT_DATE - INTERVAL '5' YEAR)
-        AND BUY_TIME &lt; DATE_TRUNC('year', CURRENT_DATE + INTERVAL '1' YEAR)
+        AND BUY_TIME &gt;= MAKEDATE(YEAR(CURDATE()) - 4, 1)
+        AND BUY_TIME &lt; MAKEDATE(YEAR(CURDATE()) + 1, 1)
         GROUP BY dept_id, EXTRACT(YEAR FROM BUY_TIME)
         )
         SELECT
