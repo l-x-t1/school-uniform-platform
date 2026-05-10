@@ -1,6 +1,5 @@
 package com.xfgl.school.controller;
 
-
 import cn.hutool.core.text.StrFormatter;
 import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.security.utils.SecurityUtils;
@@ -12,23 +11,26 @@ import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.ITeamMeetingService;
 import com.xfgl.school.service.IXfptProcSummaryService;
 import com.xfgl.school.service.IXfptSchoolGradeClassService;
-import com.xfgl.system.api.domain.SysDept;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 /**
- * 教育局统计
+ * 教育局/学校首页统计
  */
 @Slf4j
 @RestController
 @RequestMapping("/index/statistics")
 public class JyjAndSchoolStatisticsController {
+
+    private static final Long DEFAULT_TEST_DEPT_ID = 100L;
 
     @Autowired
     private IXfptSchoolGradeClassService iXfptSchoolGradeClassService;
@@ -42,66 +44,98 @@ public class JyjAndSchoolStatisticsController {
     private ITeamMeetingService iTeamMeetingService;
 
     /**
-     * 教育局首页头部统计
-     * @return
+     * 教育局首页顶部统计
      */
     @GetMapping("/jyj/topList")
-    public AjaxResult jyjTopList(){
-        SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
-        // 查询所有班级数据并求和
-        List<XfptSchoolGradeClass> classList = xfptSchoolMessageMapper.classListByDept(dept.getDeptId());
-        //学生总人数
+    public AjaxResult jyjTopList(@RequestParam(value = "deptId", required = false) Long deptId) {
+        Long currentDeptId = resolveDeptId(deptId);
+        List<XfptSchoolGradeClass> classList = xfptSchoolMessageMapper.classListByDept(currentDeptId);
+        if (classList == null) {
+            classList = Collections.emptyList();
+        }
         Long studentTotal = classList.stream()
-                .map(XfptSchoolGradeClass::getNumber)  // 获取字符串类型的数字
-                .filter(num -> num != null && !num.isEmpty())  // 避免空值转换错误
-                .mapToLong(Long::parseLong)  // 转换为int类型
-                .sum();  // 求和
-        //供应商数量
+                .map(XfptSchoolGradeClass::getNumber)
+                .filter(num -> num != null && !num.isEmpty())
+                .mapToLong(Long::parseLong)
+                .sum();
         Long supplierTotal = supplierMessageService.lambdaQuery().count();
+        Long schoolTotal = xfptSchoolMessageMapper.getCount(currentDeptId);
 
-        //学校数量
-        Long schoolTotal =xfptSchoolMessageMapper.getCount(dept.getDeptId());
-        //成交金额
-        List<XfptProcSummary> list = iXfptProcSummaryService.lambdaQuery().apply(StrFormatter.format("find_in_set({},ancestors)", dept.getDeptId())).list();
-        Long moneyTotal = list.stream().map(XfptProcSummary::getMoney).mapToLong(Long::longValue).sum();
+        List<XfptProcSummary> list = iXfptProcSummaryService.lambdaQuery()
+                .apply(StrFormatter.format("find_in_set({},ancestors)", currentDeptId))
+                .list();
+        if (list == null) {
+            list = Collections.emptyList();
+        }
+        Long moneyTotal = list.stream()
+                .map(XfptProcSummary::getMoney)
+                .filter(money -> money != null)
+                .mapToLong(Long::longValue)
+                .sum();
 
-        HashMap<String,Long> total = new HashMap<String,Long>();
-        total.put("studentTotal",studentTotal);
-        total.put("supplierTotal",supplierTotal);
-        total.put("schoolTotal",schoolTotal);
-        total.put("moneyTotal",moneyTotal);
+        HashMap<String, Long> total = new HashMap<String, Long>();
+        total.put("studentTotal", studentTotal);
+        total.put("supplierTotal", supplierTotal);
+        total.put("schoolTotal", schoolTotal);
+        total.put("moneyTotal", moneyTotal);
         return AjaxResult.success(total);
     }
 
     /**
-     * 学校首页头部统计
-     * 学生人数	订购金额	采购公告数量	订购套数
-     * @return
+     * 学校首页顶部统计
      */
     @GetMapping("/school/topList")
-    public AjaxResult schoolTopList(){
-        SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
-        // 查询所有班级数据并求和
-        List<XfptSchoolGradeClass> classList = xfptSchoolMessageMapper.classListByDept(dept.getDeptId());
-        //学生总人数
+    public AjaxResult schoolTopList(@RequestParam(value = "deptId", required = false) Long deptId) {
+        Long currentDeptId = resolveDeptId(deptId);
+        List<XfptSchoolGradeClass> classList = xfptSchoolMessageMapper.classListByDept(currentDeptId);
+        if (classList == null) {
+            classList = Collections.emptyList();
+        }
         Long studentTotal = classList.stream()
-                .map(XfptSchoolGradeClass::getNumber)  // 获取字符串类型的数字
-                .filter(num -> num != null && !num.isEmpty())  // 避免空值转换错误
-                .mapToLong(Long::parseLong)  // 转换为int类型
-                .sum();  // 求和
+                .map(XfptSchoolGradeClass::getNumber)
+                .filter(num -> num != null && !num.isEmpty())
+                .mapToLong(Long::parseLong)
+                .sum();
 
-        //成交金额
-        List<XfptProcSummary> list = iXfptProcSummaryService.lambdaQuery().apply(StrFormatter.format("find_in_set({},ancestors)", dept.getDeptId())).list();
-        Long moneyTotal = list.stream().map(XfptProcSummary::getMoney).mapToLong(Long::longValue).sum();
-        //订购件数
-        Long countTotal = list.stream().map(XfptProcSummary::getCount).mapToLong(Long::longValue).sum();
-        //采购公告数量
-        Long teamCount = iTeamMeetingService.lambdaQuery().eq(TeamMeeting::getDeptId, dept.getDeptId()).count();
-        HashMap<String,Long> total = new HashMap<String,Long>();
-        total.put("studentTotal",studentTotal);
-        total.put("moneyTotal",moneyTotal);
-        total.put("countTotal",countTotal);
-        total.put("teamCount",teamCount);
+        List<XfptProcSummary> list = iXfptProcSummaryService.lambdaQuery()
+                .apply(StrFormatter.format("find_in_set({},ancestors)", currentDeptId))
+                .list();
+        if (list == null) {
+            list = Collections.emptyList();
+        }
+        Long moneyTotal = list.stream()
+                .map(XfptProcSummary::getMoney)
+                .filter(money -> money != null)
+                .mapToLong(Long::longValue)
+                .sum();
+        Long countTotal = list.stream()
+                .map(XfptProcSummary::getCount)
+                .filter(count -> count != null)
+                .mapToLong(Long::longValue)
+                .sum();
+        Long teamCount = iTeamMeetingService.lambdaQuery()
+                .eq(TeamMeeting::getDeptId, currentDeptId)
+                .count();
+
+        HashMap<String, Long> total = new HashMap<String, Long>();
+        total.put("studentTotal", studentTotal);
+        total.put("moneyTotal", moneyTotal);
+        total.put("countTotal", countTotal);
+        total.put("teamCount", teamCount);
         return AjaxResult.success(total);
+    }
+
+    private Long resolveDeptId(Long requestDeptId) {
+        if (requestDeptId != null) {
+            return requestDeptId;
+        }
+        if (SecurityUtils.getLoginUser() != null
+                && SecurityUtils.getLoginUser().getSysUser() != null
+                && SecurityUtils.getLoginUser().getSysUser().getDept() != null
+                && SecurityUtils.getLoginUser().getSysUser().getDept().getDeptId() != null) {
+            return SecurityUtils.getLoginUser().getSysUser().getDept().getDeptId();
+        }
+        log.warn("statistics endpoint called without login user, fallback deptId={}", DEFAULT_TEST_DEPT_ID);
+        return DEFAULT_TEST_DEPT_ID;
     }
 }

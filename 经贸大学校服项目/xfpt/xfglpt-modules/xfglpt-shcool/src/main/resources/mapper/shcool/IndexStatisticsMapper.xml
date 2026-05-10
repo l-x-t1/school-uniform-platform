@@ -5,6 +5,7 @@
 <mapper namespace="com.xfgl.school.mapper.IndexStatisticsMapper">
 
     <select id="getSchool5YearCountData" resultType="com.xfgl.school.domain.vo.KeyValueVo">
+
         WITH RECURSIVE year_list AS (
         SELECT EXTRACT(YEAR FROM CURRENT_DATE) - 4 AS `key`
         UNION ALL
@@ -14,16 +15,17 @@
         ),
         proc_data AS (
         SELECT
-        YEAR(BUY_TIME) AS `key`,
-        dept_id,
-        COALESCE(SUM(`COUNT`), 0) AS value
+        EXTRACT(YEAR FROM BUY_TIME) AS `key`,
+        dept_id,  -- 保留部门ID
+        COALESCE(SUM("count"), 0) AS value
         FROM XFPT_PROC_SUMMARY
         WHERE
-        dept_id = #{deptId}
-        AND del_flag = '0'
-        AND BUY_TIME &gt;= MAKEDATE(YEAR(CURDATE()) - 4, 1)
-        AND BUY_TIME &lt; MAKEDATE(YEAR(CURDATE()) + 1, 1)
-        GROUP BY dept_id, YEAR(BUY_TIME)
+        -- 筛选条件：指定部门 + 近5年时间范围
+        dept_id = #{deptId} -- 替换为具体部门ID，如 dept_id = 101
+        AND del_flag=0
+        AND BUY_TIME &gt;= DATE_TRUNC('year', CURRENT_DATE - INTERVAL '5' YEAR)
+        AND BUY_TIME &lt; DATE_TRUNC('year', CURRENT_DATE + INTERVAL '1' YEAR)
+        GROUP BY dept_id, EXTRACT(YEAR FROM BUY_TIME)
         )
         SELECT
         yl.`key`,
@@ -34,7 +36,6 @@
         ON yl.`key` = pd.`key`
         ORDER BY yl.`key` DESC;
     </select>
-
     <select id="getSchool5YearMoneyData" resultType="com.xfgl.school.domain.vo.KeyValueVo">
         WITH RECURSIVE year_list AS (
         SELECT EXTRACT(YEAR FROM CURRENT_DATE) - 4 AS `key`
@@ -45,16 +46,16 @@
         ),
         proc_data AS (
         SELECT
-        YEAR(BUY_TIME) AS `key`,
+        EXTRACT(YEAR FROM BUY_TIME) AS `key`,
         dept_id,
         COALESCE(SUM(money), 0) AS value
         FROM XFPT_PROC_SUMMARY
         WHERE
         dept_id = #{deptId}
-        AND del_flag = '0'
-        AND BUY_TIME &gt;= MAKEDATE(YEAR(CURDATE()) - 4, 1)
-        AND BUY_TIME &lt; MAKEDATE(YEAR(CURDATE()) + 1, 1)
-        GROUP BY dept_id, YEAR(BUY_TIME)
+        and del_flag = '0'
+        AND BUY_TIME &gt;= DATE_TRUNC('year', CURRENT_DATE - INTERVAL '5' YEAR)
+        AND BUY_TIME &lt; DATE_TRUNC('year', CURRENT_DATE + INTERVAL '1' YEAR)
+        GROUP BY dept_id, EXTRACT(YEAR FROM BUY_TIME)
         )
         SELECT
         yl.`key`,
@@ -65,7 +66,6 @@
         ON yl.`key` = pd.`key`
         ORDER BY yl.`key` DESC
     </select>
-
     <select id="schoolUniformType" resultType="com.xfgl.school.domain.vo.KeyValueVo">
         WITH all_xfpl AS (
         SELECT 0 AS xfpl_code, '春秋装' AS xfpl_name UNION ALL
@@ -81,6 +81,7 @@
         FROM
         all_xfpl a
         LEFT JOIN (
+
         SELECT
         s.XFPL AS xfpl_code,
         SUM(s.GMTS) AS total_sets
