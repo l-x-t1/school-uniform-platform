@@ -51,11 +51,23 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(XfptSuppliceInspectionReport xfptSuppliceInspectionReport) {
         startPage();
-        xfptSuppliceInspectionReport.setDeptId(null);
+        xfptSuppliceInspectionReport.setDeptId(String.valueOf(SecurityUtils.getLoginUser().getSysUser().getDeptId()));
         List<XfptSuppliceInspectionReport> list = xfptSuppliceInspectionReportService.selectXfptSuppliceInspectionReportList(xfptSuppliceInspectionReport);
         for (XfptSuppliceInspectionReport suppliceInspectionReport : list) {
             SupplierMessage supplierMessage = iSupplierMessageService.getById(suppliceInspectionReport.getSupplierId());
-            suppliceInspectionReport.setLegalRepresentative(supplierMessage.getLegalRepresentative());
+            if (supplierMessage != null) {
+                suppliceInspectionReport.setLegalRepresentative(supplierMessage.getLegalRepresentative());
+            }
+            if (StringUtils.isEmpty(suppliceInspectionReport.getNoticeStatus())) {
+                suppliceInspectionReport.setNoticeStatus("0");
+            }
+            if ("1".equals(suppliceInspectionReport.getNoticeStatus())) {
+                suppliceInspectionReport.setNoticeStatusText("已通过");
+            } else if ("2".equals(suppliceInspectionReport.getNoticeStatus())) {
+                suppliceInspectionReport.setNoticeStatusText("已拒绝");
+            } else {
+                suppliceInspectionReport.setNoticeStatusText("待审核");
+            }
         }
         return getDataTable(list);
     }
