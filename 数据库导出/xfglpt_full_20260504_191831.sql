@@ -4134,6 +4134,112 @@ WHERE @school_supplier_rel_id IS NOT NULL
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+INSERT INTO `xfpt_order_info` (
+  `order_no`, `order_type`, `notice_id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`,
+  `user_id`, `user_name`, `student_id`, `student_name`, `grade_name`, `class_name`, `address_id`,
+  `receive_type`, `receiver_name`, `receiver_phone`, `receiver_address`, `total_amount`, `pay_amount`,
+  `refund_amount`, `pay_status`, `order_status`, `pay_time`, `cancel_time`, `finish_time`, `dept_id`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  'DEMO-ORDER-20260504185529-2-222-1', '2', NULL, 222, '石家庄交通运输学校', 1, '河北超享纺织服装有限公司',
+  2194, 'testUser', NULL, NULL, NULL, NULL, NULL,
+  '1', '石家庄交通运输学校', '13000000000', '石家庄交通运输学校收货点', 100.00, 100.00,
+  0.00, '1', '3', '2026-05-02 18:55:30', NULL, NULL, 222,
+  'admin', '2026-05-10 23:10:53', NULL, NULL, '测试订单', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-ORDER-20260504185529-2-222-1'
+);
+
+SET @transport_order_id := (
+  SELECT `id`
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-ORDER-20260504185529-2-222-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_order_item` (
+  `order_id`, `goods_id`, `size_id`, `goods_name`, `size_name`, `main_image`,
+  `sale_type`, `unit_price`, `buy_num`, `item_amount`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @transport_order_id, 1, 1, '春秋运动校服套装', '155', '/profile/upload/demo/goods_1.jpg',
+  '2', 88.00, 1, 88.00, 222, 'admin',
+  '2026-05-10 23:10:53', NULL, NULL, '测试订单明细', '0'
+FROM DUAL
+WHERE @transport_order_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_order_item`
+    WHERE `order_id` = @transport_order_id
+      AND `goods_id` = 1
+      AND `size_id` = 1
+      AND `del_flag` = '0'
+  );
+
+SET @transport_order_item_id := (
+  SELECT `id`
+  FROM `xfpt_order_item`
+  WHERE `order_id` = @transport_order_id
+    AND `goods_id` = 1
+    AND `size_id` = 1
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_delivery_order` (
+  `delivery_no`, `notice_id`, `order_id`, `order_no`, `production_id`, `school_id`, `supplier_id`,
+  `receiver_name`, `receiver_phone`, `receiver_address`, `logistics_company`, `logistics_no`,
+  `delivery_status`, `delivery_time`, `sign_time`, `carriage_fee`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  'DEMO-DELIVERY-20260504185529-222-1', NULL, @transport_order_id, 'DEMO-ORDER-20260504185529-2-222-1', NULL, 222, 1,
+  '石家庄交通运输学校', '13000000000', '石家庄交通运输学校收货点', '中通快递', 'ZT2026050418552903',
+  '1', '2026-05-03 18:55:30', NULL, 12.00, 222, 'admin',
+  '2026-05-10 23:10:53', NULL, NULL, '测试发货单', '0'
+FROM DUAL
+WHERE @transport_order_id IS NOT NULL
+  AND @transport_order_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_delivery_order`
+    WHERE `delivery_no` = 'DEMO-DELIVERY-20260504185529-222-1'
+  );
+
+SET @transport_delivery_id := (
+  SELECT `id`
+  FROM `xfpt_delivery_order`
+  WHERE `delivery_no` = 'DEMO-DELIVERY-20260504185529-222-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_delivery_order_item` (
+  `delivery_id`, `order_item_id`, `goods_id`, `size_id`, `goods_name`, `size_name`,
+  `delivery_num`, `sign_num`, `status`, `create_by`, `create_time`, `update_by`,
+  `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @transport_delivery_id, @transport_order_item_id, 1, 1, '春秋运动校服套装', '155',
+  1, 0, '1', 'admin', '2026-05-10 23:10:53', NULL,
+  NULL, '测试发货明细', '0'
+FROM DUAL
+WHERE @transport_delivery_id IS NOT NULL
+  AND @transport_order_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_delivery_order_item`
+    WHERE `delivery_id` = @transport_delivery_id
+      AND `order_item_id` = @transport_order_item_id
+      AND `goods_id` = 1
+      AND `size_id` = 1
+      AND `del_flag` = '0'
+  );
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
