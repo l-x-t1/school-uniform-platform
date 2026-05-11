@@ -9,34 +9,34 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收支方向，1收入 2支出" prop="flowDirection">
+      <el-form-item label="收支方向" prop="flowDirection">
         <el-input
           v-model="queryParams.flowDirection"
-          placeholder="请输入收支方向，1收入 2支出"
+          placeholder="请输入收支方向"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联订单ID" prop="orderId">
+      <el-form-item label="关联订单" prop="orderId">
         <el-input
           v-model="queryParams.orderId"
-          placeholder="请输入关联订单ID"
+          placeholder="请输入关联订单"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="订单编号快照" prop="orderNo">
+      <el-form-item label="订单编号" prop="orderNo">
         <el-input
           v-model="queryParams.orderNo"
-          placeholder="请输入订单编号快照"
+          placeholder="请输入订单编号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联售后单ID" prop="afterSaleId">
+      <el-form-item label="售后单" prop="afterSaleId">
         <el-input
           v-model="queryParams.afterSaleId"
-          placeholder="请输入关联售后单ID"
+          placeholder="请输入售后单"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -73,26 +73,26 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="支付渠道，如微信、支付宝、线下转账" prop="payChannel">
+      <el-form-item label="支付渠道" prop="payChannel">
         <el-input
           v-model="queryParams.payChannel"
-          placeholder="请输入支付渠道，如微信、支付宝、线下转账"
+          placeholder="请输入支付渠道"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="外部交易单号或平台交易号" prop="tradeNo">
+      <el-form-item label="交易单号" prop="tradeNo">
         <el-input
           v-model="queryParams.tradeNo"
-          placeholder="请输入外部交易单号或平台交易号"
+          placeholder="请输入交易单号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收款方ID，学校ID或供应商ID" prop="payeeId">
+      <el-form-item label="收款方ID" prop="payeeId">
         <el-input
           v-model="queryParams.payeeId"
-          placeholder="请输入收款方ID，学校ID或供应商ID"
+          placeholder="请输入收款方ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -203,10 +203,10 @@
       <el-table-column label="供应商ID" align="center" prop="supplierId" />
       <el-table-column label="用户ID" align="center" prop="userId" />
       <el-table-column label="流水金额" align="center" prop="amount" />
-      <el-table-column label="支付渠道，如微信、支付宝、线下转账" align="center" prop="payChannel" />
-      <el-table-column label="外部交易单号或平台交易号" align="center" prop="tradeNo" />
+      <el-table-column label="支付渠道" align="center" prop="payChannel" />
+      <el-table-column label="交易单号" align="center" prop="tradeNo" />
       <el-table-column label="收款方类型，1学校 2供应商；统购收学校，零售收供应商" align="center" prop="payeeType" />
-      <el-table-column label="收款方ID，学校ID或供应商ID" align="center" prop="payeeId" />
+      <el-table-column label="收款方ID" align="center" prop="payeeId" />
       <el-table-column label="收款方名称快照" align="center" prop="payeeName" />
       <el-table-column label="收款账户户名快照" align="center" prop="payeeAccountName" />
       <el-table-column label="收款银行快照" align="center" prop="payeeBankName" />
@@ -266,32 +266,14 @@
             <el-option label="支出" value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="关联订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入关联订单ID" />
-        </el-form-item>
-        <el-form-item label="订单编号快照" prop="orderNo">
-          <el-input v-model="form.orderNo" placeholder="请输入订单编号快照" />
-        </el-form-item>
-        <el-form-item label="关联售后单ID" prop="afterSaleId">
-          <el-input v-model="form.afterSaleId" placeholder="请输入关联售后单ID" />
-        </el-form-item>
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
-        </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
-        <el-form-item label="用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入用户ID" />
-        </el-form-item>
         <el-form-item label="流水金额" prop="amount">
           <el-input v-model="form.amount" placeholder="请输入流水金额" />
         </el-form-item>
-        <el-form-item label="支付渠道，如微信、支付宝、线下转账" prop="payChannel">
-          <el-input v-model="form.payChannel" placeholder="请输入支付渠道，如微信、支付宝、线下转账" />
+        <el-form-item label="支付渠道" prop="payChannel">
+          <el-input v-model="form.payChannel" placeholder="请输入支付渠道" />
         </el-form-item>
-        <el-form-item label="外部交易单号或平台交易号" prop="tradeNo">
-          <el-input v-model="form.tradeNo" placeholder="请输入外部交易单号或平台交易号" />
+        <el-form-item label="交易单号" prop="tradeNo">
+          <el-input v-model="form.tradeNo" placeholder="请输入交易单号" />
         </el-form-item>
         <el-form-item label="收款方类型" prop="payeeType">
           <el-select v-model="form.payeeType" placeholder="请选择收款方类型" clearable>
@@ -299,8 +281,8 @@
             <el-option label="供应商" value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="收款方ID，学校ID或供应商ID" prop="payeeId">
-          <el-input v-model="form.payeeId" placeholder="请输入收款方ID，学校ID或供应商ID" />
+        <el-form-item label="收款方ID" prop="payeeId">
+          <el-input v-model="form.payeeId" placeholder="请输入收款方ID" />
         </el-form-item>
         <el-form-item label="收款方名称快照" prop="payeeName">
           <el-input v-model="form.payeeName" placeholder="请输入收款方名称快照" />
@@ -325,14 +307,8 @@
             placeholder="请选择交易发生时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
-        </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -390,7 +366,7 @@ export default {
         payeeName: null,
         payeeAccountName: null,
         payeeBankName: null,
-        status: null,
+        status: "0",
         tradeTime: null,
         deptId: null,
       },
@@ -414,16 +390,13 @@ export default {
           { required: true, message: "收款方类型，1学校 2供应商；统购收学校，零售收供应商不能为空", trigger: "change" }
         ],
         payeeId: [
-          { required: true, message: "收款方ID，学校ID或供应商ID不能为空", trigger: "blur" }
+          { required: true, message: "收款方ID不能为空", trigger: "blur" }
         ],
         payeeName: [
           { required: true, message: "收款方名称快照不能为空", trigger: "blur" }
         ],
         status: [
           { required: true, message: "流水状态，0未支付 1已到达学校账号 2已到达供应商账号不能为空", trigger: "change" }
-        ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
         ]
       }
     };
@@ -478,7 +451,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.resetForm("form");
     },
