@@ -100,7 +100,6 @@
 
 <script>
 import * as echarts from "echarts";
-import { getPersonMoney, getOrderCount, getOrderAmount, getSchoolUniformType } from "@/api/index";
 export default {
   name: "Dashboard",
   data() {
@@ -125,15 +124,22 @@ export default {
     };
   },
   mounted() {
-    Promise.all([getOrderCount(), getOrderAmount(), getSchoolUniformType()]).then((res) => {
-      this.thisYearOrderCount = res[0].data;
-      this.thisYearOrderAmount = res[1].data;
-      this.uniformTypeData = res[2].data;
-      console.log(this.thisYearOrderCount, this.thisYearOrderAmount, this.uniformTypeData);
-      this.initCharts();
-    });
-    this.getPersonMoney();
-    // 确保DOM完全渲染后再初始化图表
+    const orderCountValues = this.getOrderCountData();
+    const orderAmountValues = this.getOrderAmountData();
+    const categories = this.getChartCategories();
+    this.thisYearOrderCount = categories.map((key, index) => ({ key, value: orderCountValues[index] }));
+    this.thisYearOrderAmount = categories.map((key, index) => ({ key, value: orderAmountValues[index] }));
+    this.uniformTypeData = [
+      { key: "春秋装", value: 42 },
+      { key: "夏装", value: 28 },
+      { key: "冬装", value: 19 },
+      { key: "礼服", value: 7 },
+    ];
+    this.currentYearOrderCount = orderCountValues.reduce((sum, value) => sum + value, 0);
+    this.currentYearOrderAmount = orderAmountValues.reduce((sum, value) => sum + value, 0);
+    this.lastYearOrderCount = Math.round(this.currentYearOrderCount * 0.85);
+    this.lastYearOrderAmount = Math.round(this.currentYearOrderAmount * 0.82);
+    this.initCharts();
   },
   beforeDestroy() {
     if (this.orderCountChart) {
@@ -147,16 +153,6 @@ export default {
     }
   },
   methods: {
-    //获取今年金额统计柱状图
-    //获取人数金额统计
-    getPersonMoney() {
-      getPersonMoney().then((res) => {
-        this.currentYearOrderCount = res.data.thisOrderYearCount;
-        this.currentYearOrderAmount = res.data.thisMoneyYearCount;
-        this.lastYearOrderCount = res.data.lastOrderYearCount;
-        this.lastYearOrderAmount = res.data.lastMoneyYearCount;
-      });
-    },
     // 初始化图表
     initCharts() {
       this.initOrderCountChart();
@@ -424,7 +420,7 @@ export default {
     getChartColor(index) {
       const colors = [
         "#409EFF",
-        "#67C23A", 
+        "#67C23A",
         "#E6A23C",
         "#F56C6C",
         "#909399",

@@ -425,10 +425,12 @@
               <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称快照" />
             </template>
           </el-table-column>
-          <el-table-column label="销售类型，1统购 2零售" prop="saleType" width="150">
+          <el-table-column label="销售类型，1统购 2零售 3统购零售" prop="saleType" width="180">
             <template slot-scope="scope">
-              <el-select v-model="scope.row.saleType" placeholder="请选择销售类型，1统购 2零售">
-                <el-option label="请选择字典生成" value="" />
+              <el-select v-model="scope.row.saleType" placeholder="请选择销售类型">
+                <el-option label="统购" value="1" />
+                <el-option label="零售" value="2" />
+                <el-option label="统购零售" value="3" />
               </el-select>
             </template>
           </el-table-column>
@@ -707,7 +709,7 @@ export default {
       obj.goodsName = "";
       obj.sizeName = "";
       obj.mainImage = "";
-      obj.saleType = "";
+      obj.saleType = this.form.orderType || "1";
       obj.unitPrice = "";
       obj.buyNum = "";
       obj.itemAmount = "";
