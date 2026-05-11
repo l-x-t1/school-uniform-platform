@@ -921,6 +921,104 @@ INSERT INTO `sys_menu` VALUES (1,'系统管理',0,70,'system',NULL,'','',1,0,'M'
 /*!40000 ALTER TABLE `sys_menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- Menu updates for 商品信息导入权限
+SET @goods_menu_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `PERMS` = 'school:goods:list'
+  LIMIT 1
+);
+SET @goods_import_id := (
+  SELECT `MENU_ID` FROM `sys_menu`
+  WHERE `PERMS` = 'school:goods:import'
+  LIMIT 1
+);
+SET @goods_import_id := IFNULL(@goods_import_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @goods_import_id, '商品库管理导入', @goods_menu_id, 6, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:goods:import', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE @goods_menu_id IS NOT NULL
+  AND NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:goods:import');
+
+-- Menu updates for 学校端零购管理 / 零售商品上下架
+SET @retail_parent_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '零购管理'
+    AND `PARENT_ID` = 2333
+  LIMIT 1
+);
+SET @retail_parent_id := IFNULL(@retail_parent_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_parent_id, '零购管理', 2333, 4, 'retailManage', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', NOW(), '', NULL, '零购管理目录', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '零购管理'
+    AND `PARENT_ID` = 2333
+);
+
+SET @retail_goods_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '零售商品上下架'
+    AND `PARENT_ID` = @retail_parent_id
+  LIMIT 1
+);
+SET @retail_goods_id := IFNULL(@retail_goods_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_goods_id, '零售商品上下架', @retail_parent_id, 1, 'lssxj', 'lssxj/index', NULL, '', 1, 0, 'C', '0', '0', 'school:retailGoods:list', 'shopping', 'admin', NOW(), '', NULL, '零售商品上下架菜单', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:retailGoods:list'
+);
+
+SET @retail_query_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:retailGoods:query'
+  LIMIT 1
+);
+SET @retail_query_id := IFNULL(@retail_query_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_query_id, '零售商品查看', @retail_goods_id, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:retailGoods:query', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:retailGoods:query');
+
+SET @retail_edit_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:retailGoods:edit'
+  LIMIT 1
+);
+SET @retail_edit_id := IFNULL(@retail_edit_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @retail_edit_id, '零售商品上下架', @retail_goods_id, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:retailGoods:edit', '#', 'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:retailGoods:edit');
+
 --
 -- Table structure for table `sys_notice`
 --
@@ -3231,7 +3329,7 @@ CREATE TABLE `xfpt_school_supplier_goods_rel` (
   PRIMARY KEY (`id`),
   KEY `idx_xfpt_school_supplier_goods_rel_rel` (`rel_id`),
   KEY `idx_xfpt_school_supplier_goods_rel_goods` (`goods_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作商品';
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作商品';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3240,7 +3338,7 @@ CREATE TABLE `xfpt_school_supplier_goods_rel` (
 
 LOCK TABLES `xfpt_school_supplier_goods_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (1,1,237,1,1,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(2,1,237,1,2,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(3,2,274,2,3,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(4,3,237,8,4,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0');
+INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (1,1,237,1,1,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(2,1,237,1,2,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(3,2,274,2,3,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(4,3,237,8,4,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(5,4,222,1,1,'1','管理员','2026-05-10 23:10:53','管理员','2026-05-10 23:10:53','','0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3270,7 +3368,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
   PRIMARY KEY (`id`),
   KEY `idx_xfpt_school_supplier_rel_status` (`school_id`,`supplier_id`,`cooperate_status`),
   KEY `idx_xfpt_school_supplier_rel_notice` (`notice_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作关系';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作关系';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3279,7 +3377,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
 
 LOCK TABLES `xfpt_school_supplier_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_rel` VALUES (1,237,'石家庄市第四十七中学',1,'河北超享纺织服装有限公司',1,NULL,'1',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(2,274,'石家庄市第八十一中学',2,'河北春风树服饰有限公司',2,NULL,'4',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(3,237,'石家庄市第四十七中学',8,'河北蓝雁纺织服装有限公司',1,NULL,'3',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0');
+INSERT INTO `xfpt_school_supplier_rel` VALUES (1,237,'石家庄市第四十七中学',1,'河北超享纺织服装有限公司',1,NULL,'1',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(2,274,'石家庄市第八十一中学',2,'河北春风树服饰有限公司',2,NULL,'4',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(3,237,'石家庄市第四十七中学',8,'河北蓝雁纺织服装有限公司',1,NULL,'3',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(4,222,'石家庄交通运输学校',1,'河北超享纺织服装有限公司',NULL,NULL,'1',NULL,'管理员','2026-05-10 23:10:53',NULL,NULL,NULL,'0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 
