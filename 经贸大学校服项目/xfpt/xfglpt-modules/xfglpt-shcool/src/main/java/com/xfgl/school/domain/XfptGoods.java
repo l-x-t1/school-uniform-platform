@@ -83,6 +83,11 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "销售类型，1统购 2零售 3统购零售")
     private String saleType;
 
+    /** 零售入口筛选标记 */
+    @TableField(exist = false)
+    @Schema(description = "零售入口筛选标记")
+    private String retailOnly;
+
     /** 状态，0草稿 1启用 2停用 */
             @Excel(name = "状态", readConverterExp = "0=草稿,1=启用,2=停用")
     @Schema(description = "状态，0草稿 1启用 2停用")

@@ -1,22 +1,22 @@
 <template>
   <div class="dashboard-container">
-    <!-- 鍔犺浇鐘舵€?-->
+    <!-- 加载状态 -->
     <div v-if="loading" class="loading-container">
       <el-loading
         :loading="loading"
-        text="姝ｅ湪鍔犺浇鏁版嵁..."
+        text="正在加载数据..."
         spinner="el-icon-loading"
         background="rgba(0, 0, 0, 0.8)"
       />
     </div>
 
-    <!-- 涓婂崐閮ㄥ垎锛氱粺璁℃暟鎹拰璁㈣喘浜烘暟鍥捐〃 -->
+    <!-- 上半部分：统计数据和订购人数图表 -->
     <el-row :gutter="20" class="top-section">
-      <!-- 宸︿笂锛氱粺璁℃暟鎹?-->
+      <!-- 左上：统计数据 -->
       <el-col :span="12" class="box-card-item">
         <el-card class="stat-section-card">
           <div slot="header" class="clearfix">
-            <span class="card-title">鏁版嵁缁熻</span>
+            <span class="card-title">数据统计</span>
           </div>
           <div class="stats-container">
             <div class="stat-row">
@@ -25,7 +25,7 @@
                   <i class="el-icon-user" style="color: #409eff"></i>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">鏈勾璁㈣喘浜烘暟</div>
+                  <div class="stat-title">本年订购人数</div>
                   <div class="stat-value">{{ currentYearOrderCount }}</div>
                 </div>
               </div>
@@ -34,8 +34,8 @@
                   <i class="el-icon-money" style="color: #67c23a"></i>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">鏈勾璁㈣喘閲戦</div>
-                  <div class="stat-value">楼{{ currentYearOrderAmount }}</div>
+                  <div class="stat-title">本年订购金额</div>
+                  <div class="stat-value">¥{{ currentYearOrderAmount }}</div>
                 </div>
               </div>
             </div>
@@ -45,7 +45,7 @@
                   <i class="el-icon-user" style="color: #e6a23c"></i>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">鍘诲勾璁㈣喘浜烘暟</div>
+                  <div class="stat-title">去年订购人数</div>
                   <div class="stat-value">{{ lastYearOrderCount }}</div>
                 </div>
               </div>
@@ -54,8 +54,8 @@
                   <i class="el-icon-money" style="color: #f56c6c"></i>
                 </div>
                 <div class="stat-content">
-                  <div class="stat-title">鍘诲勾璁㈣喘閲戦</div>
-                  <div class="stat-value">楼{{ lastYearOrderAmount }}</div>
+                  <div class="stat-title">去年订购金额</div>
+                  <div class="stat-value">¥{{ lastYearOrderAmount }}</div>
                 </div>
               </div>
             </div>
@@ -63,54 +63,56 @@
         </el-card>
       </el-col>
 
-      <!-- 鍙充笂锛氳璐汉鏁版煴鐘跺浘 -->
+      <!-- 右上：订购人数柱状图 -->
       <el-col :span="12" class="box-card-item">
         <el-card class="chart-card">
           <div slot="header" class="clearfix">
-            <span class="card-title"
-              >鏍℃湇璁㈣喘浜烘暟缁熻</span
-            >
+            <span class="card-title">校服订购人数统计</span>
           </div>
           <div id="orderCountChart" style="width: 100%; height: 360px"></div>
         </el-card>
       </el-col>
     </el-row>
 
-    <!-- 涓嬪崐閮ㄥ垎锛氳璐噾棰濆浘琛ㄥ拰鍘傚晢鍒楄〃 -->
+    <!-- 下半部分：订购金额图表和厂商列表 -->
     <el-row :gutter="20" class="bottom-section">
-      <!-- 宸︿笅锛氳璐噾棰濇煴鐘跺浘 -->
+      <!-- 左下：订购金额柱状图 -->
       <el-col :span="12" class="box-card-item">
         <el-card class="chart-card">
           <div slot="header" class="clearfix">
-            <span class="card-title"
-              >鏍℃湇璁㈣喘閲戦缁熻</span
-            >
+            <span class="card-title">校服订购金额统计</span>
           </div>
           <div id="orderAmountChart" style="width: 100%; height: 360px"></div>
         </el-card>
       </el-col>
 
-      <!-- 鍙充笅锛氭牎鏈嶅搧绫荤绫荤粺璁″浘 -->
+      <!-- 右下：校服品类种类统计图 -->
       <el-col :span="12" class="box-card-item">
         <el-card class="chart-card">
           <div slot="header" class="clearfix">
-            <span class="card-title">鏍℃湇鍝佺被绉嶇被缁熻</span>
+            <span class="card-title">校服品类种类统计</span>
           </div>
           <div id="uniformTypeChart" style="width: 100%; height: 360px"></div>
         </el-card>
       </el-col>
     </el-row>
-
   </div>
 </template>
 
 <script>
 import * as echarts from "echarts";
+import {
+  getPersonMoney,
+  getSchoolOrderCount,
+  getSchoolOrderAmount,
+  getSchoolUniformType,
+} from "@/api/index";
+
 export default {
   name: "Dashboard",
   data() {
     return {
-      // 缁熻鏁版嵁
+      // 统计数据
       currentYearOrderCount: 0,
       currentYearOrderAmount: 0,
       lastYearOrderCount: 0,
@@ -118,15 +120,15 @@ export default {
       thisYearOrderAmount: [],
       thisYearOrderCount: [],
 
-      // 鍥捐〃瀹炰緥
+      // 图表实例
       orderCountChart: null,
       orderAmountChart: null,
       uniformTypeChart: null,
 
-      // 鏍℃湇鍝佺被缁熻
+      // 校服品类统计
       uniformTypeData: [],
 
-      // 鍔犺浇鐘舵€?
+      // 加载状态
       loading: false,
     };
   },
@@ -145,24 +147,39 @@ export default {
     }
   },
   methods: {
-    // 鍒濆鍖栧浘琛?
+    // 获取人数金额统计数据
+    getPersonMoney() {
+      getPersonMoney().then((res) => {
+        this.currentYearOrderCount = res.data.thisOrderYearCount;
+        this.currentYearOrderAmount = res.data.thisMoneyYearCount;
+        this.lastYearOrderCount = res.data.lastOrderYearCount;
+        this.lastYearOrderAmount = res.data.lastMoneyYearCount;
+      });
+    },
+
+    // 初始化图表
     initCharts() {
       this.initOrderCountChart();
       this.initOrderAmountChart();
       this.initUniformTypeChart();
     },
 
-    // 鍒濆鍖栨牎鏈嶈璐汉鏁扮粺璁″浘琛?
+    // 初始化校服订购人数统计图表
     initOrderCountChart() {
       const chartDom = document.getElementById("orderCountChart");
       if (!chartDom) return;
 
       this.orderCountChart = echarts.init(chartDom);
 
-      // 澶勭悊鏁版嵁鏍煎紡锛屾敮鎸佸绉嶅瓧娈靛悕
-      const orderCountData = Array.isArray(this.thisYearOrderCount) ? this.thisYearOrderCount : [];
-      const xAxisData = orderCountData.map((item) => item.key || item.name || '鏈煡');
-      const seriesData = orderCountData.map((item) => item.value || item.count || 0);
+      const orderCountData = Array.isArray(this.thisYearOrderCount)
+        ? this.thisYearOrderCount
+        : [];
+      const xAxisData = orderCountData.map(
+        (item) => item.key || item.name || "未知"
+      );
+      const seriesData = orderCountData.map(
+        (item) => item.value || item.count || 0
+      );
 
       const option = {
         tooltip: {
@@ -170,28 +187,35 @@ export default {
           axisPointer: {
             type: "shadow",
           },
-          formatter: function (params) {
+          formatter(params) {
             if (params && params.length > 0) {
-              return params[0].name + "<br/>" + params[0].seriesName + ": " + params[0].value + "人";
+              return (
+                params[0].name +
+                "<br/>" +
+                params[0].seriesName +
+                ": " +
+                params[0].value +
+                "人"
+              );
             }
-            return '';
+            return "";
           },
         },
         grid: {
           left: "3%",
           right: "4%",
-          bottom: 80, //  鍍忕礌鍊硷紝鐢ㄤ簬涓?dataZoom 鎻愪緵鍏呰冻绌洪棿
+          bottom: 80,
           containLabel: true,
         },
         dataZoom: [
           {
             type: "slider",
-            show: orderCountData.length > 8, // 鍙湁鏁版嵁瓒呰繃8鏉℃椂鎵嶆樉绀烘粴鍔ㄦ潯
+            show: orderCountData.length > 8,
             xAxisIndex: [0],
             start: 0,
-            end: orderCountData.length > 8 ? 40 : 100, // 鏍规嵁鏁版嵁閲忚皟鏁存樉绀烘瘮渚?
+            end: orderCountData.length > 8 ? 40 : 100,
             bottom: 30,
-            height: 15, // 璋冩暣婊氬姩鏉￠珮搴?
+            height: 15,
           },
         ],
         xAxis: {
@@ -201,14 +225,14 @@ export default {
             alignWithLabel: true,
           },
           axisLabel: {
-            rotate: xAxisData.length > 6 ? 45 : 0, // 鏁版嵁澶氭椂鏃嬭浆鏍囩
+            rotate: xAxisData.length > 6 ? 45 : 0,
             fontSize: 12,
             interval: 0,
           },
         },
         yAxis: {
           type: "value",
-          name: "浜烘暟",
+          name: "人数",
           nameTextStyle: {
             fontSize: 12,
           },
@@ -225,9 +249,9 @@ export default {
         },
         series: [
           {
-            name: "鏍℃湇璁㈣喘浜烘暟",
+            name: "校服订购人数",
             type: "bar",
-            barWidth: "40%", // 璋冩暣鏌辩姸鍥惧搴?
+            barWidth: "40%",
             data: seriesData,
             itemStyle: {
               color: "#409EFF",
@@ -244,7 +268,6 @@ export default {
 
       this.orderCountChart.setOption(option);
 
-      // 鐩戝惉绐楀彛澶у皬鍙樺寲
       window.addEventListener("resize", () => {
         if (this.orderCountChart) {
           this.orderCountChart.resize();
@@ -252,17 +275,22 @@ export default {
       });
     },
 
-    // 鍒濆鍖栨牎鏈嶈璐噾棰濈粺璁″浘琛?
+    // 初始化校服订购金额统计图表
     initOrderAmountChart() {
       const chartDom = document.getElementById("orderAmountChart");
       if (!chartDom) return;
 
       this.orderAmountChart = echarts.init(chartDom);
 
-      // 澶勭悊鏁版嵁鏍煎紡锛屾敮鎸佸绉嶅瓧娈靛悕
-      const orderAmountData = Array.isArray(this.thisYearOrderAmount) ? this.thisYearOrderAmount : [];
-      const xAxisData = orderAmountData.map((item) => item.key || item.name || '鏈煡');
-      const seriesData = orderAmountData.map((item) => item.value || item.amount || 0);
+      const orderAmountData = Array.isArray(this.thisYearOrderAmount)
+        ? this.thisYearOrderAmount
+        : [];
+      const xAxisData = orderAmountData.map(
+        (item) => item.key || item.name || "未知"
+      );
+      const seriesData = orderAmountData.map(
+        (item) => item.value || item.amount || 0
+      );
 
       const option = {
         tooltip: {
@@ -270,34 +298,34 @@ export default {
           axisPointer: {
             type: "shadow",
           },
-          formatter: function (params) {
+          formatter(params) {
             if (params && params.length > 0) {
               return (
                 params[0].name +
                 "<br/>" +
                 params[0].seriesName +
-                ": 楼" +
+                ": ¥" +
                 params[0].value.toLocaleString()
               );
             }
-            return '';
+            return "";
           },
         },
         grid: {
           left: "3%",
           right: "4%",
-          bottom: 80, //  鍍忕礌鍊硷紝鐢ㄤ簬涓?dataZoom 鎻愪緵鍏呰冻绌洪棿
+          bottom: 80,
           containLabel: true,
         },
         dataZoom: [
           {
             type: "slider",
-            show: orderAmountData.length > 8, // 鍙湁鏁版嵁瓒呰繃8鏉℃椂鎵嶆樉绀烘粴鍔ㄦ潯
+            show: orderAmountData.length > 8,
             xAxisIndex: [0],
             start: 0,
-            end: orderAmountData.length > 8 ? 40 : 100, // 鏍规嵁鏁版嵁閲忚皟鏁存樉绀烘瘮渚?
+            end: orderAmountData.length > 8 ? 40 : 100,
             bottom: 30,
-            height: 15, // 璋冩暣婊氬姩鏉￠珮搴?
+            height: 15,
           },
         ],
         xAxis: {
@@ -307,21 +335,21 @@ export default {
             alignWithLabel: true,
           },
           axisLabel: {
-            rotate: xAxisData.length > 6 ? 45 : 0, // 鏁版嵁澶氭椂鏃嬭浆鏍囩
+            rotate: xAxisData.length > 6 ? 45 : 0,
             fontSize: 12,
             interval: 0,
           },
         },
         yAxis: {
           type: "value",
-          name: "閲戦(鍏?)",
+          name: "金额(元)",
           nameTextStyle: {
             fontSize: 12,
           },
           axisLabel: {
             fontSize: 12,
-            formatter: function (value) {
-              return "楼" + Math.round(value);
+            formatter(value) {
+              return "¥" + Math.round(value);
             },
           },
           splitLine: {
@@ -333,9 +361,9 @@ export default {
         },
         series: [
           {
-            name: "鏍℃湇璁㈣喘閲戦",
+            name: "校服订购金额",
             type: "bar",
-            barWidth: "40%", // 璋冩暣鏌辩姸鍥惧搴?
+            barWidth: "40%",
             data: seriesData,
             itemStyle: {
               color: "#67C23A",
@@ -352,7 +380,6 @@ export default {
 
       this.orderAmountChart.setOption(option);
 
-      // 鐩戝惉绐楀彛澶у皬鍙樺寲
       window.addEventListener("resize", () => {
         if (this.orderAmountChart) {
           this.orderAmountChart.resize();
@@ -360,7 +387,7 @@ export default {
       });
     },
 
-    // 鍒濆鍖栨牎鏈嶅搧绫荤粺璁″浘琛?
+    // 初始化校服品类统计图表
     initUniformTypeChart() {
       const chartDom = document.getElementById("uniformTypeChart");
       if (!chartDom) return;
@@ -382,7 +409,7 @@ export default {
         },
         series: [
           {
-            name: "鏍℃湇鍝佺被",
+            name: "校服品类",
             type: "pie",
             radius: ["40%", "70%"],
             center: ["60%", "50%"],
@@ -419,7 +446,6 @@ export default {
 
       this.uniformTypeChart.setOption(option);
 
-      // 鐩戝惉绐楀彛澶у皬鍙樺寲
       window.addEventListener("resize", () => {
         if (this.uniformTypeChart) {
           this.uniformTypeChart.resize();
@@ -427,7 +453,7 @@ export default {
       });
     },
 
-    // 鑾峰彇鍥捐〃棰滆壊
+    // 获取图表颜色
     getChartColor(index) {
       const colors = [
         "#409EFF",
@@ -439,45 +465,41 @@ export default {
         "#FF9800",
         "#4CAF50",
         "#2196F3",
-        "#FF5722"
+        "#FF5722",
       ];
       return colors[index % colors.length];
     },
 
-
-    // 椤甸潰鏁版嵁鍔犺浇
+    // 页面数据加载
     loadData() {
       this.loading = true;
-      this.thisYearOrderCount = [
-        { key: "2026", value: 0 },
-        { key: "2025", value: 0 },
-        { key: "2024", value: 900 },
-        { key: "2023", value: 0 },
-        { key: "2022", value: 0 },
-      ];
-      this.thisYearOrderAmount = [
-        { key: "2026", value: 0 },
-        { key: "2025", value: 0 },
-        { key: "2024", value: 387000 },
-        { key: "2023", value: 0 },
-        { key: "2022", value: 0 },
-      ];
-      this.uniformTypeData = [
-        { key: "春秋装", value: 52 },
-        { key: "夏装", value: 34 },
-        { key: "冬装", value: 18 },
-        { key: "礼服", value: 6 },
-      ];
-      this.currentYearOrderCount = this.thisYearOrderCount.reduce((sum, item) => sum + Number(item.value || 0), 0);
-      this.currentYearOrderAmount = this.thisYearOrderAmount.reduce((sum, item) => sum + Number(item.value || 0), 0);
-      this.lastYearOrderCount = Math.round(this.currentYearOrderCount * 0.85);
-      this.lastYearOrderAmount = Math.round(this.currentYearOrderAmount * 0.82);
-      this.$nextTick(() => {
-        this.initCharts();
-        this.loading = false;
-      });
-    },
 
+      Promise.all([
+        getSchoolOrderCount(),
+        getSchoolOrderAmount(),
+        getSchoolUniformType(),
+      ])
+        .then((res) => {
+          this.thisYearOrderCount = res[0].data || [];
+          this.thisYearOrderAmount = res[1].data || [];
+          this.uniformTypeData = res[2].data || [];
+
+          this.$nextTick(() => {
+            this.initCharts();
+          });
+        })
+        .catch(() => {
+          this.$message.error("获取统计数据失败，请稍后重试");
+          this.thisYearOrderCount = [];
+          this.thisYearOrderAmount = [];
+          this.uniformTypeData = [];
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+
+      this.getPersonMoney();
+    },
   },
 };
 </script>
@@ -486,6 +508,7 @@ export default {
 .box-card-item {
   height: 400px;
 }
+
 .dashboard-container {
   padding: 20px;
   background-color: #f5f5f5;
@@ -513,7 +536,6 @@ export default {
   margin-bottom: 25px;
 }
 
-// 寮哄埗鎵€鏈夊崱鐗囬珮搴﹀畬鍏ㄤ竴鑷?
 .stat-section-card,
 .chart-card,
 .manufacturer-card {
@@ -555,7 +577,6 @@ export default {
   }
 }
 
-// 缁熻鏁版嵁瀹瑰櫒
 .stats-container {
   flex: 1;
   display: flex;
@@ -614,7 +635,6 @@ export default {
   }
 }
 
-// 鍥捐〃瀹瑰櫒浼樺寲
 .chart-card {
   .el-card__body {
     padding: 20px !important;
@@ -622,15 +642,12 @@ export default {
   }
 }
 
-// 琛ㄦ牸瀹瑰櫒浼樺寲
 .manufacturer-card {
   .el-card__body {
     padding: 0 !important;
   }
 }
 
-
-// 鍝嶅簲寮忚璁?
 @media (max-width: 1200px) {
   .dashboard-container {
     height: auto;
@@ -727,6 +744,3 @@ export default {
   }
 }
 </style>
-
-
-
