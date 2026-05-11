@@ -50,6 +50,9 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
         if (xfptProductionOrderItem.getFinishNum() == null) {
             xfptProductionOrderItem.setFinishNum(0);
         }
+        if (StringUtils.isEmpty(xfptProductionOrderItem.getDelFlag())) {
+            xfptProductionOrderItem.setDelFlag("0");
+        }
     }
 
 }

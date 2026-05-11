@@ -36,6 +36,30 @@ public interface IXfptProductionOrderService extends IService<XfptProductionOrde
         public int insertXfptProductionOrder(XfptProductionOrder xfptProductionOrder);
 
         /**
+         * 根据订单生成生产单
+         *
+         * @param orderId 订单ID
+         * @return 生产单
+         */
+        public XfptProductionOrder generateFromOrder(Long orderId);
+
+        /**
+         * 开始生产
+         *
+         * @param id 生产单主键
+         * @return 结果
+         */
+        public int startProduction(Long id);
+
+        /**
+         * 完成生产
+         *
+         * @param id 生产单主键
+         * @return 结果
+         */
+        public int finishProduction(Long id);
+
+        /**
          * 修改生产单
          *
          * @param xfptProductionOrder 生产单

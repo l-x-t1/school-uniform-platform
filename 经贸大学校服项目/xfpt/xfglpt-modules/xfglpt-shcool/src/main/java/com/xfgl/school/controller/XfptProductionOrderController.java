@@ -85,6 +85,51 @@ public class XfptProductionOrderController extends BaseController {
     }
 
     /**
+     * 根据订单生成生产单
+     */
+    @Operation(summary = "根据订单生成生产单")
+    @RequiresPermissions("school:productionOrder:add")
+    @Log(title = "生产单", businessType = BusinessType.INSERT)
+    @PostMapping("/generateFromOrder/{orderId}")
+    public AjaxResult generateFromOrder(@PathVariable("orderId") Long orderId) {
+        try {
+            return success(xfptProductionOrderService.generateFromOrder(orderId));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return error(e.getMessage());
+        }
+    }
+
+    /**
+     * 开始生产
+     */
+    @Operation(summary = "开始生产")
+    @RequiresPermissions("school:productionOrder:edit")
+    @Log(title = "生产单", businessType = BusinessType.UPDATE)
+    @PutMapping("/start/{id}")
+    public AjaxResult startProduction(@PathVariable("id") Long id) {
+        try {
+            return toAjax(xfptProductionOrderService.startProduction(id));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return error(e.getMessage());
+        }
+    }
+
+    /**
+     * 完成生产
+     */
+    @Operation(summary = "完成生产")
+    @RequiresPermissions("school:productionOrder:edit")
+    @Log(title = "生产单", businessType = BusinessType.UPDATE)
+    @PutMapping("/finish/{id}")
+    public AjaxResult finishProduction(@PathVariable("id") Long id) {
+        try {
+            return toAjax(xfptProductionOrderService.finishProduction(id));
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return error(e.getMessage());
+        }
+    }
+
+    /**
      * 修改生产单
      */
     @Operation(summary = "修改生产单")
