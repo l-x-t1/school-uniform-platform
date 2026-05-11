@@ -1,50 +1,18 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="生产单主表ID" prop="productionId">
-        <el-input
-          v-model="queryParams.productionId"
-          placeholder="请输入生产单主表ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单明细ID" prop="orderItemId">
-        <el-input
-          v-model="queryParams.orderItemId"
-          placeholder="请输入订单明细ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="商品ID" prop="goodsId">
-        <el-input
-          v-model="queryParams.goodsId"
-          placeholder="请输入商品ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="尺码ID" prop="sizeId">
-        <el-input
-          v-model="queryParams.sizeId"
-          placeholder="请输入尺码ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="商品名称快照" prop="goodsName">
+      <el-form-item label="商品名称" prop="goodsName">
         <el-input
           v-model="queryParams.goodsName"
-          placeholder="请输入商品名称快照"
+          placeholder="请输入商品名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="尺码名称快照" prop="sizeName">
+      <el-form-item label="尺码名称" prop="sizeName">
         <el-input
           v-model="queryParams.sizeName"
-          placeholder="请输入尺码名称快照"
+          placeholder="请输入尺码名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -120,12 +88,8 @@
     <el-table v-loading="loading" :data="productionOrderItemList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="生产单主表ID" align="center" prop="productionId" />
-      <el-table-column label="订单明细ID" align="center" prop="orderItemId" />
-      <el-table-column label="商品ID" align="center" prop="goodsId" />
-      <el-table-column label="尺码ID" align="center" prop="sizeId" />
-      <el-table-column label="商品名称快照" align="center" prop="goodsName" />
-      <el-table-column label="尺码名称快照" align="center" prop="sizeName" />
+      <el-table-column label="商品名称" align="center" prop="goodsName" />
+      <el-table-column label="尺码名称" align="center" prop="sizeName" />
       <el-table-column label="应生产数量" align="center" prop="buyNum" />
       <el-table-column label="已完成数量" align="center" prop="finishNum" />
       <el-table-column label="状态，0待生产 1生产中 2生产完成" align="center" prop="status" />
@@ -161,35 +125,24 @@
     <!-- 添加或修改生产单明细对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="生产单主表ID" prop="productionId">
-          <el-input v-model="form.productionId" placeholder="请输入生产单主表ID" />
+        <el-form-item label="商品名称" prop="goodsName">
+          <el-input v-model="form.goodsName" placeholder="请输入商品名称" />
         </el-form-item>
-        <el-form-item label="订单明细ID" prop="orderItemId">
-          <el-input v-model="form.orderItemId" placeholder="请输入订单明细ID" />
-        </el-form-item>
-        <el-form-item label="商品ID" prop="goodsId">
-          <el-input v-model="form.goodsId" placeholder="请输入商品ID" />
-        </el-form-item>
-        <el-form-item label="尺码ID" prop="sizeId">
-          <el-input v-model="form.sizeId" placeholder="请输入尺码ID" />
-        </el-form-item>
-        <el-form-item label="商品名称快照" prop="goodsName">
-          <el-input v-model="form.goodsName" placeholder="请输入商品名称快照" />
-        </el-form-item>
-        <el-form-item label="尺码名称快照" prop="sizeName">
-          <el-input v-model="form.sizeName" placeholder="请输入尺码名称快照" />
+        <el-form-item label="尺码名称" prop="sizeName">
+          <el-input v-model="form.sizeName" placeholder="请输入尺码名称" />
         </el-form-item>
         <el-form-item label="应生产数量" prop="buyNum">
           <el-input v-model="form.buyNum" placeholder="请输入应生产数量" />
         </el-form-item>
-        <el-form-item label="已完成数量" prop="finishNum">
-          <el-input v-model="form.finishNum" placeholder="请输入已完成数量" />
+        <el-form-item label="状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择状态">
+            <el-option label="待生产" value="0" />
+            <el-option label="生产中" value="1" />
+            <el-option label="生产完成" value="2" />
+          </el-select>
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -243,14 +196,8 @@ export default {
       form: {},
       // 表单校验
       rules: {
-        productionId: [
-          { required: true, message: "生产单主表ID不能为空", trigger: "blur" }
-        ],
-        goodsId: [
-          { required: true, message: "商品ID不能为空", trigger: "blur" }
-        ],
         goodsName: [
-          { required: true, message: "商品名称快照不能为空", trigger: "blur" }
+          { required: true, message: "商品名称不能为空", trigger: "blur" }
         ],
         buyNum: [
           { required: true, message: "应生产数量不能为空", trigger: "blur" }
@@ -258,9 +205,6 @@ export default {
         status: [
           { required: true, message: "状态，0待生产 1生产中 2生产完成不能为空", trigger: "change" }
         ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
-        ]
       }
     };
   },
@@ -293,14 +237,14 @@ export default {
         goodsName: null,
         sizeName: null,
         buyNum: null,
-        finishNum: null,
-        status: null,
+        finishNum: 0,
+        status: "0",
         createBy: null,
         createTime: null,
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.resetForm("form");
     },

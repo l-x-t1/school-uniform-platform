@@ -9,42 +9,10 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="统购公告ID" prop="noticeId">
-        <el-input
-          v-model="queryParams.noticeId"
-          placeholder="请输入统购公告ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单号快照" prop="orderNo">
+      <el-form-item label="订单号" prop="orderNo">
         <el-input
           v-model="queryParams.orderNo"
-          placeholder="请输入订单号快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
+          placeholder="请输入订单号"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -57,29 +25,12 @@
           placeholder="请选择计划完成时间">
         </el-date-picker>
       </el-form-item>
-      <el-form-item label="开始生产时间" prop="startTime">
-        <el-date-picker clearable
-          v-model="queryParams.startTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择开始生产时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="生产完成时间" prop="finishTime">
-        <el-date-picker clearable
-          v-model="queryParams.finishTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择生产完成时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+      <el-form-item label="状态" prop="status">
+        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+          <el-option label="待生产" value="0" />
+          <el-option label="生产中" value="1" />
+          <el-option label="生产完成" value="2" />
+        </el-select>
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -135,15 +86,18 @@
 
     <el-table v-loading="loading" :data="productionOrderList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="生产单号" align="center" prop="productionNo" />
-      <el-table-column label="统购公告ID" align="center" prop="noticeId" />
-      <el-table-column label="订单ID" align="center" prop="orderId" />
-      <el-table-column label="订单号快照" align="center" prop="orderNo" />
-      <el-table-column label="订单类型，1统购 2零售" align="center" prop="orderType" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="状态，0待生产 1生产中 2生产完成" align="center" prop="status" />
+      <el-table-column label="生产单号" align="center" prop="productionNo" min-width="180" show-overflow-tooltip />
+      <el-table-column label="订单号" align="center" prop="orderNo" min-width="180" show-overflow-tooltip />
+      <el-table-column label="订单类型" align="center" prop="orderType">
+        <template slot-scope="scope">
+          <span>{{ formatOrderType(scope.row.orderType) }}</span>
+        </template>
+      </el-table-column>
+      <el-table-column label="状态" align="center" prop="status">
+        <template slot-scope="scope">
+          <span>{{ formatStatus(scope.row.status) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="计划完成时间" align="center" prop="plannedFinishTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.plannedFinishTime, '{y}-{m}-{d}') }}</span>
@@ -159,7 +113,6 @@
           <span>{{ parseTime(scope.row.finishTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="当前归属部门/学校" align="center" prop="deptId" />
       <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
@@ -195,21 +148,6 @@
         <el-form-item label="生产单号" prop="productionNo">
           <el-input v-model="form.productionNo" placeholder="请输入生产单号" />
         </el-form-item>
-        <el-form-item label="统购公告ID" prop="noticeId">
-          <el-input v-model="form.noticeId" placeholder="请输入统购公告ID" />
-        </el-form-item>
-        <el-form-item label="订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入订单ID" />
-        </el-form-item>
-        <el-form-item label="订单号快照" prop="orderNo">
-          <el-input v-model="form.orderNo" placeholder="请输入订单号快照" />
-        </el-form-item>
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
-        </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
         <el-form-item label="计划完成时间" prop="plannedFinishTime">
           <el-date-picker clearable
             v-model="form.plannedFinishTime"
@@ -218,30 +156,8 @@
             placeholder="请选择计划完成时间">
           </el-date-picker>
         </el-form-item>
-        <el-form-item label="开始生产时间" prop="startTime">
-          <el-date-picker clearable
-            v-model="form.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择开始生产时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="生产完成时间" prop="finishTime">
-          <el-date-picker clearable
-            v-model="form.finishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择生产完成时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
-        </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
         </el-form-item>
         <el-divider content-position="center">生产单明细信息</el-divider>
         <el-row :gutter="10" class="mb8">
@@ -255,39 +171,19 @@
         <el-table :data="xfptProductionOrderItemList" :row-class-name="rowXfptProductionOrderItemIndex" @selection-change="handleXfptProductionOrderItemSelectionChange" ref="xfptProductionOrderItem">
           <el-table-column type="selection" width="50" align="center" />
           <el-table-column label="序号" align="center" prop="index" width="50"/>
-          <el-table-column label="订单明细ID" prop="orderItemId" width="150">
+          <el-table-column label="商品名称" prop="goodsName" width="150">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.orderItemId" placeholder="请输入订单明细ID" />
+              <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称" />
             </template>
           </el-table-column>
-          <el-table-column label="商品ID" prop="goodsId" width="150">
+          <el-table-column label="尺码名称" prop="sizeName" width="150">
             <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsId" placeholder="请输入商品ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="尺码ID" prop="sizeId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sizeId" placeholder="请输入尺码ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="商品名称快照" prop="goodsName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称快照" />
-            </template>
-          </el-table-column>
-          <el-table-column label="尺码名称快照" prop="sizeName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称快照" />
+              <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称" />
             </template>
           </el-table-column>
           <el-table-column label="应生产数量" prop="buyNum" width="150">
             <template slot-scope="scope">
               <el-input v-model="scope.row.buyNum" placeholder="请输入应生产数量" />
-            </template>
-          </el-table-column>
-          <el-table-column label="已完成数量" prop="finishNum" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.finishNum" placeholder="请输入已完成数量" />
             </template>
           </el-table-column>
           <el-table-column label="状态，0待生产 1生产中 2生产完成" prop="status" width="150">
@@ -362,18 +258,6 @@ export default {
         productionNo: [
           { required: true, message: "生产单号不能为空", trigger: "blur" }
         ],
-        orderType: [
-          { required: true, message: "订单类型，1统购 2零售不能为空", trigger: "change" }
-        ],
-        supplierId: [
-          { required: true, message: "供应商ID不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "状态，0待生产 1生产中 2生产完成不能为空", trigger: "change" }
-        ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
-        ]
       }
     };
   },
@@ -390,6 +274,21 @@ export default {
         this.loading = false;
       });
     },
+    formatOrderType(orderType) {
+      const orderTypeMap = {
+        "1": "统购",
+        "2": "零售"
+      };
+      return orderTypeMap[String(orderType)] || orderType || "-";
+    },
+    formatStatus(status) {
+      const statusMap = {
+        "0": "待生产",
+        "1": "生产中",
+        "2": "生产完成"
+      };
+      return statusMap[String(status)] || status || "-";
+    },
     // 取消按钮
     cancel() {
       this.open = false;
@@ -403,10 +302,10 @@ export default {
         noticeId: null,
         orderId: null,
         orderNo: null,
-        orderType: null,
+        orderType: "2",
         schoolId: null,
         supplierId: null,
-        status: null,
+        status: "0",
         plannedFinishTime: null,
         startTime: null,
         finishTime: null,
@@ -416,7 +315,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptProductionOrderItemList = [];
       this.resetForm("form");
@@ -498,9 +397,10 @@ export default {
       obj.goodsName = "";
       obj.sizeName = "";
       obj.buyNum = "";
-      obj.finishNum = "";
-      obj.status = "";
+      obj.finishNum = 0;
+      obj.status = "0";
       obj.remark = "";
+      obj.delFlag = "0";
       this.xfptProductionOrderItemList.push(obj);
     },
     /** 生产单明细删除按钮操作 */
