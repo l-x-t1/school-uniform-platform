@@ -69,19 +69,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="saleType != null  and saleType != ''"> and sale_type = #{saleType}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
             <if test="publishStatus != null  and publishStatus != ''"> and publish_status = #{publishStatus}</if>
-            <if test="publishTime != null ">
-                and publish_time &gt;= #{publishTime}
-                and publish_time &lt; date_add(#{publishTime}, interval 1 day)
-
-            </if>
-            <if test="offShelfTime != null ">
-                and off_shelf_time &gt;= #{offShelfTime}
-                and off_shelf_time &lt; date_add(#{offShelfTime}, interval 1 day)
-            </if>
+            <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
+            <if test="offShelfTime != null "> and date_format(off_shelf_time, '%Y-%m-%d') = date_format(#{offShelfTime}, '%Y-%m-%d')</if>
             <if test="sortNum != null "> and sort_num = #{sortNum}</if>
 
     </select>
-<!--   转义字符 &gt;代表大于号 >  &lt;代表小于号 <   -->
+
     <select id="selectXfptGoodsById" parameterType="Long" resultMap="XfptGoodsXfptGoodsSizeResult">
         select id, goods_name, goods_code, category_name, supplier_id, supplier_name, brand_name, main_image, detail_images_json, detail_content, sale_type, status, publish_status, publish_time, off_shelf_time, sort_num, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_goods

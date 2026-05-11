@@ -126,6 +126,9 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
             if (StringUtils.isNotNull(xfptDeliveryOrderItemList)) {
                 for (XfptDeliveryOrderItem xfptDeliveryOrderItem : xfptDeliveryOrderItemList) {
                     xfptDeliveryOrderItem.setDeliveryId(id);
+                    if (xfptDeliveryOrderItem.getStatus() == null || "".equals(xfptDeliveryOrderItem.getStatus())) {
+                        xfptDeliveryOrderItem.setStatus("0");
+                    }
                 }
                     xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(xfptDeliveryOrderItemList);
             }
