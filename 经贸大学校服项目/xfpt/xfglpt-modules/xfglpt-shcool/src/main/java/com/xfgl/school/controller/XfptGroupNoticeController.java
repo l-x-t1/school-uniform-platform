@@ -16,6 +16,7 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.service.IXfptGroupNoticeService;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
@@ -48,6 +49,21 @@ public class XfptGroupNoticeController extends BaseController {
         startPage();
         List<XfptGroupNotice> list = xfptGroupNoticeService.selectXfptGroupNoticeList(xfptGroupNotice);
         return getDataTable(list);
+    }
+
+@Operation(summary = "查询统购订购进度列表")
+@RequiresPermissions("school:groupNotice:list")
+@GetMapping("/progress/list")
+    public TableDataInfo progressList(GroupNoticeProgressQuery query) {
+        startPage();
+        return getDataTable(xfptGroupNoticeService.selectGroupNoticeProgressList(query));
+    }
+
+@Operation(summary = "查询统购订购进度详情")
+@RequiresPermissions("school:groupNotice:query")
+@GetMapping("/progress/{noticeId}")
+    public AjaxResult progressDetail(@PathVariable("noticeId") Long noticeId, Long supplierId) {
+        return success(xfptGroupNoticeService.selectGroupNoticeOrderDetail(noticeId, supplierId));
     }
 
     /**

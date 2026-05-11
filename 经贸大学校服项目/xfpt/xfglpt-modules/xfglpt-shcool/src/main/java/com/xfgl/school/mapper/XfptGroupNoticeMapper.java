@@ -2,6 +2,9 @@ package com.xfgl.school.mapper;
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
+import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
+import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 import org.apache.ibatis.annotations.Param;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
 
@@ -42,4 +45,10 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
          * @return 结果
          */
         int batchInsertXfptGroupNoticeItem(List<XfptGroupNoticeItem> xfptGroupNoticeItemList);
+
+        List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query);
+
+        List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(@Param("noticeId") Long noticeId,
+                                                                    @Param("supplierId") Long supplierId,
+                                                                    @Param("deptId") Long deptId);
 }

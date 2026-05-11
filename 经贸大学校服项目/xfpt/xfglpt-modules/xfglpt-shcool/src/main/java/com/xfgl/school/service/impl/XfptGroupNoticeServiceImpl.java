@@ -2,17 +2,27 @@ package com.xfgl.school.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.xfgl.common.core.exception.ServiceException;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Objects;
 import com.xfgl.common.core.utils.StringUtils;
+import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.system.api.domain.SysUser;
+import com.xfgl.system.api.model.LoginUser;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
 import com.xfgl.school.mapper.XfptGroupNoticeMapper;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.XfptSchoolMessage;
+import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
+import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
+import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 import com.xfgl.school.service.IXfptGroupNoticeService;
+import com.xfgl.school.service.IXfptSchoolMessageService;
 
 /**
  * 统购公告Service业务层处理
@@ -26,6 +36,9 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     @Autowired
     private XfptGroupNoticeMapper xfptGroupNoticeMapper;
 
+    @Autowired
+    private IXfptSchoolMessageService xfptSchoolMessageService;
+
     /**
      * 查询统购公告列表
      *
@@ -35,6 +48,9 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     @Override
     public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice)
     {
+        XfptSchoolMessage currentSchool = getCurrentSchool();
+        xfptGroupNotice.setDeptId(currentSchool.getDeptId());
+        xfptGroupNotice.setSchoolId(currentSchool.getId());
         return xfptGroupNoticeMapper.selectXfptGroupNoticeList(xfptGroupNotice);
     }
 
@@ -48,6 +64,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         public XfptGroupNotice selectXfptGroupNoticeById(Long id)
         {
             XfptGroupNotice xfptGroupNotice = xfptGroupNoticeMapper.selectById(id);
+            checkNoticeBelongsToCurrentSchool(xfptGroupNotice);
             List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNoticeMapper.selectXfptGroupNoticeItemById(id);
             xfptGroupNotice.setXfptGroupNoticeItemList(xfptGroupNoticeItemList);
             return xfptGroupNotice;
@@ -63,6 +80,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         @Override
         public int insertXfptGroupNotice(XfptGroupNotice xfptGroupNotice)
         {
+            fillCurrentSchoolInfo(xfptGroupNotice);
             int rows = xfptGroupNoticeMapper.insert(xfptGroupNotice);
             insertXfptGroupNoticeItem(xfptGroupNotice);
             return rows;
@@ -78,6 +96,8 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         @Override
         public int updateXfptGroupNotice(XfptGroupNotice xfptGroupNotice)
         {
+            checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(xfptGroupNotice.getId()));
+            fillCurrentSchoolInfo(xfptGroupNotice);
                 xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(xfptGroupNotice.getId());
             insertXfptGroupNoticeItem(xfptGroupNotice);
             return xfptGroupNoticeMapper.updateById(xfptGroupNotice);
@@ -95,6 +115,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         {
             List<Long> idList = Arrays.asList(ids);
             for (Long id : idList) {
+                checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(id));
                 xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(id);
         }
             return xfptGroupNoticeMapper.deleteBatchIds(idList);
@@ -110,8 +131,26 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         @Override
         public int deleteXfptGroupNoticeById(Long id)
         {
+                checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(id));
                 xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(id);
             return xfptGroupNoticeMapper.deleteById(id);
+        }
+
+        @Override
+        public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query)
+        {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            query.setDeptId(currentSchool.getDeptId());
+            query.setSchoolId(currentSchool.getId());
+            return xfptGroupNoticeMapper.selectGroupNoticeProgressList(query);
+        }
+
+        @Override
+        public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId)
+        {
+            checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(noticeId));
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, currentSchool.getDeptId());
         }
 
         /**
@@ -123,12 +162,50 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         {
             List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNotice.getXfptGroupNoticeItemList();
             Long id = xfptGroupNotice.getId();
-            if (StringUtils.isNotNull(xfptGroupNoticeItemList)) {
+            if (StringUtils.isNotEmpty(xfptGroupNoticeItemList)) {
                 for (XfptGroupNoticeItem xfptGroupNoticeItem : xfptGroupNoticeItemList) {
                     xfptGroupNoticeItem.setNoticeId(id);
+                    xfptGroupNoticeItem.setDeptId(xfptGroupNotice.getDeptId());
                 }
                     xfptGroupNoticeMapper.batchInsertXfptGroupNoticeItem(xfptGroupNoticeItemList);
             }
+        }
+
+        private void fillCurrentSchoolInfo(XfptGroupNotice xfptGroupNotice)
+        {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            xfptGroupNotice.setDeptId(currentSchool.getDeptId());
+            xfptGroupNotice.setSchoolId(currentSchool.getId());
+            xfptGroupNotice.setSchoolName(currentSchool.getSchoolName());
+        }
+
+        private void checkNoticeBelongsToCurrentSchool(XfptGroupNotice xfptGroupNotice)
+        {
+            if (xfptGroupNotice == null) {
+                throw new ServiceException("公告不存在");
+            }
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            if (!Objects.equals(xfptGroupNotice.getDeptId(), currentSchool.getDeptId())
+                    || !Objects.equals(xfptGroupNotice.getSchoolId(), currentSchool.getId())) {
+                throw new ServiceException("只能操作当前学校的公告");
+            }
+        }
+
+        private XfptSchoolMessage getCurrentSchool()
+        {
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
+            Long deptId = sysUser == null ? null : sysUser.getDeptId();
+            if (deptId == null) {
+                throw new ServiceException("未获取到当前登录学校");
+            }
+            XfptSchoolMessage schoolMessage = xfptSchoolMessageService.lambdaQuery()
+                    .eq(XfptSchoolMessage::getDeptId, deptId)
+                    .one();
+            if (schoolMessage == null || schoolMessage.getId() == null) {
+                throw new ServiceException("当前登录学校信息不存在，请先完善学校信息");
+            }
+            return schoolMessage;
         }
 
 }
