@@ -252,8 +252,19 @@
         <el-form-item label="流水单号" prop="flowNo">
           <el-input v-model="form.flowNo" placeholder="请输入流水单号" />
         </el-form-item>
+        <el-form-item label="业务类型" prop="businessType">
+          <el-select v-model="form.businessType" placeholder="请选择业务类型" clearable>
+            <el-option label="支付" value="1" />
+            <el-option label="退款" value="2" />
+            <el-option label="提现" value="3" />
+            <el-option label="结算" value="4" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="收支方向，1收入 2支出" prop="flowDirection">
-          <el-input v-model="form.flowDirection" placeholder="请输入收支方向，1收入 2支出" />
+          <el-select v-model="form.flowDirection" placeholder="请选择收支方向" clearable>
+            <el-option label="收入" value="1" />
+            <el-option label="支出" value="2" />
+          </el-select>
         </el-form-item>
         <el-form-item label="关联订单ID" prop="orderId">
           <el-input v-model="form.orderId" placeholder="请输入关联订单ID" />
@@ -281,6 +292,12 @@
         </el-form-item>
         <el-form-item label="外部交易单号或平台交易号" prop="tradeNo">
           <el-input v-model="form.tradeNo" placeholder="请输入外部交易单号或平台交易号" />
+        </el-form-item>
+        <el-form-item label="收款方类型" prop="payeeType">
+          <el-select v-model="form.payeeType" placeholder="请选择收款方类型" clearable>
+            <el-option label="学校" value="1" />
+            <el-option label="供应商" value="2" />
+          </el-select>
         </el-form-item>
         <el-form-item label="收款方ID，学校ID或供应商ID" prop="payeeId">
           <el-input v-model="form.payeeId" placeholder="请输入收款方ID，学校ID或供应商ID" />
@@ -388,7 +405,7 @@ export default {
           { required: true, message: "业务类型，1支付 2退款 3提现 4结算不能为空", trigger: "change" }
         ],
         flowDirection: [
-          { required: true, message: "收支方向，1收入 2支出不能为空", trigger: "blur" }
+          { required: true, message: "收支方向，1收入 2支出不能为空", trigger: "change" }
         ],
         amount: [
           { required: true, message: "流水金额不能为空", trigger: "blur" }

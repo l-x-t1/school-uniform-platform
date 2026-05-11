@@ -1,0 +1,248 @@
+openapi: 3.0.3
+info:
+  title: 校服项目统计接口
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /school/index/statistics/peopleCount:
+    get:
+      summary: 数据统计
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PeopleCountResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  thisOrderYearCount: 1200
+                  lastOrderYearCount: 980
+                  thisMoneyYearCount: 560000
+                  lastMoneyYearCount: 430000
+
+  /school/index/statistics/getCount:
+    get:
+      summary: 获取今年订购人数
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyValueListResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  - key: XX区
+                    value: 120
+                  - key: YY区
+                    value: 95
+
+  /school/index/statistics/getMoney:
+    get:
+      summary: 获取今年金额统计柱状图
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyValueListResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  - key: XX区
+                    value: 560000
+                  - key: YY区
+                    value: 430000
+
+  /school/index/statistics/getSchool5YearCountData:
+    get:
+      summary: 学校近5年订购人数
+      parameters:
+        - name: deptId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: 部门ID
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyValueListResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  - key: "2026"
+                    value: 120
+                  - key: "2025"
+                    value: 98
+                  - key: "2024"
+                    value: 76
+
+  /school/index/statistics/getSchool5YearMoneyData:
+    get:
+      summary: 学校近5年金额统计
+      parameters:
+        - name: deptId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: 部门ID
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyValueListResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  - key: "2026"
+                    value: 560000
+                  - key: "2025"
+                    value: 430000
+                  - key: "2024"
+                    value: 390000
+
+  /school/index/statistics/schoolUniformType:
+    get:
+      summary: 校服品类种类统计
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/KeyValueListResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  - key: 春秋装
+                    value: 300
+                  - key: 夏装
+                    value: 220
+                  - key: 冬装
+                    value: 180
+
+  /school/index/statistics/platformUsage:
+    get:
+      summary: 平台使用情况
+      parameters:
+        - name: deptId
+          in: query
+          required: false
+          schema:
+            type: integer
+            format: int64
+          description: 部门ID
+      responses:
+        "200":
+          description: 成功
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PlatformUsageResponse"
+              example:
+                code: 200
+                msg: 操作成功
+                data:
+                  districtPlatformTotal: 12
+                  schoolPlatformTotal: 85
+                  studentPlatformTotal: 4600
+
+components:
+  schemas:
+    AjaxResult:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        msg:
+          type: string
+          example: 操作成功
+        data:
+          nullable: true
+
+    PeopleCountData:
+      type: object
+      properties:
+        thisOrderYearCount:
+          type: integer
+          format: int64
+        lastOrderYearCount:
+          type: integer
+          format: int64
+        thisMoneyYearCount:
+          type: integer
+          format: int64
+        lastMoneyYearCount:
+          type: integer
+          format: int64
+
+    KeyValueVo:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - type: integer
+            - type: number
+
+    PlatformUsageData:
+      type: object
+      properties:
+        districtPlatformTotal:
+          type: integer
+          format: int64
+        schoolPlatformTotal:
+          type: integer
+          format: int64
+        studentPlatformTotal:
+          type: integer
+          format: int64
+
+    PeopleCountResponse:
+      allOf:
+        - $ref: "#/components/schemas/AjaxResult"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PeopleCountData"
+
+    KeyValueListResponse:
+      allOf:
+        - $ref: "#/components/schemas/AjaxResult"
+        - type: object
+          properties:
+            data:
+              type: array
+              items:
+                $ref: "#/components/schemas/KeyValueVo"
+
+    PlatformUsageResponse:
+      allOf:
+        - $ref: "#/components/schemas/AjaxResult"
+        - type: object
+          properties:
+            data:
+              $ref: "#/components/schemas/PlatformUsageData"

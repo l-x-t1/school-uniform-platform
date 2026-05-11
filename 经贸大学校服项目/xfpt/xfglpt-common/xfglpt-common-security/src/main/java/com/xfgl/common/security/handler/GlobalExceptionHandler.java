@@ -3,6 +3,7 @@ package com.xfgl.common.security.handler;
 import javax.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.validation.BindException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -100,6 +101,22 @@ public class GlobalExceptionHandler
         }
         log.error("请求参数类型不匹配'{}',发生系统异常.", requestURI, e);
         return AjaxResult.error(String.format("请求参数类型不匹配，参数[%s]要求类型为：'%s'，但输入值为：'%s'", e.getName(), e.getRequiredType().getName(), value));
+    }
+
+    /**
+     * 数据唯一键冲突异常
+     */
+    @ExceptionHandler(DuplicateKeyException.class)
+    public AjaxResult handleDuplicateKeyException(DuplicateKeyException e, HttpServletRequest request)
+    {
+        String requestURI = request.getRequestURI();
+        log.error("请求地址'{}',数据库唯一键冲突.", requestURI, e);
+        String message = e.getMessage();
+        if (StringUtils.isNotEmpty(message) && message.contains("uk_xfpt_withdraw_apply_no"))
+        {
+            return AjaxResult.error("提现单号已存在，请勿重复提交");
+        }
+        return AjaxResult.error("数据已存在，请勿重复提交");
     }
 
     /**
