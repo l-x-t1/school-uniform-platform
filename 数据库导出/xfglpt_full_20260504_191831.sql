@@ -4022,6 +4022,46 @@ USE `xfglpt`;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+--
+-- Supplemental menu initialization
+--
+
+-- 账户余额页面菜单初始化脚本
+-- 执行前确认“新增功能”目录 MENU_ID = 2333 存在
+-- 页面组件路径：school/accountBalance/index
+-- 页面复用已有的资金流水、提现申请接口权限，不额外新增按钮权限
+INSERT INTO `sys_menu`
+(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+SELECT
+  2334, '账户余额', 2333, 2, 'accountBalance', 'school/accountBalance/index', NULL, '', 1, 0, 'C', '0', '0', 'school:financeFlow:list', 'money', 'admin', NOW(), 'admin', NOW(), '账户余额菜单', NULL
+FROM dual
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2334 OR (`PARENT_ID` = 2333 AND `PATH` = 'accountBalance')
+);
+
+-- 平台使用情况页面菜单初始化脚本
+-- 执行前确认“新增功能”目录 MENU_ID = 2333 存在
+-- 页面组件路径：school/platformUsage/index
+INSERT INTO `sys_menu`
+(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+SELECT
+  2335, '平台使用情况', 2333, 3, 'platformUsage', 'school/platformUsage/index', NULL, '', 1, 0, 'C', '0', '0', 'school:platformUsage:list', 'pie-chart', 'admin', NOW(), 'admin', NOW(), '平台使用情况菜单', NULL
+FROM dual
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2335 OR (`PARENT_ID` = 2333 AND `PATH` = 'platformUsage')
+);
+
+-- 学校使用情况页面菜单初始化脚本
+-- 执行前确认“新增功能”目录 MENU_ID = 2333 存在
+INSERT INTO `sys_menu`
+(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+SELECT
+  2336, '学校使用情况', 2333, 4, 'schoolUsage', 'school/schoolUsage/index', NULL, '', 1, 0, 'C', '0', '0', 'school:schoolUsage:list', 'school', 'admin', NOW(), 'admin', NOW(), '学校使用情况菜单', NULL
+FROM dual
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2336 OR (`PARENT_ID` = 2333 AND `PATH` = 'schoolUsage')
+);
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
