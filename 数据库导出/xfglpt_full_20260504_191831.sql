@@ -1019,6 +1019,25 @@ INSERT INTO `sys_menu` (
 SELECT @retail_edit_id, '零售商品上下架', @retail_goods_id, 2, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:retailGoods:edit', '#', 'admin', NOW(), '', NULL, '', NULL
 WHERE NOT EXISTS (SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:retailGoods:edit');
 
+SET @delivery_statistics_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '发货单统计'
+    AND `PARENT_ID` = @retail_parent_id
+  LIMIT 1
+);
+SET @delivery_statistics_id := IFNULL(@delivery_statistics_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @delivery_statistics_id, '发货单统计', @retail_parent_id, 2, 'deliveryStatistics', 'lssxj/deliveryStatistics/index', NULL, '', 1, 0, 'C', '0', '0', 'school:deliveryStatistics:list', 'shopping', 'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:deliveryStatistics:list'
+);
+
 --
 -- Table structure for table `sys_notice`
 --
@@ -4020,6 +4039,99 @@ USE `xfglpt`;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+-- Local business sync: keep school goods import and zero-purchase permissions
+UPDATE `sys_role`
+SET `integrity` = 'yxttIEVUHhCjZ7Zu6lChTA=='
+WHERE `role_id` = 114;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 114, t.`MENU_ID`
+FROM (
+  SELECT @goods_import_id AS `MENU_ID`
+  UNION ALL SELECT @retail_parent_id
+  UNION ALL SELECT @retail_goods_id
+  UNION ALL SELECT @retail_query_id
+  UNION ALL SELECT @retail_edit_id
+  UNION ALL SELECT @delivery_statistics_id
+) t
+WHERE t.`MENU_ID` IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = 114
+      AND rm.`MENU_ID` = t.`MENU_ID`
+  );
+
+INSERT INTO `xfpt_goods` (
+  `id`, `goods_name`, `goods_code`, `category_name`, `supplier_id`, `supplier_name`, `brand_name`,
+  `main_image`, `detail_images_json`, `detail_content`, `sale_type`, `status`, `publish_status`,
+  `publish_time`, `off_shelf_time`, `sort_num`, `create_by`, `create_time`, `update_by`,
+  `update_time`, `remark`, `del_flag`
+)
+SELECT
+  5, '春秋运动校服外套', 'DEMO-GOODS-20260504185529-5', '春秋装', 1, '河北超享纺织服装有限公司', '校园优选',
+  '/profile/upload/demo/goods_1.jpg', NULL, NULL, '3', '1', '1',
+  '2026-05-04 00:00:00', NULL, 6, '管理员', '2026-05-10 21:05:18', NULL,
+  NULL, '测试商品数据', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `xfpt_goods`
+  WHERE `goods_code` = 'DEMO-GOODS-20260504185529-5'
+);
+
+INSERT INTO `xfpt_school_supplier_rel` (
+  `id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`, `notice_id`, `contract_id`,
+  `cooperate_status`, `service_phone`, `create_by`, `create_time`, `update_by`, `update_time`,
+  `remark`, `del_flag`
+)
+SELECT
+  4, 222, '石家庄交通运输学校', 1, '河北超享纺织服装有限公司', NULL, NULL,
+  '1', NULL, '管理员', '2026-05-10 23:10:53', NULL, NULL,
+  NULL, '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `xfpt_school_supplier_rel`
+  WHERE `school_id` = 222
+    AND `supplier_id` = 1
+);
+
+SET @school_supplier_rel_id := (
+  SELECT `id`
+  FROM `xfpt_school_supplier_rel`
+  WHERE `school_id` = 222
+    AND `supplier_id` = 1
+  ORDER BY `id` DESC
+  LIMIT 1
+);
+
+SET @spring_goods_id := (
+  SELECT `id`
+  FROM `xfpt_goods`
+  WHERE `goods_code` = 'DEMO-GOODS-20260504185529-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_school_supplier_goods_rel` (
+  `id`, `rel_id`, `school_id`, `supplier_id`, `goods_id`, `status`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  5, @school_supplier_rel_id, 222, 1, @spring_goods_id, '1', '管理员',
+  '2026-05-10 23:10:53', '管理员', '2026-05-10 23:10:53', '', '0'
+FROM DUAL
+WHERE @school_supplier_rel_id IS NOT NULL
+  AND @spring_goods_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_school_supplier_goods_rel` r
+    WHERE r.`school_id` = 222
+      AND r.`supplier_id` = 1
+      AND r.`goods_id` = @spring_goods_id
+  );
+
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
