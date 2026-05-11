@@ -4053,6 +4053,7 @@ FROM (
   UNION ALL SELECT @retail_goods_id
   UNION ALL SELECT @retail_query_id
   UNION ALL SELECT @retail_edit_id
+  UNION ALL SELECT @delivery_statistics_id
 ) t
 WHERE t.`MENU_ID` IS NOT NULL
   AND NOT EXISTS (
