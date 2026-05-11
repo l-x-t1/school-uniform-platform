@@ -347,7 +347,9 @@
           <el-table-column label="状态，0待发货 1已发货 2已签收" prop="status" width="150">
             <template slot-scope="scope">
               <el-select v-model="scope.row.status" placeholder="请选择状态，0待发货 1已发货 2已签收">
-                <el-option label="请选择字典生成" value="" />
+                <el-option label="待发货" value="0" />
+                <el-option label="已发货" value="1" />
+                <el-option label="已签收" value="2" />
               </el-select>
             </template>
           </el-table-column>
@@ -567,7 +569,7 @@ export default {
       obj.sizeName = "";
       obj.deliveryNum = "";
       obj.signNum = "";
-      obj.status = "";
+      obj.status = "0";
       obj.remark = "";
       this.xfptDeliveryOrderItemList.push(obj);
     },
