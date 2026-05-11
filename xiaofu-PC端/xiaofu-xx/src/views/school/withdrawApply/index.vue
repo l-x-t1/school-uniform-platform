@@ -255,8 +255,11 @@
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
+        <el-form-item label="删除标记" prop="delFlag">
+          <el-select v-model="form.delFlag" placeholder="请选择删除标记">
+            <el-option label="正常" value="0" />
+            <el-option label="删除" value="1" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -353,7 +356,8 @@ export default {
           { validator: validateTimeOrder, trigger: "change" }
         ],
         delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
+          { required: true, message: '删除标记，0正常 1删除不能为空', trigger: 'change' },
+          { pattern: /^[01]$/, message: '删除标记只能选择0正常或1删除', trigger: 'change' }
         ]
       }
     };
@@ -405,7 +409,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: '0'
       };
       this.resetForm("form");
     },
