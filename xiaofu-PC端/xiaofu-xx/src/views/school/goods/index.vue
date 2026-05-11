@@ -25,18 +25,10 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商名称快照" prop="supplierName">
+      <el-form-item label="供应商" prop="supplierName">
         <el-input
           v-model="queryParams.supplierName"
-          placeholder="请输入供应商名称快照"
+          placeholder="请输入供应商名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -131,8 +123,7 @@
       <el-table-column label="商品名称" align="center" prop="goodsName" />
       <el-table-column label="商品编码" align="center" prop="goodsCode" />
       <el-table-column label="品类名称" align="center" prop="categoryName" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="供应商名称快照" align="center" prop="supplierName" />
+      <el-table-column label="供应商" align="center" prop="supplierName" />
       <el-table-column label="品牌名称" align="center" prop="brandName" />
       <el-table-column label="主图路径或URL" align="center" prop="mainImage" width="100">
         <template slot-scope="scope">
@@ -194,11 +185,15 @@
         <el-form-item label="品类名称" prop="categoryName">
           <el-input v-model="form.categoryName" placeholder="请输入品类名称" />
         </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
-        <el-form-item label="供应商名称快照" prop="supplierName">
-          <el-input v-model="form.supplierName" placeholder="请输入供应商名称快照" />
+        <el-form-item label="供应商" prop="supplierId">
+          <el-select v-model="form.supplierId" filterable placeholder="请选择供应商" @change="handleSupplierChange">
+            <el-option
+              v-for="item in supplierOptions"
+              :key="item.id"
+              :label="item.supplierName"
+              :value="item.id"
+            />
+          </el-select>
         </el-form-item>
         <el-form-item label="品牌名称" prop="brandName">
           <el-input v-model="form.brandName" placeholder="请输入品牌名称" />
@@ -206,10 +201,10 @@
         <el-form-item label="主图路径或URL" prop="mainImage">
           <image-upload v-model="form.mainImage"/>
         </el-form-item>
-        <el-form-item label="详情图JSON文本" prop="detailImagesJson">
+        <el-form-item label="详情图片" prop="detailImagesJson">
           <el-input v-model="form.detailImagesJson" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="商品详情富文本">
+        <el-form-item label="商品详情">
           <editor v-model="form.detailContent" :min-height="192"/>
         </el-form-item>
         <el-form-item label="销售类型" prop="saleType">
@@ -233,30 +228,11 @@
             <el-option label="已下架" value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="上架时间" prop="publishTime">
-          <el-date-picker clearable
-            v-model="form.publishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择上架时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="下架时间" prop="offShelfTime">
-          <el-date-picker clearable
-            v-model="form.offShelfTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择下架时间">
-          </el-date-picker>
-        </el-form-item>
         <el-form-item label="排序值" prop="sortNum">
           <el-input v-model="form.sortNum" placeholder="请输入排序值" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
         </el-form-item>
         <el-divider content-position="center">商品尺码信息</el-divider>
         <el-row :gutter="10" class="mb8">
@@ -324,6 +300,7 @@
 
 <script>
 import { listGoods, getGoods, delGoods, addGoods, updateGoods } from "@/api/school/goods";
+import { listSupplierMessage } from "@/api/school/manufacturers";
 
 export default {
   name: "Goods",
@@ -347,6 +324,8 @@ export default {
       goodsList: [],
       // 商品尺码表格数据
       xfptGoodsSizeList: [],
+      // 供应商下拉数据
+      supplierOptions: [],
       // 弹出层标题
       title: "",
       // 是否显示弹出层
@@ -383,10 +362,7 @@ export default {
           { required: true, message: "品类名称不能为空", trigger: "blur" }
         ],
         supplierId: [
-          { required: true, message: "供应商ID不能为空", trigger: "blur" }
-        ],
-        supplierName: [
-          { required: true, message: "供应商名称快照不能为空", trigger: "blur" }
+          { required: true, message: "供应商不能为空", trigger: "change" }
         ],
         saleType: [
           { required: true, message: "销售类型，1统购 2零售 3统购零售不能为空", trigger: "change" }
@@ -397,14 +373,12 @@ export default {
         publishStatus: [
           { required: true, message: "上架状态，0未上架 1已上架 2已下架不能为空", trigger: "change" }
         ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
-        ]
       }
     };
   },
   created() {
     this.getList();
+    this.getSupplierOptions();
   },
   methods: {
     /** 查询商品信息列表 */
@@ -415,6 +389,17 @@ export default {
         this.total = response.total;
         this.loading = false;
       });
+    },
+    /** 查询供应商下拉数据 */
+    getSupplierOptions() {
+      listSupplierMessage({ pageNum: 1, pageSize: 1000 }).then(response => {
+        this.supplierOptions = response.rows || [];
+      });
+    },
+    /** 选择供应商后同步保存供应商名称快照 */
+    handleSupplierChange(value) {
+      const supplier = this.supplierOptions.find(item => String(item.id) === String(value));
+      this.form.supplierName = supplier ? supplier.supplierName : null;
     },
     // 取消按钮
     cancel() {
@@ -487,6 +472,7 @@ export default {
     submitForm() {
       this.$refs["form"].validate(valid => {
         if (valid) {
+          this.handleSupplierChange(this.form.supplierId);
           this.form.xfptGoodsSizeList = this.xfptGoodsSizeList;
           if (this.form.id != null) {
             updateGoods(this.form).then(response => {
