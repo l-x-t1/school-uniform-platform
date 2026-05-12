@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
+import com.xfgl.common.core.exception.ServiceException;
+import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.mapper.XfptDeliveryOrderItemMapper;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
 import com.xfgl.school.service.IXfptDeliveryOrderItemService;
@@ -32,6 +34,24 @@ public class XfptDeliveryOrderItemServiceImpl extends ServiceImpl<XfptDeliveryOr
     public List<XfptDeliveryOrderItem> selectXfptDeliveryOrderItemList(XfptDeliveryOrderItem xfptDeliveryOrderItem)
     {
         return xfptDeliveryOrderItemMapper.selectXfptDeliveryOrderItemList(xfptDeliveryOrderItem);
+    }
+
+    @Override
+    public boolean save(XfptDeliveryOrderItem xfptDeliveryOrderItem)
+    {
+        if (xfptDeliveryOrderItem.getGoodsId() == null) {
+            throw new ServiceException("发货单明细商品不能为空");
+        }
+        if (StringUtils.isEmpty(xfptDeliveryOrderItem.getStatus())) {
+            xfptDeliveryOrderItem.setStatus("0");
+        }
+        if (xfptDeliveryOrderItem.getSignNum() == null) {
+            xfptDeliveryOrderItem.setSignNum(0);
+        }
+        if (StringUtils.isEmpty(xfptDeliveryOrderItem.getDelFlag())) {
+            xfptDeliveryOrderItem.setDelFlag("0");
+        }
+        return super.save(xfptDeliveryOrderItem);
     }
 
 

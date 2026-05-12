@@ -15,6 +15,7 @@ import com.xfgl.system.api.domain.SysRole;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -27,6 +28,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/index/statistics")
 public class IndexStatisticsController {
+    private static final Long DEFAULT_TEST_DEPT_ID = 100L;
+
     @Autowired
     private IXfptProcSummaryService iXfptProcSummaryService;
     @Autowired
@@ -112,10 +115,10 @@ public class IndexStatisticsController {
      * 学校查询近5年的数据
      */
     @GetMapping("/getSchool5YearCountData")
-    public AjaxResult getSchool5YearData() {
-        Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+    public AjaxResult getSchool5YearData(@RequestParam(value = "deptId", required = false) Long deptId) {
+        Long currentDeptId = resolveDeptId(deptId);
         List<KeyValueVo> map = new ArrayList<>();
-        map=indexStatisticsMapper.getSchool5YearCountData(deptId);
+        map=indexStatisticsMapper.getSchool5YearCountData(currentDeptId);
         return AjaxResult.success(map);
     }
 
@@ -123,10 +126,10 @@ public class IndexStatisticsController {
      * 学校查询近5年的数据
      */
     @GetMapping("/getSchool5YearMoneyData")
-    public AjaxResult getSchool5YearMoneyData() {
-        Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+    public AjaxResult getSchool5YearMoneyData(@RequestParam(value = "deptId", required = false) Long deptId) {
+        Long currentDeptId = resolveDeptId(deptId);
         List<KeyValueVo> map = new ArrayList<>();
-        map=indexStatisticsMapper.getSchool5YearMoneyData(deptId);
+        map=indexStatisticsMapper.getSchool5YearMoneyData(currentDeptId);
         return AjaxResult.success(map);
     }
 
@@ -146,5 +149,40 @@ public class IndexStatisticsController {
             return AjaxResult.warn("未查询到角色信息,联系管理员");
         }
         return AjaxResult.success(map);
+    }
+
+    /**
+     * 平台使用情况
+     */
+    @GetMapping("/platformUsage")
+    public AjaxResult platformUsage(@RequestParam(value = "deptId", required = false) Long deptId) {
+        Long currentDeptId = resolveDeptId(deptId);
+        HashMap<String, Long> total = new HashMap<String, Long>();
+        total.put("districtPlatformTotal", indexStatisticsMapper.getDistrictPlatformUserCount(currentDeptId));
+        total.put("schoolPlatformTotal", indexStatisticsMapper.getSchoolPlatformCount(currentDeptId));
+        total.put("studentPlatformTotal", indexStatisticsMapper.getStudentPlatformCount(currentDeptId));
+        return AjaxResult.success(total);
+    }
+
+    /**
+     * 价格趋势分析
+     */
+    @GetMapping("/priceTrendData")
+    public AjaxResult priceTrendData(@RequestParam(value = "deptId", required = false) Long deptId) {
+        Long currentDeptId = resolveDeptId(deptId);
+        List<KeyValueVo> map = indexStatisticsMapper.getPriceTrendData(currentDeptId);
+        return AjaxResult.success(map);
+    }
+
+    private Long resolveDeptId(Long requestDeptId) {
+        if (requestDeptId != null) {
+            return requestDeptId;
+        }
+        if (SecurityUtils.getLoginUser() != null
+                && SecurityUtils.getLoginUser().getSysUser() != null
+                && SecurityUtils.getLoginUser().getSysUser().getDeptId() != null) {
+            return SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        }
+        return DEFAULT_TEST_DEPT_ID;
     }
 }

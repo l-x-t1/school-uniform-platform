@@ -573,7 +573,7 @@ CREATE TABLE IF NOT EXISTS `xfpt_withdraw_apply` (
   `supplier_name` varchar(200) DEFAULT NULL COMMENT '供应商名称快照',
   `apply_amount` decimal(18,2) NOT NULL COMMENT '申请提现金额',
   `bank_info_json` longtext COMMENT '银行卡或收款账户信息JSON快照',
-  `status` char(1) NOT NULL COMMENT '提现状态，0待审核 1审核通过 2审核拒绝 3已打款 4已取消',
+  `status` char(1) NOT NULL DEFAULT '0' COMMENT '提现状态，0待审核 1审核通过 2审核拒绝 3已打款 4已取消',
   `apply_time` datetime DEFAULT NULL COMMENT '申请时间',
   `audit_user_id` bigint DEFAULT NULL COMMENT '审核人ID',
   `audit_user_name` varchar(100) DEFAULT NULL COMMENT '审核人姓名快照',
