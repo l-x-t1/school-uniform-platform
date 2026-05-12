@@ -10,6 +10,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderItemId"    column="order_item_id"    />
         <result property="orderNo"    column="order_no"    />
         <result property="orderType"    column="order_type"    />
+        <result property="schoolId"    column="school_id"    />
+        <result property="schoolName"    column="school_name"    />
         <result property="goodsId"    column="goods_id"    />
         <result property="goodsName"    column="goods_name"    />
         <result property="userId"    column="user_id"    />
@@ -21,6 +23,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="replyContent"    column="reply_content"    />
         <result property="replyTime"    column="reply_time"    />
         <result property="status"    column="status"    />
+        <result property="replyCount"    column="reply_count"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -65,6 +68,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         left join xfpt_order_info o on c.order_id = o.id
     </sql>
 
+    <sql id="selectEvaluationCommentVo">
+        select c.id, c.order_id, c.order_item_id, c.order_no, o.order_type, o.school_id, o.school_name, c.goods_id, c.goods_name, c.user_id, c.user_name, c.supplier_id, c.score, c.content, c.images_json, c.reply_content, c.reply_time, c.status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag,
+            (select count(1) from xfpt_comment_reply r where r.comment_id = c.id and r.del_flag = 0) as reply_count
+        from xfpt_comment c
+        left join xfpt_order_info o on c.order_id = o.id
+    </sql>
+
     <select id="selectXfptCommentList" parameterType="XfptComment" resultMap="XfptCommentResult">
         <include refid="selectXfptCommentVo"/>
         <include refid="search"/>
@@ -83,6 +93,35 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     </select>
 
+    <select id="selectEvaluationCommentList" parameterType="XfptComment" resultMap="XfptCommentResult">
+        <include refid="selectEvaluationCommentVo"/>
+        <include refid="search"/>
+            <if test="params.scopeSchoolId != null"> and o.school_id = #{params.scopeSchoolId}</if>
+            <if test="orderNo != null and orderNo != ''"> and c.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderType != null and orderType != ''"> and o.order_type = #{orderType}</if>
+            <if test="schoolName != null and schoolName != ''"> and o.school_name like concat('%', #{schoolName}, '%')</if>
+            <if test="goodsName != null and goodsName != ''"> and c.goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="userName != null and userName != ''"> and c.user_name like concat('%', #{userName}, '%')</if>
+            <if test="score != null"> and c.score = #{score}</if>
+            <if test="status != null and status != ''"> and c.status = #{status}</if>
+            <if test="params.replyStatus != null and params.replyStatus == '0'">
+                and (c.reply_content is null or c.reply_content = '')
+                and not exists (select 1 from xfpt_comment_reply r where r.comment_id = c.id and r.del_flag = 0)
+            </if>
+            <if test="params.replyStatus != null and params.replyStatus == '1'">
+                and ((c.reply_content is not null and c.reply_content != '')
+                    or exists (select 1 from xfpt_comment_reply r where r.comment_id = c.id and r.del_flag = 0))
+            </if>
+        order by c.create_time desc, c.id desc
+    </select>
+
+    <select id="selectEvaluationCommentById" resultMap="XfptCommentXfptCommentReplyResult">
+        <include refid="selectEvaluationCommentVo"/>
+        <include refid="search"/>
+            and c.id = #{id}
+            <if test="scopeSchoolId != null"> and o.school_id = #{scopeSchoolId}</if>
+    </select>
+
     <select id="selectXfptCommentById" parameterType="Long" resultMap="XfptCommentXfptCommentReplyResult">
         select id, order_id, order_item_id, order_no, goods_id, goods_name, user_id, user_name, supplier_id, score, content, images_json, reply_content, reply_time, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_comment
@@ -93,6 +132,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_comment_reply
         where comment_id = #{id}
+          and del_flag = 0
+        order by sort_num asc, create_time asc, id asc
     </select>
 
     <insert id="insertXfptComment" parameterType="XfptComment" useGeneratedKeys="true" keyProperty="id">

@@ -4240,6 +4240,382 @@ WHERE @transport_delivery_id IS NOT NULL
       AND `del_flag` = '0'
   );
 
+-- 学校端评价管理菜单及权限
+-- 说明：挂到“新增功能”目录下，优先按菜单名称动态查找父菜单ID。
+
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '新增功能'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+
+SET @evaluation_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:list'
+  LIMIT 1
+);
+SET @evaluation_menu_id := IFNULL(@evaluation_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_menu_id, '评价管理', @new_feature_menu_id, 8, 'evaluation', 'school/evaluation/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:evaluation:list', 'star',
+       'admin', NOW(), '', NULL, '学校端评价管理菜单', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:list'
+);
+
+UPDATE `sys_menu`
+SET `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 8,
+    `PATH` = 'evaluation',
+    `COMPONENT` = 'school/evaluation/index',
+    `MENU_TYPE` = 'C',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '学校端评价管理菜单'
+WHERE `PERMS` = 'school:evaluation:list';
+
+UPDATE `sys_menu`
+SET `PARENT_ID` = @evaluation_menu_id,
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` IN ('school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide');
+
+SET @evaluation_query_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+  LIMIT 1
+);
+SET @evaluation_query_id := IFNULL(@evaluation_query_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_query_id, '评价管理查询', @evaluation_menu_id, 1, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:evaluation:query', '#',
+       'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+);
+
+SET @evaluation_reply_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+  LIMIT 1
+);
+SET @evaluation_reply_id := IFNULL(@evaluation_reply_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_reply_id, '评价管理回复', @evaluation_menu_id, 2, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:evaluation:reply', '#',
+       'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+);
+
+SET @evaluation_hide_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+  LIMIT 1
+);
+SET @evaluation_hide_id := IFNULL(@evaluation_hide_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_hide_id, '评价管理隐藏恢复', @evaluation_menu_id, 3, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:evaluation:hide', '#',
+       'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+);
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT r.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`PERMS` IN ('school:evaluation:list', 'school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide')
+WHERE r.`ROLE_KEY` IN ('admin', 'xuexiao', 'gly', 'testXiaofu')
+  AND r.`DEL_FLAG` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = r.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT rm_parent.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_role_menu` rm_parent
+JOIN `sys_menu` m
+  ON m.`PERMS` IN ('school:evaluation:list', 'school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide')
+WHERE rm_parent.`MENU_ID` = @new_feature_menu_id
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = rm_parent.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`PERMS` IN ('school:evaluation:list', 'school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide')
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT r.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`MENU_ID` = @new_feature_menu_id
+WHERE r.`ROLE_KEY` IN ('admin', 'xuexiao', 'gly', 'testXiaofu')
+  AND r.`DEL_FLAG` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = r.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`MENU_ID` = @new_feature_menu_id
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+-- 学校端评价管理演示数据
+-- 仅用于本地/测试环境联调；生产环境请不要执行。
+
+INSERT INTO `xfpt_order_info` (
+  `order_no`, `order_type`, `notice_id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`,
+  `user_id`, `user_name`, `student_id`, `student_name`, `grade_name`, `class_name`, `address_id`,
+  `receive_type`, `receiver_name`, `receiver_phone`, `receiver_address`, `total_amount`, `pay_amount`,
+  `refund_amount`, `pay_status`, `order_status`, `pay_time`, `cancel_time`, `finish_time`, `dept_id`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  'DEMO-EVALUATION-ORDER-20260512-GROUP-1', '1', NULL, 222, '石家庄交通运输学校', 1, '河北超享纺织服装有限公司',
+  2194, 'testUser', NULL, NULL, NULL, NULL, NULL,
+  '1', '石家庄交通运输学校', '13000000000', '石家庄交通运输学校收货点', 188.00, 188.00,
+  0.00, '1', '4', '2026-05-10 09:10:00', NULL, '2026-05-11 16:20:00', 222,
+  'admin', NOW(), NULL, NULL, '评价管理演示统购订单', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_order_info` WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-GROUP-1'
+);
+
+SET @evaluation_group_order_id := (
+  SELECT `id`
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-GROUP-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_order_item` (
+  `order_id`, `goods_id`, `size_id`, `goods_name`, `size_name`, `main_image`,
+  `sale_type`, `unit_price`, `buy_num`, `item_amount`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_order_id, 1, 1, '春秋运动校服套装', '155', '/profile/upload/demo/goods_1.jpg',
+  '1', 188.00, 1, 188.00, 222, 'admin',
+  NOW(), NULL, NULL, '评价管理演示统购明细', '0'
+FROM DUAL
+WHERE @evaluation_group_order_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_order_item`
+    WHERE `order_id` = @evaluation_group_order_id
+      AND `goods_id` = 1
+      AND `size_id` = 1
+      AND `del_flag` = '0'
+  );
+
+SET @evaluation_group_item_id := (
+  SELECT `id`
+  FROM `xfpt_order_item`
+  WHERE `order_id` = @evaluation_group_order_id
+    AND `goods_id` = 1
+    AND `size_id` = 1
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_comment` (
+  `order_id`, `order_item_id`, `order_no`, `goods_id`, `goods_name`, `user_id`, `user_name`,
+  `supplier_id`, `score`, `content`, `images_json`, `reply_content`, `reply_time`, `status`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_order_id, @evaluation_group_item_id, 'DEMO-EVALUATION-ORDER-20260512-GROUP-1',
+  1, '春秋运动校服套装', 2194, 'testUser',
+  1, 5, '面料舒适，尺码标准，孩子试穿后很满意。', '["/profile/upload/demo/comment.jpg"]',
+  '感谢您的反馈，我们会继续做好服务。', '2026-05-12 09:35:00', '0',
+  'admin', '2026-05-12 09:30:00', 'admin', '2026-05-12 09:35:00', '评价管理演示数据', '0'
+FROM DUAL
+WHERE @evaluation_group_order_id IS NOT NULL
+  AND @evaluation_group_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment`
+    WHERE `order_item_id` = @evaluation_group_item_id
+      AND `user_id` = 2194
+      AND `del_flag` = '0'
+  );
+
+SET @evaluation_group_comment_id := (
+  SELECT `id`
+  FROM `xfpt_comment`
+  WHERE `order_item_id` = @evaluation_group_item_id
+    AND `user_id` = 2194
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_comment_reply` (
+  `comment_id`, `order_id`, `order_item_id`, `goods_id`, `supplier_id`,
+  `from_user_id`, `from_user_name`, `from_role_type`, `from_role_title`,
+  `to_user_id`, `to_user_name`, `to_role_type`, `to_role_title`,
+  `content`, `status`, `sort_num`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
+  1, '管理员', '4', '管理员',
+  2194, 'testUser', '1', '家长',
+  '感谢您的反馈，我们会继续做好服务。', '0', 1, 'admin', '2026-05-12 09:35:00', NULL, NULL, '评价管理演示回复', '0'
+FROM DUAL
+WHERE @evaluation_group_comment_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment_reply`
+    WHERE `comment_id` = @evaluation_group_comment_id
+      AND `content` = '感谢您的反馈，我们会继续做好服务。'
+      AND `del_flag` = '0'
+  );
+
+INSERT INTO `xfpt_order_info` (
+  `order_no`, `order_type`, `notice_id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`,
+  `user_id`, `user_name`, `student_id`, `student_name`, `grade_name`, `class_name`, `address_id`,
+  `receive_type`, `receiver_name`, `receiver_phone`, `receiver_address`, `total_amount`, `pay_amount`,
+  `refund_amount`, `pay_status`, `order_status`, `pay_time`, `cancel_time`, `finish_time`, `dept_id`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  'DEMO-EVALUATION-ORDER-20260512-RETAIL-1', '2', NULL, 222, '石家庄交通运输学校', 2, '河北春风树服饰有限公司',
+  2194, 'testUser', NULL, NULL, NULL, NULL, NULL,
+  '2', 'testUser', '13000000000', '石家庄交通运输学校测试收货地址', 99.00, 99.00,
+  0.00, '1', '4', '2026-05-10 10:10:00', NULL, '2026-05-11 17:20:00', 222,
+  'admin', NOW(), NULL, NULL, '评价管理演示零购订单', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_order_info` WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-RETAIL-1'
+);
+
+SET @evaluation_retail_order_id := (
+  SELECT `id`
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-RETAIL-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_order_item` (
+  `order_id`, `goods_id`, `size_id`, `goods_name`, `size_name`, `main_image`,
+  `sale_type`, `unit_price`, `buy_num`, `item_amount`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_retail_order_id, 3, 3, '冬季加绒冲锋衣校服', '170', '/profile/upload/demo/goods_3.jpg',
+  '2', 99.00, 1, 99.00, 222, 'admin',
+  NOW(), NULL, NULL, '评价管理演示零购明细', '0'
+FROM DUAL
+WHERE @evaluation_retail_order_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_order_item`
+    WHERE `order_id` = @evaluation_retail_order_id
+      AND `goods_id` = 3
+      AND `size_id` = 3
+      AND `del_flag` = '0'
+  );
+
+SET @evaluation_retail_item_id := (
+  SELECT `id`
+  FROM `xfpt_order_item`
+  WHERE `order_id` = @evaluation_retail_order_id
+    AND `goods_id` = 3
+    AND `size_id` = 3
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_comment` (
+  `order_id`, `order_item_id`, `order_no`, `goods_id`, `goods_name`, `user_id`, `user_name`,
+  `supplier_id`, `score`, `content`, `images_json`, `reply_content`, `reply_time`, `status`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_retail_order_id, @evaluation_retail_item_id, 'DEMO-EVALUATION-ORDER-20260512-RETAIL-1',
+  3, '冬季加绒冲锋衣校服', 2194, 'testUser',
+  2, 3, '袖口线头略多，希望后续质检再细一些。', '["/profile/upload/demo/comment.jpg"]',
+  NULL, NULL, '1',
+  'admin', '2026-05-12 10:30:00', NULL, NULL, '评价管理演示隐藏数据', '0'
+FROM DUAL
+WHERE @evaluation_retail_order_id IS NOT NULL
+  AND @evaluation_retail_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment`
+    WHERE `order_item_id` = @evaluation_retail_item_id
+      AND `user_id` = 2194
+      AND `del_flag` = '0'
+  );
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
