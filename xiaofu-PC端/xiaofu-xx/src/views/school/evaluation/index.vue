@@ -258,9 +258,13 @@
                 <div class="reply-item__body">
                   <div class="reply-item__meta">
                     <span class="reply-item__name">{{ reply.fromUserName || '-' }}</span>
-                    <el-tag size="mini" type="info">{{ reply.fromRoleTitle || '回复人' }}</el-tag>
-                    <span v-if="reply.toUserName">回复 @{{ reply.toUserName }}</span>
-                    <span>{{ parseTime(reply.createTime) || '-' }}</span>
+                    <el-tag
+                      size="mini"
+                      :type="formatReplyRoleTagType(reply.fromRoleType)"
+                      :class="['reply-role-tag', 'reply-role-tag--' + formatReplyRoleClass(reply.fromRoleType)]"
+                    >{{ formatReplyRoleText(reply) }}</el-tag>
+                    <span v-if="reply.toUserName" class="reply-item__target">回复 @{{ reply.toUserName }}</span>
+                    <span class="reply-item__time">{{ parseTime(reply.createTime) || '-' }}</span>
                   </div>
                   <div class="reply-item__content">{{ reply.content }}</div>
                 </div>
@@ -542,6 +546,33 @@ export default {
       }
       return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=202605122045'
     },
+    formatReplyRoleText(reply) {
+      const roleMap = {
+        '1': '家长',
+        '2': '供应商',
+        '3': '学校',
+        '4': '平台管理员'
+      }
+      const roleType = reply && reply.fromRoleType !== undefined && reply.fromRoleType !== null ? String(reply.fromRoleType) : ''
+      return roleMap[roleType] || (reply && reply.fromRoleTitle) || '回复人'
+    },
+    formatReplyRoleTagType(roleType) {
+      const tagTypeMap = {
+        '2': 'warning',
+        '3': 'success',
+        '4': 'danger'
+      }
+      return tagTypeMap[String(roleType)] || (String(roleType) === '1' ? '' : 'info')
+    },
+    formatReplyRoleClass(roleType) {
+      const classMap = {
+        '1': 'parent',
+        '2': 'supplier',
+        '3': 'school',
+        '4': 'admin'
+      }
+      return classMap[String(roleType)] || 'unknown'
+    },
     formatAvatarUrl(avatar) {
       if (!avatar) {
         return this.defaultAvatar
@@ -795,6 +826,48 @@ export default {
 .reply-item__name {
   color: #303133;
   font-weight: 600;
+}
+
+.reply-role-tag {
+  font-weight: 600;
+}
+
+.reply-role-tag--parent {
+  color: #1d70f2;
+  border-color: #b9d6ff;
+  background: #edf5ff;
+}
+
+.reply-role-tag--supplier {
+  color: #b87300;
+  border-color: #f3d19e;
+  background: #fdf6ec;
+}
+
+.reply-role-tag--school {
+  color: #2f8f4e;
+  border-color: #b3e19d;
+  background: #f0f9eb;
+}
+
+.reply-role-tag--admin {
+  color: #cf3a3a;
+  border-color: #fab6b6;
+  background: #fef0f0;
+}
+
+.reply-role-tag--unknown {
+  color: #606266;
+  border-color: #d3d4d6;
+  background: #f4f4f5;
+}
+
+.reply-item__target {
+  color: #606266;
+}
+
+.reply-item__time {
+  color: #909399;
 }
 
 .reply-item__content {

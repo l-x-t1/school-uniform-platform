@@ -4526,7 +4526,7 @@ INSERT INTO `xfpt_comment_reply` (
 )
 SELECT
   @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
-  1, '管理员', '4', '管理员',
+  1, '管理员', '4', '平台管理员',
   2194, 'testUser', '1', '家长',
   '感谢您的反馈，我们会继续做好服务。', '0', 1, 'admin', '2026-05-12 09:35:00', NULL, NULL, '评价管理演示回复', '0'
 FROM DUAL
@@ -4536,6 +4536,48 @@ WHERE @evaluation_group_comment_id IS NOT NULL
     FROM `xfpt_comment_reply`
     WHERE `comment_id` = @evaluation_group_comment_id
       AND `content` = '感谢您的反馈，我们会继续做好服务。'
+      AND `del_flag` = '0'
+  );
+
+INSERT INTO `xfpt_comment_reply` (
+  `comment_id`, `order_id`, `order_item_id`, `goods_id`, `supplier_id`,
+  `from_user_id`, `from_user_name`, `from_role_type`, `from_role_title`,
+  `to_user_id`, `to_user_name`, `to_role_type`, `to_role_title`,
+  `content`, `status`, `sort_num`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
+  2194, 'testUser', '1', '家长',
+  1, '管理员', '4', '平台管理员',
+  '收到，会继续观察孩子穿着情况。', '0', 2, 'testUser', '2026-05-12 09:42:00', NULL, NULL, '评价管理演示家长回复', '0'
+FROM DUAL
+WHERE @evaluation_group_comment_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment_reply`
+    WHERE `comment_id` = @evaluation_group_comment_id
+      AND `content` = '收到，会继续观察孩子穿着情况。'
+      AND `del_flag` = '0'
+  );
+
+INSERT INTO `xfpt_comment_reply` (
+  `comment_id`, `order_id`, `order_item_id`, `goods_id`, `supplier_id`,
+  `from_user_id`, `from_user_name`, `from_role_type`, `from_role_title`,
+  `to_user_id`, `to_user_name`, `to_role_type`, `to_role_title`,
+  `content`, `status`, `sort_num`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
+  NULL, '河北超享客服', '2', '供应商',
+  2194, 'testUser', '1', '家长',
+  '这款面料已经做过预缩处理，如后续尺码不合适可以联系学校登记换码。', '0', 3, '河北超享客服', '2026-05-12 09:48:00', NULL, NULL, '评价管理演示供应商回复', '0'
+FROM DUAL
+WHERE @evaluation_group_comment_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment_reply`
+    WHERE `comment_id` = @evaluation_group_comment_id
+      AND `content` = '这款面料已经做过预缩处理，如后续尺码不合适可以联系学校登记换码。'
       AND `del_flag` = '0'
   );
 

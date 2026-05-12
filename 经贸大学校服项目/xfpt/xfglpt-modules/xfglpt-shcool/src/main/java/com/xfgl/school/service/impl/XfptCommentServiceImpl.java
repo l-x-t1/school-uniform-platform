@@ -29,6 +29,17 @@ import com.xfgl.system.api.model.LoginUser;
 @Service
 public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptComment> implements IXfptCommentService {
 
+    /**
+     * Reply role types shared by admin, parent, school and supplier clients.
+     */
+    private static final String REPLY_ROLE_PARENT = "1";
+    private static final String REPLY_ROLE_SUPPLIER = "2";
+    private static final String REPLY_ROLE_SCHOOL = "3";
+    private static final String REPLY_ROLE_ADMIN = "4";
+    private static final String REPLY_ROLE_TITLE_PARENT = "家长";
+    private static final String REPLY_ROLE_TITLE_SCHOOL = "学校";
+    private static final String REPLY_ROLE_TITLE_ADMIN = "平台管理员";
+
     @Autowired
     private XfptCommentMapper xfptCommentMapper;
 
@@ -108,8 +119,8 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             xfptCommentReply.setFromRoleTitle(resolveReplyRoleTitle(loginUser));
             xfptCommentReply.setToUserId(xfptComment.getUserId());
             xfptCommentReply.setToUserName(xfptComment.getUserName());
-            xfptCommentReply.setToRoleType("1");
-            xfptCommentReply.setToRoleTitle("家长");
+            xfptCommentReply.setToRoleType(REPLY_ROLE_PARENT);
+            xfptCommentReply.setToRoleTitle(REPLY_ROLE_TITLE_PARENT);
             xfptCommentReply.setStatus("0");
             xfptCommentReply.setSortNum(xfptComment.getReplyCount() == null ? 1 : xfptComment.getReplyCount() + 1);
             xfptCommentReply.setCreateBy(replyUserName);
@@ -253,17 +264,17 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         private String resolveReplyRoleType(LoginUser loginUser)
         {
             if (SecurityUtils.isAdmin(SecurityUtils.getUserId()) || hasRole(loginUser, "admin") || hasRole(loginUser, "gly")) {
-                return "4";
+                return REPLY_ROLE_ADMIN;
             }
-            return "3";
+            return REPLY_ROLE_SCHOOL;
         }
 
         private String resolveReplyRoleTitle(LoginUser loginUser)
         {
             if (SecurityUtils.isAdmin(SecurityUtils.getUserId()) || hasRole(loginUser, "admin") || hasRole(loginUser, "gly")) {
-                return "管理员";
+                return REPLY_ROLE_TITLE_ADMIN;
             }
-            return "学校";
+            return REPLY_ROLE_TITLE_SCHOOL;
         }
 
         private boolean hasRole(LoginUser loginUser, String roleKey)
