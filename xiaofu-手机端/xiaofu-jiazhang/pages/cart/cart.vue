@@ -3,7 +3,7 @@
 		<view class="content">
 			<!-- 空购物车状态 -->
 			<view class="empty-cart" v-if="cartList.length === 0">
-				<image src="/static/images/empty-cart.png" mode="aspectFit" class="empty-image"></image>
+				<image src="/static/uni.png" mode="aspectFit" class="empty-image"></image>
 				<text class="empty-text">购物车还是空的</text>
 				<button class="go-shopping" @click="goShopping">去选购校服</button>
 			</view>
@@ -13,7 +13,7 @@
 				<view class="cart-item" v-for="(item, index) in cartList" :key="index"
 					@longpress="enterEditMode"
 					@click="handleItemClick(index)">
-					<view class="checkbox" @click.stop="toggleSelect(index)" v-if="isEdit">
+					<view class="checkbox" @click.stop="toggleSelect(index)">
 						<uni-icons :type="item.selected ? 'checkbox-filled' : 'circle'" size="24" :color="item.selected ? '#2979ff' : '#DDDDDD'"></uni-icons>
 					</view>
 					<image :src="item.image" mode="aspectFill" class="item-image"></image>
@@ -70,30 +70,18 @@
 </template>
 
 <script>
+	import config from '@/config'
+	import { listCart, updateCart, deleteCart } from '@/api/cart'
+
 	export default {
 		data() {
 			return {
 				isEdit: false,
-				cartList: [{
-					id: 1,
-					name: '夏季校服短袖套装',
-					spec: '男生款',
-					size: 'L码',
-					price: '128.00',
-					quantity: 1,
-					selected: false,
-					image: '/static/nanxf.png'
-				}, {
-					id: 2,
-					name: '夏季校服短袖套装',
-					spec: '女生款',
-					size: 'M码',
-					price: '128.00',
-					quantity: 1,
-					selected: false,
-					image: '/static/nvxf.png'
-				}]
+				cartList: []
 			}
+		},
+		onShow() {
+			this.loadCart();
 		},
 		onNavigationBarButtonTap(e) {
 			if (e.index === 0) {
@@ -103,6 +91,9 @@
 		watch: {
 			isEdit: {
 				handler(val) {
+					if (typeof uni.setNavigationBarRightButton !== 'function') {
+						return;
+					}
 					if (val) {
 						uni.setNavigationBarRightButton({
 							text: '取消',
@@ -113,8 +104,6 @@
 						uni.setNavigationBarRightButton({
 							text: ''
 						});
-						// 退出编辑模式时取消所有选择
-						this.cartList.forEach(item => item.selected = false);
 					}
 				},
 				immediate: true
@@ -130,11 +119,75 @@
 			totalAmount() {
 				return this.cartList
 					.filter(item => item.selected)
-					.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0)
+					.reduce((sum, item) => sum + parseFloat(item.price || 0) * Number(item.quantity || 1), 0)
 					.toFixed(2);
 			}
 		},
 		methods: {
+			normalizeCartItem(item) {
+				return {
+					id: item.id || item.cartId || item.uniformId,
+					uniformId: item.uniformId || item.productId || item.id,
+					skuId: item.skuId,
+					name: item.name || item.uniformName || item.productName || '校服',
+					spec: item.spec || item.color || '默认款',
+					size: item.size || item.sizeName || '-',
+					price: item.price || item.salePrice || item.unitPrice || '0.00',
+					quantity: Number(item.quantity || item.num || 1),
+					selected: item.selected !== undefined ? item.selected : true,
+					image: item.image || item.productImage || item.coverImage || '/static/nanxf.png'
+				};
+			},
+			loadCart() {
+				listCart()
+					.then((res) => {
+						const rows = res.rows || res.data || res.list || [];
+						if (rows.length) {
+							this.cartList = rows.map(this.normalizeCartItem);
+							this.saveLocalCart();
+							return;
+						}
+						const localCart = uni.getStorageSync('cartList') || [];
+						this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : this.getDemoCart();
+					})
+					.catch((error) => {
+						if (config.enableMockFallback) {
+							const localCart = uni.getStorageSync('cartList') || [];
+							this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : this.getDemoCart();
+							return;
+						}
+						uni.showToast({
+							title: error.message || '购物车加载失败',
+							icon: 'none'
+						});
+					});
+			},
+			getDemoCart() {
+				return [{
+					id: 1,
+					uniformId: 1,
+					name: '夏季短袖校服套装（男）',
+					spec: '男生款',
+					size: 'L',
+					price: '128.00',
+					quantity: 1,
+					selected: true,
+					image: '/static/nanxf.png'
+				}, {
+					id: 2,
+					uniformId: 2,
+					name: '夏季短袖校服套装（女）',
+					spec: '女生款',
+					size: 'M',
+					price: '128.00',
+					quantity: 1,
+					selected: true,
+					image: '/static/nvxf.png'
+				}];
+			},
+			saveLocalCart() {
+				uni.setStorageSync('cartList', this.cartList);
+			},
 			enterEditMode() {
 				if (!this.isEdit) {
 					this.isEdit = true;
@@ -146,27 +199,39 @@
 			},
 			exitEditMode() {
 				this.isEdit = false;
-				this.cartList.forEach(item => item.selected = false);
+				this.cartList.forEach(item => item.selected = true);
+				this.saveLocalCart();
 			},
 			handleItemClick(index) {
 				if (!this.isEdit) {
 					// 单击进入商品详情
 					uni.navigateTo({
-						url: `/pages/uniform/uniform-detail?id=${this.cartList[index].id}`
+						url: `/pages/uniform/uniform-detail?id=${this.cartList[index].uniformId || this.cartList[index].id}`
 					});
 				}
 			},
 			toggleSelect(index) {
 				this.cartList[index].selected = !this.cartList[index].selected;
+				this.saveLocalCart();
 			},
 			toggleSelectAll() {
 				const newStatus = !this.isAllSelected;
 				this.cartList.forEach(item => item.selected = newStatus);
+				this.saveLocalCart();
 			},
 			updateQuantity(index, delta) {
 				const newQuantity = this.cartList[index].quantity + delta;
 				if (newQuantity > 0 && newQuantity <= 99) {
 					this.cartList[index].quantity = newQuantity;
+					const item = this.cartList[index];
+					updateCart({
+						id: item.id,
+						cartId: item.id,
+						quantity: item.quantity
+					}).catch(() => {
+						if (config.enableMockFallback) this.saveLocalCart();
+					});
+					this.saveLocalCart();
 				}
 			},
 			handleSubmit() {
@@ -178,21 +243,32 @@
 						});
 						return;
 					}
-					// 删除选中商品
+					const ids = this.cartList.filter(item => item.selected).map(item => item.id).join(',');
 					this.cartList = this.cartList.filter(item => !item.selected);
+					this.saveLocalCart();
+					deleteCart(ids).catch(() => {
+						if (config.enableMockFallback) this.saveLocalCart();
+					});
 					if (this.cartList.length === 0) {
 						this.exitEditMode();
 					}
 				} else {
-					// 结算
+					if (this.selectedCount === 0) {
+						uni.showToast({
+							title: '请选择要结算的商品',
+							icon: 'none'
+						});
+						return;
+					}
+					uni.setStorageSync('confirmOrderItems', this.cartList.filter(item => item.selected));
 					uni.navigateTo({
-						url: '/pages/order/create'
+						url: '/pages/order/order-confirm?source=cart'
 					});
 				}
 			},
 			goShopping() {
-				uni.switchTab({
-					url: '/pages/uniform/uniform-purchase'
+				uni.navigateTo({
+					url: '/pages/uniform/uniform-list'
 				});
 			}
 		}
