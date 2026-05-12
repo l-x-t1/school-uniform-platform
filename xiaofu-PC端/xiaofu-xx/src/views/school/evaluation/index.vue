@@ -84,9 +84,10 @@
         <el-table-column label="订单号" align="center" prop="orderNo" min-width="150" show-overflow-tooltip />
         <el-table-column label="学校" align="center" prop="schoolName" min-width="150" show-overflow-tooltip />
         <el-table-column label="商品" align="center" prop="goodsName" min-width="160" show-overflow-tooltip />
-        <el-table-column label="评分" align="center" prop="score" width="130">
+        <el-table-column label="评分" align="center" prop="score" min-width="160" class-name="evaluation-score-column">
           <template slot-scope="scope">
             <el-rate
+              class="evaluation-rate"
               :value="Number(scope.row.score || 0)"
               disabled
               show-score
@@ -171,7 +172,7 @@
           <el-descriptions-item label="商品">{{ detail.goodsName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="评价人">{{ detail.userName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="评分">
-            <el-rate :value="Number(detail.score || 0)" disabled show-score text-color="#ff9900" />
+            <el-rate class="evaluation-rate" :value="Number(detail.score || 0)" disabled show-score text-color="#ff9900" />
           </el-descriptions-item>
           <el-descriptions-item label="评价时间">{{ parseTime(detail.createTime) || '-' }}</el-descriptions-item>
           <el-descriptions-item label="官方回复">
@@ -216,7 +217,7 @@
                 {{ detail.goodsName || '-' }} · {{ formatOrderType(detail.orderType) }}
               </div>
               <el-rate
-                class="parent-comment__rate"
+                class="evaluation-rate parent-comment__rate"
                 :value="Number(detail.score || 0)"
                 disabled
                 show-score
@@ -231,7 +232,12 @@
                   :src="normalizeImageUrl(image)"
                   :preview-src-list="parseImages(detail.imagesJson).map(normalizeImageUrl)"
                   fit="cover"
-                />
+                >
+                  <div slot="error" class="image-list__error">
+                    <i class="el-icon-picture-outline" />
+                    <span>图片加载失败</span>
+                  </div>
+                </el-image>
               </div>
               <div v-else class="empty-text parent-comment__empty-image">暂无评价图片</div>
             </div>
@@ -521,10 +527,20 @@ export default {
         return ''
       }
       if (/^(https?:)?\/\//.test(src) || /^data:image\//.test(src) || /^blob:/.test(src)) {
-        return src
+        return this.appendDemoImageVersion(src)
       }
-      const baseUrl = process.env.VUE_APP_BASE_API || ''
-      return src.indexOf('/') === 0 ? baseUrl + src : baseUrl + '/' + src
+      const imageBaseUrl = process.env.VUE_APP_IMAGE_BASE_API || ''
+      const filePrefix = '/filestatics'
+      const normalizedSrc = src.indexOf('/') === 0 ? src : '/' + src
+      const imagePath = normalizedSrc.replace(/^\/(profile|statics)\//, filePrefix + '/')
+      const imageUrl = imageBaseUrl ? imageBaseUrl + imagePath : (process.env.VUE_APP_BASE_API || '') + imagePath
+      return this.appendDemoImageVersion(imageUrl)
+    },
+    appendDemoImageVersion(url) {
+      if (url.indexOf('/upload/demo/') === -1 || url.indexOf('v=202605122045') !== -1) {
+        return url
+      }
+      return url + (url.indexOf('?') === -1 ? '?' : '&') + 'v=202605122045'
     },
     formatAvatarUrl(avatar) {
       if (!avatar) {
@@ -565,6 +581,35 @@ export default {
   min-height: 240px;
 }
 
+.evaluation-page ::v-deep .evaluation-score-column .cell {
+  overflow: visible;
+  white-space: nowrap;
+  text-overflow: clip;
+}
+
+.evaluation-rate {
+  display: inline-flex;
+  align-items: center;
+  min-width: 136px;
+  white-space: nowrap;
+}
+
+.evaluation-rate ::v-deep .el-rate__item {
+  line-height: 1;
+}
+
+.evaluation-rate ::v-deep .el-rate__icon {
+  margin-right: 4px;
+  font-size: 16px;
+}
+
+.evaluation-rate ::v-deep .el-rate__text {
+  margin-left: 4px;
+  color: #ff9900 !important;
+  font-size: 14px;
+  line-height: 1;
+}
+
 .image-list {
   display: flex;
   flex-wrap: wrap;
@@ -577,6 +622,23 @@ export default {
   overflow: hidden;
   border: 1px solid #ebeef5;
   border-radius: 8px;
+}
+
+.image-list__error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: #909399;
+  font-size: 12px;
+  background: #f5f7fa;
+}
+
+.image-list__error i {
+  margin-bottom: 4px;
+  font-size: 20px;
 }
 
 .comment-thread {
