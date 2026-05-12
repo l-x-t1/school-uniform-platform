@@ -4,7 +4,7 @@
       <div slot="header" class="evaluation-card__header">
         <div>
           <div class="evaluation-card__title">评价管理</div>
-          <div class="evaluation-card__desc">按统购、零购查看订单评价，并维护学校回复记录</div>
+          <div class="evaluation-card__desc">按统购、零购查看订单评价，处理官方回复与评价状态</div>
         </div>
       </div>
 
@@ -58,7 +58,7 @@
             <el-option v-for="score in scoreOptions" :key="score" :label="score + '星'" :value="score" />
           </el-select>
         </el-form-item>
-        <el-form-item label="回复状态" prop="params.replyStatus">
+        <el-form-item label="官方回复" prop="params.replyStatus">
           <el-select v-model="queryParams.params.replyStatus" placeholder="请选择状态" clearable>
             <el-option label="未回复" value="0" />
             <el-option label="已回复" value="1" />
@@ -102,7 +102,7 @@
             <span>{{ parseTime(scope.row.createTime) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="回复状态" align="center" width="110">
+        <el-table-column label="官方回复" align="center" width="110">
           <template slot-scope="scope">
             <el-tag :type="hasReply(scope.row) ? 'success' : 'info'">
               {{ hasReply(scope.row) ? '已回复' : '未回复' }}
@@ -116,12 +116,12 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="最新回复" align="left" prop="replyContent" min-width="180" show-overflow-tooltip>
+        <el-table-column label="最新官方回复" align="left" prop="replyContent" min-width="180" show-overflow-tooltip>
           <template slot-scope="scope">
             <span>{{ scope.row.replyContent || '-' }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="回复时间" align="center" prop="replyTime" width="170">
+        <el-table-column label="官方回复时间" align="center" prop="replyTime" width="170">
           <template slot-scope="scope">
             <span>{{ parseTime(scope.row.replyTime) || '-' }}</span>
           </template>
@@ -141,7 +141,7 @@
               type="text"
               icon="el-icon-chat-dot-square"
               @click="handleReply(scope.row)"
-            >回复</el-button>
+            >官方回复</el-button>
             <el-button
               v-hasPermi="['school:evaluation:hide']"
               size="mini"
@@ -162,7 +162,7 @@
       />
     </el-card>
 
-    <el-dialog title="评价详情" :visible.sync="detailOpen" width="760px" append-to-body>
+    <el-dialog title="评价处理详情" :visible.sync="detailOpen" width="820px" append-to-body>
       <div v-loading="detailLoading" class="evaluation-detail">
         <el-descriptions :column="2" border size="small">
           <el-descriptions-item label="订单号">{{ detail.orderNo || '-' }}</el-descriptions-item>
@@ -174,7 +174,7 @@
             <el-rate :value="Number(detail.score || 0)" disabled show-score text-color="#ff9900" />
           </el-descriptions-item>
           <el-descriptions-item label="评价时间">{{ parseTime(detail.createTime) || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="回复状态">
+          <el-descriptions-item label="官方回复">
             <el-tag :type="hasReply(detail) ? 'success' : 'info'">{{ hasReply(detail) ? '已回复' : '未回复' }}</el-tag>
           </el-descriptions-item>
           <el-descriptions-item label="评价状态">
@@ -182,39 +182,90 @@
           </el-descriptions-item>
         </el-descriptions>
 
-        <div class="detail-section comment-card">
-          <div class="detail-section__title">商品评价</div>
-          <div class="detail-section__content">{{ detail.content || '暂无评价内容' }}</div>
-        </div>
-
-        <div class="detail-section">
-          <div class="detail-section__title">评价图片</div>
-          <div v-if="parseImages(detail.imagesJson).length" class="image-list">
-            <el-image
-              v-for="image in parseImages(detail.imagesJson)"
-              :key="image"
-              class="image-list__item"
-              :src="normalizeImageUrl(image)"
-              :preview-src-list="parseImages(detail.imagesJson).map(normalizeImageUrl)"
-              fit="cover"
-            />
+        <div class="comment-thread">
+          <div class="comment-thread__header">
+            <div>
+              <div class="comment-thread__title">评价回复区</div>
+              <div class="comment-thread__desc">查看该评价下的回复记录，可添加官方回复</div>
+            </div>
+            <el-button
+              v-hasPermi="['school:evaluation:reply']"
+              type="primary"
+              size="mini"
+              icon="el-icon-chat-dot-square"
+              :disabled="!detail.id"
+              @click="handleReply(detail)"
+            >官方回复</el-button>
           </div>
-          <div v-else class="empty-text">暂无图片</div>
-        </div>
 
-        <div class="detail-section">
-          <div class="detail-section__title">回复记录</div>
-          <div v-if="replyList.length" class="reply-list">
-            <div v-for="reply in replyList" :key="reply.id" class="reply-item">
-              <div class="reply-item__meta">
-                <span class="reply-item__name">{{ reply.fromUserName || '-' }}</span>
-                <el-tag size="mini" type="info">{{ reply.fromRoleTitle || '回复人' }}</el-tag>
-                <span>{{ parseTime(reply.createTime) || '-' }}</span>
+          <div class="parent-comment">
+            <div class="comment-avatar comment-avatar--parent">{{ getNameInitial(detail.userName) }}</div>
+            <div class="parent-comment__body">
+              <div class="parent-comment__meta">
+                <div>
+                  <span class="parent-comment__name">{{ detail.userName || '评价人' }}</span>
+                  <el-tag size="mini" type="warning">商品评价</el-tag>
+                </div>
+                <span class="parent-comment__time">{{ parseTime(detail.createTime) || '-' }}</span>
               </div>
-              <div class="reply-item__content">{{ reply.content }}</div>
+              <div class="parent-comment__goods">
+                {{ detail.goodsName || '-' }} · {{ formatOrderType(detail.orderType) }}
+              </div>
+              <el-rate
+                class="parent-comment__rate"
+                :value="Number(detail.score || 0)"
+                disabled
+                show-score
+                text-color="#ff9900"
+              />
+              <div class="parent-comment__content">{{ detail.content || '暂无评价内容' }}</div>
+              <div v-if="parseImages(detail.imagesJson).length" class="image-list parent-comment__images">
+                <el-image
+                  v-for="image in parseImages(detail.imagesJson)"
+                  :key="image"
+                  class="image-list__item"
+                  :src="normalizeImageUrl(image)"
+                  :preview-src-list="parseImages(detail.imagesJson).map(normalizeImageUrl)"
+                  fit="cover"
+                />
+              </div>
+              <div v-else class="empty-text parent-comment__empty-image">暂无评价图片</div>
             </div>
           </div>
-          <div v-else class="empty-text">暂无回复记录</div>
+
+          <div class="reply-thread">
+            <div class="reply-thread__header">
+              <span>回复记录</span>
+              <el-tag size="mini" type="info">{{ replyList.length }} 条</el-tag>
+            </div>
+            <div v-if="replyList.length" class="reply-list">
+              <div v-for="reply in replyList" :key="reply.id" class="reply-item">
+                <div class="comment-avatar">{{ getNameInitial(reply.fromUserName) }}</div>
+                <div class="reply-item__body">
+                  <div class="reply-item__meta">
+                    <span class="reply-item__name">{{ reply.fromUserName || '-' }}</span>
+                    <el-tag size="mini" type="info">{{ reply.fromRoleTitle || '回复人' }}</el-tag>
+                    <span v-if="reply.toUserName">回复 @{{ reply.toUserName }}</span>
+                    <span>{{ parseTime(reply.createTime) || '-' }}</span>
+                  </div>
+                  <div class="reply-item__content">{{ reply.content }}</div>
+                </div>
+              </div>
+            </div>
+            <div v-else class="reply-empty">
+              <div class="reply-empty__title">暂无回复记录</div>
+              <div class="reply-empty__desc">可以在这里对该评价添加一条官方回复。</div>
+              <el-button
+                v-hasPermi="['school:evaluation:reply']"
+                type="primary"
+                plain
+                size="mini"
+                icon="el-icon-chat-dot-square"
+                :disabled="!detail.id"
+                @click="handleReply(detail)"
+              >添加官方回复</el-button>
+            </div>
+          </div>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -222,7 +273,7 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="回复评价" :visible.sync="replyOpen" width="560px" append-to-body>
+    <el-dialog title="官方回复评价" :visible.sync="replyOpen" width="560px" append-to-body>
       <el-form ref="replyForm" :model="replyForm" :rules="replyRules" label-width="80px">
         <el-form-item label="回复内容" prop="content">
           <el-input
@@ -231,7 +282,7 @@
             :rows="6"
             maxlength="500"
             show-word-limit
-            placeholder="请输入 1-500 字回复内容"
+            placeholder="请输入 1-500 字官方回复内容"
           />
         </el-form-item>
       </el-form>
@@ -286,8 +337,8 @@ export default {
       scoreOptions: [5, 4, 3, 2, 1],
       replyRules: {
         content: [
-          { required: true, message: '回复内容不能为空', trigger: 'blur' },
-          { min: 1, max: 500, message: '回复内容长度为 1-500 字', trigger: 'blur' }
+          { required: true, message: '官方回复内容不能为空', trigger: 'blur' },
+          { min: 1, max: 500, message: '官方回复内容长度为 1-500 字', trigger: 'blur' }
         ]
       }
     }
@@ -355,6 +406,9 @@ export default {
       })
     },
     handleReply(row) {
+      if (!row || !row.id) {
+        return
+      }
       this.replyForm = {
         commentId: row.id,
         content: ''
@@ -373,12 +427,12 @@ export default {
         }
         const content = (this.replyForm.content || '').trim()
         if (!content) {
-          this.$message.warning('回复内容不能为空')
+          this.$message.warning('官方回复内容不能为空')
           return
         }
         this.replySubmitting = true
         replyEvaluationComment(this.replyForm.commentId, { content }).then(() => {
-          this.$modal.msgSuccess('回复成功')
+          this.$modal.msgSuccess('官方回复成功')
           this.replyOpen = false
           this.replySubmitting = false
           this.getList()
@@ -426,6 +480,10 @@ export default {
         return '零购'
       }
       return '-'
+    },
+    getNameInitial(name) {
+      const text = String(name || '').trim()
+      return text ? text.slice(0, 1).toUpperCase() : '-'
     },
     parseImages(imagesJson) {
       if (!imagesJson) {
@@ -489,86 +547,200 @@ export default {
     color: #8492a6;
     font-size: 13px;
   }
+}
 
-  .evaluation-detail {
-    min-height: 240px;
-  }
+.evaluation-detail {
+  min-height: 240px;
+}
 
-  .detail-section {
-    margin-top: 18px;
-  }
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
 
-  .detail-section__title {
-    margin-bottom: 10px;
-    color: #1f2d3d;
-    font-weight: 600;
-  }
+.image-list__item {
+  width: 96px;
+  height: 96px;
+  overflow: hidden;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+}
 
-  .detail-section__content {
-    padding: 12px;
-    color: #606266;
-    line-height: 1.7;
-    background: #f8fafc;
-    border-radius: 8px;
-    white-space: pre-wrap;
-  }
+.comment-thread {
+  margin-top: 18px;
+  padding: 18px;
+  border: 1px solid #e4e7ed;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
 
-  .comment-card {
-    padding: 14px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-    border: 1px solid #ebeef5;
-  }
+.comment-thread__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
 
-  .image-list {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 10px;
-  }
+.comment-thread__title {
+  color: #1f2d3d;
+  font-size: 16px;
+  font-weight: 600;
+}
 
-  .image-list__item {
-    width: 96px;
-    height: 96px;
-    border-radius: 8px;
-    border: 1px solid #ebeef5;
-  }
+.comment-thread__desc {
+  margin-top: 4px;
+  color: #909399;
+  font-size: 12px;
+}
 
-  .reply-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
+.comment-avatar {
+  flex: 0 0 34px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  color: #fff;
+  line-height: 34px;
+  text-align: center;
+  font-weight: 600;
+  background: #909399;
+}
 
-  .reply-item {
-    padding: 12px;
-    background: #f8fafc;
-    border-radius: 8px;
-    border: 1px solid #ebeef5;
-  }
+.comment-avatar--parent {
+  background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+}
 
-  .reply-item__meta {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
-    color: #909399;
-    font-size: 12px;
-  }
+.parent-comment {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #cfe6ff;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 6px 18px rgba(64, 158, 255, 0.08);
+}
 
-  .reply-item__name {
-    color: #303133;
-    font-weight: 600;
-  }
+.parent-comment__body {
+  flex: 1;
+  min-width: 0;
+}
 
-  .reply-item__content {
-    color: #606266;
-    line-height: 1.7;
-    white-space: pre-wrap;
-  }
+.parent-comment__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
 
-  .empty-text {
-    color: #909399;
-    font-size: 13px;
-  }
+.parent-comment__name {
+  margin-right: 8px;
+  color: #303133;
+  font-weight: 600;
+}
+
+.parent-comment__time,
+.parent-comment__goods {
+  color: #909399;
+  font-size: 12px;
+}
+
+.parent-comment__goods,
+.parent-comment__rate,
+.parent-comment__content,
+.parent-comment__images,
+.parent-comment__empty-image {
+  margin-top: 8px;
+}
+
+.parent-comment__content {
+  padding: 12px;
+  color: #303133;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.reply-thread {
+  margin-top: 16px;
+  padding: 14px 14px 14px 46px;
+  border: 1px solid #ebeef5;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.reply-thread__header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+  color: #1f2d3d;
+  font-weight: 600;
+}
+
+.reply-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reply-item {
+  display: flex;
+  gap: 10px;
+}
+
+.reply-item__body {
+  flex: 1;
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid #ebeef5;
+  border-radius: 8px;
+  background: #f8fafc;
+}
+
+.reply-item__meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+  color: #909399;
+  font-size: 12px;
+}
+
+.reply-item__name {
+  color: #303133;
+  font-weight: 600;
+}
+
+.reply-item__content {
+  color: #606266;
+  line-height: 1.7;
+  white-space: pre-wrap;
+}
+
+.reply-empty {
+  padding: 18px;
+  color: #909399;
+  text-align: center;
+  border: 1px dashed #dcdfe6;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.reply-empty__title {
+  color: #606266;
+  font-weight: 600;
+}
+
+.reply-empty__desc {
+  margin: 6px 0 10px;
+  font-size: 12px;
+}
+
+.empty-text {
+  color: #909399;
+  font-size: 13px;
 }
 </style>
