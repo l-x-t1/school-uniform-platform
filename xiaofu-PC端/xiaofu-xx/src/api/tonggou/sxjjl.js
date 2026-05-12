@@ -8,3 +8,10 @@ export function listSizeExchange(query) {
     params: query
   })
 }
+
+export function getSizeExchange(id) {
+  return request({
+    url: '/school/sizeExchange/' + id,
+    method: 'get'
+  })
+}

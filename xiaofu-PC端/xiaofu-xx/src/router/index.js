@@ -127,6 +127,32 @@ export const constantRoutes = [
       },
     ],
   },
+  {
+    path: "/zjbg/detail",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/zjbg/detail"),
+        name: "ZjbgDetail",
+        meta: { title: "质检报告详情", activeMenu: "/zjbg" },
+      },
+    ],
+  },
+  {
+    path: "/sxjjl/detail",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "",
+        component: () => import("@/views/sxjjl/detail"),
+        name: "SxjjlDetail",
+        meta: { title: "尺码调换详情", activeMenu: "/sxjjl" },
+      },
+    ],
+  },
 ];
 
 // 动态首页路由 - 根据角色动态添加

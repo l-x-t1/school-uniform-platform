@@ -24,4 +24,10 @@ public class XfptSizeExchangeServiceImpl implements IXfptSizeExchangeService {
         query.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId());
         return xfptSizeExchangeMapper.selectSizeExchangeList(query);
     }
+
+    @Override
+    public XfptSizeExchangeVo selectSizeExchangeById(Long id) {
+        Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        return xfptSizeExchangeMapper.selectSizeExchangeById(id, deptId);
+    }
 }

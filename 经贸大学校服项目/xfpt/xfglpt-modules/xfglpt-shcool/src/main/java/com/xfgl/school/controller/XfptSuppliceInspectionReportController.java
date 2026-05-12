@@ -93,6 +93,23 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         XfptSuppliceInspectionReport byId = xfptSuppliceInspectionReportService.getById(id);
+        if (byId == null || !String.valueOf(SecurityUtils.getLoginUser().getSysUser().getDeptId()).equals(byId.getDeptId())) {
+            return success(null);
+        }
+        SupplierMessage supplierMessage = iSupplierMessageService.getById(byId.getSupplierId());
+        if (supplierMessage != null) {
+            byId.setLegalRepresentative(supplierMessage.getLegalRepresentative());
+        }
+        if (StringUtils.isEmpty(byId.getNoticeStatus())) {
+            byId.setNoticeStatus("0");
+        }
+        if ("1".equals(byId.getNoticeStatus())) {
+            byId.setNoticeStatusText("已通过");
+        } else if ("2".equals(byId.getNoticeStatus())) {
+            byId.setNoticeStatusText("已拒绝");
+        } else {
+            byId.setNoticeStatusText("待审核");
+        }
         List<XfptAnnoResults> list2 = iXfptAnnoResultsService.lambdaQuery().eq(XfptAnnoResults::getTeamId, byId.getTeamMeetingId()).list();
         if(CollUtil.isNotEmpty(list2)){
             byId.setGgTitle(list2.get(0).getNoticeTitle());

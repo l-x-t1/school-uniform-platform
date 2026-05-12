@@ -50,4 +50,24 @@ public class XfptSizeExchangeVo {
     private Integer applyNum;
 
     private Long deptId;
+
+    private String reason;
+
+    private String handleResult;
+
+    private String handleRemark;
+
+    private Date auditTime;
+
+    private Date finishTime;
+
+    private BigDecimal applyAmount;
+
+    private BigDecimal actualRefundAmount;
+
+    private String refundStatus;
+
+    private String imagesJson;
+
+    private Date createTime;
 }

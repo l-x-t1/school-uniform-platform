@@ -11,4 +11,6 @@ import java.util.List;
 public interface IXfptSizeExchangeService {
 
     public List<XfptSizeExchangeVo> selectSizeExchangeList(XfptSizeExchangeQuery query);
+
+    public XfptSizeExchangeVo selectSizeExchangeById(Long id);
 }
