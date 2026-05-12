@@ -90,6 +90,11 @@ public class XfptComment extends BaseEntity {
     @Schema(description = "评价用户名称快照")
     private String userName;
 
+    /** 评价用户头像 */
+    @TableField(exist = false)
+    @Schema(description = "评价用户头像")
+    private String userAvatar;
+
     /** 供应商ID */
     @Excel(name = "供应商ID")
     @Schema(description = "供应商ID")

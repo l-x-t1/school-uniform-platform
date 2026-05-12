@@ -1,6 +1,7 @@
 package com.xfgl.school.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.xfgl.common.core.annotation.Excel;
@@ -70,6 +71,11 @@ public class XfptCommentReply extends BaseEntity {
     @Schema(description = "回复人名称快照")
     private String fromUserName;
 
+    /** 回复人头像 */
+    @TableField(exist = false)
+    @Schema(description = "回复人头像")
+    private String fromUserAvatar;
+
     /** 回复人角色，1家长 2供应商 */
     @Excel(name = "回复人角色")
     @Schema(description = "回复人角色，1家长 2供应商")
@@ -89,6 +95,11 @@ public class XfptCommentReply extends BaseEntity {
     @Excel(name = "被回复人名称快照")
     @Schema(description = "被回复人名称快照")
     private String toUserName;
+
+    /** 被回复人头像 */
+    @TableField(exist = false)
+    @Schema(description = "被回复人头像")
+    private String toUserAvatar;
 
     /** 被回复人角色，1家长 2供应商 */
     @Excel(name = "被回复人角色")

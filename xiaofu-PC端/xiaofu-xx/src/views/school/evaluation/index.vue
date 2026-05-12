@@ -199,7 +199,11 @@
           </div>
 
           <div class="parent-comment">
-            <div class="comment-avatar comment-avatar--parent">{{ getNameInitial(detail.userName) }}</div>
+            <div class="comment-avatar comment-avatar--parent">
+              <el-image class="comment-avatar__image" :src="formatAvatarUrl(detail.userAvatar)" fit="cover">
+                <img slot="error" class="comment-avatar__fallback-image" :src="defaultAvatar" alt="">
+              </el-image>
+            </div>
             <div class="parent-comment__body">
               <div class="parent-comment__meta">
                 <div>
@@ -240,7 +244,11 @@
             </div>
             <div v-if="replyList.length" class="reply-list">
               <div v-for="reply in replyList" :key="reply.id" class="reply-item">
-                <div class="comment-avatar">{{ getNameInitial(reply.fromUserName) }}</div>
+                <div class="comment-avatar">
+                  <el-image class="comment-avatar__image" :src="formatAvatarUrl(reply.fromUserAvatar)" fit="cover">
+                    <img slot="error" class="comment-avatar__fallback-image" :src="defaultAvatar" alt="">
+                  </el-image>
+                </div>
                 <div class="reply-item__body">
                   <div class="reply-item__meta">
                     <span class="reply-item__name">{{ reply.fromUserName || '-' }}</span>
@@ -301,6 +309,7 @@ import {
   replyEvaluationComment,
   updateEvaluationCommentStatus
 } from '@/api/school/comment'
+import defaultAvatar from '@/assets/images/profile.jpg'
 
 export default {
   name: 'SchoolEvaluation',
@@ -320,6 +329,7 @@ export default {
         commentId: null,
         content: ''
       },
+      defaultAvatar,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -481,10 +491,6 @@ export default {
       }
       return '-'
     },
-    getNameInitial(name) {
-      const text = String(name || '').trim()
-      return text ? text.slice(0, 1).toUpperCase() : '-'
-    },
     parseImages(imagesJson) {
       if (!imagesJson) {
         return []
@@ -514,11 +520,17 @@ export default {
       if (!src) {
         return ''
       }
-      if (/^(https?:)?\/\//.test(src)) {
+      if (/^(https?:)?\/\//.test(src) || /^data:image\//.test(src) || /^blob:/.test(src)) {
         return src
       }
       const baseUrl = process.env.VUE_APP_BASE_API || ''
       return src.indexOf('/') === 0 ? baseUrl + src : baseUrl + '/' + src
+    },
+    formatAvatarUrl(avatar) {
+      if (!avatar) {
+        return this.defaultAvatar
+      }
+      return this.normalizeImageUrl(avatar)
     }
   }
 }
@@ -598,6 +610,7 @@ export default {
   flex: 0 0 34px;
   width: 34px;
   height: 34px;
+  overflow: hidden;
   border-radius: 50%;
   color: #fff;
   line-height: 34px;
@@ -608,6 +621,14 @@ export default {
 
 .comment-avatar--parent {
   background: linear-gradient(135deg, #409eff 0%, #67c23a 100%);
+}
+
+.comment-avatar__image,
+.comment-avatar__fallback-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
 }
 
 .parent-comment {
