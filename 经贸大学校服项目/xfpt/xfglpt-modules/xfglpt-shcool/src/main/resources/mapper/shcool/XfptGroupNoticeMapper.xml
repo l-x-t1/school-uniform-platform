@@ -93,12 +93,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="gradeNames != null  and gradeNames != ''"> and grade_names = #{gradeNames}</if>
             <if test="teamMeetingId != null "> and team_meeting_id = #{teamMeetingId}</if>
             <if test="purchaseProcessId != null "> and purchase_process_id = #{purchaseProcessId}</if>
-            <if test="startTime != null "> and start_time = #{startTime}</if>
-            <if test="endTime != null "> and end_time = #{endTime}</if>
+            <if test="startTime != null "> and date_format(start_time, '%Y-%m-%d') = date_format(#{startTime}, '%Y-%m-%d')</if>
+            <if test="endTime != null "> and date_format(end_time, '%Y-%m-%d') = date_format(#{endTime}, '%Y-%m-%d')</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
             <if test="applyStatus != null  and applyStatus != ''"> and apply_status = #{applyStatus}</if>
-            <if test="publishTime != null "> and publish_time = #{publishTime}</if>
-            <if test="resultPublishTime != null "> and result_publish_time = #{resultPublishTime}</if>
+            <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
+            <if test="resultPublishTime != null "> and date_format(result_publish_time, '%Y-%m-%d') = date_format(#{resultPublishTime}, '%Y-%m-%d')</if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>
@@ -109,7 +109,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptGroupNoticeItemById" resultMap="XfptGroupNoticeItemResult">
+    <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
         select id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice_item
         where notice_id = #{id}

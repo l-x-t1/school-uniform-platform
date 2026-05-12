@@ -9,11 +9,19 @@ import java.util.Map;
 import java.util.Arrays;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
+import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.system.api.domain.SysUser;
+import com.xfgl.system.api.model.LoginUser;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
 import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
 import com.xfgl.school.domain.XfptDeliveryOrder;
+import com.xfgl.school.domain.XfptSchoolMessage;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo;
+import com.xfgl.school.domain.vo.SupplierOptionVo;
 import com.xfgl.school.service.IXfptDeliveryOrderService;
+import com.xfgl.school.service.IXfptSchoolMessageService;
 
 /**
  * 发货单Service业务层处理
@@ -26,6 +34,9 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
 
     @Autowired
     private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
+
+    @Autowired
+    private IXfptSchoolMessageService xfptSchoolMessageService;
 
     /**
      * 查询发货单列表
@@ -123,6 +134,22 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
             return xfptDeliveryOrderMapper.deleteById(id);
         }
 
+        @Override
+        public List<DeliveryOrderStatisticsVo> selectDeliveryOrderStatisticsList(DeliveryOrderStatisticsQuery query)
+        {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            query.setDeptId(currentSchool.getDeptId());
+            query.setSchoolId(currentSchool.getId());
+            return xfptDeliveryOrderMapper.selectDeliveryOrderStatisticsList(query);
+        }
+
+        @Override
+        public List<SupplierOptionVo> selectDeliveryOrderSupplierOptions()
+        {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            return xfptDeliveryOrderMapper.selectDeliveryOrderSupplierOptions(currentSchool.getId(), currentSchool.getDeptId());
+        }
+
         /**
          * 新增发货单明细信息
          *
@@ -153,6 +180,23 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
                 }
                     xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(xfptDeliveryOrderItemList);
             }
+        }
+
+        private XfptSchoolMessage getCurrentSchool()
+        {
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
+            Long deptId = sysUser == null ? null : sysUser.getDeptId();
+            if (deptId == null) {
+                throw new ServiceException("未获取到当前登录学校");
+            }
+            XfptSchoolMessage schoolMessage = xfptSchoolMessageService.lambdaQuery()
+                    .eq(XfptSchoolMessage::getDeptId, deptId)
+                    .one();
+            if (schoolMessage == null || schoolMessage.getId() == null) {
+                throw new ServiceException("当前登录学校信息不存在，请先完善学校信息");
+            }
+            return schoolMessage;
         }
 
 }

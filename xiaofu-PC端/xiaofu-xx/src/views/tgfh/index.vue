@@ -1,10 +1,13 @@
 <template>
   <div class="app-container">
-    <!-- 提示信息 -->
-    <el-alert title="此页面可查询与自己参与的浏览商品已关联采购，您也可查询浏览商品没关联采购，您可查看个商品。" type="warning" :closable="false" show-icon
-      class="alert-warning mb15" />
+    <el-alert
+      title="此页面可查询与自己参与的浏览商品已关联采购，您也可查询浏览商品没关联采购，您可查看个商品。"
+      type="warning"
+      :closable="false"
+      show-icon
+      class="alert-warning mb15"
+    />
 
-    <!-- 查询表单 -->
     <el-form :inline="true" :model="queryParams">
       <el-form-item label="导出快查：">
         <el-select v-model="queryParams.exportType" placeholder="请选择" style="width: 180px;">
@@ -25,7 +28,6 @@
       </el-form-item>
     </el-form>
 
-    <!-- 数据表格 -->
     <el-table v-loading="loading" :data="tableData" style="width: 100%">
       <el-table-column label="公告名称" prop="noticeName" :show-overflow-tooltip="true"></el-table-column>
       <el-table-column label="付款截止日期" prop="paymentDeadline" width="150" align="center"></el-table-column>
@@ -40,53 +42,54 @@
       </el-table-column>
     </el-table>
 
-    <!-- 分页组件 -->
-    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
-      @pagination="getList" />
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="queryParams.pageNum"
+      :limit.sync="queryParams.pageSize"
+      @pagination="getList"
+    />
   </div>
 </template>
 
 <script>
+import { listDeliveryOrderStatistics, listDeliveryOrderStatisticsSuppliers } from '@/api/school/deliveryOrder';
+
 export default {
   name: 'TgfhIndex',
   data() {
     return {
-      // 遮罩层
       loading: false,
-      // 总条数
       total: 0,
-      // 表格数据
       tableData: [],
-      // 查询参数
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         exportType: '',
         manufacturerId: ''
       },
-      // 厂商选项
-      manufacturerOptions: [
-        { value: '1', label: '北京服装厂' },
-        { value: '2', label: '上海制衣厂' },
-        { value: '3', label: '广州校服有限公司' }
-      ]
+      manufacturerOptions: []
     };
   },
   created() {
+    this.getSupplierOptions();
     this.getList();
   },
   methods: {
-    /** 查询列表 */
     getList() {
       this.loading = true;
-      // 模拟接口调用
-      setTimeout(() => {
-        this.tableData = [];
-        this.total = 0;
+      listDeliveryOrderStatistics(this.queryParams).then(response => {
+        this.tableData = response.rows || [];
+        this.total = response.total || 0;
+      }).finally(() => {
         this.loading = false;
-      }, 300);
+      });
     },
-    /** 搜索按钮操作 */
+    getSupplierOptions() {
+      listDeliveryOrderStatisticsSuppliers().then(response => {
+        this.manufacturerOptions = response.data || [];
+      });
+    },
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();

@@ -16,6 +16,8 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.school.domain.XfptDeliveryOrder;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo;
 import com.xfgl.school.service.IXfptDeliveryOrderService;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
@@ -36,6 +38,22 @@ import com.xfgl.common.core.web.page.TableDataInfo;
 public class XfptDeliveryOrderController extends BaseController {
     @Autowired
     private IXfptDeliveryOrderService xfptDeliveryOrderService;
+
+    @Operation(summary = "查询发货单统计列表")
+    @RequiresPermissions("school:tgfh:list")
+    @GetMapping("/statistics/list")
+    public TableDataInfo statisticsList(DeliveryOrderStatisticsQuery query) {
+        startPage();
+        List<DeliveryOrderStatisticsVo> list = xfptDeliveryOrderService.selectDeliveryOrderStatisticsList(query);
+        return getDataTable(list);
+    }
+
+    @Operation(summary = "查询发货单统计厂商下拉")
+    @RequiresPermissions("school:tgfh:list")
+    @GetMapping("/statistics/suppliers")
+    public AjaxResult supplierOptions() {
+        return success(xfptDeliveryOrderService.selectDeliveryOrderSupplierOptions());
+    }
 
 /**
  * 查询发货单列表

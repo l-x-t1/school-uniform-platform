@@ -81,6 +81,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         public int insertXfptGroupNotice(XfptGroupNotice xfptGroupNotice)
         {
             fillCurrentSchoolInfo(xfptGroupNotice);
+            fillGroupNoticeDefaults(xfptGroupNotice);
             int rows = xfptGroupNoticeMapper.insert(xfptGroupNotice);
             insertXfptGroupNoticeItem(xfptGroupNotice);
             return rows;
@@ -98,6 +99,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         {
             checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(xfptGroupNotice.getId()));
             fillCurrentSchoolInfo(xfptGroupNotice);
+            fillGroupNoticeDefaults(xfptGroupNotice);
                 xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(xfptGroupNotice.getId());
             insertXfptGroupNoticeItem(xfptGroupNotice);
             return xfptGroupNoticeMapper.updateById(xfptGroupNotice);
@@ -166,8 +168,27 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
                 for (XfptGroupNoticeItem xfptGroupNoticeItem : xfptGroupNoticeItemList) {
                     xfptGroupNoticeItem.setNoticeId(id);
                     xfptGroupNoticeItem.setDeptId(xfptGroupNotice.getDeptId());
+                    if (xfptGroupNoticeItem.getDelFlag() == null || "".equals(xfptGroupNoticeItem.getDelFlag())) {
+                        xfptGroupNoticeItem.setDelFlag("0");
+                    }
                 }
                     xfptGroupNoticeMapper.batchInsertXfptGroupNoticeItem(xfptGroupNoticeItemList);
+            }
+        }
+
+        private void fillGroupNoticeDefaults(XfptGroupNotice xfptGroupNotice)
+        {
+            if (xfptGroupNotice.getNoticeType() == null || "".equals(xfptGroupNotice.getNoticeType())) {
+                xfptGroupNotice.setNoticeType("1");
+            }
+            if (xfptGroupNotice.getStatus() == null || "".equals(xfptGroupNotice.getStatus())) {
+                xfptGroupNotice.setStatus("0");
+            }
+            if (xfptGroupNotice.getApplyStatus() == null || "".equals(xfptGroupNotice.getApplyStatus())) {
+                xfptGroupNotice.setApplyStatus("0");
+            }
+            if (xfptGroupNotice.getDelFlag() == null || "".equals(xfptGroupNotice.getDelFlag())) {
+                xfptGroupNotice.setDelFlag("0");
             }
         }
 

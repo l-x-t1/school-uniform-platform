@@ -182,6 +182,13 @@
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-view"
+            @click="handleView(scope.row)"
+            v-hasPermi="['school:groupNotice:query']"
+          >{{ detailButtonText }}</el-button>
+          <el-button
+            size="mini"
+            type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
             v-hasPermi="['school:groupNotice:edit']"
@@ -207,18 +214,24 @@
 
     <!-- 添加或修改统购公告对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="80px" :disabled="isViewMode">
         <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
+          <el-input v-model="form.schoolId" disabled placeholder="请输入学校ID" />
         </el-form-item>
         <el-form-item label="学校名称快照" prop="schoolName">
-          <el-input v-model="form.schoolName" placeholder="请输入学校名称快照" />
+          <el-input v-model="form.schoolName" disabled placeholder="请输入学校名称快照" />
         </el-form-item>
         <el-form-item label="公告标题" prop="title">
           <el-input v-model="form.title" placeholder="请输入公告标题" />
         </el-form-item>
         <el-form-item label="公告编号" prop="noticeCode">
           <el-input v-model="form.noticeCode" placeholder="请输入公告编号" />
+        </el-form-item>
+        <el-form-item label="公告类型" prop="noticeType">
+          <el-select v-model="form.noticeType" placeholder="请选择公告类型">
+            <el-option label="选购公告" value="1" />
+            <el-option label="结果公告" value="2" />
+          </el-select>
         </el-form-item>
         <el-form-item label="公告正文">
           <editor v-model="form.content" :min-height="192"/>
@@ -251,6 +264,21 @@
             placeholder="请选择公告截止时间">
           </el-date-picker>
         </el-form-item>
+        <el-form-item label="公告状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择公告状态">
+            <el-option label="草稿" value="0" />
+            <el-option label="已发布" value="1" />
+            <el-option label="已结束" value="2" />
+            <el-option label="已撤回" value="3" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="报名状态" prop="applyStatus">
+          <el-select v-model="form.applyStatus" placeholder="请选择报名状态">
+            <el-option label="未开放" value="0" />
+            <el-option label="报名中" value="1" />
+            <el-option label="报名结束" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="发布时间" prop="publishTime">
           <el-date-picker clearable
             v-model="form.publishTime"
@@ -268,7 +296,7 @@
           </el-date-picker>
         </el-form-item>
         <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
+          <el-input v-model="form.deptId" disabled placeholder="请输入当前归属部门/学校" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -316,7 +344,7 @@
         </el-table>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button v-if="!isViewMode" type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
       </div>
     </el-dialog>
@@ -325,6 +353,7 @@
 
 <script>
 import { listGroupNotice, getGroupNotice, delGroupNotice, addGroupNotice, updateGroupNotice } from "@/api/school/groupNotice";
+import { getSchoolInfoDetail } from "@/api/questionnaire";
 
 export default {
   name: "GroupNotice",
@@ -352,6 +381,9 @@ export default {
       title: "",
       // 是否显示弹出层
       open: false,
+      isViewMode: false,
+      detailButtonText: "\u8be6\u60c5",
+      currentSchool: null,
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -430,7 +462,7 @@ export default {
         schoolName: null,
         title: null,
         noticeCode: null,
-        noticeType: null,
+        noticeType: "1",
         content: null,
         gradeIds: null,
         gradeNames: null,
@@ -438,8 +470,8 @@ export default {
         purchaseProcessId: null,
         startTime: null,
         endTime: null,
-        status: null,
-        applyStatus: null,
+        status: "0",
+        applyStatus: "0",
         publishTime: null,
         resultPublishTime: null,
         deptId: null,
@@ -448,7 +480,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptGroupNoticeItemList = [];
       this.resetForm("form");
@@ -472,12 +504,27 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.open = true;
-      this.title = "添加统购公告";
+      this.isViewMode = false;
+      this.loadCurrentSchoolInfo().then(() => {
+        this.open = true;
+        this.title = "\u6dfb\u52a0\u7edf\u8d2d\u516c\u544a";
+      });
+    },
+    handleView(row) {
+      this.reset();
+      this.isViewMode = true;
+      const id = row.id || this.ids
+      getGroupNotice(id).then(response => {
+        this.form = response.data;
+        this.xfptGroupNoticeItemList = response.data.xfptGroupNoticeItemList;
+        this.open = true;
+        this.title = "\u516c\u544a\u8be6\u60c5";
+      });
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
+      this.isViewMode = false;
       const id = row.id || this.ids
       getGroupNotice(id).then(response => {
         this.form = response.data;
@@ -552,6 +599,23 @@ export default {
       this.checkedXfptGroupNoticeItem = selection.map(item => item.index)
     },
     /** 导出按钮操作 */
+    loadCurrentSchoolInfo() {
+      const deptId = this.$store.state.user.deptId;
+      if (!deptId) {
+        this.$modal.msgError("\u672a\u83b7\u53d6\u5230\u5f53\u524d\u767b\u5f55\u5b66\u6821");
+        return Promise.reject(new Error("missing deptId"));
+      }
+      return getSchoolInfoDetail(deptId).then(response => {
+        if (!response.data) {
+          this.$modal.msgError("\u5f53\u524d\u5b66\u6821\u4fe1\u606f\u4e0d\u5b58\u5728\uff0c\u8bf7\u5148\u5b8c\u5584\u5b66\u6821\u4fe1\u606f");
+          return Promise.reject(new Error("missing school"));
+        }
+        this.currentSchool = response.data;
+        this.form.deptId = response.data.deptId;
+        this.form.schoolId = response.data.id;
+        this.form.schoolName = response.data.schoolName;
+      });
+    },
     handleExport() {
       this.download('school/groupNotice/export', {
         ...this.queryParams
