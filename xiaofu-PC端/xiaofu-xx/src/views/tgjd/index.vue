@@ -120,6 +120,8 @@
 </template>
 
 <script>
+import { listGroupNoticeProgress, getGroupNoticeProgressDetail } from '@/api/school/groupNotice'
+
 export default {
   name: 'TgjdIndex',
   data() {
@@ -163,36 +165,12 @@ export default {
     /** 查询列表 */
     getList() {
       this.loading = true;
-      // 这里应该调用后端接口获取数据
-      setTimeout(() => {
-        // 模拟数据
-        this.tableData = [
-          {
-            id: 1,
-            noticeName: '2023年春季校服采购通知',
-            manufacturerName: '河北金鑫服装制造有限公司',
-            promotionCount: 500,
-            expectedSalesCount: 450,
-            orderCount: 350,
-            orderRate: 77.78,
-            timeRange: '2023-03-18 ~ 2023-04-17',
-            remainTime: '3天'
-          },
-          {
-            id: 2,
-            noticeName: '2023年秋季校服采购通知',
-            manufacturerName: '山西顺贝达服饰有限公司',
-            promotionCount: 600,
-            expectedSalesCount: 580,
-            orderCount: 480,
-            orderRate: 82.76,
-            timeRange: '2023-08-10 ~ 2023-09-10',
-            remainTime: '已截止'
-          }
-        ];
-        this.total = 2;
+      listGroupNoticeProgress(this.queryParams).then(response => {
+        this.tableData = response.rows || [];
+        this.total = response.total || 0;
+      }).finally(() => {
         this.loading = false;
-      }, 500);
+      });
     },
 
     /** 查询按钮操作 */
@@ -218,23 +196,11 @@ export default {
         expectedSalesCount: row.expectedSalesCount,
         orderCount: row.orderCount,
         orderRate: row.orderRate,
-        orderList: [
-          {
-            productName: '夏季短袖校服',
-            price: '¥128',
-            quantity: 2,
-            orderPerson: '张三家长',
-            orderTime: '2023-03-20 10:30:45'
-          },
-          {
-            productName: '运动长裤',
-            price: '¥98',
-            quantity: 1,
-            orderPerson: '李四家长',
-            orderTime: '2023-03-21 14:22:15'
-          }
-        ]
+        orderList: []
       };
+      getGroupNoticeProgressDetail(row.noticeId || row.id, row.supplierId).then(response => {
+        this.detailInfo.orderList = response.data || [];
+      });
     },
 
     /** 导出明细操作 */

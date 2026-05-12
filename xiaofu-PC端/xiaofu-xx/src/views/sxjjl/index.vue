@@ -5,7 +5,7 @@
     <!-- 查询表单 -->
     <el-form :inline="true" :model="queryParams">
       <el-form-item label="厂商名称：">
-        <el-input v-model="queryParams.manufacturerName" disabled placeholder="请输入厂商名称"
+        <el-input v-model="queryParams.manufacturerName" placeholder="请输入厂商名称"
           style="width: 220px;"></el-input>
       </el-form-item>
       <el-form-item label="商品状态：">
@@ -36,6 +36,13 @@
       </el-form-item>
     </el-form>
 
+    <el-tabs v-model="activeTab" @tab-click="handleTabClick">
+      <el-tab-pane label="待受理" name="pending" />
+      <el-tab-pane label="已通过" name="approved" />
+      <el-tab-pane label="已退回" name="returned" />
+      <el-tab-pane label="已更换" name="changed" />
+    </el-tabs>
+
     <!-- 数据表格 -->
     <el-table v-loading="loading" :data="tableData" style="width: 100%">
       <el-table-column label="商品信息" prop="productInfo" min-width="300">
@@ -59,6 +66,11 @@
           <div class="publish-time">{{ scope.row.operateTime }}</div>
         </template>
       </el-table-column>
+      <el-table-column label="状态" prop="status" width="110" align="center">
+        <template slot-scope="scope">
+          <el-tag :type="statusTagType(scope.row.status)">{{ statusText(scope.row.status) }}</el-tag>
+        </template>
+      </el-table-column>
       <el-table-column label="操作" width="120" align="center">
         <template slot-scope="scope">
           <el-button size="mini" type="text" @click="handleView(scope.row)">查看</el-button>
@@ -78,6 +90,8 @@
 </template>
 
 <script>
+import { listSizeExchange } from '@/api/tonggou/sxjjl'
+
 export default {
   name: 'SxjjlIndex',
   data() {
@@ -88,6 +102,7 @@ export default {
       total: 0,
       // 表格数据
       tableData: [],
+      activeTab: 'pending',
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -95,7 +110,8 @@ export default {
         manufacturerName: '',
         productStatus: '',
         productCategory: '',
-        productStyle: ''
+        productStyle: '',
+        status: '0'
       }
     };
   },
@@ -106,17 +122,47 @@ export default {
     /** 查询列表 */
     getList() {
       this.loading = true;
-      // 模拟接口调用
-      setTimeout(() => {
-        this.tableData = [];
-        this.total = 0;
+      listSizeExchange(this.queryParams).then(response => {
+        this.tableData = response.rows || [];
+        this.total = response.total || 0;
+      }).finally(() => {
         this.loading = false;
-      }, 300);
+      });
     },
     /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
+    },
+    handleTabClick(tab) {
+      const statusMap = {
+        pending: '0',
+        approved: '1',
+        returned: '2',
+        changed: '4'
+      };
+      this.queryParams.status = statusMap[tab.name];
+      this.handleQuery();
+    },
+    statusText(status) {
+      const textMap = {
+        '0': '待受理',
+        '1': '已通过',
+        '2': '已退回',
+        '3': '处理中',
+        '4': '已更换',
+        '5': '已关闭'
+      };
+      return textMap[status] || '-';
+    },
+    statusTagType(status) {
+      const typeMap = {
+        '0': 'warning',
+        '1': 'success',
+        '2': 'danger',
+        '4': 'success'
+      };
+      return typeMap[status] || 'info';
     },
     /** 查看按钮操作 */
     handleView(row) {

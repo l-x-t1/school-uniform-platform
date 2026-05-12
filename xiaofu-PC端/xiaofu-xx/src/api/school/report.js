@@ -65,6 +65,13 @@ export function suppliceInspectionReportList(query) {
     params: query,
   });
 }
+// 查询质检报告详情
+export function getSuppliceInspectionReport(id) {
+  return request({
+    url: "/school/suppliceInspectionReport/" + id,
+    method: "get",
+  });
+}
 // 上传质检报告
 export function addsuppliceInspectionReportSon(data) {
   return request({

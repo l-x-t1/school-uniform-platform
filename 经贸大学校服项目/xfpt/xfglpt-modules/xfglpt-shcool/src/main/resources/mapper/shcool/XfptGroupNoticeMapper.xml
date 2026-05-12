@@ -1,34 +1,34 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper
-PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
-"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.xfgl.school.mapper.XfptGroupNoticeMapper">
 
     <resultMap type="XfptGroupNotice" id="XfptGroupNoticeResult">
-        <result property="id"    column="id"    />
-        <result property="schoolId"    column="school_id"    />
-        <result property="schoolName"    column="school_name"    />
-        <result property="title"    column="title"    />
-        <result property="noticeCode"    column="notice_code"    />
-        <result property="noticeType"    column="notice_type"    />
-        <result property="content"    column="content"    />
-        <result property="gradeIds"    column="grade_ids"    />
-        <result property="gradeNames"    column="grade_names"    />
-        <result property="teamMeetingId"    column="team_meeting_id"    />
-        <result property="purchaseProcessId"    column="purchase_process_id"    />
-        <result property="startTime"    column="start_time"    />
-        <result property="endTime"    column="end_time"    />
-        <result property="status"    column="status"    />
-        <result property="applyStatus"    column="apply_status"    />
-        <result property="publishTime"    column="publish_time"    />
-        <result property="resultPublishTime"    column="result_publish_time"    />
-        <result property="deptId"    column="dept_id"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
+        <result property="id" column="id" />
+        <result property="schoolId" column="school_id" />
+        <result property="schoolName" column="school_name" />
+        <result property="title" column="title" />
+        <result property="noticeCode" column="notice_code" />
+        <result property="noticeType" column="notice_type" />
+        <result property="content" column="content" />
+        <result property="gradeIds" column="grade_ids" />
+        <result property="gradeNames" column="grade_names" />
+        <result property="teamMeetingId" column="team_meeting_id" />
+        <result property="purchaseProcessId" column="purchase_process_id" />
+        <result property="startTime" column="start_time" />
+        <result property="endTime" column="end_time" />
+        <result property="status" column="status" />
+        <result property="applyStatus" column="apply_status" />
+        <result property="publishTime" column="publish_time" />
+        <result property="resultPublishTime" column="result_publish_time" />
+        <result property="deptId" column="dept_id" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
     </resultMap>
 
     <resultMap id="XfptGroupNoticeXfptGroupNoticeItemResult" type="XfptGroupNotice" extends="XfptGroupNoticeResult">
@@ -36,23 +36,45 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap type="XfptGroupNoticeItem" id="XfptGroupNoticeItemResult">
-        <result property="id"    column="id"    />
-        <result property="noticeId"    column="notice_id"    />
-        <result property="goodsId"    column="goods_id"    />
-        <result property="goodsName"    column="goods_name"    />
-        <result property="sizeRuleJson"    column="size_rule_json"    />
-        <result property="unitName"    column="unit_name"    />
-        <result property="buyNum"    column="buy_num"    />
-        <result property="priceDesc"    column="price_desc"    />
-        <result property="gradeIds"    column="grade_ids"    />
-        <result property="gradeNames"    column="grade_names"    />
-        <result property="deptId"    column="dept_id"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
+        <result property="id" column="id" />
+        <result property="noticeId" column="notice_id" />
+        <result property="goodsId" column="goods_id" />
+        <result property="goodsName" column="goods_name" />
+        <result property="sizeRuleJson" column="size_rule_json" />
+        <result property="unitName" column="unit_name" />
+        <result property="buyNum" column="buy_num" />
+        <result property="priceDesc" column="price_desc" />
+        <result property="gradeIds" column="grade_ids" />
+        <result property="gradeNames" column="grade_names" />
+        <result property="deptId" column="dept_id" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
+    </resultMap>
+
+    <resultMap type="com.xfgl.school.domain.vo.GroupNoticeProgressVo" id="GroupNoticeProgressResult">
+        <result property="id" column="id" />
+        <result property="noticeId" column="notice_id" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="noticeName" column="notice_name" />
+        <result property="manufacturerName" column="manufacturer_name" />
+        <result property="promotionCount" column="promotion_count" />
+        <result property="expectedSalesCount" column="expected_sales_count" />
+        <result property="orderCount" column="order_count" />
+        <result property="orderRate" column="order_rate" />
+        <result property="timeRange" column="time_range" />
+        <result property="remainTime" column="remain_time" />
+    </resultMap>
+
+    <resultMap type="com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo" id="GroupNoticeOrderDetailResult">
+        <result property="productName" column="product_name" />
+        <result property="price" column="price" />
+        <result property="quantity" column="quantity" />
+        <result property="orderPerson" column="order_person" />
+        <result property="orderTime" column="order_time" />
     </resultMap>
 
     <sql id="selectXfptGroupNoticeVo">
@@ -62,23 +84,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <select id="selectXfptGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
         <include refid="selectXfptGroupNoticeVo"/>
         <include refid="search"/>
-            <if test="schoolId != null "> and school_id = #{schoolId}</if>
-            <if test="schoolName != null  and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
-            <if test="title != null  and title != ''"> and title = #{title}</if>
-            <if test="noticeCode != null  and noticeCode != ''"> and notice_code like concat('%', #{noticeCode}, '%')</if>
-            <if test="noticeType != null  and noticeType != ''"> and notice_type = #{noticeType}</if>
-            <if test="gradeIds != null  and gradeIds != ''"> and grade_ids = #{gradeIds}</if>
-            <if test="gradeNames != null  and gradeNames != ''"> and grade_names = #{gradeNames}</if>
-            <if test="teamMeetingId != null "> and team_meeting_id = #{teamMeetingId}</if>
-            <if test="purchaseProcessId != null "> and purchase_process_id = #{purchaseProcessId}</if>
-            <if test="startTime != null "> and date_format(start_time, '%Y-%m-%d') = date_format(#{startTime}, '%Y-%m-%d')</if>
-            <if test="endTime != null "> and date_format(end_time, '%Y-%m-%d') = date_format(#{endTime}, '%Y-%m-%d')</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="applyStatus != null  and applyStatus != ''"> and apply_status = #{applyStatus}</if>
-            <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
-            <if test="resultPublishTime != null "> and date_format(result_publish_time, '%Y-%m-%d') = date_format(#{resultPublishTime}, '%Y-%m-%d')</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
-
+        <if test="schoolId != null "> and school_id = #{schoolId}</if>
+        <if test="schoolName != null and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="title != null and title != ''"> and title = #{title}</if>
+        <if test="noticeCode != null and noticeCode != ''"> and notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="noticeType != null and noticeType != ''"> and notice_type = #{noticeType}</if>
+        <if test="gradeIds != null and gradeIds != ''"> and grade_ids = #{gradeIds}</if>
+        <if test="gradeNames != null and gradeNames != ''"> and grade_names = #{gradeNames}</if>
+        <if test="teamMeetingId != null "> and team_meeting_id = #{teamMeetingId}</if>
+        <if test="purchaseProcessId != null "> and purchase_process_id = #{purchaseProcessId}</if>
+        <if test="startTime != null "> and date_format(start_time, '%Y-%m-%d') = date_format(#{startTime}, '%Y-%m-%d')</if>
+        <if test="endTime != null "> and date_format(end_time, '%Y-%m-%d') = date_format(#{endTime}, '%Y-%m-%d')</if>
+        <if test="status != null and status != ''"> and status = #{status}</if>
+        <if test="applyStatus != null and applyStatus != ''"> and apply_status = #{applyStatus}</if>
+        <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
+        <if test="resultPublishTime != null "> and date_format(result_publish_time, '%Y-%m-%d') = date_format(#{resultPublishTime}, '%Y-%m-%d')</if>
+        <if test="deptId != null "> and dept_id = #{deptId}</if>
     </select>
 
     <select id="selectXfptGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeXfptGroupNoticeItemResult">
@@ -87,16 +108,110 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptGroupNoticeItemById" resultMap="XfptGroupNoticeItemResult">
+    <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
         select id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice_item
         where notice_id = #{id}
     </select>
 
-    <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
-        select id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+    <select id="selectGroupNoticeProgressList" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">
+        select *
+        from (
+        select
+        g.id as id,
+        g.id as notice_id,
+        o.supplier_id as supplier_id,
+        g.title as notice_name,
+        o.supplier_name as manufacturer_name,
+        coalesce(s.promotion_count, 0) as promotion_count,
+        coalesce(i.expected_sales_count, 0) as expected_sales_count,
+        coalesce(o.order_count, 0) as order_count,
+        case
+        when coalesce(i.expected_sales_count, 0) = 0 then 0
+        else round(coalesce(o.order_count, 0) * 100 / i.expected_sales_count, 2)
+        end as order_rate,
+        concat(date_format(g.start_time, '%Y-%m-%d'), ' ~ ', date_format(g.end_time, '%Y-%m-%d')) as time_range,
+        case
+        when g.end_time is null then ''
+        when g.end_time &lt; now() then '已截止'
+        else concat(timestampdiff(day, now(), g.end_time), '天')
+        end as remain_time
+        from xfpt_group_notice g
+        left join (
+        select notice_id, sum(coalesce(buy_num, 0)) as expected_sales_count
         from xfpt_group_notice_item
-        where notice_id = #{id}
+        where del_flag = 0
+        group by notice_id
+        ) i on i.notice_id = g.id
+        left join (
+        select notice_id, supplier_id, supplier_name,
+        count(distinct coalesce(student_id, user_id, id)) as order_count
+        from xfpt_order_info
+        where del_flag = 0
+        and order_type = '1'
+        and (order_status is null or order_status != '5')
+        group by notice_id, supplier_id, supplier_name
+        ) o on o.notice_id = g.id
+        left join (
+        select shcool_id, count(1) as promotion_count
+        from xfpt_student_info
+        where del_flag = 0
+        group by shcool_id
+        ) s on s.shcool_id = cast(g.school_id as char)
+        where g.del_flag = 0
+        and g.school_id = #{schoolId}
+        and g.dept_id = #{deptId}
+        <if test="manufacturerName != null and manufacturerName != ''">
+            and o.supplier_name like concat('%', #{manufacturerName}, '%')
+        </if>
+        <if test="enableDateRange != null and enableDateRange == true">
+            <if test="startTime != null and startTime != ''">
+                and g.end_time &gt;= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                and g.end_time &lt;= #{endTime}
+            </if>
+        </if>
+        <if test="(enableDateRange == null or enableDateRange == false) and dateType != null and dateType != ''">
+            <if test="dateType == 'week'">
+                and g.end_time &gt;= now() and g.end_time &lt;= date_add(now(), interval 7 day)
+            </if>
+            <if test="dateType == 'month'">
+                and g.end_time &gt;= now() and g.end_time &lt;= date_add(now(), interval 1 month)
+            </if>
+            <if test="dateType == 'quarter'">
+                and g.end_time &gt;= now() and g.end_time &lt;= date_add(now(), interval 3 month)
+            </if>
+        </if>
+        ) p
+        where 1 = 1
+        <if test="orderRateMin != null">
+            and p.order_rate &gt;= #{orderRateMin}
+        </if>
+        <if test="orderRateMax != null">
+            and p.order_rate &lt;= #{orderRateMax}
+        </if>
+        order by p.notice_id desc
+    </select>
+
+    <select id="selectGroupNoticeOrderDetail" resultMap="GroupNoticeOrderDetailResult">
+        select
+        item.goods_name as product_name,
+        item.unit_price as price,
+        item.buy_num as quantity,
+        coalesce(info.student_name, info.user_name) as order_person,
+        info.create_time as order_time
+        from xfpt_order_info info
+        inner join xfpt_order_item item on item.order_id = info.id and item.del_flag = 0
+        where info.del_flag = 0
+        and info.notice_id = #{noticeId}
+        and info.dept_id = #{deptId}
+        and info.order_type = '1'
+        and (info.order_status is null or info.order_status != '5')
+        <if test="supplierId != null">
+            and info.supplier_id = #{supplierId}
+        </if>
+        order by info.create_time desc, info.id desc
     </select>
 
     <insert id="insertXfptGroupNotice" parameterType="XfptGroupNotice" useGeneratedKeys="true" keyProperty="id">
@@ -125,7 +240,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">update_time,</if>
             <if test="remark != null">remark,</if>
             <if test="delFlag != null and delFlag != ''">del_flag,</if>
-         </trim>
+        </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="schoolId != null">#{schoolId},</if>
             <if test="schoolName != null and schoolName != ''">#{schoolName},</if>
@@ -150,7 +265,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">#{updateTime},</if>
             <if test="remark != null">#{remark},</if>
             <if test="delFlag != null and delFlag != ''">#{delFlag},</if>
-         </trim>
+        </trim>
     </insert>
 
     <update id="updateXfptGroupNotice" parameterType="XfptGroupNotice">
@@ -211,6 +326,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             ( #{item.id}, #{item.noticeId}, #{item.goodsId}, #{item.goodsName}, #{item.sizeRuleJson}, #{item.unitName}, #{item.buyNum}, #{item.priceDesc}, #{item.gradeIds}, #{item.gradeNames}, #{item.deptId}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
         </foreach>
     </insert>
+
     <sql id="search">
         where del_flag = 0
     </sql>

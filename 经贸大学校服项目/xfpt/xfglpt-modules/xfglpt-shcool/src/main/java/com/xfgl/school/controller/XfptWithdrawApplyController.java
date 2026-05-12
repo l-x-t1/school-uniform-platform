@@ -81,6 +81,10 @@ public class XfptWithdrawApplyController extends BaseController {
     @Log(title = "供应商提现申请" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptWithdrawApply xfptWithdrawApply) {
+            AjaxResult validateResult = validateWithdrawTimeOrder(xfptWithdrawApply);
+            if (validateResult != null) {
+                    return validateResult;
+            }
             return toAjax(xfptWithdrawApplyService.save(xfptWithdrawApply));
     }
 
@@ -92,6 +96,10 @@ public class XfptWithdrawApplyController extends BaseController {
     @Log(title = "供应商提现申请" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptWithdrawApply xfptWithdrawApply) {
+            AjaxResult validateResult = validateWithdrawTimeOrder(xfptWithdrawApply);
+            if (validateResult != null) {
+                    return validateResult;
+            }
             return toAjax(xfptWithdrawApplyService.updateById(xfptWithdrawApply));
     }
 
@@ -105,5 +113,24 @@ public class XfptWithdrawApplyController extends BaseController {
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptWithdrawApplyService.removeByIds(Arrays.asList(ids)));
+    }
+
+    private AjaxResult validateWithdrawTimeOrder(XfptWithdrawApply withdrawApply) {
+            if (withdrawApply == null) {
+                    return error("提现申请数据不能为空");
+            }
+            if (withdrawApply.getApplyTime() != null && withdrawApply.getAuditTime() != null
+                    && !withdrawApply.getApplyTime().before(withdrawApply.getAuditTime())) {
+                    return error("申请时间必须小于审核时间");
+            }
+            if (withdrawApply.getAuditTime() != null && withdrawApply.getPayTime() != null
+                    && !withdrawApply.getAuditTime().before(withdrawApply.getPayTime())) {
+                    return error("审核时间必须小于打款时间");
+            }
+            if (withdrawApply.getApplyTime() != null && withdrawApply.getPayTime() != null
+                    && !withdrawApply.getApplyTime().before(withdrawApply.getPayTime())) {
+                    return error("申请时间必须小于打款时间");
+            }
+            return null;
     }
 }

@@ -42,3 +42,21 @@ export function delGroupNotice(id) {
     method: 'delete'
   })
 }
+
+// 查询统购订购进度列表
+export function listGroupNoticeProgress(query) {
+  return request({
+    url: '/school/groupNotice/progress/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询统购订购进度详情
+export function getGroupNoticeProgressDetail(noticeId, supplierId) {
+  return request({
+    url: '/school/groupNotice/progress/' + noticeId,
+    method: 'get',
+    params: { supplierId }
+  })
+}

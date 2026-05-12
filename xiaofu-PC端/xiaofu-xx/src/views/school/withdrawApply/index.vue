@@ -255,8 +255,11 @@
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
         </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
+        <el-form-item label="删除标记" prop="delFlag">
+          <el-select v-model="form.delFlag" placeholder="请选择删除标记">
+            <el-option label="正常" value="0" />
+            <el-option label="删除" value="1" />
+          </el-select>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -273,6 +276,24 @@ import { listWithdrawApply, getWithdrawApply, delWithdrawApply, addWithdrawApply
 export default {
   name: "WithdrawApply",
   data() {
+    const validateTimeOrder = (rule, value, callback) => {
+      const applyTime = this.parseDateValue(this.form.applyTime);
+      const auditTime = this.parseDateValue(this.form.auditTime);
+      const payTime = this.parseDateValue(this.form.payTime);
+      if (applyTime && auditTime && applyTime >= auditTime) {
+        callback(new Error("申请时间必须小于审核时间"));
+        return;
+      }
+      if (auditTime && payTime && auditTime >= payTime) {
+        callback(new Error("审核时间必须小于打款时间"));
+        return;
+      }
+      if (applyTime && payTime && applyTime >= payTime) {
+        callback(new Error("申请时间必须小于打款时间"));
+        return;
+      }
+      callback();
+    };
     return {
       // 遮罩层
       loading: true,
@@ -325,8 +346,18 @@ export default {
         status: [
           { required: true, message: "提现状态，0待审核 1审核通过 2审核拒绝 3已打款 4已取消不能为空", trigger: "change" }
         ],
+        applyTime: [
+          { validator: validateTimeOrder, trigger: "change" }
+        ],
+        auditTime: [
+          { validator: validateTimeOrder, trigger: "change" }
+        ],
+        payTime: [
+          { validator: validateTimeOrder, trigger: "change" }
+        ],
         delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
+          { required: true, message: '删除标记，0正常 1删除不能为空', trigger: 'change' },
+          { pattern: /^[01]$/, message: '删除标记只能选择0正常或1删除', trigger: 'change' }
         ]
       }
     };
@@ -335,6 +366,13 @@ export default {
     this.getList();
   },
   methods: {
+    parseDateValue(value) {
+      if (!value) {
+        return null;
+      }
+      const date = value instanceof Date ? value : new Date(value);
+      return Number.isNaN(date.getTime()) ? null : date;
+    },
     /** 查询供应商提现申请列表 */
     getList() {
       this.loading = true;
@@ -371,7 +409,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: '0'
       };
       this.resetForm("form");
     },

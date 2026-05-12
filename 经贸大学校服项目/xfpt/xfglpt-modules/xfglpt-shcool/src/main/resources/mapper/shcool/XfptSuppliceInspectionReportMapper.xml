@@ -17,24 +17,43 @@
         <result property="remark" column="remark"/>
         <result property="teamMeetingId" column="team_meeting_id"/>
         <result property="ancestors" column="ancestors"/>
+        <result property="noticeName" column="notice_name"/>
+        <result property="manufacturerName" column="manufacturer_name"/>
+        <result property="firstInspection" column="first_inspection"/>
+        <result property="secondInspection" column="second_inspection"/>
+        <result property="noticeStatus" column="notice_status"/>
         
     </resultMap>
 
     <sql id="selectXfptSuppliceInspectionReportVo">
-        select id,
-               dept_id,
-               dept_name,
-               supplier_id,
-               supplier_name,
-               supplier_phone,
-               create_by,
-               create_time,
-               update_by,
-               update_time,
-               remark,
-               team_meeting_id,
-               ancestors
-        from xfpt_supplice_inspection_report
+        select r.id,
+               r.dept_id,
+               r.dept_name,
+               r.supplier_id,
+               r.supplier_name,
+               r.supplier_phone,
+               r.create_by,
+               r.create_time,
+               r.update_by,
+               r.update_time,
+               r.remark,
+               r.team_meeting_id,
+               r.ancestors,
+               ar.notice_title as notice_name,
+               coalesce(ar.transaction_company_name, r.supplier_name) as manufacturer_name,
+               case when coalesce(ins.first_count, 0) > 0 then '1' else '' end as first_inspection,
+               case when coalesce(ins.second_count, 0) > 0 then '1' else '' end as second_inspection,
+               ar.is_release as notice_status
+        from xfpt_supplice_inspection_report r
+        left join xfpt_anno_results ar on ar.team_id = r.team_meeting_id and ar.del_flag = 0
+        left join (
+            select report_id,
+                   sum(case when type = '1' then 1 else 0 end) as first_count,
+                   sum(case when type = '2' then 1 else 0 end) as second_count
+            from xfpt_supplice_inspection_report_son
+            where del_flag = 0
+            group by report_id
+        ) ins on ins.report_id = r.id
     </sql>
 
     <select id="selectXfptSuppliceInspectionReportList" parameterType="XfptSuppliceInspectionReport"
@@ -42,33 +61,53 @@
         <include refid="selectXfptSuppliceInspectionReportVo"/>
         <include refid="search"/>
         <if test="deptId != null  and deptId != ''">
-            and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
+            and r.dept_id = #{deptId}
         </if>
         <if test="deptName != null  and deptName != ''">
-            and dept_name like concat('%', #{deptName}, '%')
+            and r.dept_name like concat('%', #{deptName}, '%')
         </if>
         <if test="supplierId != null  and supplierId != ''">
-            and supplier_id = #{supplierId}
+            and r.supplier_id = #{supplierId}
         </if>
         <if test="supplierName != null  and supplierName != ''">
-            and supplier_name like concat('%', #{supplierName}, '%')
+            and r.supplier_name like concat('%', #{supplierName}, '%')
+        </if>
+        <if test="manufacturerName != null  and manufacturerName != ''">
+            and coalesce(ar.transaction_company_name, r.supplier_name) like concat('%', #{manufacturerName}, '%')
+        </if>
+        <if test="noticeName != null  and noticeName != ''">
+            and ar.notice_title like concat('%', #{noticeName}, '%')
         </if>
         <if test="supplierPhone != null  and supplierPhone != ''">
-            and supplier_phone = #{supplierPhone}
+            and r.supplier_phone = #{supplierPhone}
         </if>
         <if test="teamMeetingId != null  and teamMeetingId != ''">
-            and team_meeting_id = #{teamMeetingId}
+            and r.team_meeting_id = #{teamMeetingId}
         </if>
         
         <if test="ancestors != null  and ancestors != ''">
-            and ancestors like concat('%', #{ancestors}, '%')
+            and r.ancestors like concat('%', #{ancestors}, '%')
         </if>
+        <if test="firstInspection != null  and firstInspection != ''">
+            and case when coalesce(ins.first_count, 0) > 0 then '1' else '0' end = #{firstInspection}
+        </if>
+        <if test="secondInspection != null  and secondInspection != ''">
+            and case when coalesce(ins.second_count, 0) > 0 then '1' else '0' end = #{secondInspection}
+        </if>
+        <if test="noticeStatus != null  and noticeStatus != ''">
+            and coalesce(ar.is_release, '0') = #{noticeStatus}
+        </if>
+        <if test="dateRange != null  and dateRange != ''">
+            and date(r.create_time) &gt;= substring_index(#{dateRange}, ' - ', 1)
+            and date(r.create_time) &lt;= substring_index(#{dateRange}, ' - ', -1)
+        </if>
+        order by r.create_time desc, r.id desc
     </select>
 
     <select id="selectXfptSuppliceInspectionReportById" parameterType="Long"
             resultMap="XfptSuppliceInspectionReportResult">
         <include refid="selectXfptSuppliceInspectionReportVo"/>
-        where id = #{id}
+        where r.id = #{id}
     </select>
 
     <insert id="insertXfptSuppliceInspectionReport" parameterType="XfptSuppliceInspectionReport" useGeneratedKeys="true"
@@ -211,6 +250,6 @@
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where r.del_flag = 0
     </sql>
 </mapper>
