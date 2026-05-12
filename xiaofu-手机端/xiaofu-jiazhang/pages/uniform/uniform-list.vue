@@ -66,7 +66,7 @@
       
       <!-- 无数据提示 -->
       <view class="empty-state" v-if="uniformList.length === 0 && !isLoading">
-        <image class="empty-image" src="/static/images/empty-box.png" mode="aspectFit"></image>
+        <image class="empty-image" src="/static/uni.png" mode="aspectFit"></image>
         <text class="empty-text">暂无相关校服</text>
       </view>
     </scroll-view>
@@ -136,6 +136,9 @@
 </template>
 
 <script>
+import config from '@/config'
+import { listUniforms } from '@/api/uniform'
+
 export default {
   data() {
     return {
@@ -179,6 +182,58 @@ export default {
     this.fetchUniformList();
   },
   methods: {
+    normalizeUniform(item, index) {
+      return {
+        id: item.id || item.uniformId || item.productId,
+        name: item.name || item.uniformName || item.productName || '校服',
+        price: item.price || item.salePrice || item.minPrice || 0,
+        salesCount: item.salesCount || item.saleCount || item.buyCount || 0,
+        image: item.image || item.coverImage || item.mainImage || item.imgUrl || (index % 2 === 0 ? '/static/nanxf.png' : '/static/nvxf.png')
+      };
+    },
+
+    getQueryParams() {
+      return {
+        pageNum: this.page,
+        pageSize: 10,
+        keyword: this.searchKeyword,
+        category: this.currentCategory === 'all' ? '' : this.currentCategory,
+        grade: this.filters.grade,
+        season: this.filters.season,
+        minPrice: this.filters.minPrice,
+        maxPrice: this.filters.maxPrice
+      };
+    },
+
+    getMockUniforms() {
+      const all = [
+        { id: 1, category: 'summer', name: '夏季短袖校服套装（男）', price: 128, salesCount: 236, image: '/static/nanxf.png' },
+        { id: 2, category: 'summer', name: '夏季短袖校服套装（女）', price: 128, salesCount: 218, image: '/static/nvxf.png' },
+        { id: 3, category: 'daily', name: '秋季校服三件套（男）', price: 268, salesCount: 168, image: '/static/qjxf.png' },
+        { id: 4, category: 'daily', name: '秋季校服三件套（女）', price: 268, salesCount: 152, image: '/static/xf1.png' },
+        { id: 5, category: 'sport', name: '运动校服套装', price: 198, salesCount: 96, image: '/static/xf2.png' },
+        { id: 6, category: 'winter', name: '冬季加绒校服外套', price: 328, salesCount: 84, image: '/static/qjxf.png' }
+      ];
+      const categoryList = this.currentCategory === 'all' || this.currentCategory === 'new'
+        ? all
+        : all.filter((item) => item.category === this.currentCategory);
+      const keyword = this.searchKeyword.trim();
+      return keyword ? categoryList.filter((item) => item.name.includes(keyword)) : categoryList;
+    },
+
+    applyUniformResult(rows, total) {
+      const list = rows.map(this.normalizeUniform);
+      this.uniformList = this.page === 1 ? list : [...this.uniformList, ...list];
+      this.hasMore = total ? this.uniformList.length < total : list.length >= 10;
+      if (this.hasMore) this.page += 1;
+    },
+
+    finishLoading() {
+      this.isLoading = false;
+      this.isLoadingMore = false;
+      this.isRefreshing = false;
+    },
+
     // 获取校服列表
     fetchUniformList(refresh = false) {
       if (refresh) {
@@ -190,29 +245,33 @@ export default {
       if (!this.hasMore || this.isLoading) return;
       
       this.isLoading = true;
-      // 模拟API请求
-      setTimeout(() => {
-        // 这里应该是从API获取数据
-        const mockData = Array(10).fill().map((_, index) => ({
-          id: (this.page - 1) * 10 + index + 1,
-          name: `${this.currentCategory === 'all' ? '' : this.getCategoryName() + ' '}校服${(this.page - 1) * 10 + index + 1}`,
-          price: Math.floor(Math.random() * 150) + 50,
-          salesCount: Math.floor(Math.random() * 500),
-          image: index % 2 === 0 ? '/static/nanxf.png' : '/static/nvxf.png' 
-        }));
-        
-        this.uniformList = [...this.uniformList, ...mockData];
-        this.isLoading = false;
-        this.isLoadingMore = false;
-        this.isRefreshing = false;
-        
-        // 模拟没有更多数据的情况
-        if (this.page >= 3) {
-          this.hasMore = false;
-        } else {
-          this.page += 1;
+      listUniforms(this.getQueryParams())
+        .then((res) => {
+          const rows = res.rows || res.data || res.list || [];
+          if (!rows.length && config.enableMockFallback) {
+            this.uniformList = this.getMockUniforms();
+            this.hasMore = false;
+          } else {
+            this.applyUniformResult(rows, res.total);
+          }
+          this.finishLoading();
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            const mockData = this.getMockUniforms();
+            this.uniformList = this.page === 1 ? mockData : [...this.uniformList, ...mockData];
+            this.hasMore = false;
+            this.finishLoading();
+            return;
+          }
+
+          this.finishLoading();
+          uni.showToast({
+            title: error.message || '校服列表加载失败',
+            icon: 'none'
+          });
         }
-      }, 800);
+      );
     },
     
     // 获取分类名称
@@ -230,12 +289,6 @@ export default {
     
     // 搜索校服
     searchUniform() {
-      if (!this.searchKeyword.trim()) return;
-      // 实际开发中应该调用API搜索
-      uni.showToast({
-        title: `搜索关键词: ${this.searchKeyword}`,
-        icon: 'none'
-      });
       this.fetchUniformList(true);
     },
     
@@ -281,8 +334,6 @@ export default {
     // 应用筛选条件
     applyFilter() {
       this.showFilterDrawer = false;
-      // 实际开发中应该调用API根据筛选条件查询
-      console.log('应用筛选条件', this.filters);
       this.fetchUniformList(true);
     }
   }
@@ -339,12 +390,12 @@ export default {
 
 // 分类选项卡
 .category-tabs {
-  display: flex;
   white-space: nowrap;
   background-color: #fff;
   padding: 0 20rpx;
   height: 80rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  box-sizing: border-box;
   
   .tab-item {
     display: inline-block;

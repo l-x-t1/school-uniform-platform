@@ -134,6 +134,9 @@
 </template>
 
 <script>
+import config from '@/config'
+import { getAddress, addAddress, updateAddress } from '@/api/address'
+
 export default {
   data() {
     return {
@@ -196,25 +199,56 @@ export default {
     this.getRegionData();
   },
   methods: {
+    normalizeAddress(item = {}) {
+      return {
+        id: item.id || item.addressId || this.addressId,
+        name: item.name || item.receiver || item.userName || '',
+        phone: item.phone || item.mobile || '',
+        province: item.province || '',
+        city: item.city || '',
+        district: item.district || '',
+        detailAddress: item.detailAddress || item.address || '',
+        isDefault: item.isDefault === true || item.isDefault === 1 || item.defaultFlag === 1,
+        tag: item.tag || item.label || ''
+      };
+    },
+    getLocalAddresses() {
+      return uni.getStorageSync('addressList') || [];
+    },
+    saveLocalAddress(address) {
+      const list = this.getLocalAddresses();
+      const normalized = this.normalizeAddress(address);
+      const id = normalized.id || `ADDR${Date.now()}`;
+      const nextAddress = { ...normalized, id };
+      let nextList = list.filter((item) => String(item.id) !== String(id));
+
+      if (nextAddress.isDefault || nextList.length === 0) {
+        nextList = nextList.map((item) => ({ ...item, isDefault: false }));
+        nextAddress.isDefault = true;
+      }
+
+      nextList.unshift(nextAddress);
+      uni.setStorageSync('addressList', nextList);
+      uni.setStorageSync('selectedAddress', nextAddress);
+      return nextAddress;
+    },
     // 获取地址详情
     getAddressDetail() {
-      // 模拟数据
-      const addressDetail = {
-        id: this.addressId,
-        name: '张先生',
-        phone: '13812345678',
-        province: '河北省',
-        city: '石家庄市',
-        district: '长安区',
-        detailAddress: '和平路123号和平小区2号楼3单元501',
-        isDefault: true,
-        tag: '家'
-      };
-      
-      // 设置表单数据
-      this.addressInfo = addressDetail;
-      
-      // TODO: 从API获取地址详情
+      getAddress(this.addressId)
+        .then((res) => {
+          this.addressInfo = this.normalizeAddress(res.data || res);
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            const address = this.getLocalAddresses().find((item) => String(item.id) === String(this.addressId));
+            if (address) this.addressInfo = this.normalizeAddress(address);
+            return;
+          }
+          uni.showToast({
+            title: error.message || '地址详情加载失败',
+            icon: 'none'
+          });
+        });
     },
     
     // 获取省市区数据
@@ -295,23 +329,40 @@ export default {
         return;
       }
       
-      // TODO: 调用API保存地址
       uni.showLoading({
         title: '保存中...'
       });
-      
-      setTimeout(() => {
-        uni.hideLoading();
-        uni.showToast({
-          title: this.isEdit ? '修改成功' : '添加成功',
-          icon: 'success'
+
+      const payload = {
+        ...this.addressInfo,
+        id: this.addressId || this.addressInfo.id
+      };
+      const request = this.isEdit ? updateAddress(payload) : addAddress(payload);
+
+      request
+        .catch((error) => {
+          if (!config.enableMockFallback) return Promise.reject(error);
+          return { data: this.saveLocalAddress(payload) };
+        })
+        .then((res) => {
+          const saved = (res && (res.data || res)) || payload;
+          this.saveLocalAddress(Object.assign({}, payload, saved));
+          uni.hideLoading();
+          uni.showToast({
+            title: this.isEdit ? '修改成功' : '添加成功',
+            icon: 'success'
+          });
+          setTimeout(() => {
+            uni.navigateBack();
+          }, 800);
+        })
+        .catch((error) => {
+          uni.hideLoading();
+          uni.showToast({
+            title: error.message || '保存失败',
+            icon: 'none'
+          });
         });
-        
-        // 返回地址列表页
-        setTimeout(() => {
-          uni.navigateBack();
-        }, 1500);
-      }, 1000);
     }
   }
 }

@@ -70,6 +70,9 @@
 </template>
 
 <script>
+import config from '@/config'
+import { listMyStudents, deleteStudent as deleteStudentApi } from '@/api/student'
+
 export default {
   data() {
     return {
@@ -86,32 +89,49 @@ export default {
     this.getStudentList();
   },
   methods: {
+    normalizeStudent(item = {}) {
+      return {
+        id: item.id || item.studentId,
+        name: item.name || item.studentName || '',
+        gender: item.gender || item.sex || '0',
+        grade: item.grade || item.gradeName || '',
+        className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
+        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || ''
+      };
+    },
+    getLocalStudents() {
+      return uni.getStorageSync('studentList') || [];
+    },
+    saveLocalStudents(list) {
+      uni.setStorageSync('studentList', list);
+    },
     //获取学生列表
     getStudentList() {
-      uni.request({
-        url: `${this.baseUrl}/school/schoolStudentInfo/list`,
-        method: "GET",
-        header: {
-          Authorization: uni.getStorageSync("token"),
-        },
-        data: {
-          simId: uni.getStorageSync("simId"),
-        },
-        success: ({ data }) => {
-          this.studentList = data.rows.map((item) => ({
-            id: item.id,
-            name: item.name,
-            gender: item.sex,
-            className:item.grade+'级'+item.classId+'班',
-            school: item.sysDepts.deptName,
-          }));
-        },
-      });
+      listMyStudents({ simId: uni.getStorageSync("simId") })
+        .then((res) => {
+          const rows = res.rows || res.data || res.list || [];
+          if (rows.length) {
+            this.studentList = rows.map(this.normalizeStudent);
+            this.saveLocalStudents(this.studentList);
+            return;
+          }
+          this.studentList = config.enableMockFallback ? this.getLocalStudents().map(this.normalizeStudent) : [];
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            this.studentList = this.getLocalStudents().map(this.normalizeStudent);
+            return;
+          }
+          uni.showToast({
+            title: error.message || '学生信息加载失败',
+            icon: 'none'
+          });
+        });
     },
     // 编辑学生信息
     editStudent(student) {
       uni.navigateTo({
-        url: `/pages/user/bind-student?id=${student.id}&type=edit`,
+        url: `/pages/user/student-edit?id=${student.id}`,
       });
     },
 
@@ -123,22 +143,25 @@ export default {
         title: "确认删除",
         content: `确定要删除${student.name}的信息吗？`,
         success: (res) => {
-          uni.request({
-            url: `${this.baseUrl}/school/schoolStudentInfo/` + student.id,
-            method: "DELETE",
-            header: {
-              Authorization: uni.getStorageSync("token"),
-            },
-            success: ({ data }) => {
-              if (data.code === 200) {
+            deleteStudentApi(student.id)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+                const nextList = this.getLocalStudents().filter((item) => String(item.id || item.studentId) !== String(student.id));
+                this.saveLocalStudents(nextList);
+              })
+              .then(() => {
                 uni.showToast({
                   title: "删除成功",
                   icon: "success",
                 });
                 this.getStudentList();
-              }
-            },
-          });
+              })
+              .catch((error) => {
+                uni.showToast({
+                  title: error.message || '删除失败',
+                  icon: 'none'
+                });
+              });
         },
       });
     },
@@ -155,7 +178,7 @@ export default {
       }
 
       uni.navigateTo({
-        url: "/pages/user/bind-student",
+        url: "/pages/user/student-edit",
       });
     },
     complete(){

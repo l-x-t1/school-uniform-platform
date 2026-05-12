@@ -19,6 +19,7 @@
           </view>
           <view class="tag-row" v-if="item.tag">
             <view class="address-tag">{{item.tag}}</view>
+            <view class="default-action" v-if="!item.isDefault" @click.stop="setAsDefault(item, index)">设为默认</view>
           </view>
         </view>
         <view class="address-actions">
@@ -34,7 +35,7 @@
     
     <!-- 空状态 -->
     <view class="empty-state" v-else>
-      <image class="empty-image" src="/static/images/empty-address.png" mode="aspectFit"></image>
+      <image class="empty-image" src="/static/uni.png" mode="aspectFit"></image>
       <text class="empty-text">暂无收货地址</text>
       <text class="empty-desc">添加地址以便收到校服</text>
     </view>
@@ -50,33 +51,13 @@
 </template>
 
 <script>
+import config from '@/config'
+import { listAddress, deleteAddress as deleteAddressApi, setDefaultAddress } from '@/api/address'
+
 export default {
   data() {
     return {
-      addressList: [
-        {
-          id: '1',
-          name: '张先生',
-          phone: '13812345678',
-          province: '河北省',
-          city: '石家庄市',
-          district: '长安区',
-          detailAddress: '和平路123号和平小区2号楼3单元501',
-          isDefault: true,
-          tag: '家'
-        },
-        {
-          id: '2',
-          name: '李女士',
-          phone: '13987654321',
-          province: '河北省',
-          city: '石家庄市',
-          district: '新华区',
-          detailAddress: '中华北大街256号丰泽园小区5号楼2单元302',
-          isDefault: false,
-          tag: '学校'
-        }
-      ],
+      addressList: [],
       // 是否从选择地址进入
       isChooseMode: false
     }
@@ -90,11 +71,62 @@ export default {
     // 获取地址列表
     this.getAddressList();
   },
+  onShow() {
+    this.getAddressList();
+  },
   methods: {
+    normalizeAddress(item = {}) {
+      const fullAddress = item.fullAddress || `${item.province || ''}${item.city || ''}${item.district || ''}${item.detailAddress || ''}`;
+      return {
+        id: item.id || item.addressId,
+        name: item.name || item.receiver || item.userName || '',
+        phone: item.phone || item.mobile || '',
+        province: item.province || '',
+        city: item.city || '',
+        district: item.district || '',
+        detailAddress: item.detailAddress || item.address || '',
+        fullAddress,
+        isDefault: item.isDefault === true || item.isDefault === 1 || item.defaultFlag === 1,
+        tag: item.tag || item.label || ''
+      };
+    },
+    getLocalAddresses() {
+      const local = uni.getStorageSync('addressList') || [];
+      if (local.length) return local.map(this.normalizeAddress);
+      const demo = [{
+        id: 'ADDR_DEMO_1',
+        name: '张先生',
+        phone: '13812345678',
+        province: '河北省',
+        city: '石家庄市',
+        district: '长安区',
+        detailAddress: '和平路123号和平小区2号楼3单元501',
+        isDefault: true,
+        tag: '家'
+      }];
+      uni.setStorageSync('addressList', demo);
+      return demo.map(this.normalizeAddress);
+    },
+    saveLocalAddresses(list) {
+      uni.setStorageSync('addressList', list);
+    },
     // 获取地址列表
     getAddressList() {
-      // TODO: 从API获取地址列表
-      console.log('获取地址列表');
+      listAddress()
+        .then((res) => {
+          const rows = res.rows || res.data || res.list || [];
+          this.addressList = rows.length ? rows.map(this.normalizeAddress) : this.getLocalAddresses();
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            this.addressList = this.getLocalAddresses();
+            return;
+          }
+          uni.showToast({
+            title: error.message || '地址加载失败',
+            icon: 'none'
+          });
+        });
     },
     
     // 新增地址
@@ -118,11 +150,13 @@ export default {
         content: '确定要删除此地址吗？',
         success: (res) => {
           if (res.confirm) {
-            // TODO: 调用API删除地址
             this.addressList.splice(index, 1);
+            deleteAddressApi(item.id).catch(() => {
+              if (config.enableMockFallback) this.saveLocalAddresses(this.addressList);
+            });
             uni.showToast({
               title: '删除成功',
-              icon: 'none'
+              icon: 'success'
             });
           }
         }
@@ -132,14 +166,7 @@ export default {
     // 选择地址（从订单确认页进入时）
     selectAddress(item) {
       if (this.isChooseMode) {
-        // 将选中的地址返回给上一页
-        let pages = getCurrentPages();
-        let prevPage = pages[pages.length - 2];
-        
-        // 设置上一页的数据
-        prevPage.$vm.selectedAddress = item;
-        
-        // 返回上一页
+        uni.setStorageSync('selectedAddress', item);
         uni.navigateBack();
       }
     },
@@ -154,10 +181,12 @@ export default {
       // 将当前地址设为默认
       this.addressList[index].isDefault = true;
       
-      // TODO: 调用API更新默认地址
+      setDefaultAddress(item.id).catch(() => {
+        if (config.enableMockFallback) this.saveLocalAddresses(this.addressList);
+      });
       uni.showToast({
         title: '设置成功',
-        icon: 'none'
+        icon: 'success'
       });
     }
   }
@@ -220,7 +249,11 @@ export default {
         }
       }
       
-      .tag-row {
+        .tag-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+
         .address-tag {
           display: inline-block;
           font-size: 22rpx;
@@ -228,6 +261,11 @@ export default {
           background-color: rgba(59, 122, 255, 0.1);
           padding: 4rpx 16rpx;
           border-radius: 20rpx;
+        }
+
+        .default-action {
+          font-size: 24rpx;
+          color: #3B7AFF;
         }
       }
     }

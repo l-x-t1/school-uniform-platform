@@ -175,6 +175,9 @@
 </template>
 
 <script>
+import config from '@/config'
+import { getStudent, addStudent, updateStudent } from '@/api/student'
+
 export default {
   data() {
     return {
@@ -209,6 +212,36 @@ export default {
     }
   },
   methods: {
+    normalizeStudent(item = {}) {
+      return {
+        avatar: item.avatar || item.avatarUrl || (item.gender === '女' || item.sex === '1' ? '/static/nvsheng.png' : '/static/nansheng.png'),
+        name: item.name || item.studentName || '',
+        gender: item.gender === '0' || item.sex === '0' ? '男' : (item.gender === '1' || item.sex === '1' ? '女' : (item.gender || '男')),
+        studentId: item.studentId || item.studentNo || item.code || '',
+        school: item.school || item.schoolName || '',
+        grade: item.grade || item.gradeName || '',
+        className: item.className || item.class || '',
+        topSize: item.topSize || '',
+        bottomSize: item.bottomSize || '',
+        shoesSize: item.shoesSize || ''
+      };
+    },
+    getLocalStudents() {
+      return uni.getStorageSync('studentList') || [];
+    },
+    saveLocalStudent(payload) {
+      const list = this.getLocalStudents();
+      const id = this.studentId || payload.id || `STU${Date.now()}`;
+      const nextStudent = {
+        ...payload,
+        id,
+        gender: payload.gender === '男' ? '0' : '1'
+      };
+      const nextList = [nextStudent, ...list.filter((item) => String(item.id || item.studentId) !== String(id))];
+      uni.setStorageSync('studentList', nextList);
+      uni.setStorageSync('isImprove', 1);
+      return nextStudent;
+    },
     // 选择头像
     chooseAvatar() {
       uni.chooseImage({
@@ -225,35 +258,21 @@ export default {
     
     // 获取学生信息
     fetchStudentInfo() {
-      // 模拟从API获取数据
-      // 实际开发中应该调用API获取
-      if (this.studentId === '1') {
-        this.studentInfo = {
-          avatar: 'https://pic3.zhimg.com/v2-306cd8f07a20cba46873209739c6395d_r.jpg',
-          name: '张小明',
-          gender: '男',
-          studentId: '20230001',
-          school: '石家庄市第一中学',
-          grade: '高一',
-          className: '1班',
-          topSize: '165/84A',
-          bottomSize: 'L',
-          shoesSize: '41码'
-        };
-      } else if (this.studentId === '2') {
-        this.studentInfo = {
-          avatar: 'https://pic1.zhimg.com/v2-594f4c68d0b7ec2b5aa51f92d5de61ae_r.jpg',
-          name: '张小红',
-          gender: '女',
-          studentId: '20230042',
-          school: '石家庄市第一中学',
-          grade: '初二',
-          className: '3班',
-          topSize: '160/80A',
-          bottomSize: 'M',
-          shoesSize: '38码'
-        };
-      }
+      getStudent(this.studentId)
+        .then((res) => {
+          this.studentInfo = this.normalizeStudent(res.data || res);
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            const localStudent = this.getLocalStudents().find((item) => String(item.id || item.studentId) === String(this.studentId));
+            if (localStudent) this.studentInfo = this.normalizeStudent(localStudent);
+            return;
+          }
+          uni.showToast({
+            title: error.message || '学生信息加载失败',
+            icon: 'none'
+          });
+        });
     },
     
     // 选择学校
@@ -335,23 +354,41 @@ export default {
         return;
       }
       
-      // 实际开发中应该调用API保存数据
       uni.showLoading({
         title: '保存中'
       });
-      
-      setTimeout(() => {
-        uni.hideLoading();
-        uni.showToast({
-          title: this.isEdit ? '修改成功' : '添加成功',
-          icon: 'success'
+
+      const payload = {
+        ...this.studentInfo,
+        id: this.studentId || undefined,
+        sex: this.studentInfo.gender === '男' ? '0' : '1'
+      };
+      const request = this.isEdit ? updateStudent(payload) : addStudent(payload);
+
+      request
+        .catch((error) => {
+          if (!config.enableMockFallback) return Promise.reject(error);
+          return { data: this.saveLocalStudent(payload) };
+        })
+        .then((res) => {
+          const saved = (res && (res.data || res)) || payload;
+          this.saveLocalStudent(Object.assign({}, payload, saved));
+          uni.hideLoading();
+          uni.showToast({
+            title: this.isEdit ? '修改成功' : '添加成功',
+            icon: 'success'
+          });
+          setTimeout(() => {
+            uni.navigateBack();
+          }, 800);
+        })
+        .catch((error) => {
+          uni.hideLoading();
+          uni.showToast({
+            title: error.message || '保存失败',
+            icon: 'none'
+          });
         });
-        
-        // 返回上一页
-        setTimeout(() => {
-          uni.navigateBack();
-        }, 1500);
-      }, 1000);
     }
   }
 }
