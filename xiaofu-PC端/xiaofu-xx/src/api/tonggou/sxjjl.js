@@ -8,3 +8,11 @@ export function listSizeExchange(query) {
     params: query
   })
 }
+
+// 查询尺码调换记录详情
+export function getSizeExchange(id) {
+  return request({
+    url: '/school/sizeExchange/' + id,
+    method: 'get'
+  })
+}
