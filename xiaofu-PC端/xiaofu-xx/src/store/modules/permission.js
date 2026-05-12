@@ -45,6 +45,42 @@ function normalizeUsageMenus(routes = []) {
   });
 }
 
+function ensureSupplierMessageMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const exists = (children = []) =>
+    children.some((item) => item.path === "supplierMessage" || item.path === "/newFeature/supplierMessage");
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "SupplierMessage",
+      path: "supplierMessage",
+      component: "school/supplierMessage/index",
+      meta: {
+        title: "供应商信息",
+        icon: "tree-table",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierMessageMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
 const permission = {
   state: {
     routes: [],
@@ -81,9 +117,9 @@ const permission = {
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = normalizeUsageMenus(
+          const normalizedRoutes = ensureSupplierMessageMenu(normalizeUsageMenus(
             JSON.parse(JSON.stringify(res.data || []))
-          );
+          ));
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);
