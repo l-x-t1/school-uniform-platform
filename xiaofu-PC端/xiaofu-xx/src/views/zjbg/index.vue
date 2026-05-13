@@ -101,6 +101,8 @@
 </template>
 
 <script>
+import { suppliceInspectionReportList } from '@/api/school/report'
+
 export default {
   name: 'ZjbgIndex',
   data() {
@@ -132,12 +134,12 @@ export default {
     /** 查询列表 */
     getList() {
       this.loading = true;
-      // 模拟接口调用
-      setTimeout(() => {
-        this.tableData = [];
-        this.total = 0;
+      suppliceInspectionReportList(this.queryParams).then(response => {
+        this.tableData = response.rows || [];
+        this.total = response.total || 0;
+      }).finally(() => {
         this.loading = false;
-      }, 300);
+      });
     },
     /** 搜索按钮操作 */
     handleQuery() {

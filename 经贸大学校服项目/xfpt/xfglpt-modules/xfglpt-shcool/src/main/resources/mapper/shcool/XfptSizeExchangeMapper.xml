@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptSizeExchangeMapper">
+
+    <resultMap type="com.xfgl.school.domain.vo.XfptSizeExchangeVo" id="XfptSizeExchangeResult">
+        <result property="id" column="id" />
+        <result property="afterSaleId" column="after_sale_id" />
+        <result property="afterSaleNo" column="after_sale_no" />
+        <result property="orderId" column="order_id" />
+        <result property="orderItemId" column="order_item_id" />
+        <result property="orderNo" column="order_no" />
+        <result property="goodsId" column="goods_id" />
+        <result property="productName" column="product_name" />
+        <result property="productCode" column="product_code" />
+        <result property="categoryName" column="category_name" />
+        <result property="imageUrl" column="image_url" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="manufacturerName" column="manufacturer_name" />
+        <result property="price" column="price" />
+        <result property="operateTime" column="operate_time" />
+        <result property="status" column="status" />
+        <result property="sizeName" column="size_name" />
+        <result property="targetSizeName" column="target_size_name" />
+        <result property="applyNum" column="apply_num" />
+        <result property="deptId" column="dept_id" />
+    </resultMap>
+
+    <select id="selectSizeExchangeList" parameterType="com.xfgl.school.domain.vo.XfptSizeExchangeQuery" resultMap="XfptSizeExchangeResult">
+        select
+            a.id as id,
+            a.id as after_sale_id,
+            a.after_sale_no,
+            a.order_id,
+            a.order_item_id,
+            a.order_no,
+            item.goods_id,
+            coalesce(g.goods_name, item.goods_name) as product_name,
+            g.goods_code as product_code,
+            g.category_name as category_name,
+            coalesce(item.main_image, g.main_image) as image_url,
+            coalesce(oi.supplier_id, g.supplier_id, a.supplier_id) as supplier_id,
+            coalesce(oi.supplier_name, g.supplier_name) as manufacturer_name,
+            item.unit_price as price,
+            coalesce(a.finish_time, a.update_time, a.create_time) as operate_time,
+            a.status,
+            item.size_name,
+            a.target_size_name,
+            a.apply_num,
+            a.dept_id
+        from xfpt_after_sale a
+        left join xfpt_order_info oi on a.order_id = oi.id and oi.del_flag = '0'
+        left join xfpt_order_item item on a.order_item_id = item.id and item.del_flag = '0'
+        left join xfpt_goods g on item.goods_id = g.id and g.del_flag = '0'
+        <where>
+            a.del_flag = '0'
+            and a.apply_type = '3'
+            and a.dept_id = #{deptId}
+            <if test="status != null and status != ''">
+                and a.status = #{status}
+            </if>
+            <if test="manufacturerName != null and manufacturerName != ''">
+                and coalesce(oi.supplier_name, g.supplier_name) like concat('%', #{manufacturerName}, '%')
+            </if>
+            <if test="productStatus != null and productStatus != ''">
+                and g.status = #{productStatus}
+            </if>
+            <if test="productCategory != null and productCategory != ''">
+                <choose>
+                    <when test='productCategory == "1"'>
+                        and g.category_name like concat('%', '校服', '%')
+                    </when>
+                    <when test='productCategory == "2"'>
+                        and g.category_name like concat('%', '运动', '%')
+                    </when>
+                    <when test='productCategory == "3"'>
+                        and g.category_name like concat('%', '书包', '%')
+                    </when>
+                    <otherwise>
+                        and g.category_name like concat('%', #{productCategory}, '%')
+                    </otherwise>
+                </choose>
+            </if>
+            <if test="productStyle != null and productStyle != ''">
+                <choose>
+                    <when test='productStyle == "1"'>
+                        and (coalesce(g.goods_name, item.goods_name) like concat('%', '春', '%')
+                            or coalesce(g.goods_name, item.goods_name) like concat('%', '秋', '%'))
+                    </when>
+                    <when test='productStyle == "2"'>
+                        and coalesce(g.goods_name, item.goods_name) like concat('%', '夏', '%')
+                    </when>
+                    <when test='productStyle == "3"'>
+                        and coalesce(g.goods_name, item.goods_name) like concat('%', '冬', '%')
+                    </when>
+                    <otherwise>
+                        and coalesce(g.goods_name, item.goods_name) like concat('%', #{productStyle}, '%')
+                    </otherwise>
+                </choose>
+            </if>
+        </where>
+        order by operate_time desc, a.id desc
+    </select>
+
+    <select id="selectSizeExchangeById" resultMap="XfptSizeExchangeResult">
+        select
+            a.id as id,
+            a.id as after_sale_id,
+            a.after_sale_no,
+            a.order_id,
+            a.order_item_id,
+            a.order_no,
+            item.goods_id,
+            coalesce(g.goods_name, item.goods_name) as product_name,
+            g.goods_code as product_code,
+            g.category_name as category_name,
+            coalesce(item.main_image, g.main_image) as image_url,
+            coalesce(oi.supplier_id, g.supplier_id, a.supplier_id) as supplier_id,
+            coalesce(oi.supplier_name, g.supplier_name) as manufacturer_name,
+            item.unit_price as price,
+            coalesce(a.finish_time, a.update_time, a.create_time) as operate_time,
+            a.status,
+            item.size_name,
+            a.target_size_name,
+            a.apply_num,
+            a.dept_id
+        from xfpt_after_sale a
+        left join xfpt_order_info oi on a.order_id = oi.id and oi.del_flag = '0'
+        left join xfpt_order_item item on a.order_item_id = item.id and item.del_flag = '0'
+        left join xfpt_goods g on item.goods_id = g.id and g.del_flag = '0'
+        where a.del_flag = '0'
+          and a.apply_type = '3'
+          and a.id = #{id}
+          and a.dept_id = #{deptId}
+    </select>
+</mapper>

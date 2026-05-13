@@ -2,6 +2,9 @@ package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
+import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
+import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 
 /**
  * 统购公告Service接口
@@ -58,4 +61,8 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
          * @return 结果
          */
         public int deleteXfptGroupNoticeById(Long id);
+
+        public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query);
+
+        public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId);
 }

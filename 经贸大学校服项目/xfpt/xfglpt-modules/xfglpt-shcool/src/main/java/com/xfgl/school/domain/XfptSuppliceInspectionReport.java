@@ -84,5 +84,81 @@ public class XfptSuppliceInspectionReport extends BaseEntity {
     @TableField(exist = false)
     private String ggTitle;
 
+    @TableField(exist = false)
+    private String noticeName;
+
+    @TableField(exist = false)
+    private String manufacturerName;
+
+    @TableField(exist = false)
+    private String firstInspection;
+
+    @TableField(exist = false)
+    private String secondInspection;
+
+    @TableField(exist = false)
+    private String noticeStatus;
+
+    @TableField(exist = false)
+    private String noticeStatusText;
+
+    @TableField(exist = false)
+    private String dateRange;
+
+    public String getNoticeName() {
+        return noticeName;
+    }
+
+    public void setNoticeName(String noticeName) {
+        this.noticeName = noticeName;
+    }
+
+    public String getManufacturerName() {
+        return manufacturerName;
+    }
+
+    public void setManufacturerName(String manufacturerName) {
+        this.manufacturerName = manufacturerName;
+    }
+
+    public String getFirstInspection() {
+        return firstInspection;
+    }
+
+    public void setFirstInspection(String firstInspection) {
+        this.firstInspection = firstInspection;
+    }
+
+    public String getSecondInspection() {
+        return secondInspection;
+    }
+
+    public void setSecondInspection(String secondInspection) {
+        this.secondInspection = secondInspection;
+    }
+
+    public String getNoticeStatus() {
+        return noticeStatus;
+    }
+
+    public void setNoticeStatus(String noticeStatus) {
+        this.noticeStatus = noticeStatus;
+    }
+
+    public String getNoticeStatusText() {
+        return noticeStatusText;
+    }
+
+    public void setNoticeStatusText(String noticeStatusText) {
+        this.noticeStatusText = noticeStatusText;
+    }
+
+    public String getDateRange() {
+        return dateRange;
+    }
+
+    public void setDateRange(String dateRange) {
+        this.dateRange = dateRange;
+    }
 
 }

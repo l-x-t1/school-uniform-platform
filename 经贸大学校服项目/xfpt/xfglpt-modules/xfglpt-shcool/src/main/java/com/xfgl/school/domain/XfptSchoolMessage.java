@@ -140,4 +140,16 @@ public class XfptSchoolMessage extends BaseEntity {
      */
     private String peopleCount;
 
+    public Long getId() {
+        return id;
+    }
+
+    public Long getDeptId() {
+        return deptId;
+    }
+
+    public String getSchoolName() {
+        return schoolName;
+    }
+
 }
