@@ -154,6 +154,32 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/sxjjl",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "detail",
+        component: () => import("@/views/sxjjl/detail"),
+        name: "SxjjlDetail",
+        meta: { title: "尺码调换详情", activeMenu: "/tonggou/sxjjl" },
+      },
+    ],
+  },
+  {
+    path: "/zjbg",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "detail",
+        component: () => import("@/views/zjbg/detail"),
+        name: "ZjbgDetail",
+        meta: { title: "质检报告详情", activeMenu: "/tonggou/zjbg" },
+      },
+    ],
+  },
+  {
     path: "/bxactiveAdd",
     component: Layout,
     name: "Bxactive",
