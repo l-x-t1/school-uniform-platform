@@ -957,6 +957,42 @@ ON DUPLICATE KEY UPDATE
   `REMARK` = VALUES(`REMARK`),
   `TYPE` = VALUES(`TYPE`);
 
+-- 学校端结算管理菜单及权限
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+VALUES
+  (2356, '结算管理', 2333, 96, 'settlementManage', 'school/settlementManage/index', NULL, '',
+   1, 0, 'C', '0', '0', 'school:settlementManage:list', 'money',
+   'admin', '2026-05-13 00:00:00', '', NULL, '结算管理菜单', NULL),
+  (2357, '结算管理查询', 2356, 1, '#', '', NULL, '',
+   1, 0, 'F', '0', '0', 'school:settlementManage:query', '#',
+   'admin', '2026-05-13 00:00:00', '', NULL, '', NULL),
+  (2358, '结算管理结算', 2356, 2, '#', '', NULL, '',
+   1, 0, 'F', '0', '0', 'school:settlementManage:settle', '#',
+   'admin', '2026-05-13 00:00:00', '', NULL, '', NULL)
+ON DUPLICATE KEY UPDATE
+  `MENU_NAME` = VALUES(`MENU_NAME`),
+  `PARENT_ID` = VALUES(`PARENT_ID`),
+  `ORDER_NUM` = VALUES(`ORDER_NUM`),
+  `PATH` = VALUES(`PATH`),
+  `COMPONENT` = VALUES(`COMPONENT`),
+  `QUERY` = VALUES(`QUERY`),
+  `ROUTE_NAME` = VALUES(`ROUTE_NAME`),
+  `IS_FRAME` = VALUES(`IS_FRAME`),
+  `IS_CACHE` = VALUES(`IS_CACHE`),
+  `MENU_TYPE` = VALUES(`MENU_TYPE`),
+  `VISIBLE` = VALUES(`VISIBLE`),
+  `STATUS` = VALUES(`STATUS`),
+  `PERMS` = VALUES(`PERMS`),
+  `ICON` = VALUES(`ICON`),
+  `UPDATE_BY` = VALUES(`UPDATE_BY`),
+  `UPDATE_TIME` = VALUES(`UPDATE_TIME`),
+  `REMARK` = VALUES(`REMARK`),
+  `TYPE` = VALUES(`TYPE`);
+
 -- Menu updates for 商品信息导入权限
 SET @goods_menu_id := (
   SELECT `MENU_ID` FROM `sys_menu`
@@ -4489,6 +4525,22 @@ JOIN `sys_user_role` ur
   ON ur.`USER_ID` = u.`USER_ID`
 JOIN `sys_menu` m
   ON m.`MENU_ID` IN (2353, 2354, 2355)
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+-- 学校端结算管理权限：同步给 testUser 当前绑定角色
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`MENU_ID` IN (2356, 2357, 2358)
 WHERE u.`USER_NAME` = 'testUser'
   AND NOT EXISTS (
     SELECT 1
