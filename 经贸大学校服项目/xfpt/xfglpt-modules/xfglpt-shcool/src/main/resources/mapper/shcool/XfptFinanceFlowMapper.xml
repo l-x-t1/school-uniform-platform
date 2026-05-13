@@ -71,6 +71,52 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     </select>
 
+    <select id="selectDailyIncomeList" parameterType="XfptFinanceFlow" resultType="java.util.HashMap">
+        select
+            date_format(trade_time, '%Y-%m-%d') as incomeDate,
+            coalesce(sum(amount), 0) as totalAmount,
+            count(1) as totalCount,
+            coalesce(sum(case when status = '1' then amount else 0 end), 0) as schoolAmount,
+            coalesce(sum(case when status = '2' then amount else 0 end), 0) as supplierAmount
+        from xfpt_finance_flow
+        <where>
+            del_flag = 0
+            and flow_direction = '1'
+            and status in ('1', '2')
+            and trade_time is not null
+            <if test="flowNo != null and flowNo != ''"> and flow_no like concat('%', #{flowNo}, '%')</if>
+            <if test="payeeType != null and payeeType != ''"> and payee_type = #{payeeType}</if>
+            <if test="schoolId != null"> and school_id = #{schoolId}</if>
+            <if test="supplierId != null"> and supplier_id = #{supplierId}</if>
+            <if test="params != null and params.beginTime != null and params.beginTime != ''">
+                and trade_time &gt;= str_to_date(#{params.beginTime}, '%Y-%m-%d')
+            </if>
+            <if test="params != null and params.endTime != null and params.endTime != ''">
+                and trade_time &lt; date_add(str_to_date(#{params.endTime}, '%Y-%m-%d'), interval 1 day)
+            </if>
+        </where>
+        group by date_format(trade_time, '%Y-%m-%d')
+        order by incomeDate desc
+    </select>
+
+    <select id="selectDailyIncomeDetail" parameterType="XfptFinanceFlow" resultMap="XfptFinanceFlowResult">
+        <include refid="selectXfptFinanceFlowVo"/>
+        <where>
+            del_flag = 0
+            and flow_direction = '1'
+            and status in ('1', '2')
+            <if test="tradeTime != null">
+                and trade_time &gt;= #{tradeTime}
+                and trade_time &lt; date_add(#{tradeTime}, interval 1 day)
+            </if>
+            <if test="flowNo != null and flowNo != ''"> and flow_no like concat('%', #{flowNo}, '%')</if>
+            <if test="payeeType != null and payeeType != ''"> and payee_type = #{payeeType}</if>
+            <if test="schoolId != null"> and school_id = #{schoolId}</if>
+            <if test="supplierId != null"> and supplier_id = #{supplierId}</if>
+        </where>
+        order by trade_time desc, id desc
+    </select>
+
     <select id="selectXfptFinanceFlowById" parameterType="Long" resultMap="XfptFinanceFlowResult">
         <include refid="selectXfptFinanceFlowVo"/>
         where id = #{id}
