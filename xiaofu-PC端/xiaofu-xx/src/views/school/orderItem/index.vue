@@ -41,6 +41,16 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="销售类型" prop="saleType">
+        <el-select v-model="queryParams.saleType" placeholder="请选择销售类型" clearable>
+          <el-option
+            v-for="item in saleTypeOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
       <el-form-item label="单价" prop="unitPrice">
         <el-input
           v-model="queryParams.unitPrice"
@@ -138,7 +148,11 @@
           <image-preview :src="scope.row.mainImage" :width="50" :height="50"/>
         </template>
       </el-table-column>
-      <el-table-column label="销售类型，1统购 2零售" align="center" prop="saleType" />
+      <el-table-column label="销售类型" align="center" prop="saleType">
+        <template slot-scope="scope">
+          <span>{{ getSaleTypeLabel(scope.row.saleType) }}</span>
+        </template>
+      </el-table-column>
       <el-table-column label="单价" align="center" prop="unitPrice" />
       <el-table-column label="购买数量" align="center" prop="buyNum" />
       <el-table-column label="行金额" align="center" prop="itemAmount" />
@@ -193,6 +207,16 @@
         <el-form-item label="商品主图快照" prop="mainImage">
           <image-upload v-model="form.mainImage"/>
         </el-form-item>
+        <el-form-item label="销售类型" prop="saleType">
+          <el-select v-model="form.saleType" placeholder="请选择销售类型" style="width: 100%">
+            <el-option
+              v-for="item in saleTypeOptions"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="单价" prop="unitPrice">
           <el-input v-model="form.unitPrice" placeholder="请输入单价" />
         </el-form-item>
@@ -223,6 +247,11 @@
 <script>
 import { listOrderItem, getOrderItem, delOrderItem, addOrderItem, updateOrderItem } from "@/api/school/orderItem";
 
+const SALE_TYPE_OPTIONS = [
+  { label: "统购", value: "1" },
+  { label: "零售", value: "2" }
+];
+
 export default {
   name: "OrderItem",
   data() {
@@ -237,6 +266,7 @@ export default {
       multiple: true,
       // 显示搜索条件
       showSearch: true,
+      saleTypeOptions: SALE_TYPE_OPTIONS,
       // 总条数
       total: 0,
       // 订单明细表格数据
@@ -296,6 +326,10 @@ export default {
     this.getList();
   },
   methods: {
+    getSaleTypeLabel(value) {
+      const match = this.saleTypeOptions.find(item => item.value === value);
+      return match ? match.label : value;
+    },
     /** 查询订单明细列表 */
     getList() {
       this.loading = true;
