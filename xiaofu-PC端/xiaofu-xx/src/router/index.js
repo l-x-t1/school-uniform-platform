@@ -128,6 +128,32 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/school/platformUsage",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/platformUsage/index"),
+        name: "PlatformUsage",
+        meta: { title: "使用情况", activeMenu: "/newFeature/platformUsage" },
+      },
+    ],
+  },
+  {
+    path: "/school/schoolUsage",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/schoolUsage/index"),
+        name: "SchoolUsage",
+        meta: { title: "使用情况", activeMenu: "/newFeature/schoolUsage" },
+      },
+    ],
+  },
+  {
     path: "/bxactiveAdd",
     component: Layout,
     name: "Bxactive",

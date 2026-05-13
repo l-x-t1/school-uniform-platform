@@ -1,41 +1,53 @@
-# Tomcat
 server:
   port: 9204
-# Spring
+
 spring:
   main:
     allow-bean-definition-overriding: true
   application:
-    # 应用名称
     name: xfglpt-school
   profiles:
-    # 环境配置
     active: dev
   cloud:
     nacos:
       discovery:
-        # 服务注册地址
-        #server-addr: 172.16.25.27:8848
         server-addr: localhost:8848
         ip: 127.0.0.1
-        #ip: 172.16.25.35
-        #ip: 172.16.25.25
         namespace: e4771fd7-40af-4918-96f5-90641c81b444
         port: 9204
         username: nacos
         password: admin123W999*)^(!@#
-      config:
-        # 配置中心地址
-        server-addr: localhost:8848
-        #server-addr: 172.16.25.27:8848
-        username: nacos
-        password: admin123W999*)^(!@#
-        namespace: 5e3e155d-73b2-4a36-ab8b-e54454e8b351
-        # 配置文件格式
-        file-extension: yml
-        # 共享配置
-        shared-configs:
-          - application-${spring.profiles.active}.${spring.cloud.nacos.config.file-extension}
+  datasource:
+    druid:
+      stat-view-servlet:
+        enabled: true
+        loginUsername: ruoyi
+        loginPassword: 123456
+    dynamic:
+      primary: master
+      druid:
+        initial-size: 5
+        min-idle: 5
+        maxActive: 20
+        maxWait: 60000
+        connectTimeout: 30000
+        socketTimeout: 60000
+        timeBetweenEvictionRunsMillis: 60000
+        minEvictableIdleTimeMillis: 300000
+        validationQuery: SELECT 1
+        testWhileIdle: true
+        testOnBorrow: false
+        testOnReturn: false
+        poolPreparedStatements: true
+        maxPoolPreparedStatementPerConnectionSize: 20
+        filters: stat,slf4j
+        connectionProperties: druid.stat.mergeSql\=true;druid.stat.slowSqlMillis\=5000
+      datasource:
+        master:
+          driver-class-name: com.mysql.cj.jdbc.Driver
+          url: jdbc:mysql://127.0.0.1:3306/xfglpt?useUnicode=true&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull&useSSL=false&serverTimezone=GMT%2B8
+          username: root
+          password: 123456
 
 mybatis-plus:
   type-aliases-package: com.xfgl.school.domain,com.xfgl.system.api.domain

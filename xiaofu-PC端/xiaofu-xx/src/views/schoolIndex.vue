@@ -9,7 +9,7 @@
         background="rgba(0, 0, 0, 0.8)"
       />
     </div>
-    
+
     <!-- 上半部分：统计数据和订购人数图表 -->
     <el-row :gutter="20" class="top-section">
       <!-- 左上：统计数据 -->
@@ -67,9 +67,7 @@
       <el-col :span="12" class="box-card-item">
         <el-card class="chart-card">
           <div slot="header" class="clearfix">
-            <span class="card-title"
-              >校服订购人数统计</span
-            >
+            <span class="card-title">校服订购人数统计</span>
           </div>
           <div id="orderCountChart" style="width: 100%; height: 360px"></div>
         </el-card>
@@ -82,9 +80,7 @@
       <el-col :span="12" class="box-card-item">
         <el-card class="chart-card">
           <div slot="header" class="clearfix">
-            <span class="card-title"
-              >校服订购金额统计</span
-            >
+            <span class="card-title">校服订购金额统计</span>
           </div>
           <div id="orderAmountChart" style="width: 100%; height: 360px"></div>
         </el-card>
@@ -100,13 +96,18 @@
         </el-card>
       </el-col>
     </el-row>
-
   </div>
 </template>
 
 <script>
 import * as echarts from "echarts";
-import { getPersonMoney, getSchoolOrderCount, getSchoolOrderAmount, getSchoolUniformType } from "@/api/index";
+import {
+  getPersonMoney,
+  getSchoolOrderCount,
+  getSchoolOrderAmount,
+  getSchoolUniformType,
+} from "@/api/index";
+
 export default {
   name: "Dashboard",
   data() {
@@ -118,7 +119,7 @@ export default {
       lastYearOrderAmount: 0,
       thisYearOrderAmount: [],
       thisYearOrderCount: [],
-      
+
       // 图表实例
       orderCountChart: null,
       orderAmountChart: null,
@@ -126,7 +127,7 @@ export default {
 
       // 校服品类统计
       uniformTypeData: [],
-      
+
       // 加载状态
       loading: false,
     };
@@ -155,6 +156,7 @@ export default {
         this.lastYearOrderAmount = res.data.lastMoneyYearCount;
       });
     },
+
     // 初始化图表
     initCharts() {
       this.initOrderCountChart();
@@ -169,10 +171,15 @@ export default {
 
       this.orderCountChart = echarts.init(chartDom);
 
-      // 处理数据格式，支持多种字段名
-      const orderCountData = Array.isArray(this.thisYearOrderCount) ? this.thisYearOrderCount : [];
-      const xAxisData = orderCountData.map((item) => item.key || item.name || '未知');
-      const seriesData = orderCountData.map((item) => item.value || item.count || 0);
+      const orderCountData = Array.isArray(this.thisYearOrderCount)
+        ? this.thisYearOrderCount
+        : [];
+      const xAxisData = orderCountData.map(
+        (item) => item.key || item.name || "未知"
+      );
+      const seriesData = orderCountData.map(
+        (item) => item.value || item.count || 0
+      );
 
       const option = {
         tooltip: {
@@ -180,28 +187,35 @@ export default {
           axisPointer: {
             type: "shadow",
           },
-          formatter: function (params) {
+          formatter(params) {
             if (params && params.length > 0) {
-              return params[0].name + "<br/>" + params[0].seriesName + ": " + params[0].value + "人";
+              return (
+                params[0].name +
+                "<br/>" +
+                params[0].seriesName +
+                ": " +
+                params[0].value +
+                "人"
+              );
             }
-            return '';
+            return "";
           },
         },
         grid: {
           left: "3%",
           right: "4%",
-          bottom: 80, //  像素值，用于为 dataZoom 提供充足空间
+          bottom: 80,
           containLabel: true,
         },
         dataZoom: [
           {
             type: "slider",
-            show: orderCountData.length > 8, // 只有数据超过8条时才显示滚动条
+            show: orderCountData.length > 8,
             xAxisIndex: [0],
             start: 0,
-            end: orderCountData.length > 8 ? 40 : 100, // 根据数据量调整显示比例
+            end: orderCountData.length > 8 ? 40 : 100,
             bottom: 30,
-            height: 15, // 调整滚动条高度
+            height: 15,
           },
         ],
         xAxis: {
@@ -211,7 +225,7 @@ export default {
             alignWithLabel: true,
           },
           axisLabel: {
-            rotate: xAxisData.length > 6 ? 45 : 0, // 数据多时旋转标签
+            rotate: xAxisData.length > 6 ? 45 : 0,
             fontSize: 12,
             interval: 0,
           },
@@ -237,7 +251,7 @@ export default {
           {
             name: "校服订购人数",
             type: "bar",
-            barWidth: "40%", // 调整柱状图宽度
+            barWidth: "40%",
             data: seriesData,
             itemStyle: {
               color: "#409EFF",
@@ -254,7 +268,6 @@ export default {
 
       this.orderCountChart.setOption(option);
 
-      // 监听窗口大小变化
       window.addEventListener("resize", () => {
         if (this.orderCountChart) {
           this.orderCountChart.resize();
@@ -269,10 +282,15 @@ export default {
 
       this.orderAmountChart = echarts.init(chartDom);
 
-      // 处理数据格式，支持多种字段名
-      const orderAmountData = Array.isArray(this.thisYearOrderAmount) ? this.thisYearOrderAmount : [];
-      const xAxisData = orderAmountData.map((item) => item.key || item.name || '未知');
-      const seriesData = orderAmountData.map((item) => item.value || item.amount || 0);
+      const orderAmountData = Array.isArray(this.thisYearOrderAmount)
+        ? this.thisYearOrderAmount
+        : [];
+      const xAxisData = orderAmountData.map(
+        (item) => item.key || item.name || "未知"
+      );
+      const seriesData = orderAmountData.map(
+        (item) => item.value || item.amount || 0
+      );
 
       const option = {
         tooltip: {
@@ -280,7 +298,7 @@ export default {
           axisPointer: {
             type: "shadow",
           },
-          formatter: function (params) {
+          formatter(params) {
             if (params && params.length > 0) {
               return (
                 params[0].name +
@@ -290,24 +308,24 @@ export default {
                 params[0].value.toLocaleString()
               );
             }
-            return '';
+            return "";
           },
         },
         grid: {
           left: "3%",
           right: "4%",
-          bottom: 80, //  像素值，用于为 dataZoom 提供充足空间
+          bottom: 80,
           containLabel: true,
         },
         dataZoom: [
           {
             type: "slider",
-            show: orderAmountData.length > 8, // 只有数据超过8条时才显示滚动条
+            show: orderAmountData.length > 8,
             xAxisIndex: [0],
             start: 0,
-            end: orderAmountData.length > 8 ? 40 : 100, // 根据数据量调整显示比例
+            end: orderAmountData.length > 8 ? 40 : 100,
             bottom: 30,
-            height: 15, // 调整滚动条高度
+            height: 15,
           },
         ],
         xAxis: {
@@ -317,7 +335,7 @@ export default {
             alignWithLabel: true,
           },
           axisLabel: {
-            rotate: xAxisData.length > 6 ? 45 : 0, // 数据多时旋转标签
+            rotate: xAxisData.length > 6 ? 45 : 0,
             fontSize: 12,
             interval: 0,
           },
@@ -330,7 +348,7 @@ export default {
           },
           axisLabel: {
             fontSize: 12,
-            formatter: function (value) {
+            formatter(value) {
               return "¥" + Math.round(value);
             },
           },
@@ -345,7 +363,7 @@ export default {
           {
             name: "校服订购金额",
             type: "bar",
-            barWidth: "40%", // 调整柱状图宽度
+            barWidth: "40%",
             data: seriesData,
             itemStyle: {
               color: "#67C23A",
@@ -362,7 +380,6 @@ export default {
 
       this.orderAmountChart.setOption(option);
 
-      // 监听窗口大小变化
       window.addEventListener("resize", () => {
         if (this.orderAmountChart) {
           this.orderAmountChart.resize();
@@ -429,7 +446,6 @@ export default {
 
       this.uniformTypeChart.setOption(option);
 
-      // 监听窗口大小变化
       window.addEventListener("resize", () => {
         if (this.uniformTypeChart) {
           this.uniformTypeChart.resize();
@@ -441,7 +457,7 @@ export default {
     getChartColor(index) {
       const colors = [
         "#409EFF",
-        "#67C23A", 
+        "#67C23A",
         "#E6A23C",
         "#F56C6C",
         "#909399",
@@ -449,30 +465,31 @@ export default {
         "#FF9800",
         "#4CAF50",
         "#2196F3",
-        "#FF5722"
+        "#FF5722",
       ];
       return colors[index % colors.length];
     },
 
-
     // 页面数据加载
     loadData() {
       this.loading = true;
-      
-      // 获取校服订购统计数据
-      Promise.all([getSchoolOrderCount(), getSchoolOrderAmount(), getSchoolUniformType()])
+
+      Promise.all([
+        getSchoolOrderCount(),
+        getSchoolOrderAmount(),
+        getSchoolUniformType(),
+      ])
         .then((res) => {
           this.thisYearOrderCount = res[0].data || [];
-          this.thisYearOrderAmount = res[1].data || []; 
+          this.thisYearOrderAmount = res[1].data || [];
           this.uniformTypeData = res[2].data || [];
-          
-          // DOM渲染完成后初始化图表
+
           this.$nextTick(() => {
             this.initCharts();
           });
         })
-        .catch((error) => { 
-          this.$message.error('获取统计数据失败，请稍后重试');
+        .catch(() => {
+          this.$message.error("获取统计数据失败，请稍后重试");
           this.thisYearOrderCount = [];
           this.thisYearOrderAmount = [];
           this.uniformTypeData = [];
@@ -481,10 +498,8 @@ export default {
           this.loading = false;
         });
 
-      // 获取其他数据
       this.getPersonMoney();
     },
-
   },
 };
 </script>
@@ -493,6 +508,7 @@ export default {
 .box-card-item {
   height: 400px;
 }
+
 .dashboard-container {
   padding: 20px;
   background-color: #f5f5f5;
@@ -520,7 +536,6 @@ export default {
   margin-bottom: 25px;
 }
 
-// 强制所有卡片高度完全一致
 .stat-section-card,
 .chart-card,
 .manufacturer-card {
@@ -562,7 +577,6 @@ export default {
   }
 }
 
-// 统计数据容器
 .stats-container {
   flex: 1;
   display: flex;
@@ -621,7 +635,6 @@ export default {
   }
 }
 
-// 图表容器优化
 .chart-card {
   .el-card__body {
     padding: 20px !important;
@@ -629,15 +642,12 @@ export default {
   }
 }
 
-// 表格容器优化
 .manufacturer-card {
   .el-card__body {
     padding: 0 !important;
   }
 }
 
-
-// 响应式设计
 @media (max-width: 1200px) {
   .dashboard-container {
     height: auto;

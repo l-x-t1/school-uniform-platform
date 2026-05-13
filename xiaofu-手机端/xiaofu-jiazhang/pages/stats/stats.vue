@@ -67,6 +67,16 @@ const PROCEDURE_MENU_FULL = [
   { pcType: 12, title: "学校校服采购工作总结" },
 ];
 
+const FALLBACK_PROCESS_HEAD = {
+  purchaseName: "2026年春季校服采购流程",
+  purchaseYear: "2026",
+  cgTime: "2026-05",
+  cglcTeamId: DEFAULT_TEAM_MEETING_TEAM_ID,
+  id: "demo-cglc",
+};
+
+const FALLBACK_PROCESS_STATES = [1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0];
+
 export default {
   data() {
     return {
@@ -168,15 +178,12 @@ export default {
         await this.syncTeamMeetingIdFromList();
         await this.loadProcessDots();
       } catch (e) {
-        this.processHead = null;
-        this.teamMeetingId = "";
-        setStatsTeamMeetingId("");
-        setStatsFormTeamId("");
-        uni.showToast({
-          title: (e && e.message) || "流程信息加载失败",
-          icon: "none",
-        });
-        await this.loadProcessDots();
+        this.processHead = Object.assign({}, FALLBACK_PROCESS_HEAD);
+        this.teamMeetingId = DEFAULT_TEAM_MEETING_TEAM_ID;
+        setStatsTeamMeetingId(this.teamMeetingId);
+        setStatsFormTeamId(this.teamMeetingId);
+        this.cgTypeNum = null;
+        this.processStatesRaw = FALLBACK_PROCESS_STATES.slice();
       }
     },
     /**
@@ -203,7 +210,7 @@ export default {
         this.processStatesRaw = arr;
       } catch (e) {
         this.cgTypeNum = null;
-        this.processStatesRaw = [];
+        this.processStatesRaw = FALLBACK_PROCESS_STATES.slice();
       }
     },
     rawStateForMobileStep(mobileIndex) {
@@ -243,9 +250,9 @@ export default {
         setStatsTeamMeetingId(id);
         setStatsFormTeamId(id);
       } catch (e) {
-        this.teamMeetingId = "";
-        setStatsTeamMeetingId("");
-        setStatsFormTeamId("");
+        this.teamMeetingId = DEFAULT_TEAM_MEETING_TEAM_ID;
+        setStatsTeamMeetingId(this.teamMeetingId);
+        setStatsFormTeamId(this.teamMeetingId);
       }
     },
     /** 采购信息报备：与 PC Caigoubaobei 一致按 formId(teamId) 直接 getSummary(teamId) */

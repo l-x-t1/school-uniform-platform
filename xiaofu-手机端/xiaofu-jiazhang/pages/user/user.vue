@@ -1,7 +1,7 @@
 <template>
   <view class="user-container">
     <!-- 顶部用户信息区域 -->
-    <!-- <view class="user-header-section">
+    <view class="user-header-section">
       <view class="user-info">
         <view class="avatar-wrapper">
           <image
@@ -10,10 +10,23 @@
             mode="aspectFill"
           ></image>
         </view>
-        <view class="user-detail"> 
+        <view class="user-detail">
+          <text class="user-name">{{ userInfo.nickName || userInfo.name || '家长用户' }}</text>
+          <text class="school-info">{{ userInfo.phone || phone || '已登录' }}</text>
         </view>
-      </view> 
-    </view> -->
+      </view>
+      <button class="edit-btn" @click="navigateTo('/pages/user/profile-edit')">编辑资料</button>
+    </view>
+
+    <!-- 常用功能 -->
+    <view class="quick-card">
+      <view class="quick-item" v-for="item in quickActions" :key="item.title" @click="navigateTo(item.url)">
+        <view class="quick-icon" :style="{ backgroundColor: item.color }">
+          <uni-icons :type="item.icon" size="22" color="#fff"></uni-icons>
+        </view>
+        <text class="quick-text">{{ item.title }}</text>
+      </view>
+    </view>
 
     <!-- 学生信息卡片 -->
     <view class="student-card">
@@ -28,6 +41,9 @@
         </view>
       </view>
       <view class="student-list"> 
+        <view class="student-empty" v-if="studentList.length === 0" @click="navigateTo('/pages/user/student-edit')">
+          <text>暂无学生信息，去添加</text>
+        </view>
         <view
           class="student-item"
           v-for="(student, index) in studentList"
@@ -115,14 +131,18 @@
       </view> 
     </view> 
     <!-- 底部版本信息 -->
-    <!-- <view class="footer"> 
+    <view class="footer"> 
       <button class="logout-btn" @click="handleLogout">退出登录</button>
-    </view> -->
+    </view>
   </view>
 </template>
 
 <script>
 import linSelect from '../../uni_modules/lin-select/components/lin-select/lin-select.vue';
+import config from '@/config'
+import { listMyStudents } from '@/api/student'
+import { clearLoginState } from '@/utils/auth'
+
 export default {
   components: { linSelect },
   data() {
@@ -131,7 +151,14 @@ export default {
       userInfo: { 
         avatar: "/static/usertx.png", 
       },
+      phone: uni.getStorageSync('phone') || '',
       studentList: [],
+      quickActions: [
+        { title: '我的订单', icon: 'list', url: '/pages/order/order-list', color: '#30A3FF' },
+        { title: '购物车', icon: 'cart', url: '/pages/cart/cart', color: '#12B886' },
+        { title: '收货地址', icon: 'location', url: '/pages/user/address-list', color: '#FF9F1C' },
+        { title: '学生信息', icon: 'person', url: '/pages/user/student-info', color: '#7D3BFF' }
+      ],
       // 反馈统计数据
       feedbackStats: {
         total: 0,
@@ -143,31 +170,106 @@ export default {
   created() {
     
   },
-  onShow() { 
-    this.getFeedbackStats(); 
-	this.getStudentList();
+  onShow() {
+    this.userInfo = {
+      avatar: "/static/usertx.png",
+      ...(uni.getStorageSync('userInfo') || {})
+    };
+    this.phone = uni.getStorageSync('phone') || this.userInfo.phone || this.userInfo.parm1 || '';
+    this.ensureLogin(() => {
+      this.getFeedbackStats();
+      this.getStudentList();
+    });
   },
   methods: {
-    //获取学生列表
-    getStudentList() {
+    ensureLogin(callback) {
+      if (uni.getStorageSync("token") && uni.getStorageSync("simId")) {
+        callback && callback();
+        return;
+      }
+      if (this.isLocalDev()) {
+        this.devLogin(callback);
+        return;
+      }
+      uni.reLaunch({
+        url: "/pages/login/login",
+      });
+    },
+    isLocalDev() {
+      return typeof window !== "undefined" && ["localhost", "127.0.0.1"].includes(window.location.hostname);
+    },
+    devLogin(callback) {
+      const useLocalFallback = () => {
+        uni.setStorageSync("token", "dev-token");
+        uni.setStorageSync("simId", "dev-parent");
+        uni.setStorageSync("isImprove", 1);
+        uni.setStorageSync("phone", "13800138000");
+        uni.setStorageSync("isLoggedIn", true);
+        uni.setStorageSync("userInfo", {
+          nickName: "家长用户",
+          phone: "13800138000"
+        });
+        callback && callback();
+      };
+      uni.showLoading({
+        title: "本地登录中...",
+        mask: true,
+      });
       uni.request({
-        url: `${this.baseUrl}/school/schoolStudentInfo/list`,
+        url: `${this.baseUrl}/school/simOpen/devLogin`,
         method: "GET",
-        header: {
-          Authorization: uni.getStorageSync("token"),
-        },
-        data: {
-          simId: uni.getStorageSync("simId"),
-        },
         success: ({ data }) => {
-          this.studentList = data.rows.map((item) => ({
-            name: item.name,
-            sex: item.sex,
-            className:item.grade+'级'+item.classId+'班',
-            schoolName: item.sysDepts.deptName,
-          }));
+          uni.hideLoading();
+          if (data.code === 200) {
+            uni.setStorageSync("token", data.data.access_token);
+            uni.setStorageSync("simId", data.data.user.id);
+            uni.setStorageSync("isImprove", data.data.is_improve);
+            uni.setStorageSync("phone", data.data.user.parm1);
+            uni.setStorageSync("isLoggedIn", true);
+            uni.setStorageSync("userInfo", data.data.user);
+            callback && callback();
+          } else {
+            useLocalFallback();
+          }
+        },
+        fail: () => {
+          uni.hideLoading();
+          useLocalFallback();
         },
       });
+    },
+    //获取学生列表
+    getStudentList() {
+      listMyStudents({ simId: uni.getStorageSync("simId") })
+        .then((res) => {
+          const rows = res.rows || res.data || res.list || [];
+          if (rows.length) {
+            this.studentList = rows.map(this.normalizeStudent);
+            uni.setStorageSync('studentList', this.studentList);
+            return;
+          }
+          this.studentList = config.enableMockFallback ? (uni.getStorageSync('studentList') || []).map(this.normalizeStudent) : [];
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            this.studentList = (uni.getStorageSync('studentList') || []).map(this.normalizeStudent);
+            return;
+          }
+          uni.showToast({
+            title: error.message || '学生信息加载失败',
+            icon: 'none'
+          });
+        });
+    },
+
+    normalizeStudent(item = {}) {
+      return {
+        id: item.id || item.studentId,
+        name: item.name || item.studentName || '',
+        sex: item.sex || item.gender || '0',
+        className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
+        schoolName: item.schoolName || item.school || (item.sysDepts && item.sysDepts.deptName) || ''
+      };
     },
 
     // 获取反馈统计
@@ -206,10 +308,7 @@ export default {
         content: "确定要退出登录吗？",
         success: (res) => {
           if (res.confirm) {
-            // 清除登录信息
-            uni.removeStorageSync("token");
-            uni.removeStorageSync("userInfo");
-            // 跳转到登录页
+            clearLoginState();
             uni.reLaunch({
               url: "/pages/login/login",
             });
@@ -223,9 +322,10 @@ export default {
 
 <style lang="scss" scoped>
 .user-container {
-  height: 100%;
+  min-height: 100vh;
   background-color: #f5f5f5;
   padding:40rpx 40rpx;
+  box-sizing: border-box;
 }
 
 // 用户信息头部
@@ -291,6 +391,40 @@ export default {
   }
 }
 
+.quick-card {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  padding: 26rpx 18rpx;
+  margin: 24rpx 0 30rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.05);
+
+  .quick-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+  }
+
+  .quick-icon {
+    width: 72rpx;
+    height: 72rpx;
+    border-radius: 36rpx;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12rpx;
+  }
+
+  .quick-text {
+    font-size: 24rpx;
+    color: #333;
+    white-space: nowrap;
+  }
+}
+
 // 学生信息卡片
 .student-card { 
   background-color: #fff;
@@ -319,6 +453,17 @@ export default {
 
   .student-list {
     margin-top: 30rpx;
+
+    .student-empty {
+      height: 96rpx;
+      border-radius: 12rpx;
+      background: #f6f9ff;
+      color: #3B7AFF;
+      font-size: 28rpx;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
     .student-item {
       display: flex;
@@ -350,6 +495,23 @@ export default {
           margin-left: 20rpx;
         }
       }
+    }
+  }
+}
+
+.footer {
+  margin: 36rpx 0 20rpx;
+
+  .logout-btn {
+    height: 88rpx;
+    line-height: 88rpx;
+    border-radius: 44rpx;
+    background: #fff;
+    color: #ff5a5f;
+    font-size: 30rpx;
+
+    &::after {
+      border: none;
     }
   }
 }

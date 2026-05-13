@@ -1,23 +1,26 @@
 <template>
   <view class="container">
-    <!-- 搜索框 -->
     <view class="search-container">
       <view class="search-box">
-        <input 
-          class="search-input" 
-          type="text" 
-          placeholder="请输入公告名称" 
-          v-model="searchKeyword" 
+        <uni-icons type="search" size="20" color="#8a8f99"></uni-icons>
+        <input
+          class="search-input"
+          type="text"
+          placeholder="搜索公告名称"
+          v-model="searchKeyword"
+          @input="onSearchInput"
           @confirm="onSearchConfirm"
         />
-        <view class="search-btn" @click="onSearchConfirm">
-          <!-- <text class="search-icon">🔍</text> -->
-          <uni-icons type="search" size="20" color="#999"></uni-icons>
-        </view>
+        <uni-icons
+          v-if="searchKeyword"
+          type="clear"
+          size="18"
+          color="#b8bec8"
+          @click="clearSearch"
+        ></uni-icons>
       </view>
     </view>
 
-    <!-- 顶部选项卡 -->
     <view class="tabs">
       <view
         class="tab-item"
@@ -33,16 +36,8 @@
       >
         成交公告
       </view>
-      <!-- <view
-        class="tab-item"
-        :class="{ active: currentTab === 2 }"
-        @click="switchTab(2)"
-      >
-        备选公告
-      </view> -->
     </view>
 
-    <!-- 公告列表 -->
     <scroll-view
       scroll-y
       class="notice-list"
@@ -50,8 +45,6 @@
       refresher-enabled
       :refresher-triggered="isRefreshing"
       @refresherrefresh="onRefresh"
-      :refresher-threshold="80"
-      :refresher-default-style="'black'"
     >
       <view class="list-content" v-if="notices.length > 0">
         <view
@@ -60,102 +53,112 @@
           :key="item.id || index"
           @click="viewNotice(item)"
         >
-          <!-- 公告标题 -->
-          <view class="notice-header">
-            <text class="notice-title">{{ item.title }}</text> 
-          </view>
-
-          <!-- 公告信息 -->
-          <view class="notice-info"> 
-            <view class="notice-time"> 
-              <text class="source-text">{{ item.deptname }}</text> 
-              <!-- <text class="time-label">发布时间:</text> -->
-              <text class="time-value">{{ item.createTime ? item.createTime.split(' ')[0] : '暂无' }}</text>
+          <view class="notice-main">
+            <view class="notice-tag">{{ getStatusText(item) }}</view>
+            <text class="notice-title">{{ item.title }}</text>
+            <view class="notice-info">
+              <text class="notice-source">{{ item.deptname || item.createBy || '校服管理平台' }}</text>
+              <text class="notice-time">{{ formatDate(item.createTime) }}</text>
             </view>
           </view>
-
-          <!-- 操作按钮 -->
-          <!-- <view class="notice-action" v-if="item.catagory === 'CGGG' || item.catagory === 'QYRWGG'">
-            <button
-              class="action-btn btn-primary"
-              @click.stop="handleAction(item)"
-            >
-              查看详情
-            </button>
-          </view> -->
+          <uni-icons type="right" size="16" color="#c8ccd4"></uni-icons>
         </view>
-        
-        <!-- 加载更多提示 -->
-        <view class="loading-more" v-if="notices.length > 0">
-          <view v-if="isLoading" class="loading-content">
-            <uni-load-more status="loading" :content-text="loadingText"></uni-load-more>
-          </view>
-          <view v-else-if="!hasMore" class="loading-content">
-            <uni-load-more status="noMore" :content-text="loadingText"></uni-load-more>
-          </view>
+
+        <view class="loading-more" v-if="isLoading || !hasMore">
+          <uni-load-more
+            :status="isLoading ? 'loading' : 'noMore'"
+            :content-text="loadingText"
+          ></uni-load-more>
         </view>
       </view>
 
-      <!-- 空状态 -->
-      <view class="empty-state" v-if="notices.length == 0 && !isLoading">
-        <view class="empty-icon">📋</view>
-        <text class="empty-text">暂无公告</text> 
-      </view>
-      
-      <!-- 错误状态 -->
-      <view class="error-state" v-if="hasError && !isLoading">
-        <view class="error-icon">⚠️</view>
-        <text class="error-text">{{ errorMessage }}</text>
-        <button class="retry-btn" @click="retryLoad">重新加载</button>
+      <view class="empty-state" v-if="notices.length === 0 && !isLoading">
+        <image src="/static/uni.png" mode="aspectFit" class="empty-image"></image>
+        <text class="empty-text">暂无公告</text>
       </view>
     </scroll-view>
   </view>
 </template>
 
 <script>
+const MOCK_NOTICES = [
+  {
+    id: "notice-1",
+    title: "2026年春季校服采购公告",
+    deptname: "石家庄市示例学校",
+    createBy: "总务处",
+    createTime: "2026-05-02 09:00:00",
+    catagory: "CGGG",
+    type: 0,
+    content:
+      "根据学校校服采购工作安排，现启动2026年春季校服采购流程。本次采购将按照公开、公平、公正原则开展，采购范围包括春秋装、夏装及冬季校服。欢迎符合条件的供应商按要求参与。",
+    attachments: ["/profile/upload/校服采购需求说明.pdf"],
+  },
+  {
+    id: "notice-2",
+    title: "校服样衣展示及家长意见征集公告",
+    deptname: "石家庄市示例学校",
+    createBy: "校服选用组织",
+    createTime: "2026-05-01 15:30:00",
+    catagory: "CGGG",
+    type: 0,
+    content:
+      "学校将对候选校服样衣进行集中展示，并同步征集家长意见。家长可在规定时间内查看样衣图片、面料说明和价格区间，并提交选购意见。",
+    attachments: [],
+  },
+  {
+    id: "notice-3",
+    title: "2026年春季校服成交结果公告",
+    deptname: "校服管理平台",
+    createBy: "采购小组",
+    createTime: "2026-04-28 10:20:00",
+    catagory: "CGGG",
+    type: 3,
+    content:
+      "经校服选用组织评议和家长代表确认，现将2026年春季校服采购成交结果予以公告。后续将按照合同约定组织尺码采集、订单确认和质量验收。",
+    attachments: ["/profile/upload/成交结果公告.pdf"],
+  },
+];
+
 export default {
   data() {
     return {
       baseUrl: getApp().globalData.baseUrl,
       notices: [],
-      currentTab: 0, // 0 for 采购公告, 1 for 备选公告
+      currentTab: 0,
       page: 1,
       limit: 10,
       isLoading: false,
       hasMore: true,
       isRefreshing: false,
-      hasError: false,
-      errorMessage: '',
-      searchKeyword: '', // 搜索关键词
-      searchTimer: null, // 搜索防抖定时器
+      searchKeyword: "",
+      searchTimer: null,
       loadingText: {
-        contentdown: '加载中...',
-        contentrefresh: '加载中...',
-        contentnomore: '没有更多了'
-      }
+        contentdown: "加载更多",
+        contentrefresh: "加载中",
+        contentnomore: "没有更多了",
+      },
     };
-  }, 
+  },
   created() {
     this.getList();
   },
   methods: {
     getList() {
       this.isLoading = true;
-      this.hasError = false;
-      
+
       const requestData = {
         simId: uni.getStorageSync("simId"),
         pageNum: this.page,
         pageSize: this.limit,
-        catagory: this.currentTab === 0 ? 'CGGG' : this.currentTab === 1 ? 'CGGG' : 'QYRWGG',
-        type: this.currentTab === 0 ? 0 : this.currentTab === 1 ? 3 : null,
+        catagory: "CGGG",
+        type: this.currentTab === 0 ? 0 : 3,
       };
-      
-      // 如果有搜索关键词，添加到请求参数中
+
       if (this.searchKeyword && this.searchKeyword.trim()) {
         requestData.title = this.searchKeyword.trim();
       }
-      
+
       uni.request({
         url: `${this.baseUrl}/system/xfptnotice/appList`,
         method: "GET",
@@ -164,470 +167,256 @@ export default {
           Authorization: uni.getStorageSync("token"),
         },
         success: ({ data }) => {
-          if (this.page === 1) {
-            // 第一页或搜索时，替换数据
-            this.notices = data.rows || [];
+          const rows = data && Array.isArray(data.rows) ? data.rows : [];
+          if (rows.length) {
+            this.mergeRows(rows, data.total);
+          } else if (this.page === 1) {
+            this.useMockRows();
           } else {
-            // 加载更多时，追加数据
-            this.notices = [...this.notices, ...(data.rows || [])];
+            this.hasMore = false;
           }
-          
-          // 判断是否还有更多数据 - 使用total字段正确判断
-          this.hasMore = this.notices.length < (data.total || 0);
-          
-          // 只有在成功获取数据后才递增页码
-          if (data.rows && data.rows.length > 0) {
-            this.page++;
-          }
-          
-          this.isLoading = false;
-          this.isRefreshing = false;
-          uni.stopPullDownRefresh(); 
+          this.finishLoading();
         },
-        fail: (err) => {
-          this.hasError = true;
-          this.errorMessage = err.message || '加载失败';
-          this.isLoading = false;
-          this.isRefreshing = false;
-          uni.stopPullDownRefresh();
-        }
+        fail: () => {
+          this.useMockRows();
+          this.finishLoading();
+        },
       });
     },
-    switchTab(index) {
-      this.currentTab = index;
-      this.page = 1; // 切换标签时重置页码
-      this.hasMore = true;
+    mergeRows(rows, total) {
+      if (this.page === 1) {
+        this.notices = rows;
+      } else {
+        this.notices = this.notices.concat(rows);
+      }
+      this.hasMore = this.notices.length < (total || rows.length);
+      if (rows.length > 0) {
+        this.page += 1;
+      }
+    },
+    useMockRows() {
+      const type = this.currentTab === 0 ? 0 : 3;
+      const keyword = (this.searchKeyword || "").trim();
+      let rows = MOCK_NOTICES.filter((item) => item.type === type);
+      if (keyword) {
+        rows = rows.filter((item) => item.title.indexOf(keyword) !== -1);
+      }
+      this.notices = rows;
+      this.hasMore = false;
+    },
+    finishLoading() {
       this.isLoading = false;
       this.isRefreshing = false;
-      this.notices = []; // 清空列表
+      uni.stopPullDownRefresh();
+    },
+    switchTab(index) {
+      if (this.currentTab === index) return;
+      this.currentTab = index;
+      this.resetList();
       this.getList();
     },
     loadMore() {
-      if (this.isLoading || !this.hasMore) {
-        return;
-      }
-      this.isLoading = true;
+      if (this.isLoading || !this.hasMore) return;
       this.getList();
     },
     onRefresh() {
-      this.page = 1;
-      this.hasMore = true;
-      this.isLoading = false;
       this.isRefreshing = true;
-      this.notices = [];
+      this.resetList();
       this.getList();
     },
-    retryLoad() {
-      this.hasError = false;
-      this.getList();
+    resetList() {
+      this.page = 1;
+      this.hasMore = true;
+      this.notices = [];
+      this.isLoading = false;
     },
     viewNotice(notice) {
       uni.navigateTo({
-        url: `/pages/notice/notice-detail?id=${notice.id}`,
+        url: `/pages/notice/notice-detail?id=${encodeURIComponent(notice.id)}`,
       });
     },
-    handleAction(notice) {
-      this.viewNotice(notice);
-    },
-    getStatusClass(item) {
-      if (item.catagory === 'CGGG' && item.type === 0) {
-        return 'status-purchase';
-      } else if (item.catagory === 'CGGG' && item.type === 1) {
-        return 'status-bid';
-      } else if (item.catagory === 'QYRWGG') {
-        return 'status-alternative';
-      }
-      return 'status-unknown';
-    },
     getStatusText(item) {
-      if (item.catagory === 'CGGG' && item.type === 0) {
-        return '采购公告';
-      } else if (item.catagory === 'CGGG' && item.type === 1) {
-        return '中标公告';
-      } else if (item.catagory === 'QYRWGG') {
-        return '备选公告';
-      }
-      return '未知状态';
+      return Number(item.type) === 3 ? "成交公告" : "采购公告";
     },
-    // 搜索输入处理（防抖）
+    formatDate(value) {
+      if (!value) return "暂无时间";
+      return String(value).split(" ")[0];
+    },
     onSearchInput() {
-      // 清除之前的定时器
       if (this.searchTimer) {
         clearTimeout(this.searchTimer);
       }
-      
-      // 设置新的定时器，500ms后执行搜索
       this.searchTimer = setTimeout(() => {
         this.performSearch();
-      }, 500);
+      }, 400);
     },
-    // 搜索确认
     onSearchConfirm() {
-      // 清除定时器，立即执行搜索
       if (this.searchTimer) {
         clearTimeout(this.searchTimer);
       }
       this.performSearch();
     },
-    // 执行搜索
     performSearch() {
-      this.page = 1;
-      this.hasMore = true;
-      this.isLoading = false;
-      this.isRefreshing = false;
-      this.notices = []; // 清空列表
+      this.resetList();
       this.getList();
     },
-    // 清空搜索
     clearSearch() {
-      this.searchKeyword = '';
+      this.searchKeyword = "";
       this.performSearch();
-    }
+    },
   },
 };
 </script>
 
 <style lang="scss">
-.container { 
-  background-color: #f8f9fa;
+.container {
+  min-height: 100vh;
+  background-color: #f5f7fb;
 }
 
-// 搜索框样式
 .search-container {
-  background-color: #fff;
-  padding: 24rpx;
-  border-bottom: 1rpx solid #e8eaed;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
+  background-color: #ffffff;
+  padding: 24rpx 28rpx;
+  border-bottom: 1rpx solid #eef0f4;
 }
 
 .search-box {
+  height: 78rpx;
+  padding: 0 24rpx;
   display: flex;
   align-items: center;
-  background-color: #f5f5f5;
-  border-radius: 48rpx;
-  padding: 0 24rpx;
-  height: 80rpx;
-  border: 2rpx solid transparent;
-  transition: all 0.3s ease;
-
-  &:focus-within {
-    border-color: #3b7aff;
-    background-color: #fff;
-    box-shadow: 0 0 0 4rpx rgba(59, 122, 255, 0.1);
-  }
+  gap: 14rpx;
+  background-color: #f3f5f8;
+  border-radius: 10rpx;
 }
 
 .search-input {
   flex: 1;
-  height: 100%;
+  height: 78rpx;
   font-size: 28rpx;
-  color: #333;
-  background: transparent;
-  border: none;
-  outline: none;
-  
-  &::placeholder {
-    color: #999;
-    font-size: 26rpx;
-  }
+  color: #20242c;
 }
 
-.search-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 60rpx;
-  height: 60rpx;
-  margin-left: 16rpx;
-  // background-color: #3b7aff;
-  border-radius: 50%;
-  transition: all 0.3s ease;
-
-  &:active {
-    transform: scale(0.95);
-    background-color: #2c5ce6;
-  }
-}
-
-.search-icon {
-  font-size: 28rpx;
-  color: #fff;
-}
-
-// 顶部选项卡
 .tabs {
   display: flex;
   height: 88rpx;
-  background-color: #fff;
-  border-bottom: 1rpx solid #e8eaed;
+  background-color: #ffffff;
+  border-bottom: 1rpx solid #eef0f4;
+}
+
+.tab-item {
+  flex: 1;
   position: relative;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-
-  .tab-item {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28rpx;
-    color: #666;
-    position: relative;
-    transition: all 0.3s ease;
-    font-weight: 400;
-
-    &.active {
-      color: #3b7aff;
-      font-weight: 600;
-
-      &::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 48rpx;
-        height: 4rpx;
-        background-color: #3b7aff;
-        border-radius: 2rpx;
-        transition: all 0.3s ease;
-      }
-    }
-
-    &:active {
-      opacity: 0.7;
-    }
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28rpx;
+  color: #5f6673;
 }
 
-// 公告列表
-.notice-list { 
-  background-color: #f8f9fa;
-  height: calc(100vh - 320rpx);
-
-  .list-content {
-    padding: 24rpx;
-  }
-
-  .notice-item {
-    background-color: #fff;
-    border-radius: 16rpx;
-    padding: 32rpx 32rpx 8rpx;
-    margin-bottom: 24rpx;
-    box-shadow: 0 4rpx 16rpx rgba(0, 0, 0, 0.06);
-    transition: all 0.3s ease;
-    border: 1rpx solid #f0f0f0;
-
-    &:active {
-      transform: scale(0.98);
-      box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.1);
-    }
-
-    .notice-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 24rpx;
-
-      .notice-title {
-        flex: 1;
-        font-size: 32rpx;
-        color: #1a1a1a;
-        font-weight: 600;
-        line-height: 1.4;
-        margin-right: 20rpx;
-      }
-
-      .notice-status {
-        font-size: 22rpx;
-        padding: 6rpx 16rpx;
-        border-radius: 20rpx;
-        font-weight: 500;
-        white-space: nowrap;
-
-        &.status-purchase {
-          background-color: rgba(59, 122, 255, 0.1);
-          color: #3b7aff;
-        }
-
-        &.status-bid {
-          background-color: rgba(76, 175, 80, 0.1);
-          color: #4caf50;
-        }
-
-        &.status-alternative {
-          background-color: rgba(255, 152, 0, 0.1);
-          color: #ff9800;
-        }
-
-        &.status-unknown {
-          background-color: rgba(158, 158, 158, 0.1);
-          color: #9e9e9e;
-        }
-      }
-    }
-
-    .notice-info {
-      margin-bottom: 28rpx;
-
-      .notice-source {
-        margin-bottom: 16rpx;
-
-        .source-text {
-          font-size: 26rpx;
-          color: #3b7aff;
-          background-color: rgba(59, 122, 255, 0.08);
-          padding: 8rpx 20rpx;
-          border-radius: 24rpx;
-          font-weight: 500;
-        }
-      }
-
-      .notice-time {
-        display: flex;
-        align-items: center;
-        
-        .source-text {
-          font-size: 26rpx;
-          color: #3b7aff;
-          background-color: rgba(59, 122, 255, 0.08);
-          padding: 8rpx 20rpx;
-          border-radius: 24rpx;
-          font-weight: 500;
-        }
-
-        .time-label {
-          font-size: 26rpx;
-          color: #999;
-          margin-right: 8rpx;
-        }
-
-        .time-value {
-          font-size: 26rpx;
-          color: #666;
-          font-weight: 500; 
-          margin-left: 20rpx;
-        }
-      }
-    }
-
-    .notice-action {
-      display: flex;
-      justify-content: center;
-
-      .action-btn {
-        width: 240rpx;
-        height: 72rpx;
-        line-height: 72rpx;
-        border-radius: 36rpx;
-        font-size: 28rpx;
-        font-weight: 500;
-        padding: 0;
-        transition: all 0.3s ease;
-        border: none;
-        background: linear-gradient(135deg, #3b7aff 0%, #5b8cff 100%);
-        color: #fff;
-        box-shadow: 0 4rpx 12rpx rgba(59, 122, 255, 0.3);
-
-        &::after {
-          border: none;
-        }
-
-        &:active {
-          transform: translateY(2rpx);
-          box-shadow: 0 2rpx 8rpx rgba(59, 122, 255, 0.2);
-        }
-      }
-    }
-  }
+.tab-item.active {
+  color: #2f7df6;
+  font-weight: 600;
 }
 
-// 加载更多
+.tab-item.active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  width: 52rpx;
+  height: 5rpx;
+  transform: translateX(-50%);
+  background-color: #2f7df6;
+  border-radius: 4rpx;
+}
+
+.notice-list {
+  height: calc(100vh - 176rpx);
+}
+
+.list-content {
+  padding: 24rpx;
+}
+
+.notice-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18rpx;
+  padding: 28rpx 26rpx;
+  margin-bottom: 20rpx;
+  background-color: #ffffff;
+  border-radius: 12rpx;
+  border: 1rpx solid #eef0f4;
+}
+
+.notice-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.notice-tag {
+  display: inline-flex;
+  align-items: center;
+  height: 38rpx;
+  padding: 0 14rpx;
+  margin-bottom: 14rpx;
+  border-radius: 6rpx;
+  background-color: #edf4ff;
+  color: #2f7df6;
+  font-size: 22rpx;
+}
+
+.notice-title {
+  display: block;
+  font-size: 31rpx;
+  line-height: 1.45;
+  font-weight: 600;
+  color: #1f2530;
+}
+
+.notice-info {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 18rpx;
+}
+
+.notice-source,
+.notice-time {
+  font-size: 24rpx;
+  color: #7a8290;
+}
+
+.notice-source {
+  max-width: 360rpx;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .loading-more {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 40rpx 0;
-
-  .loading-content {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  }
+  padding: 12rpx 0 28rpx;
 }
 
-// 空状态
 .empty-state {
+  min-height: 520rpx;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 120rpx 40rpx;
-
-  .empty-icon {
-    font-size: 120rpx;
-    margin-bottom: 32rpx;
-    opacity: 0.4;
-  }
-
-  .empty-text {
-    font-size: 28rpx;
-    color: #666;
-    font-weight: 500;
-    margin-bottom: 16rpx;
-    margin-top: 20rpx;
-  }
-
-  .empty-subtext {
-    font-size: 26rpx;
-    color: #999;
-    text-align: center;
-    line-height: 1.5;
-  }
 }
 
-// 错误状态
-.error-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 120rpx 40rpx;
+.empty-image {
+  width: 180rpx;
+  height: 180rpx;
+  opacity: 0.55;
+  margin-bottom: 20rpx;
+}
 
-  .error-icon {
-    font-size: 80rpx;
-    margin-bottom: 24rpx;
-    opacity: 0.6;
-  }
-
-  .error-text {
-    font-size: 30rpx;
-    color: #666;
-    margin-bottom: 40rpx;
-    text-align: center;
-    line-height: 1.5;
-  }
-
-  .retry-btn {
-    width: 240rpx;
-    height: 72rpx;
-    line-height: 72rpx;
-    border-radius: 36rpx;
-    font-size: 28rpx;
-    font-weight: 500;
-    background: linear-gradient(135deg, #3b7aff 0%, #5b8cff 100%);
-    color: #fff;
-    border: none;
-    box-shadow: 0 4rpx 12rpx rgba(59, 122, 255, 0.3);
-    transition: all 0.3s ease;
-
-    &:active {
-      transform: translateY(2rpx);
-      box-shadow: 0 2rpx 8rpx rgba(59, 122, 255, 0.2);
-    }
-
-    &::after {
-      border: none;
-    }
-  }
+.empty-text {
+  font-size: 28rpx;
+  color: #8a8f99;
 }
 </style>

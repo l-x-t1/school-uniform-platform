@@ -1,7 +1,7 @@
 <template>
   <div class="detail-panel">
     <div class="header" style="display: flex; align-items: center">
-      <h3>多校联合、一校为主模式(二)</h3>
+      <h3>选用组织自主确定企业模式（二）</h3>
       <div style="margin-left: 20px">
         <el-button
           icon="el-icon-upload"
@@ -373,7 +373,7 @@ export default {
       showSearch: true,
       // 总条数
       total: 0,
-      // 一校为主模式（模式二）表格数据
+      // 选用组织自主确定企业模式（二）表格数据
       yxwzmodeList: [],
       // 弹出层标题
       title: "",
@@ -522,7 +522,7 @@ export default {
       this.reset();
       this.open = true;
       this.readOnly = false;
-      this.title = "添加一校为主模式（模式二）";
+      this.title = "添加选用组织自主确定企业模式（二）";
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -532,7 +532,7 @@ export default {
       getYxwzmode(id).then((response) => {
         this.form = response.data;
         this.open = true;
-        this.title = "修改一校为主模式（模式二）";
+        this.title = "修改选用组织自主确定企业模式（二）";
       });
     },
     /** 提交按钮 */
@@ -595,7 +595,7 @@ export default {
           });
         }
         this.open = true;
-        this.title = "查看一校为主模式（模式二）";
+        this.title = "查看选用组织自主确定企业模式（二）";
       });
     },
   },

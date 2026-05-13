@@ -38,6 +38,9 @@ public class XfptRetailGoodsVo extends BaseEntity {
     @Schema(description = "学校ID")
     private Long schoolId;
 
+    @Schema(description = "学校名称")
+    private String schoolName;
+
     @Schema(description = "供应商ID")
     private Long supplierId;
 

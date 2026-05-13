@@ -1,11 +1,10 @@
 package com.xfgl.school.service.impl;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Map;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.mapper.XfptProductionOrderItemMapper;
 import com.xfgl.school.domain.XfptProductionOrderItem;
@@ -26,6 +25,9 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
     @Override
     public boolean save(XfptProductionOrderItem xfptProductionOrderItem)
     {
+        if (xfptProductionOrderItem.getGoodsId() == null) {
+            throw new ServiceException("生产单明细商品不能为空");
+        }
         initDefaultValue(xfptProductionOrderItem);
         return super.save(xfptProductionOrderItem);
     }
@@ -50,6 +52,8 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
         if (xfptProductionOrderItem.getFinishNum() == null) {
             xfptProductionOrderItem.setFinishNum(0);
         }
+        if (StringUtils.isEmpty(xfptProductionOrderItem.getDelFlag())) {
+            xfptProductionOrderItem.setDelFlag("0");
+        }
     }
-
 }

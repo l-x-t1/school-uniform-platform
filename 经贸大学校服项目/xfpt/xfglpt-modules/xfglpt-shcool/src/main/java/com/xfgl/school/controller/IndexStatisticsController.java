@@ -12,9 +12,12 @@ import com.xfgl.school.mapper.IndexStatisticsMapper;
 import com.xfgl.school.service.IXfptProcSummaryService;
 import com.xfgl.school.service.IXfptSchoolMessageService;
 import com.xfgl.system.api.domain.SysRole;
+import com.xfgl.system.api.domain.SysUser;
+import com.xfgl.system.api.model.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
@@ -27,6 +30,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/index/statistics")
 public class IndexStatisticsController {
+    private static final Long DEFAULT_TEST_DEPT_ID = 100L;
+
     @Autowired
     private IXfptProcSummaryService iXfptProcSummaryService;
     @Autowired
@@ -37,7 +42,11 @@ public class IndexStatisticsController {
 
     @GetMapping("/peopleCount")
     public AjaxResult peopleCount() {
-        Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        SysUser currentUser = getCurrentUser();
+        if (currentUser == null || currentUser.getDeptId() == null) {
+            return invalidLoginResult();
+        }
+        Long deptId = currentUser.getDeptId();
         //Long deptId =200l;
 
 
@@ -73,10 +82,13 @@ public class IndexStatisticsController {
 
         //判断角色是否是教育局
         //查询角色，提取角色的key
-        List<SysRole> roles = SecurityUtils.getLoginUser().getSysUser().getRoles();
-        List<String> collect = roles.stream().map(SysRole::getRoleKey).collect(Collectors.toList());
+        SysUser currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return invalidLoginResult();
+        }
+        List<String> collect = getRoleKeys(currentUser);
         List<KeyValueVo> map = new ArrayList<>();
-        if (collect.contains(RoleType.SJYJ.getCode()) || SecurityUtils.getLoginUser().getSysUser().getUserName().equals("admin")) {
+        if (collect.contains(RoleType.SJYJ.getCode()) || "admin".equals(currentUser.getUserName())) {
             map = indexStatisticsMapper.getQxMoney();
         } else {
             map = indexStatisticsMapper.getSchoolMoney();
@@ -96,10 +108,13 @@ public class IndexStatisticsController {
 
         //判断角色是否是教育局
         //查询角色，提取角色的key
-        List<SysRole> roles = SecurityUtils.getLoginUser().getSysUser().getRoles();
-        List<String> collect = roles.stream().map(SysRole::getRoleKey).collect(Collectors.toList());
+        SysUser currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return invalidLoginResult();
+        }
+        List<String> collect = getRoleKeys(currentUser);
         List<KeyValueVo> map = new ArrayList<>();
-        if (collect.contains(RoleType.SJYJ.getCode()) || SecurityUtils.getLoginUser().getSysUser().getUserName().equals("admin")) {
+        if (collect.contains(RoleType.SJYJ.getCode()) || "admin".equals(currentUser.getUserName())) {
             map = indexStatisticsMapper.getQxCount();
         } else {
             map = indexStatisticsMapper.getSchoolCount();
@@ -112,10 +127,13 @@ public class IndexStatisticsController {
      * 学校查询近5年的数据
      */
     @GetMapping("/getSchool5YearCountData")
-    public AjaxResult getSchool5YearData() {
-        Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+    public AjaxResult getSchool5YearData(@RequestParam(value = "deptId", required = false) Long deptId) {
+        if (getCurrentUser() == null) {
+            return invalidLoginResult();
+        }
+        Long currentDeptId = resolveDeptId(deptId);
         List<KeyValueVo> map = new ArrayList<>();
-        map=indexStatisticsMapper.getSchool5YearCountData(deptId);
+        map=indexStatisticsMapper.getSchool5YearCountData(currentDeptId);
         return AjaxResult.success(map);
     }
 
@@ -123,10 +141,13 @@ public class IndexStatisticsController {
      * 学校查询近5年的数据
      */
     @GetMapping("/getSchool5YearMoneyData")
-    public AjaxResult getSchool5YearMoneyData() {
-        Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+    public AjaxResult getSchool5YearMoneyData(@RequestParam(value = "deptId", required = false) Long deptId) {
+        if (getCurrentUser() == null) {
+            return invalidLoginResult();
+        }
+        Long currentDeptId = resolveDeptId(deptId);
         List<KeyValueVo> map = new ArrayList<>();
-        map=indexStatisticsMapper.getSchool5YearMoneyData(deptId);
+        map=indexStatisticsMapper.getSchool5YearMoneyData(currentDeptId);
         return AjaxResult.success(map);
     }
 
@@ -134,17 +155,80 @@ public class IndexStatisticsController {
     public AjaxResult schoolUniformType(){
         //判断角色是否是教育局
         //查询角色，提取角色的key
-        List<SysRole> roles = SecurityUtils.getLoginUser().getSysUser().getRoles();
-        List<String> collect = roles.stream().map(SysRole::getRoleKey).collect(Collectors.toList());
+        SysUser currentUser = getCurrentUser();
+        if (currentUser == null) {
+            return invalidLoginResult();
+        }
+        List<String> collect = getRoleKeys(currentUser);
         List<KeyValueVo> map = new ArrayList<>();
-        if (collect.contains(RoleType.SJYJ.getCode()) || SecurityUtils.getLoginUser().getSysUser().getUserName().equals("admin")) {
+        if (collect.contains(RoleType.SJYJ.getCode()) || "admin".equals(currentUser.getUserName())) {
             map = indexStatisticsMapper.schoolUniformType(null);
         } else if(collect.contains(RoleType.JYJ.getCode()) || collect.contains(RoleType.XX.getCode())){
-            Long deptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+            Long deptId = currentUser.getDeptId();
             map = indexStatisticsMapper.schoolUniformType(deptId);
         }else {
             return AjaxResult.warn("未查询到角色信息,联系管理员");
         }
         return AjaxResult.success(map);
+    }
+
+    /**
+     * 平台使用情况
+     */
+    @GetMapping("/platformUsage")
+    public AjaxResult platformUsage(@RequestParam(value = "deptId", required = false) Long deptId) {
+        if (getCurrentUser() == null) {
+            return invalidLoginResult();
+        }
+        Long currentDeptId = resolveDeptId(deptId);
+        HashMap<String, Long> total = new HashMap<String, Long>();
+        total.put("districtPlatformTotal", indexStatisticsMapper.getDistrictPlatformUserCount(currentDeptId));
+        total.put("schoolPlatformTotal", indexStatisticsMapper.getSchoolPlatformCount(currentDeptId));
+        total.put("studentPlatformTotal", indexStatisticsMapper.getStudentPlatformCount(currentDeptId));
+        return AjaxResult.success(total);
+    }
+
+    /**
+     * 价格趋势分析
+     */
+    @GetMapping("/priceTrendData")
+    public AjaxResult priceTrendData(@RequestParam(value = "deptId", required = false) Long deptId) {
+        if (getCurrentUser() == null) {
+            return invalidLoginResult();
+        }
+        Long currentDeptId = resolveDeptId(deptId);
+        List<KeyValueVo> map = indexStatisticsMapper.getPriceTrendData(currentDeptId);
+        return AjaxResult.success(map);
+    }
+
+    private AjaxResult invalidLoginResult() {
+        return AjaxResult.error("Login status is invalid, please login again");
+    }
+
+    private SysUser getCurrentUser() {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (loginUser == null) {
+            return null;
+        }
+        return loginUser.getSysUser();
+    }
+
+    private List<String> getRoleKeys(SysUser currentUser) {
+        List<SysRole> roles = currentUser.getRoles();
+        if (roles == null) {
+            return new ArrayList<>();
+        }
+        return roles.stream().map(SysRole::getRoleKey).collect(Collectors.toList());
+    }
+
+    private Long resolveDeptId(Long requestDeptId) {
+        if (requestDeptId != null) {
+            return requestDeptId;
+        }
+        SysUser currentUser = getCurrentUser();
+        if (currentUser != null && currentUser.getDeptId() != null) {
+            return currentUser.getDeptId();
+        }
+        return DEFAULT_TEST_DEPT_ID;
     }
 }

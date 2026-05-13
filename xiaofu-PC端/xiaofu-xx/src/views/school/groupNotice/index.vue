@@ -220,6 +220,12 @@
         <el-form-item label="公告编号" prop="noticeCode">
           <el-input v-model="form.noticeCode" placeholder="请输入公告编号" />
         </el-form-item>
+        <el-form-item label="公告类型" prop="noticeType">
+          <el-select v-model="form.noticeType" placeholder="请选择公告类型">
+            <el-option label="选购公告" value="1" />
+            <el-option label="结果公告" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="公告正文">
           <editor v-model="form.content" :min-height="192"/>
         </el-form-item>
@@ -250,6 +256,21 @@
             value-format="yyyy-MM-dd"
             placeholder="请选择公告截止时间">
           </el-date-picker>
+        </el-form-item>
+        <el-form-item label="公告状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择公告状态">
+            <el-option label="草稿" value="0" />
+            <el-option label="已发布" value="1" />
+            <el-option label="已结束" value="2" />
+            <el-option label="已撤回" value="3" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="报名状态" prop="applyStatus">
+          <el-select v-model="form.applyStatus" placeholder="请选择报名状态">
+            <el-option label="未开放" value="0" />
+            <el-option label="报名中" value="1" />
+            <el-option label="报名结束" value="2" />
+          </el-select>
         </el-form-item>
         <el-form-item label="发布时间" prop="publishTime">
           <el-date-picker clearable
@@ -430,7 +451,7 @@ export default {
         schoolName: null,
         title: null,
         noticeCode: null,
-        noticeType: null,
+        noticeType: "1",
         content: null,
         gradeIds: null,
         gradeNames: null,
@@ -438,8 +459,8 @@ export default {
         purchaseProcessId: null,
         startTime: null,
         endTime: null,
-        status: null,
-        applyStatus: null,
+        status: "0",
+        applyStatus: "0",
         publishTime: null,
         resultPublishTime: null,
         deptId: null,
@@ -448,7 +469,7 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
+        delFlag: "0"
       };
       this.xfptGroupNoticeItemList = [];
       this.resetForm("form");

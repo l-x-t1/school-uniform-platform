@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptDeliveryStatisticsMapper">
+
+    <resultMap id="XfptDeliveryStatisticsResult" type="com.xfgl.school.domain.vo.XfptDeliveryStatisticsVo">
+        <result property="id" column="id"/>
+        <result property="deliveryNo" column="delivery_no"/>
+        <result property="orderNo" column="order_no"/>
+        <result property="schoolId" column="school_id"/>
+        <result property="schoolName" column="school_name"/>
+        <result property="supplierName" column="supplier_name"/>
+        <result property="deliveryStatus" column="delivery_status"/>
+        <result property="deliveryTotalNum" column="delivery_total_num"/>
+        <result property="signTotalNum" column="sign_total_num"/>
+        <result property="carriageFee" column="carriage_fee"/>
+        <result property="deliveryTime" column="delivery_time"/>
+        <result property="signTime" column="sign_time"/>
+    </resultMap>
+
+    <sql id="selectXfptDeliveryStatisticsVo">
+        SELECT
+            d.id,
+            d.school_id,
+            d.delivery_no,
+            d.order_no,
+            o.school_name,
+            o.supplier_name,
+            d.delivery_status,
+            COALESCE(SUM(COALESCE(i.delivery_num, 0)), 0) AS delivery_total_num,
+            COALESCE(SUM(COALESCE(i.sign_num, 0)), 0) AS sign_total_num,
+            d.carriage_fee,
+            d.delivery_time,
+            d.sign_time
+        FROM xfpt_delivery_order d
+        INNER JOIN xfpt_order_info o
+            ON o.id = d.order_id
+           AND o.order_type = '2'
+           AND o.del_flag = 0
+        LEFT JOIN xfpt_delivery_order_item i
+            ON i.delivery_id = d.id
+           AND i.del_flag = 0
+        <where>
+            d.del_flag = 0
+            <if test="schoolId != null">AND d.school_id = #{schoolId}</if>
+            <if test="deliveryNo != null and deliveryNo != ''">AND d.delivery_no LIKE concat('%', #{deliveryNo}, '%')</if>
+            <if test="orderNo != null and orderNo != ''">AND d.order_no LIKE concat('%', #{orderNo}, '%')</if>
+            <if test="schoolName != null and schoolName != ''">AND o.school_name LIKE concat('%', #{schoolName}, '%')</if>
+            <if test="supplierName != null and supplierName != ''">AND o.supplier_name LIKE concat('%', #{supplierName}, '%')</if>
+            <if test="deliveryStatus != null and deliveryStatus != ''">AND d.delivery_status = #{deliveryStatus}</if>
+            <if test="params != null and params.beginTime != null and params.beginTime != ''">
+                AND DATE_FORMAT(d.delivery_time, '%Y-%m-%d') &gt;= #{params.beginTime}
+            </if>
+            <if test="params != null and params.endTime != null and params.endTime != ''">
+                AND DATE_FORMAT(d.delivery_time, '%Y-%m-%d') &lt;= #{params.endTime}
+            </if>
+        </where>
+        GROUP BY
+            d.id,
+            d.school_id,
+            d.delivery_no,
+            d.order_no,
+            o.school_name,
+            o.supplier_name,
+            d.delivery_status,
+            d.carriage_fee,
+            d.delivery_time,
+            d.sign_time
+        ORDER BY d.delivery_time DESC, d.id DESC
+    </sql>
+
+    <select id="selectXfptDeliveryStatisticsList" parameterType="com.xfgl.school.domain.vo.XfptDeliveryStatisticsVo" resultMap="XfptDeliveryStatisticsResult">
+        <include refid="selectXfptDeliveryStatisticsVo"/>
+    </select>
+</mapper>
