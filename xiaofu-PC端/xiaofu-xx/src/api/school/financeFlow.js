@@ -9,6 +9,24 @@ export function listFinanceFlow(query) {
   })
 }
 
+// 查询每日入账金额列表
+export function listDailyIncome(query) {
+  return request({
+    url: '/school/financeFlow/dailyIncome/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询每日入账金额详情
+export function listDailyIncomeDetail(query) {
+  return request({
+    url: '/school/financeFlow/dailyIncome/detail',
+    method: 'get',
+    params: query
+  })
+}
+
 // 查询资金流水详细
 export function getFinanceFlow(id) {
   return request({
