@@ -1,451 +1,248 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="发货单号" prop="deliveryNo">
-        <el-input
-          v-model="queryParams.deliveryNo"
-          placeholder="请输入发货单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="统购公告ID" prop="noticeId">
-        <el-input
-          v-model="queryParams.noticeId"
-          placeholder="请输入统购公告ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单号快照" prop="orderNo">
-        <el-input
-          v-model="queryParams.orderNo"
-          placeholder="请输入订单号快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="生产单ID" prop="productionId">
-        <el-input
-          v-model="queryParams.productionId"
-          placeholder="请输入生产单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="收货人姓名快照" prop="receiverName">
-        <el-input
-          v-model="queryParams.receiverName"
-          placeholder="请输入收货人姓名快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="收货人电话快照" prop="receiverPhone">
-        <el-input
-          v-model="queryParams.receiverPhone"
-          placeholder="请输入收货人电话快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="物流公司" prop="logisticsCompany">
-        <el-input
-          v-model="queryParams.logisticsCompany"
-          placeholder="请输入物流公司"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="物流单号" prop="logisticsNo">
-        <el-input
-          v-model="queryParams.logisticsNo"
-          placeholder="请输入物流单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="发货时间" prop="deliveryTime">
-        <el-date-picker clearable
-          v-model="queryParams.deliveryTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择发货时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="签收时间" prop="signTime">
-        <el-date-picker clearable
-          v-model="queryParams.signTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择签收时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="运费" prop="carriageFee">
-        <el-input
-          v-model="queryParams.carriageFee"
-          placeholder="请输入运费"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['school:deliveryOrder:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['school:deliveryOrder:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['school:deliveryOrder:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['school:deliveryOrder:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="deliveryOrderList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="发货单号" align="center" prop="deliveryNo" />
-      <el-table-column label="统购公告ID" align="center" prop="noticeId" />
-      <el-table-column label="订单ID" align="center" prop="orderId" />
-      <el-table-column label="订单号快照" align="center" prop="orderNo" />
-      <el-table-column label="生产单ID" align="center" prop="productionId" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="收货人姓名快照" align="center" prop="receiverName" />
-      <el-table-column label="收货人电话快照" align="center" prop="receiverPhone" />
-      <el-table-column label="收货地址快照" align="center" prop="receiverAddress" />
-      <el-table-column label="物流公司" align="center" prop="logisticsCompany" />
-      <el-table-column label="物流单号" align="center" prop="logisticsNo" />
-      <el-table-column label="发货状态，0待发货 1已发货 2已签收" align="center" prop="deliveryStatus" />
-      <el-table-column label="发货时间" align="center" prop="deliveryTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.deliveryTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="签收时间" align="center" prop="signTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.signTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="运费" align="center" prop="carriageFee" />
-      <el-table-column label="当前归属部门/学校" align="center" prop="deptId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:deliveryOrder:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['school:deliveryOrder:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
-
-    <!-- 添加或修改发货单对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+  <div class="app-container delivery-order-page">
+    <el-card v-show="showSearch" class="search-card" shadow="never">
+      <el-form
+        ref="queryForm"
+        :model="queryParams"
+        size="small"
+        :inline="true"
+        label-width="86px"
+      >
         <el-form-item label="发货单号" prop="deliveryNo">
-          <el-input v-model="form.deliveryNo" placeholder="请输入发货单号" />
+          <el-input
+            v-model="queryParams.deliveryNo"
+            placeholder="请输入发货单号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item label="统购公告ID" prop="noticeId">
-          <el-input v-model="form.noticeId" placeholder="请输入统购公告ID" />
+        <el-form-item label="订单编号" prop="orderNo">
+          <el-input
+            v-model="queryParams.orderNo"
+            placeholder="请输入订单编号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item label="订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入订单ID" />
-        </el-form-item>
-        <el-form-item label="订单号快照" prop="orderNo">
-          <el-input v-model="form.orderNo" placeholder="请输入订单号快照" />
-        </el-form-item>
-        <el-form-item label="生产单ID" prop="productionId">
-          <el-input v-model="form.productionId" placeholder="请输入生产单ID" />
-        </el-form-item>
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
-        </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
-        <el-form-item label="收货人姓名快照" prop="receiverName">
-          <el-input v-model="form.receiverName" placeholder="请输入收货人姓名快照" />
-        </el-form-item>
-        <el-form-item label="收货人电话快照" prop="receiverPhone">
-          <el-input v-model="form.receiverPhone" placeholder="请输入收货人电话快照" />
-        </el-form-item>
-        <el-form-item label="收货地址快照" prop="receiverAddress">
-          <el-input v-model="form.receiverAddress" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="物流公司" prop="logisticsCompany">
-          <el-input v-model="form.logisticsCompany" placeholder="请输入物流公司" />
+        <el-form-item label="收货人" prop="receiverName">
+          <el-input
+            v-model="queryParams.receiverName"
+            placeholder="请输入收货人姓名"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
         <el-form-item label="物流单号" prop="logisticsNo">
-          <el-input v-model="form.logisticsNo" placeholder="请输入物流单号" />
+          <el-input
+            v-model="queryParams.logisticsNo"
+            placeholder="请输入物流单号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="物流公司" prop="logisticsCompany">
+          <el-input
+            v-model="queryParams.logisticsCompany"
+            placeholder="请输入物流公司"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
         <el-form-item label="发货状态" prop="deliveryStatus">
-          <el-select v-model="form.deliveryStatus" placeholder="请选择发货状态">
+          <el-select
+            v-model="queryParams.deliveryStatus"
+            placeholder="请选择发货状态"
+            clearable
+          >
             <el-option label="待发货" value="0" />
             <el-option label="已发货" value="1" />
             <el-option label="已签收" value="2" />
           </el-select>
         </el-form-item>
-        <el-form-item label="发货时间" prop="deliveryTime">
-          <el-date-picker clearable
-            v-model="form.deliveryTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择发货时间">
-          </el-date-picker>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+          <el-button
+            type="warning"
+            plain
+            icon="el-icon-download"
+            size="mini"
+            @click="handleExport"
+            v-hasPermi="['school:deliveryOrder:export']"
+          >导出</el-button>
         </el-form-item>
-        <el-form-item label="签收时间" prop="signTime">
-          <el-date-picker clearable
-            v-model="form.signTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择签收时间">
-          </el-date-picker>
+      </el-form>
+    </el-card>
+
+    <el-card class="table-card" shadow="never">
+      <div slot="header" class="table-header">
+        <div>
+          <div class="table-title">发货单处理</div>
+          <div class="table-desc">查询统购和零售发货单，并查看发货、签收状态</div>
+        </div>
+        <right-toolbar :showSearch.sync="showSearch" @queryTable="getList" />
+      </div>
+
+      <el-tabs v-model="activeOrderType" class="order-type-tabs" @tab-click="handleOrderTypeTabClick">
+        <el-tab-pane label="统购" name="1" />
+        <el-tab-pane label="零售" name="2" />
+      </el-tabs>
+
+      <el-table
+        v-loading="loading"
+        :data="deliveryOrderList"
+        border
+        @selection-change="handleSelectionChange"
+      >
+        <el-table-column type="selection" width="50" align="center" />
+        <el-table-column label="发货单号" align="center" prop="deliveryNo" min-width="150" />
+        <el-table-column label="订单编号" align="center" prop="orderNo" min-width="150" />
+        <el-table-column label="订单类型" align="center" prop="orderType" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.orderType === '2' ? 'success' : 'primary'" size="mini">
+              {{ formatOrderType(scope.row.orderType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="学校名称" align="center" prop="schoolName" min-width="160">
+          <template slot-scope="scope">
+            <span>{{ scope.row.schoolName || scope.row.schoolId || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="供应商名称" align="center" prop="supplierName" min-width="180">
+          <template slot-scope="scope">
+            <span>{{ scope.row.supplierName || scope.row.supplierId || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="收货人" align="center" prop="receiverName" min-width="120" />
+        <el-table-column label="收货电话" align="center" prop="receiverPhone" min-width="130" />
+        <el-table-column label="物流公司" align="center" prop="logisticsCompany" min-width="130" />
+        <el-table-column label="物流单号" align="center" prop="logisticsNo" min-width="150" />
+        <el-table-column label="运费" align="center" prop="carriageFee" width="90" />
+        <el-table-column label="发货状态" align="center" prop="deliveryStatus" width="100">
+          <template slot-scope="scope">
+            <el-tag :type="deliveryStatusTagType(scope.row.deliveryStatus)" size="mini">
+              {{ formatDeliveryStatus(scope.row.deliveryStatus) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="发货时间" align="center" prop="deliveryTime" width="140">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.deliveryTime, '{y}-{m}-{d}') || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="签收时间" align="center" prop="signTime" width="140">
+          <template slot-scope="scope">
+            <span>{{ parseTime(scope.row.signTime, '{y}-{m}-{d}') || '-' }}</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" align="center" fixed="right" width="110">
+          <template slot-scope="scope">
+            <el-button
+              v-if="scope.row.deliveryStatus === '0' || scope.row.deliveryStatus === 0"
+              size="mini"
+              type="text"
+              icon="el-icon-truck"
+              @click="handleShip(scope.row)"
+              v-hasPermi="['school:deliveryOrder:edit']"
+            >发货</el-button>
+            <span v-else class="muted-action">{{ formatDeliveryStatus(scope.row.deliveryStatus) }}</span>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        :page.sync="queryParams.pageNum"
+        :limit.sync="queryParams.pageSize"
+        @pagination="getList"
+      />
+    </el-card>
+
+    <el-dialog
+      title="填写发货信息"
+      :visible.sync="shipOpen"
+      width="520px"
+      append-to-body
+    >
+      <el-form ref="shipForm" :model="shipForm" :rules="shipRules" label-width="90px" size="small">
+        <el-form-item label="发货单号">
+          <el-input v-model="shipForm.deliveryNo" disabled />
+        </el-form-item>
+        <el-form-item label="物流公司" prop="logisticsCompany">
+          <el-input v-model="shipForm.logisticsCompany" placeholder="请输入物流公司" clearable />
+        </el-form-item>
+        <el-form-item label="物流单号" prop="logisticsNo">
+          <el-input v-model="shipForm.logisticsNo" placeholder="请输入物流单号" clearable />
         </el-form-item>
         <el-form-item label="运费" prop="carriageFee">
-          <el-input v-model="form.carriageFee" placeholder="请输入运费" />
+          <el-input v-model="shipForm.carriageFee" placeholder="请输入运费" clearable />
         </el-form-item>
-        <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
+        <el-form-item label="发货时间" prop="deliveryTime">
+          <el-date-picker
+            v-model="shipForm.deliveryTime"
+            type="date"
+            value-format="yyyy-MM-dd"
+            placeholder="请选择发货时间"
+            clearable
+          />
         </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
-        </el-form-item>
-        <el-divider content-position="center">发货单明细信息</el-divider>
-        <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
-            <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAddXfptDeliveryOrderItem">添加</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDeleteXfptDeliveryOrderItem">删除</el-button>
-          </el-col>
-        </el-row>
-        <el-table :data="xfptDeliveryOrderItemList" :row-class-name="rowXfptDeliveryOrderItemIndex" @selection-change="handleXfptDeliveryOrderItemSelectionChange" ref="xfptDeliveryOrderItem">
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="序号" align="center" prop="index" width="50"/>
-          <el-table-column label="订单明细ID" prop="orderItemId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.orderItemId" placeholder="请输入订单明细ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="商品ID" prop="goodsId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsId" placeholder="请输入商品ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="尺码ID" prop="sizeId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sizeId" placeholder="请输入尺码ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="商品名称快照" prop="goodsName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称快照" />
-            </template>
-          </el-table-column>
-          <el-table-column label="尺码名称快照" prop="sizeName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称快照" />
-            </template>
-          </el-table-column>
-          <el-table-column label="发货数量" prop="deliveryNum" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.deliveryNum" placeholder="请输入发货数量" />
-            </template>
-          </el-table-column>
-          <el-table-column label="签收数量" prop="signNum" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.signNum" placeholder="请输入签收数量" />
-            </template>
-          </el-table-column>
-          <el-table-column label="状态，0待发货 1已发货 2已签收" prop="status" width="150">
-            <template slot-scope="scope">
-              <el-select v-model="scope.row.status" placeholder="请选择状态，0待发货 1已发货 2已签收">
-                <el-option label="待发货" value="0" />
-                <el-option label="已发货" value="1" />
-                <el-option label="已签收" value="2" />
-              </el-select>
-            </template>
-          </el-table-column>
-        </el-table>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" size="small" @click="submitShip">确 定</el-button>
+        <el-button size="small" @click="shipOpen = false">取 消</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listDeliveryOrder, getDeliveryOrder, delDeliveryOrder, addDeliveryOrder, updateDeliveryOrder } from "@/api/school/deliveryOrder";
+import { listDeliveryOrder, updateDeliveryOrder } from "@/api/school/deliveryOrder";
 
 export default {
   name: "DeliveryOrder",
   data() {
     return {
-      // 遮罩层
       loading: true,
-      // 选中数组
       ids: [],
-      // 子表选中数据
-      checkedXfptDeliveryOrderItem: [],
-      // 非单个禁用
       single: true,
-      // 非多个禁用
       multiple: true,
-      // 显示搜索条件
       showSearch: true,
-      // 总条数
       total: 0,
-      // 发货单表格数据
       deliveryOrderList: [],
-      // 发货单明细表格数据
-      xfptDeliveryOrderItemList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
+      activeOrderType: "1",
+      shipOpen: false,
+      shipForm: {
+        id: null,
+        deliveryNo: null,
+        logisticsCompany: null,
+        logisticsNo: null,
+        carriageFee: null,
+        deliveryTime: null,
+        deliveryStatus: "1"
+      },
+      shipRules: {
+        logisticsCompany: [
+          { required: true, message: "物流公司不能为空", trigger: "blur" }
+        ],
+        logisticsNo: [
+          { required: true, message: "物流单号不能为空", trigger: "blur" }
+        ],
+        deliveryTime: [
+          { required: true, message: "发货时间不能为空", trigger: "change" }
+        ]
+      },
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        orderType: "1",
         deliveryNo: null,
-        noticeId: null,
-        orderId: null,
         orderNo: null,
-        productionId: null,
-        schoolId: null,
-        supplierId: null,
         receiverName: null,
-        receiverPhone: null,
-        receiverAddress: null,
         logisticsCompany: null,
         logisticsNo: null,
-        deliveryStatus: "0",
-        deliveryTime: null,
-        signTime: null,
-        carriageFee: null,
-        deptId: null,
-      },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        deliveryNo: [
-          { required: true, message: "发货单号不能为空", trigger: "blur" }
-        ],
-        supplierId: [
-          { required: true, message: "供应商ID不能为空", trigger: "blur" }
-        ],
-        receiverName: [
-          { required: true, message: "收货人姓名快照不能为空", trigger: "blur" }
-        ],
-        receiverPhone: [
-          { required: true, message: "收货人电话快照不能为空", trigger: "blur" }
-        ],
-        receiverAddress: [
-          { required: true, message: "收货地址快照不能为空", trigger: "blur" }
-        ],
-        deliveryStatus: [
-          { required: true, message: "发货状态，0待发货 1已发货 2已签收不能为空", trigger: "change" }
-        ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
-        ]
+        deliveryStatus: null
       }
     };
   },
@@ -453,155 +250,149 @@ export default {
     this.getList();
   },
   methods: {
-    /** 查询发货单列表 */
     getList() {
       this.loading = true;
+      this.queryParams.orderType = this.activeOrderType;
       listDeliveryOrder(this.queryParams).then(response => {
-        this.deliveryOrderList = response.rows;
-        this.total = response.total;
+        this.deliveryOrderList = response.rows || [];
+        this.total = response.total || 0;
+        this.loading = false;
+      }).catch(() => {
         this.loading = false;
       });
     },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
+    handleOrderTypeTabClick(tab) {
+      this.activeOrderType = tab.name;
+      this.queryParams.orderType = tab.name;
+      this.handleQuery();
     },
-    // 表单重置
-    reset() {
-      this.form = {
-        id: null,
-        deliveryNo: null,
-        noticeId: null,
-        orderId: null,
-        orderNo: null,
-        productionId: null,
-        schoolId: null,
-        supplierId: null,
-        receiverName: null,
-        receiverPhone: null,
-        receiverAddress: null,
-        logisticsCompany: null,
-        logisticsNo: null,
-        deliveryStatus: null,
-        deliveryTime: null,
-        signTime: null,
-        carriageFee: null,
-        deptId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: "0"
-      };
-      this.xfptDeliveryOrderItemList = [];
-      this.resetForm("form");
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
     },
-    /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
+      this.queryParams.orderType = this.activeOrderType;
       this.handleQuery();
     },
-    // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.ids = selection.map(item => item.id);
+      this.single = selection.length !== 1;
+      this.multiple = !selection.length;
     },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加发货单";
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids
-      getDeliveryOrder(id).then(response => {
-        this.form = response.data;
-        this.xfptDeliveryOrderItemList = response.data.xfptDeliveryOrderItemList;
-        this.open = true;
-        this.title = "修改发货单";
+    handleShip(row) {
+      this.shipForm = {
+        id: row.id,
+        deliveryNo: row.deliveryNo,
+        logisticsCompany: row.logisticsCompany,
+        logisticsNo: row.logisticsNo,
+        carriageFee: row.carriageFee,
+        deliveryTime: row.deliveryTime || this.parseTime(new Date(), "{y}-{m}-{d}"),
+        deliveryStatus: "1"
+      };
+      this.shipOpen = true;
+      this.$nextTick(() => {
+        this.resetForm("shipForm");
       });
     },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          this.form.xfptDeliveryOrderItemList = this.xfptDeliveryOrderItemList;
-          if (this.form.id != null) {
-            updateDeliveryOrder(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addDeliveryOrder(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
+    submitShip() {
+      this.$refs.shipForm.validate(valid => {
+        if (!valid) {
+          return;
         }
+        updateDeliveryOrder({
+          id: this.shipForm.id,
+          logisticsCompany: this.shipForm.logisticsCompany,
+          logisticsNo: this.shipForm.logisticsNo,
+          carriageFee: this.shipForm.carriageFee,
+          deliveryTime: this.shipForm.deliveryTime,
+          deliveryStatus: "1"
+        }).then(() => {
+          this.$modal.msgSuccess("发货成功");
+          this.shipOpen = false;
+          this.getList();
+        });
       });
     },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除发货单编号为"' + ids + '"的数据项？').then(function() {
-        return delDeliveryOrder(ids);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
-    },
-	/** 发货单明细序号 */
-    rowXfptDeliveryOrderItemIndex({ row, rowIndex }) {
-      row.index = rowIndex + 1;
-    },
-    /** 发货单明细添加按钮操作 */
-    handleAddXfptDeliveryOrderItem() {
-      let obj = {};
-      obj.orderItemId = "";
-      obj.goodsId = "";
-      obj.sizeId = "";
-      obj.goodsName = "";
-      obj.sizeName = "";
-      obj.deliveryNum = "";
-      obj.signNum = "";
-      obj.status = "0";
-      obj.remark = "";
-      this.xfptDeliveryOrderItemList.push(obj);
-    },
-    /** 发货单明细删除按钮操作 */
-    handleDeleteXfptDeliveryOrderItem() {
-      if (this.checkedXfptDeliveryOrderItem.length == 0) {
-        this.$modal.msgError("请先选择要删除的发货单明细数据");
-      } else {
-        const xfptDeliveryOrderItemList = this.xfptDeliveryOrderItemList;
-        const checkedXfptDeliveryOrderItem = this.checkedXfptDeliveryOrderItem;
-        this.xfptDeliveryOrderItemList = xfptDeliveryOrderItemList.filter(function(item) {
-          return checkedXfptDeliveryOrderItem.indexOf(item.index) == -1
-        });
+    formatOrderType(orderType) {
+      if (orderType === "1" || orderType === 1) {
+        return "统购";
       }
+      if (orderType === "2" || orderType === 2) {
+        return "零售";
+      }
+      return "-";
     },
-    /** 复选框选中数据 */
-    handleXfptDeliveryOrderItemSelectionChange(selection) {
-      this.checkedXfptDeliveryOrderItem = selection.map(item => item.index)
+    formatDeliveryStatus(status) {
+      if (status === "0" || status === 0) {
+        return "待发货";
+      }
+      if (status === "1" || status === 1) {
+        return "已发货";
+      }
+      if (status === "2" || status === 2) {
+        return "已签收";
+      }
+      return "-";
     },
-    /** 导出按钮操作 */
+    deliveryStatusTagType(status) {
+      if (status === "0" || status === 0) {
+        return "info";
+      }
+      if (status === "1" || status === 1) {
+        return "warning";
+      }
+      if (status === "2" || status === 2) {
+        return "success";
+      }
+      return "";
+    },
     handleExport() {
-      this.download('school/deliveryOrder/export', {
-        ...this.queryParams
-      }, `deliveryOrder_${new Date().getTime()}.xlsx`)
+      this.download("school/deliveryOrder/export", {
+        ...this.queryParams,
+        orderType: this.activeOrderType
+      }, `deliveryOrder_${new Date().getTime()}.xlsx`);
     }
   }
 };
 </script>
+
+<style scoped>
+.delivery-order-page .search-card,
+.delivery-order-page .table-card {
+  border: 1px solid #e6ebf5;
+  border-radius: 4px;
+}
+
+.delivery-order-page .search-card {
+  margin-bottom: 18px;
+}
+
+.delivery-order-page .table-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.delivery-order-page .table-title {
+  color: #303133;
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 26px;
+}
+
+.delivery-order-page .table-desc {
+  margin-top: 4px;
+  color: #909399;
+  font-size: 13px;
+}
+
+.delivery-order-page .order-type-tabs {
+  margin-bottom: 14px;
+}
+
+.delivery-order-page .muted-action {
+  color: #909399;
+  font-size: 12px;
+}
+</style>
