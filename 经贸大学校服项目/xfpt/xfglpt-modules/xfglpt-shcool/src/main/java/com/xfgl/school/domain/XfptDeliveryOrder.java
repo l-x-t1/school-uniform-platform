@@ -56,6 +56,11 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "订单号快照")
     private String orderNo;
 
+    /** Order type: 1 unified purchase, 2 retail. */
+    @TableField(exist = false)
+    @Schema(description = "订单类型：1统购 2零售")
+    private String orderType;
+
     /** 生产单ID */
             @Excel(name = "生产单ID")
     @Schema(description = "生产单ID")
@@ -66,10 +71,20 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "学校ID")
     private Long schoolId;
 
+    /** School name snapshot from order. */
+    @TableField(exist = false)
+    @Schema(description = "学校名称")
+    private String schoolName;
+
     /** 供应商ID */
             @Excel(name = "供应商ID")
     @Schema(description = "供应商ID")
     private Long supplierId;
+
+    /** Supplier name snapshot from order. */
+    @TableField(exist = false)
+    @Schema(description = "供应商名称")
+    private String supplierName;
 
     /** 收货人姓名快照 */
             @Excel(name = "收货人姓名快照")
