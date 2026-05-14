@@ -374,19 +374,19 @@
           <div class="form-section">
             <div class="section-head">
               <div class="section-title">商品详情</div>
-              <div class="section-desc">商品详情优先维护富文本内容，扩展字段按需填写</div>
+              <div class="section-desc">商品详情优先维护富文本内容，详情图片可直接上传</div>
             </div>
             <el-form-item label="详情内容" prop="detailContent">
               <editor v-model="form.detailContent" :min-height="220" />
             </el-form-item>
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="详情图配置" prop="detailImagesJson">
-                  <el-input
+                <el-form-item label="详情图片" prop="detailImagesJson">
+                  <image-upload
                     v-model="form.detailImagesJson"
-                    type="textarea"
-                    :rows="4"
-                    placeholder="选填，支持保存详情图 JSON 配置"
+                    :limit="10"
+                    :file-size="5"
+                    :is-show-tip="true"
                   />
                 </el-form-item>
               </el-col>
@@ -714,7 +714,9 @@ export default {
       const id = row && row.id ? row.id : this.ids[0]
       getGoods(id).then(response => {
         const data = response.data || {}
-        this.form = Object.assign(this.getDefaultForm(), data)
+        const formData = Object.assign(this.getDefaultForm(), data)
+        formData.detailImagesJson = this.normalizeDetailImagesValue(formData.detailImagesJson)
+        this.form = formData
         this.xfptGoodsSizeList = this.decorateSizeList(data.xfptGoodsSizeList || [])
         this.open = true
         this.title = '修改商品'
@@ -734,6 +736,7 @@ export default {
         }
         this.xfptGoodsSizeList = this.decorateSizeList(normalizedSizeList)
         const payload = Object.assign({}, this.form, {
+          detailImagesJson: this.normalizeDetailImagesValue(this.form.detailImagesJson),
           xfptGoodsSizeList: normalizedSizeList
         })
         if (payload.id != null) {
@@ -849,6 +852,53 @@ export default {
     },
     formatDate(value) {
       return value ? this.parseTime(value, '{y}-{m}-{d}') : '--'
+    },
+    normalizeDetailImagesValue(value) {
+      if (!value) {
+        return null
+      }
+      if (Array.isArray(value)) {
+        const paths = this.extractDetailImagePaths(value)
+        return paths.length > 0 ? paths.join(',') : null
+      }
+      const text = String(value).trim()
+      if (!text) {
+        return null
+      }
+      if (text.startsWith('[') || text.startsWith('{')) {
+        try {
+          const paths = this.extractDetailImagePaths(JSON.parse(text))
+          return paths.length > 0 ? paths.join(',') : text
+        } catch (error) {
+          return text
+        }
+      }
+      return text
+    },
+    extractDetailImagePaths(value) {
+      if (!value) {
+        return []
+      }
+      if (typeof value === 'string') {
+        return value.trim() ? [value.trim()] : []
+      }
+      if (Array.isArray(value)) {
+        return value.reduce((list, item) => list.concat(this.extractDetailImagePaths(item)), [])
+      }
+      if (typeof value === 'object') {
+        const imageKeys = ['url', 'path', 'src', 'image', 'imageUrl', 'fileUrl', 'filePath']
+        const images = imageKeys.reduce((list, key) => {
+          return value[key] ? list.concat(this.extractDetailImagePaths(value[key])) : list
+        }, [])
+        if (images.length > 0) {
+          return images
+        }
+        const listKeys = ['images', 'imageList', 'detailImages', 'urls', 'list']
+        return listKeys.reduce((list, key) => {
+          return value[key] ? list.concat(this.extractDetailImagePaths(value[key])) : list
+        }, [])
+      }
+      return []
     },
     decorateSizeList(sizeList) {
       return (sizeList || []).map((item, index) => {
