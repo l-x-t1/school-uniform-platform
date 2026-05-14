@@ -1,8 +1,22 @@
 <template>
-  <div class="app-container">
-    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="68px">
+  <div class="app-container goods-size-page">
+    <el-form
+      v-show="showSearch"
+      ref="queryForm"
+      :model="queryParams"
+      size="small"
+      :inline="true"
+      label-width="76px"
+      class="query-form"
+    >
       <el-form-item label="关联商品" prop="goodsId">
-        <el-select v-model="queryParams.goodsId" placeholder="请选择商品" clearable filterable>
+        <el-select
+          v-model="queryParams.goodsId"
+          placeholder="请选择商品"
+          clearable
+          filterable
+          style="width: 240px"
+        >
           <el-option
             v-for="item in goodsOptions"
             :key="item.id"
@@ -19,40 +33,13 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="排序字段，根据商品尺码依次增加，如 S=1 M=2 L=3 XL=4" prop="sortNum">
-        <el-input
-          v-model="queryParams.sortNum"
-          placeholder="请输入排序字段，根据商品尺码依次增加，如 S=1 M=2 L=3 XL=4"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="零售价" prop="retailPrice">
-        <el-input
-          v-model="queryParams.retailPrice"
-          placeholder="请输入零售价"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="统购价" prop="groupPrice">
-        <el-input
-          v-model="queryParams.groupPrice"
-          placeholder="请输入统购价"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="库存" prop="stockNum">
-        <el-input
-          v-model="queryParams.stockNum"
-          placeholder="请输入库存"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="性别类型" prop="genderType">
-        <el-select v-model="queryParams.genderType" placeholder="请选择性别类型" clearable>
+        <el-select
+          v-model="queryParams.genderType"
+          placeholder="请选择性别类型"
+          clearable
+          style="width: 180px"
+        >
           <el-option
             v-for="item in genderTypeOptions"
             :key="item.value"
@@ -62,7 +49,12 @@
         </el-select>
       </el-form-item>
       <el-form-item label="状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择状态" clearable>
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择状态"
+          clearable
+          style="width: 180px"
+        >
           <el-option
             v-for="item in enableStatusOptions"
             :key="item.value"
@@ -123,33 +115,39 @@
       <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table v-loading="loading" :data="goodsSizeList" @selection-change="handleSelectionChange">
+    <el-table
+      v-loading="loading"
+      :data="goodsSizeList"
+      border
+      class="goods-table"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="关联商品" align="center" prop="goodsId">
+      <el-table-column label="关联商品" prop="goodsId" min-width="240" show-overflow-tooltip>
         <template slot-scope="scope">
-          <span>{{ getGoodsName(scope.row.goodsId) }}</span>
+          <div class="goods-info-cell">
+            <div class="goods-title">{{ getGoodsName(scope.row.goodsId) }}</div>
+          </div>
         </template>
       </el-table-column>
-      <el-table-column label="尺码编码" align="center" prop="sizeCode" />
-      <el-table-column label="排序字段，根据商品尺码依次增加，如 S=1 M=2 L=3 XL=4" align="center" prop="sortNum" />
-      <el-table-column label="性别类型" align="center" prop="genderType">
+      <el-table-column label="尺码编码" align="center" prop="sizeCode" min-width="120" />
+      <el-table-column label="性别类型" align="center" prop="genderType" width="110">
         <template slot-scope="scope">
           <span>{{ getOptionLabel(genderTypeOptions, scope.row.genderType) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="零售价" align="center" prop="retailPrice" />
-      <el-table-column label="统购价" align="center" prop="groupPrice" />
-      <el-table-column label="库存" align="center" prop="stockNum" />
-      <el-table-column label="状态" align="center" prop="status">
+      <el-table-column label="零售价" align="center" prop="retailPrice" width="110" />
+      <el-table-column label="统购价" align="center" prop="groupPrice" width="110" />
+      <el-table-column label="库存" align="center" prop="stockNum" width="100" />
+      <el-table-column label="状态" align="center" prop="status" width="100">
         <template slot-scope="scope">
-          <el-tag size="mini" :type="scope.row.status === '1' ? 'success' : 'info'">
+          <el-tag size="mini" :type="getOptionTagType(enableStatusOptions, scope.row.status)">
             {{ getOptionLabel(enableStatusOptions, scope.row.status) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="备注" prop="remark" min-width="180" show-overflow-tooltip />
+      <el-table-column label="操作" width="140" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             v-hasPermi="['school:goodsSize:edit']"
@@ -178,60 +176,164 @@
     />
 
     <!-- 添加或修改商品尺码对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="关联商品" prop="goodsId">
-          <el-select v-model="form.goodsId" placeholder="请选择商品" clearable filterable>
-            <el-option
-              v-for="item in goodsOptions"
-              :key="item.id"
-              :label="formatGoodsOption(item)"
-              :value="item.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="尺码编码" prop="sizeCode">
-          <el-input v-model="form.sizeCode" placeholder="请输入尺码编码" />
-        </el-form-item>
-        <el-form-item label="排序字段，根据商品尺码依次增加，如 S=1 M=2 L=3 XL=4" prop="sortNum">
-          <el-input v-model="form.sortNum" placeholder="请输入排序字段，根据商品尺码依次增加，如 S=1 M=2 L=3 XL=4" />
-        </el-form-item>
-        <el-form-item label="量体规则JSON文本" prop="measureJson">
-          <el-input v-model="form.measureJson" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="性别类型" prop="genderType">
-          <el-select v-model="form.genderType" placeholder="请选择性别类型" clearable>
-            <el-option
-              v-for="item in genderTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="零售价" prop="retailPrice">
-          <el-input v-model="form.retailPrice" placeholder="请输入零售价" />
-        </el-form-item>
-        <el-form-item label="统购价" prop="groupPrice">
-          <el-input v-model="form.groupPrice" placeholder="请输入统购价" />
-        </el-form-item>
-        <el-form-item label="库存" prop="stockNum">
-          <el-input v-model="form.stockNum" placeholder="请输入库存" />
-        </el-form-item>
-        <el-form-item label="状态" prop="status">
-          <el-select v-model="form.status" placeholder="请选择状态" clearable>
-            <el-option
-              v-for="item in enableStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-      </el-form>
+    <el-dialog
+      :title="title"
+      :visible.sync="open"
+      width="760px"
+      top="6vh"
+      append-to-body
+      :close-on-click-modal="false"
+      class="goods-size-edit-dialog"
+    >
+      <div class="dialog-scroll">
+        <el-form ref="form" :model="form" :rules="rules" label-width="92px" class="goods-size-form">
+          <div class="form-section">
+            <div class="section-head">
+              <div class="section-title">基础信息</div>
+              <div class="section-desc">维护尺码所属商品、尺码编码、适用性别与启停状态</div>
+            </div>
+            <el-row :gutter="20">
+              <el-col :span="24">
+                <el-form-item label="关联商品" prop="goodsId">
+                  <el-select
+                    v-model="form.goodsId"
+                    placeholder="请选择商品"
+                    clearable
+                    filterable
+                    style="width: 100%"
+                  >
+                    <el-option
+                      v-for="item in goodsOptions"
+                      :key="item.id"
+                      :label="formatGoodsOption(item)"
+                      :value="item.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="尺码编码" prop="sizeCode">
+                  <el-input v-model="form.sizeCode" placeholder="请输入尺码编码，如 S、M、XL" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="性别类型" prop="genderType">
+                  <el-select v-model="form.genderType" placeholder="请选择性别类型" clearable style="width: 100%">
+                    <el-option
+                      v-for="item in genderTypeOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="状态" prop="status">
+                  <el-select v-model="form.status" placeholder="请选择状态" clearable style="width: 100%">
+                    <el-option
+                      v-for="item in enableStatusOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+
+          <div class="form-section">
+            <div class="section-head">
+              <div class="section-title">价格库存</div>
+              <div class="section-desc">维护该尺码的零售价、统购价与可售库存</div>
+            </div>
+            <el-row :gutter="20">
+              <el-col :span="8">
+                <el-form-item label="零售价" prop="retailPrice">
+                  <el-input v-model="form.retailPrice" placeholder="请输入零售价" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="统购价" prop="groupPrice">
+                  <el-input v-model="form.groupPrice" placeholder="请输入统购价" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="8">
+                <el-form-item label="库存" prop="stockNum">
+                  <el-input v-model="form.stockNum" placeholder="请输入库存" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+
+          <div class="form-section">
+            <div class="section-head">
+              <div class="section-title">扩展信息</div>
+              <div class="section-desc">按需补充量体信息与备注说明</div>
+            </div>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="量体信息" prop="measureJson">
+                  <div v-if="measureJsonRawMode" class="measure-editor">
+                    <el-input
+                      v-model="measureJsonRawValue"
+                      type="textarea"
+                      :rows="4"
+                      placeholder="当前量体信息不是标准 JSON，将按原文保存"
+                    />
+                    <div class="measure-tip">当前内容无法拆分为量体项，系统会按原文保存。</div>
+                  </div>
+                  <div v-else class="measure-editor">
+                    <template v-if="measureInfoList.length > 0">
+                      <div
+                        v-for="(item, index) in measureInfoList"
+                        :key="index"
+                        class="measure-row"
+                      >
+                        <el-input
+                          v-model="item.label"
+                          class="measure-label-input"
+                          placeholder="项目"
+                        />
+                        <el-input
+                          v-model="item.value"
+                          class="measure-value-input"
+                          placeholder="内容"
+                        />
+                        <el-button
+                          type="text"
+                          icon="el-icon-delete"
+                          class="measure-delete"
+                          @click="removeMeasureInfo(index)"
+                        />
+                      </div>
+                    </template>
+                    <div v-else class="measure-empty">暂无量体信息</div>
+                    <el-button
+                      type="primary"
+                      plain
+                      icon="el-icon-plus"
+                      size="mini"
+                      @click="addMeasureInfo"
+                    >添加量体项</el-button>
+                  </div>
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="备注" prop="remark">
+                  <el-input
+                    v-model="form.remark"
+                    type="textarea"
+                    :rows="4"
+                    placeholder="选填，补充尺码说明"
+                  />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+        </el-form>
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -243,6 +345,24 @@
 <script>
 import { listGoodsSize, getGoodsSize, delGoodsSize, addGoodsSize, updateGoodsSize } from '@/api/school/goodsSize'
 import { listGoods } from '@/api/school/goods'
+
+const MEASURE_FIELD_LABELS = {
+  height: '身高',
+  weight: '体重',
+  heightRange: '身高范围',
+  weightRange: '体重范围',
+  chest: '胸围',
+  waist: '腰围',
+  hip: '臀围',
+  shoulder: '肩宽',
+  sleeve: '袖长',
+  length: '衣长'
+}
+
+const MEASURE_LABEL_FIELDS = Object.keys(MEASURE_FIELD_LABELS).reduce((labelFields, field) => {
+  labelFields[MEASURE_FIELD_LABELS[field]] = field
+  return labelFields
+}, {})
 
 export default {
   name: 'GoodsSize',
@@ -280,6 +400,10 @@ export default {
       total: 0,
       // 商品尺码表格数据
       goodsSizeList: [],
+      // 量体信息编辑数据
+      measureInfoList: [],
+      measureJsonRawMode: false,
+      measureJsonRawValue: '',
       // 商品下拉数据
       goodsOptions: [],
       genderTypeOptions: [
@@ -288,8 +412,8 @@ export default {
         { value: '2', label: '女' }
       ],
       enableStatusOptions: [
-        { value: '0', label: '停用' },
-        { value: '1', label: '启用' }
+        { value: '0', label: '停用', tagType: 'info' },
+        { value: '1', label: '启用', tagType: 'success' }
       ],
       // 弹出层标题
       title: '',
@@ -301,11 +425,7 @@ export default {
         pageSize: 10,
         goodsId: null,
         sizeCode: null,
-        sortNum: null,
         genderType: null,
-        retailPrice: null,
-        groupPrice: null,
-        stockNum: null,
         status: null
       },
       // 表单参数
@@ -317,10 +437,6 @@ export default {
         ],
         sizeCode: [
           { required: true, message: '尺码编码不能为空', trigger: 'blur' }
-        ],
-        sortNum: [
-          { required: true, message: '排序字段，根据商品尺码依次增加，如 S=1 M=2 L=3 XL=4不能为空', trigger: 'blur' },
-          { validator: validateNonNegativeInteger, trigger: 'blur' }
         ],
         genderType: [
           { required: true, message: '性别类型不能为空', trigger: 'change' }
@@ -351,8 +467,9 @@ export default {
     getList() {
       this.loading = true
       listGoodsSize(this.queryParams).then(response => {
-        this.goodsSizeList = response.rows
-        this.total = response.total
+        this.goodsSizeList = response.rows || []
+        this.total = response.total || 0
+      }).finally(() => {
         this.loading = false
       })
     },
@@ -363,24 +480,10 @@ export default {
     },
     // 表单重置
     reset() {
-      this.form = {
-        id: null,
-        goodsId: null,
-        sizeCode: null,
-        sortNum: null,
-        genderType: '0',
-        measureJson: null,
-        retailPrice: null,
-        groupPrice: null,
-        stockNum: null,
-        status: '1',
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: '0'
-      }
+      this.form = this.getDefaultForm()
+      this.measureInfoList = []
+      this.measureJsonRawMode = false
+      this.measureJsonRawValue = ''
       this.resetForm('form')
     },
     /** 搜索按钮操作 */
@@ -408,9 +511,10 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
-      const id = row.id || this.ids
+      const id = row && row.id ? row.id : this.ids[0]
       getGoodsSize(id).then(response => {
-        this.form = response.data
+        this.form = Object.assign(this.getDefaultForm(), response.data || {})
+        this.setMeasureInfo(this.form.measureJson)
         this.open = true
         this.title = '修改商品尺码'
       })
@@ -419,15 +523,19 @@ export default {
     submitForm() {
       this.$refs['form'].validate(valid => {
         if (valid) {
-          this.form.delFlag = this.form.delFlag || '0'
-          if (this.form.id != null) {
-            updateGoodsSize(this.form).then(response => {
+          const payload = Object.assign({}, this.form, {
+            measureJson: this.stringifyMeasureInfo(),
+            sortNum: this.calculateSizeSortNum(this.form.sizeCode),
+            delFlag: this.form.delFlag || '0'
+          })
+          if (payload.id != null) {
+            updateGoodsSize(payload).then(() => {
               this.$modal.msgSuccess('修改成功')
               this.open = false
               this.getList()
             })
           } else {
-            addGoodsSize(this.form).then(response => {
+            addGoodsSize(payload).then(() => {
               this.$modal.msgSuccess('新增成功')
               this.open = false
               this.getList()
@@ -438,7 +546,7 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids
+      const ids = row && row.id ? row.id : this.ids.join(',')
       this.$modal.confirm('是否确认删除商品尺码编号为"' + ids + '"的数据项？').then(function() {
         return delGoodsSize(ids)
       }).then(() => {
@@ -467,7 +575,256 @@ export default {
     getOptionLabel(options, value) {
       const option = options.find(item => item.value === String(value))
       return option ? option.label : value || '-'
+    },
+    getOptionTagType(options, value) {
+      const option = options.find(item => item.value === String(value))
+      return option ? option.tagType : 'info'
+    },
+    getDefaultForm() {
+      return {
+        id: null,
+        goodsId: null,
+        sizeCode: null,
+        sortNum: null,
+        genderType: '0',
+        measureJson: null,
+        retailPrice: null,
+        groupPrice: null,
+        stockNum: null,
+        status: '1',
+        createBy: null,
+        createTime: null,
+        updateBy: null,
+        updateTime: null,
+        remark: null,
+        delFlag: '0'
+      }
+    },
+    calculateSizeSortNum(sizeCode) {
+      const normalizedSize = String(sizeCode || '').trim().toUpperCase()
+      if (/^\d+$/.test(normalizedSize)) {
+        return Number(normalizedSize)
+      }
+      const sizeSortMap = {
+        XS: 0,
+        S: 1,
+        M: 2,
+        L: 3,
+        XL: 4,
+        XXL: 5,
+        XXXL: 6
+      }
+      if (Object.prototype.hasOwnProperty.call(sizeSortMap, normalizedSize)) {
+        return sizeSortMap[normalizedSize]
+      }
+      const numberedXlMatch = normalizedSize.match(/^(\d+)XL$/)
+      if (numberedXlMatch) {
+        return Number(numberedXlMatch[1]) + 3
+      }
+      const repeatedXlMatch = normalizedSize.match(/^(X{2,})L$/)
+      if (repeatedXlMatch) {
+        return repeatedXlMatch[1].length + 3
+      }
+      return 999
+    },
+    getMeasureLabel(field) {
+      return MEASURE_FIELD_LABELS[field] || field
+    },
+    getMeasureField(item) {
+      const label = String(item.label || '').trim()
+      if (item.key && this.getMeasureLabel(item.key) === label) {
+        return item.key
+      }
+      return MEASURE_LABEL_FIELDS[label] || label || item.key
+    },
+    formatMeasureValue(value) {
+      if (value === null || value === undefined) {
+        return ''
+      }
+      if (typeof value === 'object') {
+        return JSON.stringify(value)
+      }
+      return String(value)
+    },
+    setMeasureInfo(measureJson) {
+      this.measureInfoList = []
+      this.measureJsonRawMode = false
+      this.measureJsonRawValue = ''
+      if (!measureJson) {
+        return
+      }
+      try {
+        const parsedMeasure = typeof measureJson === 'string' ? JSON.parse(measureJson) : measureJson
+        if (!parsedMeasure || Array.isArray(parsedMeasure) || typeof parsedMeasure !== 'object') {
+          throw new Error('量体信息不是对象格式')
+        }
+        this.measureInfoList = Object.keys(parsedMeasure).map(field => {
+          return {
+            key: field,
+            label: this.getMeasureLabel(field),
+            value: this.formatMeasureValue(parsedMeasure[field])
+          }
+        })
+      } catch (error) {
+        this.measureJsonRawMode = true
+        this.measureJsonRawValue = String(measureJson)
+      }
+    },
+    addMeasureInfo() {
+      this.measureInfoList.push({
+        key: '',
+        label: '',
+        value: ''
+      })
+    },
+    removeMeasureInfo(index) {
+      this.measureInfoList.splice(index, 1)
+    },
+    stringifyMeasureInfo() {
+      if (this.measureJsonRawMode) {
+        const rawValue = String(this.measureJsonRawValue || '').trim()
+        return rawValue || null
+      }
+      const measureInfo = {}
+      this.measureInfoList.forEach(item => {
+        const field = this.getMeasureField(item)
+        const value = String(item.value || '').trim()
+        if (field && value) {
+          measureInfo[field] = value
+        }
+      })
+      return Object.keys(measureInfo).length > 0 ? JSON.stringify(measureInfo) : null
     }
   }
 }
 </script>
+
+<style scoped>
+.query-form {
+  margin-bottom: 16px;
+  padding: 18px 20px 6px;
+  background: #f8fafc;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+}
+
+.goods-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.goods-info-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.goods-title {
+  overflow: hidden;
+  font-size: 14px;
+  font-weight: 600;
+  color: #243447;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dialog-scroll {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.form-section {
+  margin-bottom: 18px;
+  padding: 18px 18px 6px;
+  background: #f8fafc;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+}
+
+.section-head {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #243447;
+}
+
+.section-desc {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8798;
+}
+
+.measure-editor {
+  width: 100%;
+}
+
+.measure-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.measure-label-input {
+  flex: 0 0 112px;
+  margin-right: 8px;
+}
+
+.measure-value-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.measure-delete {
+  flex: 0 0 32px;
+  margin-left: 4px;
+  color: #f56c6c;
+}
+
+.measure-empty {
+  margin-bottom: 8px;
+  padding: 10px 12px;
+  color: #7a8798;
+  background: #fff;
+  border: 1px dashed #d8e0ea;
+  border-radius: 6px;
+}
+
+.measure-tip {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: #7a8798;
+}
+
+.goods-size-edit-dialog ::v-deep .el-dialog {
+  max-width: calc(100vw - 32px);
+}
+
+@media (max-width: 768px) {
+  .goods-size-form ::v-deep .el-col {
+    width: 100%;
+  }
+
+  .dialog-scroll {
+    max-height: 64vh;
+  }
+
+  .measure-row {
+    flex-wrap: wrap;
+  }
+
+  .measure-label-input,
+  .measure-value-input {
+    flex: 0 0 100%;
+    margin-right: 0;
+  }
+
+  .measure-delete {
+    margin-left: 0;
+  }
+}
+</style>

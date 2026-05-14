@@ -1,56 +1,82 @@
 <template>
-  <el-image :src="`${realSrc}`" fit="cover" :style="`width:${realWidth};height:${realHeight};`"
-    :preview-src-list="realSrcList">
+  <el-image
+    :src="`${realSrc}`"
+    fit="cover"
+    :style="`width:${realWidth};height:${realHeight};`"
+    :preview-src-list="realSrcList"
+  >
     <div slot="error" class="image-slot">
-      <i class="el-icon-picture-outline"></i>
+      <i class="el-icon-picture-outline" />
     </div>
   </el-image>
 </template>
 
 <script>
 export default {
-  name: "ImagePreview",
+  name: 'ImagePreview',
   props: {
     src: {
       type: String,
-      default: ""
+      default: ''
     },
     width: {
       type: [Number, String],
-      default: ""
+      default: ''
     },
     height: {
       type: [Number, String],
-      default: ""
+      default: ''
+    },
+    baseUrl: {
+      type: String,
+      default: process.env.VUE_APP_IMAGE_BASE_API
     }
   },
   computed: {
     realSrc() {
       if (!this.src) {
-        return;
+        return ''
       }
-      let real_src = this.src.split(",")[0];
-      return real_src;
+      const realSrc = this.normalizeSrc(this.src.split(',')[0])
+      return realSrc
     },
     realSrcList() {
       if (!this.src) {
-        return;
+        return []
       }
-      let real_src_list = this.src.split(",");
-      let srcList = [];
-      real_src_list.forEach(item => {
-        return srcList.push(item);
-      });
-      return srcList;
+      const realSrcList = this.src.split(',')
+      const srcList = []
+      realSrcList.forEach(item => {
+        const realSrc = this.normalizeSrc(item)
+        if (realSrc) {
+          srcList.push(realSrc)
+        }
+      })
+      return srcList
     },
     realWidth() {
-      return typeof this.width == "string" ? this.width : `${this.width}px`;
+      return typeof this.width === 'string' ? this.width : `${this.width}px`
     },
     realHeight() {
-      return typeof this.height == "string" ? this.height : `${this.height}px`;
+      return typeof this.height === 'string' ? this.height : `${this.height}px`
     }
   },
-};
+  methods: {
+    normalizeSrc(src) {
+      const realSrc = String(src || '').trim()
+      if (!realSrc) {
+        return ''
+      }
+      if (/^(https?:)?\/\//.test(realSrc) || /^(data|blob):/.test(realSrc)) {
+        return realSrc
+      }
+      if (!this.baseUrl) {
+        return realSrc
+      }
+      return `${this.baseUrl.replace(/\/$/, '')}/${realSrc.replace(/^\//, '')}`
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>
