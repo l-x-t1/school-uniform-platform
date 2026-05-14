@@ -52,7 +52,7 @@ public class XfptGroupNoticeController extends BaseController {
     }
 
 @Operation(summary = "查询统购订购进度列表")
-@RequiresPermissions("school:groupNotice:list")
+@RequiresPermissions("school:tgjd:list")
 @GetMapping("/progress/list")
     public TableDataInfo progressList(GroupNoticeProgressQuery query) {
         startPage();
@@ -60,7 +60,7 @@ public class XfptGroupNoticeController extends BaseController {
     }
 
 @Operation(summary = "查询统购订购进度详情")
-@RequiresPermissions("school:groupNotice:query")
+@RequiresPermissions("school:tgjd:query")
 @GetMapping("/progress/{noticeId}")
     public AjaxResult progressDetail(@PathVariable("noticeId") Long noticeId, Long supplierId) {
         return success(xfptGroupNoticeService.selectGroupNoticeOrderDetail(noticeId, supplierId));

@@ -177,6 +177,18 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
             xfptGroupNotice.setDeptId(currentSchool.getDeptId());
             xfptGroupNotice.setSchoolId(currentSchool.getId());
             xfptGroupNotice.setSchoolName(currentSchool.getSchoolName());
+            if (StringUtils.isEmpty(xfptGroupNotice.getNoticeType())) {
+                xfptGroupNotice.setNoticeType("1");
+            }
+            if (StringUtils.isEmpty(xfptGroupNotice.getStatus())) {
+                xfptGroupNotice.setStatus("0");
+            }
+            if (StringUtils.isEmpty(xfptGroupNotice.getApplyStatus())) {
+                xfptGroupNotice.setApplyStatus("0");
+            }
+            if (StringUtils.isEmpty(xfptGroupNotice.getDelFlag())) {
+                xfptGroupNotice.setDelFlag("0");
+            }
         }
 
         private void checkNoticeBelongsToCurrentSchool(XfptGroupNotice xfptGroupNotice)

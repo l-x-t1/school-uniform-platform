@@ -50,4 +50,12 @@ public class XfptSizeExchangeVo {
     private Integer applyNum;
 
     private Long deptId;
+
+    private String reason;
+
+    private String handleResult;
+
+    private String handleRemark;
+
+    private Date createTime;
 }
