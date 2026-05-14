@@ -44,6 +44,22 @@ public interface IXfptProductionOrderService extends IService<XfptProductionOrde
         public int updateXfptProductionOrder(XfptProductionOrder xfptProductionOrder);
 
         /**
+         * 标记生产单生产完成
+         *
+         * @param id 生产单主键
+         * @return 结果
+         */
+        public int finishProductionOrder(Long id);
+
+        /**
+         * 根据生产单生成发货单
+         *
+         * @param id 生产单主键
+         * @return 生成的发货单主键
+         */
+        public Long generateDeliveryOrder(Long id);
+
+        /**
          * 批量删除生产单
          *
          * @param ids 需要删除的生产单主键集合
