@@ -184,7 +184,11 @@
         <el-descriptions-item label="打款时间">{{ parseTime(detail.payTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</el-descriptions-item>
         <el-descriptions-item label="审核备注" :span="2">{{ detail.auditRemark || '-' }}</el-descriptions-item>
         <el-descriptions-item label="收款信息" :span="2">
-          <pre class="json-preview">{{ detail.bankInfoJson || '-' }}</pre>
+          <div class="bank-info">
+            <div>收款户名：{{ formatBankInfo(detail.bankInfoJson).accountName }}</div>
+            <div>开户银行：{{ formatBankInfo(detail.bankInfoJson).bankName }}</div>
+            <div>银行账号：{{ formatBankInfo(detail.bankInfoJson).accountNo }}</div>
+          </div>
         </el-descriptions-item>
         <el-descriptions-item label="备注" :span="2">{{ detail.remark || '-' }}</el-descriptions-item>
       </el-descriptions>
@@ -364,6 +368,26 @@ export default {
     formatMoney(value) {
       return Number(value || 0).toFixed(2)
     },
+    formatBankInfo(bankInfoJson) {
+      const emptyInfo = {
+        accountName: '-',
+        bankName: '-',
+        accountNo: '-'
+      }
+      if (!bankInfoJson) {
+        return emptyInfo
+      }
+      try {
+        const bankInfo = JSON.parse(bankInfoJson)
+        return {
+          accountName: bankInfo.accountName || '-',
+          bankName: bankInfo.bankName || '-',
+          accountNo: bankInfo.accountNo || bankInfo.bankNo || bankInfo.bankAccountNo || '-'
+        }
+      } catch (error) {
+        return emptyInfo
+      }
+    },
     formatStatus(value) {
       const textMap = {
         '0': '待审核',
@@ -437,10 +461,8 @@ export default {
   margin-bottom: 14px;
 }
 
-.json-preview {
-  margin: 0;
-  white-space: pre-wrap;
+.bank-info {
+  line-height: 24px;
   word-break: break-all;
-  font-family: Consolas, Monaco, monospace;
 }
 </style>
