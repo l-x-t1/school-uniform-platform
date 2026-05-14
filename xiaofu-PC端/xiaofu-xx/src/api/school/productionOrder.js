@@ -42,3 +42,19 @@ export function delProductionOrder(id) {
     method: 'delete'
   })
 }
+
+// 生产完成
+export function finishProductionOrder(id) {
+  return request({
+    url: '/school/productionOrder/finish/' + id,
+    method: 'put'
+  })
+}
+
+// 生成发货单
+export function generateDeliveryOrder(id) {
+  return request({
+    url: '/school/productionOrder/generateDelivery/' + id,
+    method: 'post'
+  })
+}
