@@ -1,6 +1,7 @@
 package com.xfgl.school.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.xfgl.common.core.enums.RoleType;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
@@ -13,6 +14,7 @@ import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 import com.xfgl.school.mapper.XfptGroupNoticeMapper;
 import com.xfgl.school.service.IXfptGroupNoticeService;
 import com.xfgl.school.service.IXfptSchoolMessageService;
+import com.xfgl.system.api.domain.SysRole;
 import com.xfgl.system.api.domain.SysUser;
 import com.xfgl.system.api.model.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,30 +40,18 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     @Autowired
     private IXfptSchoolMessageService xfptSchoolMessageService;
 
-    /**
-     * 查询统购公告列表
-     *
-     * @param xfptGroupNotice 统购公告
-     * @return 统购公告
-     */
     @Override
-    public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice)
-    {
-        XfptSchoolMessage currentSchool = getCurrentSchool();
-        xfptGroupNotice.setDeptId(currentSchool.getDeptId());
-        xfptGroupNotice.setSchoolId(currentSchool.getId());
+    public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice) {
+        if (!isAdmin()) {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            xfptGroupNotice.setDeptId(currentSchool.getDeptId());
+            xfptGroupNotice.setSchoolId(currentSchool.getId());
+        }
         return xfptGroupNoticeMapper.selectXfptGroupNoticeList(xfptGroupNotice);
     }
 
-    /**
-     * 查询统购公告
-     *
-     * @param id 统购公告主键
-     * @return 统购公告
-     */
     @Override
-    public XfptGroupNotice selectXfptGroupNoticeById(Long id)
-    {
+    public XfptGroupNotice selectXfptGroupNoticeById(Long id) {
         XfptGroupNotice xfptGroupNotice = xfptGroupNoticeMapper.selectById(id);
         checkNoticeBelongsToCurrentSchool(xfptGroupNotice);
         List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNoticeMapper.selectXfptGroupNoticeItemById(id);
@@ -69,51 +59,30 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         return xfptGroupNotice;
     }
 
-    /**
-     * 新增统购公告
-     *
-     * @param xfptGroupNotice 统购公告
-     * @return 结果
-     */
     @Transactional
     @Override
-    public int insertXfptGroupNotice(XfptGroupNotice xfptGroupNotice)
-    {
+    public int insertXfptGroupNotice(XfptGroupNotice xfptGroupNotice) {
         fillGroupNoticeDefaults(xfptGroupNotice);
-        fillCurrentSchoolInfo(xfptGroupNotice);
+        fillNoticeSchoolInfo(xfptGroupNotice);
         int rows = xfptGroupNoticeMapper.insert(xfptGroupNotice);
         insertXfptGroupNoticeItem(xfptGroupNotice);
         return rows;
     }
 
-    /**
-     * 修改统购公告
-     *
-     * @param xfptGroupNotice 统购公告
-     * @return 结果
-     */
     @Transactional
     @Override
-    public int updateXfptGroupNotice(XfptGroupNotice xfptGroupNotice)
-    {
+    public int updateXfptGroupNotice(XfptGroupNotice xfptGroupNotice) {
         checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(xfptGroupNotice.getId()));
         fillGroupNoticeDefaults(xfptGroupNotice);
-        fillCurrentSchoolInfo(xfptGroupNotice);
+        fillNoticeSchoolInfo(xfptGroupNotice);
         xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(xfptGroupNotice.getId());
         insertXfptGroupNoticeItem(xfptGroupNotice);
         return xfptGroupNoticeMapper.updateById(xfptGroupNotice);
     }
 
-    /**
-     * 批量删除统购公告
-     *
-     * @param ids 需要删除的统购公告主键
-     * @return 结果
-     */
     @Transactional
     @Override
-    public int deleteXfptGroupNoticeByIds(Long[] ids)
-    {
+    public int deleteXfptGroupNoticeByIds(Long[] ids) {
         List<Long> idList = Arrays.asList(ids);
         for (Long id : idList) {
             checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(id));
@@ -122,52 +91,42 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         return xfptGroupNoticeMapper.deleteBatchIds(idList);
     }
 
-    /**
-     * 删除统购公告信息
-     *
-     * @param id 统购公告主键
-     * @return 结果
-     */
     @Transactional
     @Override
-    public int deleteXfptGroupNoticeById(Long id)
-    {
+    public int deleteXfptGroupNoticeById(Long id) {
         checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(id));
         xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(id);
         return xfptGroupNoticeMapper.deleteById(id);
     }
 
     @Override
-    public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query)
-    {
-        XfptSchoolMessage currentSchool = getCurrentSchool();
-        query.setDeptId(currentSchool.getDeptId());
-        query.setSchoolId(currentSchool.getId());
+    public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query) {
+        if (!isAdmin()) {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            query.setDeptId(currentSchool.getDeptId());
+            query.setSchoolId(currentSchool.getId());
+        }
         return xfptGroupNoticeMapper.selectGroupNoticeProgressList(query);
     }
 
     @Override
-    public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId)
-    {
+    public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId) {
         checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(noticeId));
-        XfptSchoolMessage currentSchool = getCurrentSchool();
-        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, currentSchool.getDeptId());
+        Long deptId = null;
+        if (!isAdmin()) {
+            deptId = getCurrentSchool().getDeptId();
+        }
+        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, deptId);
     }
 
-    /**
-     * 新增统购公告商品信息
-     *
-     * @param xfptGroupNotice 统购公告对象
-     */
-    private void insertXfptGroupNoticeItem(XfptGroupNotice xfptGroupNotice)
-    {
+    private void insertXfptGroupNoticeItem(XfptGroupNotice xfptGroupNotice) {
         List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNotice.getXfptGroupNoticeItemList();
         Long id = xfptGroupNotice.getId();
         if (StringUtils.isNotEmpty(xfptGroupNoticeItemList)) {
             for (XfptGroupNoticeItem xfptGroupNoticeItem : xfptGroupNoticeItemList) {
                 xfptGroupNoticeItem.setNoticeId(id);
                 xfptGroupNoticeItem.setDeptId(xfptGroupNotice.getDeptId());
-                if (xfptGroupNoticeItem.getDelFlag() == null || "".equals(xfptGroupNoticeItem.getDelFlag())) {
+                if (StringUtils.isEmpty(xfptGroupNoticeItem.getDelFlag())) {
                     xfptGroupNoticeItem.setDelFlag("0");
                 }
             }
@@ -175,34 +134,50 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         }
     }
 
-    private void fillGroupNoticeDefaults(XfptGroupNotice xfptGroupNotice)
-    {
-        if (xfptGroupNotice.getNoticeType() == null || "".equals(xfptGroupNotice.getNoticeType())) {
+    private void fillGroupNoticeDefaults(XfptGroupNotice xfptGroupNotice) {
+        if (StringUtils.isEmpty(xfptGroupNotice.getNoticeType())) {
             xfptGroupNotice.setNoticeType("1");
         }
-        if (xfptGroupNotice.getStatus() == null || "".equals(xfptGroupNotice.getStatus())) {
+        if (StringUtils.isEmpty(xfptGroupNotice.getStatus())) {
             xfptGroupNotice.setStatus("0");
         }
-        if (xfptGroupNotice.getApplyStatus() == null || "".equals(xfptGroupNotice.getApplyStatus())) {
+        if (StringUtils.isEmpty(xfptGroupNotice.getApplyStatus())) {
             xfptGroupNotice.setApplyStatus("0");
         }
-        if (xfptGroupNotice.getDelFlag() == null || "".equals(xfptGroupNotice.getDelFlag())) {
+        if (StringUtils.isEmpty(xfptGroupNotice.getDelFlag())) {
             xfptGroupNotice.setDelFlag("0");
         }
     }
 
-    private void fillCurrentSchoolInfo(XfptGroupNotice xfptGroupNotice)
-    {
-        XfptSchoolMessage currentSchool = getCurrentSchool();
-        xfptGroupNotice.setDeptId(currentSchool.getDeptId());
-        xfptGroupNotice.setSchoolId(currentSchool.getId());
-        xfptGroupNotice.setSchoolName(currentSchool.getSchoolName());
+    private void fillNoticeSchoolInfo(XfptGroupNotice xfptGroupNotice) {
+        if (!isAdmin()) {
+            XfptSchoolMessage currentSchool = getCurrentSchool();
+            xfptGroupNotice.setDeptId(currentSchool.getDeptId());
+            xfptGroupNotice.setSchoolId(currentSchool.getId());
+            xfptGroupNotice.setSchoolName(currentSchool.getSchoolName());
+            return;
+        }
+
+        if (xfptGroupNotice.getSchoolId() == null) {
+            throw new ServiceException("请选择学校");
+        }
+        XfptSchoolMessage schoolMessage = xfptSchoolMessageService.lambdaQuery()
+                .eq(XfptSchoolMessage::getId, xfptGroupNotice.getSchoolId())
+                .one();
+        if (schoolMessage == null || schoolMessage.getDeptId() == null) {
+            throw new ServiceException("选择的学校信息不存在");
+        }
+        xfptGroupNotice.setDeptId(schoolMessage.getDeptId());
+        xfptGroupNotice.setSchoolId(schoolMessage.getId());
+        xfptGroupNotice.setSchoolName(schoolMessage.getSchoolName());
     }
 
-    private void checkNoticeBelongsToCurrentSchool(XfptGroupNotice xfptGroupNotice)
-    {
+    private void checkNoticeBelongsToCurrentSchool(XfptGroupNotice xfptGroupNotice) {
         if (xfptGroupNotice == null) {
             throw new ServiceException("公告不存在");
+        }
+        if (isAdmin()) {
+            return;
         }
         XfptSchoolMessage currentSchool = getCurrentSchool();
         if (!Objects.equals(xfptGroupNotice.getDeptId(), currentSchool.getDeptId())
@@ -211,8 +186,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         }
     }
 
-    private XfptSchoolMessage getCurrentSchool()
-    {
+    private XfptSchoolMessage getCurrentSchool() {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
         Long deptId = sysUser == null ? null : sysUser.getDeptId();
@@ -226,5 +200,25 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
             throw new ServiceException("当前登录学校信息不存在，请先完善学校信息");
         }
         return schoolMessage;
+    }
+
+    private boolean isAdmin() {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
+        if (sysUser == null) {
+            return false;
+        }
+        if (sysUser.isAdmin() || "admin".equals(sysUser.getUserName())) {
+            return true;
+        }
+        List<SysRole> roles = sysUser.getRoles();
+        if (roles == null) {
+            return false;
+        }
+        return roles.stream()
+                .filter(Objects::nonNull)
+                .map(SysRole::getRoleKey)
+                .filter(StringUtils::isNotEmpty)
+                .anyMatch(roleKey -> "admin".equals(roleKey) || RoleType.SJYJ.getCode().equals(roleKey));
     }
 }

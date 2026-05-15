@@ -14,15 +14,20 @@ import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.*;
 import com.xfgl.school.service.*;
 import com.xfgl.system.api.domain.SysDept;
+import com.xfgl.system.api.model.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletResponse;
+import java.beans.PropertyEditorSupport;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -42,6 +47,24 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     @Autowired
     private ISupplierMessageService iSupplierMessageService;
 
+    @InitBinder
+    public void initBinder(WebDataBinder binder) {
+        binder.registerCustomEditor(Map.class, "params", new PropertyEditorSupport() {
+            @Override
+            public void setAsText(String text) {
+                setValue(new HashMap<String, Object>());
+            }
+        });
+    }
+
+    private Long getCurrentDeptId() {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        if (loginUser == null || loginUser.getSysUser() == null) {
+            return null;
+        }
+        return loginUser.getSysUser().getDeptId();
+    }
+
     /**
      * 查询学校与供应商检验报告关联列表
      */
@@ -51,7 +74,10 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     @GetMapping("/list")
     public TableDataInfo list(XfptSuppliceInspectionReport xfptSuppliceInspectionReport) {
         startPage();
-        xfptSuppliceInspectionReport.setDeptId(String.valueOf(SecurityUtils.getLoginUser().getSysUser().getDeptId()));
+        Long deptId = getCurrentDeptId();
+        if (deptId != null) {
+            xfptSuppliceInspectionReport.setDeptId(String.valueOf(deptId));
+        }
         List<XfptSuppliceInspectionReport> list = xfptSuppliceInspectionReportService.selectXfptSuppliceInspectionReportList(xfptSuppliceInspectionReport);
         for (XfptSuppliceInspectionReport suppliceInspectionReport : list) {
             SupplierMessage supplierMessage = iSupplierMessageService.getById(suppliceInspectionReport.getSupplierId());
@@ -93,6 +119,24 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         XfptSuppliceInspectionReport byId = xfptSuppliceInspectionReportService.getById(id);
+        Long deptId = getCurrentDeptId();
+        if (byId == null || (deptId != null && !String.valueOf(deptId).equals(byId.getDeptId()))) {
+            return success(null);
+        }
+        SupplierMessage supplierMessage = iSupplierMessageService.getById(byId.getSupplierId());
+        if (supplierMessage != null) {
+            byId.setLegalRepresentative(supplierMessage.getLegalRepresentative());
+        }
+        if (StringUtils.isEmpty(byId.getNoticeStatus())) {
+            byId.setNoticeStatus("0");
+        }
+        if ("1".equals(byId.getNoticeStatus())) {
+            byId.setNoticeStatusText("已通过");
+        } else if ("2".equals(byId.getNoticeStatus())) {
+            byId.setNoticeStatusText("已拒绝");
+        } else {
+            byId.setNoticeStatusText("待审核");
+        }
         List<XfptAnnoResults> list2 = iXfptAnnoResultsService.lambdaQuery().eq(XfptAnnoResults::getTeamId, byId.getTeamMeetingId()).list();
         if(CollUtil.isNotEmpty(list2)){
             byId.setGgTitle(list2.get(0).getNoticeTitle());

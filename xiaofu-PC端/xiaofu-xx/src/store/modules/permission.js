@@ -81,6 +81,45 @@ function ensureSupplierMessageMenu(routes = []) {
   return routes;
 }
 
+function ensureUsageMenu(routes = []) {
+  const exists = (children = []) =>
+    children.some(
+      (item) =>
+        item.path === "platformUsage" ||
+        item.path === "/newFeature/platformUsage" ||
+        item.component === "school/platformUsage/index"
+    );
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "PlatformUsage",
+      path: "platformUsage",
+      component: "school/platformUsage/index",
+      meta: {
+        title: "使用情况",
+        icon: "chart",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    if (route.path === "newFeature" || route.path === "/newFeature") {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureUsageMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
 const permission = {
   state: {
     routes: [],
@@ -117,9 +156,11 @@ const permission = {
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = ensureSupplierMessageMenu(normalizeUsageMenus(
-            JSON.parse(JSON.stringify(res.data || []))
-          ));
+          const normalizedRoutes = ensureUsageMenu(
+            ensureSupplierMessageMenu(
+              normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+            )
+          );
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);

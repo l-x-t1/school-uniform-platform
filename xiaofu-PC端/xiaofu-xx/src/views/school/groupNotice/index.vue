@@ -216,7 +216,23 @@
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="80px" :disabled="isViewMode">
         <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" disabled placeholder="请输入学校ID" />
+          <el-select
+            v-if="isAdmin"
+            v-model="form.schoolId"
+            filterable
+            clearable
+            placeholder="请选择学校"
+            style="width: 100%"
+            @change="handleSchoolChange"
+          >
+            <el-option
+              v-for="school in schoolOptions"
+              :key="school.id"
+              :label="school.schoolName"
+              :value="school.id"
+            />
+          </el-select>
+          <el-input v-else v-model="form.schoolId" disabled placeholder="请输入学校ID" />
         </el-form-item>
         <el-form-item label="学校名称快照" prop="schoolName">
           <el-input v-model="form.schoolName" disabled placeholder="请输入学校名称快照" />
@@ -354,6 +370,7 @@
 <script>
 import { listGroupNotice, getGroupNotice, delGroupNotice, addGroupNotice, updateGroupNotice } from "@/api/school/groupNotice";
 import { getSchoolInfoDetail } from "@/api/questionnaire";
+import request from "@/utils/request";
 
 export default {
   name: "GroupNotice",
@@ -384,6 +401,7 @@ export default {
       isViewMode: false,
       detailButtonText: "\u8be6\u60c5",
       currentSchool: null,
+      schoolOptions: [],
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -438,6 +456,14 @@ export default {
   },
   created() {
     this.getList();
+    if (this.isAdmin) {
+      this.getSchoolOptions();
+    }
+  },
+  computed: {
+    isAdmin() {
+      return this.$store.state.user.name === "admin" || this.$store.state.user.id === 1;
+    }
   },
   methods: {
     /** 查询统购公告列表 */
@@ -505,7 +531,7 @@ export default {
     handleAdd() {
       this.reset();
       this.isViewMode = false;
-      this.loadCurrentSchoolInfo().then(() => {
+      this.loadNoticeSchoolInfo().then(() => {
         this.open = true;
         this.title = "\u6dfb\u52a0\u7edf\u8d2d\u516c\u544a";
       });
@@ -578,7 +604,7 @@ export default {
       obj.priceDesc = "";
       obj.gradeIds = "";
       obj.gradeNames = "";
-      obj.deptId = "";
+      obj.deptId = this.form.deptId || "";
       obj.remark = "";
       this.xfptGroupNoticeItemList.push(obj);
     },
@@ -599,6 +625,41 @@ export default {
       this.checkedXfptGroupNoticeItem = selection.map(item => item.index)
     },
     /** 导出按钮操作 */
+    loadNoticeSchoolInfo() {
+      if (this.isAdmin) {
+        return this.getSchoolOptions();
+      }
+      return this.loadCurrentSchoolInfo();
+    },
+    getSchoolOptions() {
+      if (this.schoolOptions.length > 0) {
+        return Promise.resolve(this.schoolOptions);
+      }
+      return request({
+        url: "/school/schoolMessage/list",
+        method: "get",
+        params: {
+          pageNum: 1,
+          pageSize: 999
+        }
+      }).then(response => {
+        this.schoolOptions = response.rows || [];
+        return this.schoolOptions;
+      });
+    },
+    handleSchoolChange(schoolId) {
+      const school = this.schoolOptions.find(item => item.id === schoolId);
+      if (!school) {
+        this.form.schoolName = null;
+        this.form.deptId = null;
+        return;
+      }
+      this.form.schoolName = school.schoolName;
+      this.form.deptId = school.deptId;
+      this.xfptGroupNoticeItemList.forEach(item => {
+        item.deptId = school.deptId;
+      });
+    },
     loadCurrentSchoolInfo() {
       const deptId = this.$store.state.user.deptId;
       if (!deptId) {
