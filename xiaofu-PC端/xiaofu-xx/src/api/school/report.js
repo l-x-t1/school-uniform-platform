@@ -17,6 +17,14 @@ export function getReport(id) {
   });
 }
 
+// 查询学校端质检报告详情
+export function getSuppliceInspectionReport(id) {
+  return request({
+    url: "/school/suppliceInspectionReport/" + id,
+    method: "get",
+  });
+}
+
 // 新增学校与供应商检验报告关联
 export function addReport(data) {
   return request({

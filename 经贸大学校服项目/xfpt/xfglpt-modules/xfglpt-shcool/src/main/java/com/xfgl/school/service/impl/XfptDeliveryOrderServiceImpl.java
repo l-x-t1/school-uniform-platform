@@ -1,17 +1,18 @@
 package com.xfgl.school.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import org.springframework.stereotype.Service;
-import org.springframework.beans.factory.annotation.Autowired;
-import java.util.List;
-import java.util.Arrays;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
-import org.springframework.transaction.annotation.Transactional;
+import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
 import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
-import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.service.IXfptDeliveryOrderService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * 发货单Service业务层处理
@@ -26,15 +27,16 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
     private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
 
     @Override
-    public List<XfptDeliveryOrder> selectXfptDeliveryOrderList(XfptDeliveryOrder xfptDeliveryOrder)
-    {
+    public List<XfptDeliveryOrder> selectXfptDeliveryOrderList(XfptDeliveryOrder xfptDeliveryOrder) {
         return xfptDeliveryOrderMapper.selectXfptDeliveryOrderList(xfptDeliveryOrder);
     }
 
     @Override
-    public XfptDeliveryOrder selectXfptDeliveryOrderById(Long id)
-    {
+    public XfptDeliveryOrder selectXfptDeliveryOrderById(Long id) {
         XfptDeliveryOrder xfptDeliveryOrder = xfptDeliveryOrderMapper.selectById(id);
+        if (xfptDeliveryOrder == null) {
+            return null;
+        }
         List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList = xfptDeliveryOrderMapper.selectXfptDeliveryOrderItemById(id);
         xfptDeliveryOrder.setXfptDeliveryOrderItemList(xfptDeliveryOrderItemList);
         return xfptDeliveryOrder;
@@ -42,8 +44,7 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
 
     @Transactional
     @Override
-    public int insertXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder)
-    {
+    public int insertXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder) {
         if (xfptDeliveryOrder.getDeliveryTime() != null
                 && xfptDeliveryOrder.getSignTime() != null
                 && !xfptDeliveryOrder.getDeliveryTime().before(xfptDeliveryOrder.getSignTime())) {
@@ -57,8 +58,7 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
 
     @Transactional
     @Override
-    public int updateXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder)
-    {
+    public int updateXfptDeliveryOrder(XfptDeliveryOrder xfptDeliveryOrder) {
         fillDeliveryOrderDefaults(xfptDeliveryOrder);
         xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(xfptDeliveryOrder.getId());
         insertXfptDeliveryOrderItem(xfptDeliveryOrder);
@@ -67,8 +67,7 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
 
     @Transactional
     @Override
-    public int deleteXfptDeliveryOrderByIds(Long[] ids)
-    {
+    public int deleteXfptDeliveryOrderByIds(Long[] ids) {
         List<Long> idList = Arrays.asList(ids);
         for (Long id : idList) {
             xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(id);
@@ -78,14 +77,12 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
 
     @Transactional
     @Override
-    public int deleteXfptDeliveryOrderById(Long id)
-    {
+    public int deleteXfptDeliveryOrderById(Long id) {
         xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(id);
         return xfptDeliveryOrderMapper.deleteById(id);
     }
 
-    private void insertXfptDeliveryOrderItem(XfptDeliveryOrder xfptDeliveryOrder)
-    {
+    private void insertXfptDeliveryOrderItem(XfptDeliveryOrder xfptDeliveryOrder) {
         List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList = xfptDeliveryOrder.getXfptDeliveryOrderItemList();
         Long id = xfptDeliveryOrder.getId();
 
@@ -116,8 +113,7 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         }
     }
 
-    private void fillDeliveryOrderDefaults(XfptDeliveryOrder xfptDeliveryOrder)
-    {
+    private void fillDeliveryOrderDefaults(XfptDeliveryOrder xfptDeliveryOrder) {
         if (StringUtils.isEmpty(xfptDeliveryOrder.getDeliveryStatus())) {
             xfptDeliveryOrder.setDeliveryStatus("0");
         }
