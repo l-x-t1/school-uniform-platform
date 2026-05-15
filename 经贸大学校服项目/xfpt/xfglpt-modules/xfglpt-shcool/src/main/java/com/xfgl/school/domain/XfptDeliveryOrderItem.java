@@ -67,6 +67,4 @@ public class XfptDeliveryOrderItem extends BaseEntity {
     @Schema(description = "状态，0待发货，1已发货，2已签收")
     private String status;
 
-    @Schema(description = "删除标志")
-    private String delFlag;
 }

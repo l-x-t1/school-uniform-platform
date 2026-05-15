@@ -107,9 +107,6 @@ public class XfptDeliveryOrder extends BaseEntity {
     @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
-    @Schema(description = "删除标志")
-    private String delFlag;
-
     @TableField(exist = false)
     @Schema(description = "发货单明细")
     private List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList;
