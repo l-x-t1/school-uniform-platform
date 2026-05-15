@@ -93,3 +93,7 @@ WHERE r.del_flag = '0'
   AND NOT EXISTS (
     SELECT 1 FROM sys_role_menu rm WHERE rm.role_id = r.role_id AND rm.menu_id = m.menu_id
   );
+
+-- 服务学校列表补充字段：服务电话
+ALTER TABLE xfpt_school_supplier_rel
+ADD COLUMN service_phone varchar(50) DEFAULT NULL COMMENT '服务电话' AFTER cooperate_status;
