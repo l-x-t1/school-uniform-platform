@@ -4324,6 +4324,8 @@ SET @new_feature_menu_id := (
   LIMIT 1
 );
 SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+SET @OLD_SQL_SAFE_UPDATES := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
 
 SET @evaluation_menu_id := (
   SELECT `MENU_ID`
@@ -4807,6 +4809,127 @@ WHERE @evaluation_retail_order_id IS NOT NULL
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- ============================================
+-- 追加：新增功能菜单 - 账户余额 / 供应商提现记录
+-- 说明：使用 utf8mb4 十六进制字面量，避免中文编码问题
+-- ============================================
+
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'newFeature'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+
+SET @account_balance_name := CONVERT(0xE8B4A6E688B7E4BD99E9A29D USING utf8mb4);
+SET @account_balance_remark := CONVERT(0xE8B4A6E688B7E4BD99E9A29DE88F9CE58D95 USING utf8mb4);
+SET @supplier_withdraw_record_name := CONVERT(0xE4BE9BE5BA94E59586E68F90E78EB0E8AEB0E5BD95 USING utf8mb4);
+SET @supplier_withdraw_record_remark := CONVERT(0xE4BE9BE5BA94E59586E68F90E78EB0E8AEB0E5BD95E88F9CE58D95 USING utf8mb4);
+SET @OLD_SQL_SAFE_UPDATES := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+SET @account_balance_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'accountBalance'
+     OR `COMPONENT` = 'school/accountBalance/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @account_balance_menu_id := IFNULL(@account_balance_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @account_balance_menu_id, @account_balance_name, @new_feature_menu_id, 30,
+       'accountBalance', 'school/accountBalance/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:financeFlow:list', 'money',
+       'admin', NOW(), 'admin', NOW(), @account_balance_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'accountBalance'
+     OR `COMPONENT` = 'school/accountBalance/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @account_balance_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 30,
+    `PATH` = 'accountBalance',
+    `COMPONENT` = 'school/accountBalance/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:financeFlow:list',
+    `ICON` = 'money',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @account_balance_remark
+WHERE `MENU_ID` = @account_balance_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @account_balance_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @account_balance_menu_id
+);
+
+SET @supplier_withdraw_record_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierWithdrawRecord'
+     OR `COMPONENT` = 'school/supplierWithdrawRecord/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_withdraw_record_menu_id := IFNULL(@supplier_withdraw_record_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_withdraw_record_menu_id, @supplier_withdraw_record_name, @new_feature_menu_id, 31,
+       'supplierWithdrawRecord', 'school/supplierWithdrawRecord/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:withdrawApply:list', 'money',
+       'admin', NOW(), 'admin', NOW(), @supplier_withdraw_record_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierWithdrawRecord'
+     OR `COMPONENT` = 'school/supplierWithdrawRecord/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @supplier_withdraw_record_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 31,
+    `PATH` = 'supplierWithdrawRecord',
+    `COMPONENT` = 'school/supplierWithdrawRecord/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:withdrawApply:list',
+    `ICON` = 'money',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @supplier_withdraw_record_remark
+WHERE `MENU_ID` = @supplier_withdraw_record_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @supplier_withdraw_record_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @supplier_withdraw_record_menu_id
+);
+SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-05-04 19:18:33
