@@ -58,14 +58,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="供应商名称" prop="supplierName">
         <el-input
           v-model="queryParams.supplierName"
@@ -104,7 +96,6 @@
 
     <el-table v-loading="loading" :data="settlementManageList" border>
       <el-table-column label="申请单号" prop="withdrawNo" min-width="180" show-overflow-tooltip />
-      <el-table-column label="供应商ID" prop="supplierId" width="100" align="center" />
       <el-table-column label="供应商名称" prop="supplierName" min-width="160" show-overflow-tooltip />
       <el-table-column label="结算金额" width="130" align="right">
         <template slot-scope="scope">
@@ -167,45 +158,138 @@
       @pagination="getList"
     />
 
-    <el-dialog title="结算详情" :visible.sync="detailOpen" width="820px" append-to-body>
-      <el-descriptions :column="2" border size="small">
-        <el-descriptions-item label="申请单号">{{ detail.withdrawNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="结算状态">
-          <el-tag :type="statusTagType(detail.status)">
-            {{ formatStatus(detail.status) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="供应商ID">{{ detail.supplierId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="供应商名称">{{ detail.supplierName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="结算金额">¥{{ formatMoney(detail.applyAmount) }}</el-descriptions-item>
-        <el-descriptions-item label="结算流水ID">{{ detail.financeFlowId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="申请时间">{{ parseTime(detail.applyTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审核时间">{{ parseTime(detail.auditTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="打款时间">{{ parseTime(detail.payTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审核人">{{ detail.auditUserName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="审核备注" :span="2">{{ detail.auditRemark || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="收款信息" :span="2">
-          <div class="bank-info">
-            <div>收款户名：{{ formatBankInfo(detail.bankInfoJson).accountName }}</div>
-            <div>开户银行：{{ formatBankInfo(detail.bankInfoJson).bankName }}</div>
-            <div>银行账号：{{ formatBankInfo(detail.bankInfoJson).accountNo }}</div>
+    <el-dialog title="结算详情" :visible.sync="detailOpen" width="920px" append-to-body>
+      <div class="dialog-scroll settlement-detail-content">
+        <div class="detail-hero">
+          <div class="detail-main">
+            <div class="detail-eyebrow">结算申请</div>
+            <div class="detail-title">{{ detail.withdrawNo || '-' }}</div>
+            <div class="detail-meta">
+              <span class="meta-pill">{{ detail.supplierName || '未知供应商' }}</span>
+              <el-tag :type="statusTagType(detail.status)" size="small">
+                {{ formatStatus(detail.status) }}
+              </el-tag>
+            </div>
           </div>
-        </el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ detail.remark || '-' }}</el-descriptions-item>
-      </el-descriptions>
+          <div class="amount-block">
+            <div class="amount-label">结算金额</div>
+            <div class="amount-value">{{ formatAmountText(detail.applyAmount) }}</div>
+          </div>
+        </div>
 
-      <el-divider content-position="left">结算资金流水</el-divider>
-      <el-descriptions :column="2" border size="small">
-        <el-descriptions-item label="流水单号">{{ financeFlow.flowNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="外部交易号">{{ financeFlow.tradeNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="支付渠道">{{ financeFlow.payChannel || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="流水金额">¥{{ formatMoney(financeFlow.amount) }}</el-descriptions-item>
-        <el-descriptions-item label="收款方">{{ financeFlow.payeeName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="交易时间">{{ parseTime(financeFlow.tradeTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="收款银行">{{ financeFlow.payeeBankName || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="银行卡号">{{ financeFlow.payeeBankAccountNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="流水备注" :span="2">{{ financeFlow.remark || '-' }}</el-descriptions-item>
-      </el-descriptions>
+        <div class="detail-section">
+          <div class="section-head">
+            <div>
+              <h4>申请与审核</h4>
+              <p>结算申请、审核和打款进度</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">申请单号</span>
+              <span class="detail-value">{{ detail.withdrawNo || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">供应商名称</span>
+              <span class="detail-value">{{ detail.supplierName || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">申请时间</span>
+              <span class="detail-value">{{ parseTime(detail.applyTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">审核时间</span>
+              <span class="detail-value">{{ parseTime(detail.auditTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">打款时间</span>
+              <span class="detail-value">{{ parseTime(detail.payTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">审核人</span>
+              <span class="detail-value">{{ detail.auditUserName || '-' }}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">审核备注</span>
+              <span class="detail-value">{{ detail.auditRemark || '-' }}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">备注</span>
+              <span class="detail-value">{{ detail.remark || '-' }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">
+            <div>
+              <h4>收款信息</h4>
+              <p>供应商结算收款账户</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">收款户名</span>
+              <span class="detail-value">{{ detailBankInfo.accountName }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">开户银行</span>
+              <span class="detail-value">{{ detailBankInfo.bankName }}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">银行账号</span>
+              <span class="detail-value">{{ detailBankInfo.accountNo }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">
+            <div>
+              <h4>结算资金流水</h4>
+              <p>结算成功后生成的资金流水信息</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">流水单号</span>
+              <span class="detail-value">{{ financeFlow.flowNo || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">外部交易号</span>
+              <span class="detail-value">{{ financeFlow.tradeNo || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">支付渠道</span>
+              <span class="detail-value">{{ financeFlow.payChannel || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">流水金额</span>
+              <span class="detail-value amount-text">{{ formatAmountText(financeFlow.amount) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">收款方</span>
+              <span class="detail-value">{{ financeFlow.payeeName || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">交易时间</span>
+              <span class="detail-value">{{ parseTime(financeFlow.tradeTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">收款银行</span>
+              <span class="detail-value">{{ financeFlow.payeeBankName || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">银行卡号</span>
+              <span class="detail-value">{{ financeFlow.payeeBankAccountNo || '-' }}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">流水备注</span>
+              <span class="detail-value">{{ financeFlow.remark || '-' }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
     </el-dialog>
 
     <el-dialog title="执行结算" :visible.sync="settleOpen" width="520px" append-to-body>
@@ -305,6 +389,9 @@ export default {
         settledCount: settledRows.length,
         flowCount: rows.filter((item) => item.financeFlowId).length
       }
+    },
+    detailBankInfo() {
+      return this.formatBankInfo(this.detail.bankInfoJson)
     }
   },
   created() {
@@ -393,6 +480,12 @@ export default {
     formatMoney(value) {
       return Number(value || 0).toFixed(2)
     },
+    formatAmountText(value) {
+      if (value === undefined || value === null || value === '') {
+        return '-'
+      }
+      return `¥${this.formatMoney(value)}`
+    },
     formatBankInfo(bankInfoJson) {
       const emptyInfo = {
         accountName: '-',
@@ -480,8 +573,197 @@ export default {
   margin-bottom: 14px;
 }
 
-.bank-info {
+.dialog-scroll {
+  max-height: calc(88vh - 130px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.settlement-detail-content {
+  color: #1f2937;
+}
+
+.detail-hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.detail-main {
+  min-width: 0;
+}
+
+.detail-eyebrow {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 20px;
+}
+
+.detail-title {
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  word-break: break-all;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-size: 12px;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.amount-block {
+  display: flex;
+  flex: 0 0 180px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  border-left: 1px solid #dbe7f3;
+  padding-left: 18px;
+}
+
+.amount-label {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.amount-value {
+  margin-top: 8px;
+  color: #0f766e;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 34px;
+}
+
+.detail-section {
+  margin-top: 16px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5edf7;
+  background: #f8fafc;
+}
+
+.section-head h4 {
+  margin: 0;
+  color: #10233f;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.section-head p {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-item {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.detail-item:nth-child(odd) {
+  border-right: 1px solid #edf2f7;
+}
+
+.detail-item.full {
+  grid-column: 1 / -1;
+  border-right: 0;
+}
+
+.detail-item:last-child {
+  border-bottom: 0;
+}
+
+.detail-label {
+  color: #64748b;
+  line-height: 24px;
+}
+
+.detail-value {
+  min-width: 0;
+  color: #1f2937;
   line-height: 24px;
   word-break: break-all;
+}
+
+.amount-text {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    flex-direction: column;
+  }
+
+  .amount-block {
+    align-items: flex-start;
+    flex-basis: auto;
+    border-left: 0;
+    border-top: 1px solid #dbe7f3;
+    padding-top: 14px;
+    padding-left: 0;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-item,
+  .detail-item:nth-child(odd),
+  .detail-item.full,
+  .detail-item.full:nth-last-child(-n + 2) {
+    border-right: 0;
+    border-bottom: 1px solid #edf2f7;
+  }
+
+  .detail-item:last-child {
+    border-bottom: 0;
+  }
 }
 </style>

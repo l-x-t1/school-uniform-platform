@@ -214,8 +214,14 @@
           <span>{{ formatDate(scope.row.offShelfTime) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="140" align="center" fixed="right" class-name="small-padding fixed-width">
+      <el-table-column label="操作" width="210" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
+          <el-button
+            size="mini"
+            type="text"
+            icon="el-icon-view"
+            @click="handleView(scope.row)"
+          >详情</el-button>
           <el-button
             v-hasPermi="['school:goods:edit']"
             size="mini"
@@ -241,6 +247,132 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <el-dialog
+      title="商品详情"
+      :visible.sync="detailOpen"
+      width="1080px"
+      top="5vh"
+      append-to-body
+      class="goods-detail-dialog"
+      @closed="resetDetail"
+    >
+      <div v-loading="detailLoading" class="dialog-scroll detail-scroll">
+        <div class="form-section detail-section">
+          <div class="detail-hero">
+            <image-preview :src="detailForm.mainImage" :width="96" :height="96" />
+            <div class="detail-hero-meta">
+              <div class="detail-title">{{ detailForm.goodsName || '--' }}</div>
+              <div class="detail-code">编码：{{ detailForm.goodsCode || '--' }}</div>
+              <div class="detail-tags">
+                <el-tag size="mini" :type="getOptionTagType(saleTypeOptions, detailForm.saleType)">
+                  {{ getOptionLabel(saleTypeOptions, detailForm.saleType) }}
+                </el-tag>
+                <el-tag size="mini" :type="getOptionTagType(goodsStatusOptions, detailForm.status)">
+                  {{ getOptionLabel(goodsStatusOptions, detailForm.status) }}
+                </el-tag>
+                <el-tag size="mini" :type="getOptionTagType(publishStatusOptions, detailForm.publishStatus)">
+                  {{ getOptionLabel(publishStatusOptions, detailForm.publishStatus) }}
+                </el-tag>
+              </div>
+            </div>
+          </div>
+          <div class="detail-kv-grid">
+            <div class="detail-kv">
+              <span class="detail-label">品类名称</span>
+              <span class="detail-value">{{ formatValue(detailForm.categoryName) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">品牌名称</span>
+              <span class="detail-value">{{ formatValue(detailForm.brandName) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">供应商名称</span>
+              <span class="detail-value">{{ formatValue(detailForm.supplierName) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">供应商ID</span>
+              <span class="detail-value">{{ formatValue(detailForm.supplierId) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">上架时间</span>
+              <span class="detail-value">{{ formatDate(detailForm.publishTime) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">下架时间</span>
+              <span class="detail-value">{{ formatDate(detailForm.offShelfTime) }}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-section detail-section">
+          <div class="section-head">
+            <div class="section-title">商品详情</div>
+            <div class="section-desc">展示详情富文本、详情图片与补充说明</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-block-title">详情内容</div>
+            <div v-if="detailForm.detailContent" class="detail-rich-text" v-html="detailForm.detailContent" />
+            <div v-else class="empty-text">暂无详情内容</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-block-title">详情图片</div>
+            <div v-if="getImageList(detailForm.detailImagesJson).length > 0" class="detail-image-grid">
+              <div
+                v-for="(image, index) in getImageList(detailForm.detailImagesJson)"
+                :key="image + index"
+                class="detail-image-item"
+              >
+                <image-preview :src="image" :width="120" :height="120" />
+              </div>
+            </div>
+            <div v-else class="empty-text">暂无详情图片</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-block-title">补充说明</div>
+            <div class="detail-remark">{{ formatValue(detailForm.remark) }}</div>
+          </div>
+        </div>
+
+        <div class="form-section detail-section">
+          <div class="section-head">
+            <div class="section-title">商品尺码</div>
+            <div class="section-desc">展示尺码、价格、库存与启停状态</div>
+          </div>
+          <el-table :data="detailSizeList" border size="mini" class="detail-size-table">
+            <el-table-column label="尺码" prop="sizeCode" min-width="110" />
+            <el-table-column label="排序" prop="sortNum" width="90" align="center">
+              <template slot-scope="scope">{{ formatValue(scope.row.sortNum) }}</template>
+            </el-table-column>
+            <el-table-column label="性别" prop="genderType" width="100" align="center">
+              <template slot-scope="scope">{{ getOptionLabel(genderTypeOptions, scope.row.genderType) }}</template>
+            </el-table-column>
+            <el-table-column label="零售价" prop="retailPrice" width="110" align="center">
+              <template slot-scope="scope">{{ formatValue(scope.row.retailPrice) }}</template>
+            </el-table-column>
+            <el-table-column label="统购价" prop="groupPrice" width="110" align="center">
+              <template slot-scope="scope">{{ formatValue(scope.row.groupPrice) }}</template>
+            </el-table-column>
+            <el-table-column label="库存" prop="stockNum" width="100" align="center">
+              <template slot-scope="scope">{{ formatValue(scope.row.stockNum) }}</template>
+            </el-table-column>
+            <el-table-column label="状态" prop="status" width="100" align="center">
+              <template slot-scope="scope">
+                <el-tag size="mini" :type="getOptionTagType(sizeStatusOptions, scope.row.status)">
+                  {{ getOptionLabel(sizeStatusOptions, scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip>
+              <template slot-scope="scope">{{ formatValue(scope.row.remark) }}</template>
+            </el-table-column>
+          </el-table>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="detailOpen = false">关 闭</el-button>
+      </div>
+    </el-dialog>
 
     <el-dialog
       :title="title"
@@ -374,19 +506,19 @@
           <div class="form-section">
             <div class="section-head">
               <div class="section-title">商品详情</div>
-              <div class="section-desc">商品详情优先维护富文本内容，扩展字段按需填写</div>
+              <div class="section-desc">商品详情优先维护富文本内容，详情图片可直接上传</div>
             </div>
             <el-form-item label="详情内容" prop="detailContent">
               <editor v-model="form.detailContent" :min-height="220" />
             </el-form-item>
             <el-row :gutter="20">
               <el-col :span="12">
-                <el-form-item label="详情图配置" prop="detailImagesJson">
-                  <el-input
+                <el-form-item label="详情图片" prop="detailImagesJson">
+                  <image-upload
                     v-model="form.detailImagesJson"
-                    type="textarea"
-                    :rows="4"
-                    placeholder="选填，支持保存详情图 JSON 配置"
+                    :limit="10"
+                    :file-size="5"
+                    :is-show-tip="true"
                   />
                 </el-form-item>
               </el-col>
@@ -563,6 +695,10 @@ export default {
       total: 0,
       goodsList: [],
       xfptGoodsSizeList: [],
+      detailOpen: false,
+      detailLoading: false,
+      detailForm: {},
+      detailSizeList: [],
       title: '',
       open: false,
       pageActivated: false,
@@ -708,13 +844,39 @@ export default {
       this.open = true
       this.title = '新增商品'
     },
+    /** 查看详情按钮操作 */
+    handleView(row) {
+      const id = row && row.id ? row.id : this.ids[0]
+      if (!id) {
+        this.$modal.msgError('请选择要查看的商品')
+        return
+      }
+      this.detailOpen = true
+      this.detailLoading = true
+      getGoods(id).then(response => {
+        const data = response.data || {}
+        const detailForm = Object.assign(this.getDefaultForm(), data)
+        detailForm.detailImagesJson = this.normalizeDetailImagesValue(detailForm.detailImagesJson)
+        this.detailForm = detailForm
+        this.detailSizeList = this.decorateSizeList(data.xfptGoodsSizeList || [])
+      }).finally(() => {
+        this.detailLoading = false
+      })
+    },
+    resetDetail() {
+      this.detailForm = {}
+      this.detailSizeList = []
+      this.detailLoading = false
+    },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset()
       const id = row && row.id ? row.id : this.ids[0]
       getGoods(id).then(response => {
         const data = response.data || {}
-        this.form = Object.assign(this.getDefaultForm(), data)
+        const formData = Object.assign(this.getDefaultForm(), data)
+        formData.detailImagesJson = this.normalizeDetailImagesValue(formData.detailImagesJson)
+        this.form = formData
         this.xfptGoodsSizeList = this.decorateSizeList(data.xfptGoodsSizeList || [])
         this.open = true
         this.title = '修改商品'
@@ -734,6 +896,7 @@ export default {
         }
         this.xfptGoodsSizeList = this.decorateSizeList(normalizedSizeList)
         const payload = Object.assign({}, this.form, {
+          detailImagesJson: this.normalizeDetailImagesValue(this.form.detailImagesJson),
           xfptGoodsSizeList: normalizedSizeList
         })
         if (payload.id != null) {
@@ -847,8 +1010,65 @@ export default {
       const option = options.find(item => String(item.value) === String(value))
       return option ? option.tagType : 'info'
     },
+    formatValue(value) {
+      return value == null || value === '' ? '--' : value
+    },
     formatDate(value) {
       return value ? this.parseTime(value, '{y}-{m}-{d}') : '--'
+    },
+    getImageList(value) {
+      const normalizedValue = this.normalizeDetailImagesValue(value)
+      if (!normalizedValue) {
+        return []
+      }
+      return normalizedValue.split(',').map(item => item.trim()).filter(Boolean)
+    },
+    normalizeDetailImagesValue(value) {
+      if (!value) {
+        return null
+      }
+      if (Array.isArray(value)) {
+        const paths = this.extractDetailImagePaths(value)
+        return paths.length > 0 ? paths.join(',') : null
+      }
+      const text = String(value).trim()
+      if (!text) {
+        return null
+      }
+      if (text.startsWith('[') || text.startsWith('{')) {
+        try {
+          const paths = this.extractDetailImagePaths(JSON.parse(text))
+          return paths.length > 0 ? paths.join(',') : text
+        } catch (error) {
+          return text
+        }
+      }
+      return text
+    },
+    extractDetailImagePaths(value) {
+      if (!value) {
+        return []
+      }
+      if (typeof value === 'string') {
+        return value.trim() ? [value.trim()] : []
+      }
+      if (Array.isArray(value)) {
+        return value.reduce((list, item) => list.concat(this.extractDetailImagePaths(item)), [])
+      }
+      if (typeof value === 'object') {
+        const imageKeys = ['url', 'path', 'src', 'image', 'imageUrl', 'fileUrl', 'filePath']
+        const images = imageKeys.reduce((list, key) => {
+          return value[key] ? list.concat(this.extractDetailImagePaths(value[key])) : list
+        }, [])
+        if (images.length > 0) {
+          return images
+        }
+        const listKeys = ['images', 'imageList', 'detailImages', 'urls', 'list']
+        return listKeys.reduce((list, key) => {
+          return value[key] ? list.concat(this.extractDetailImagePaths(value[key])) : list
+        }, [])
+      }
+      return []
     },
     decorateSizeList(sizeList) {
       return (sizeList || []).map((item, index) => {
@@ -984,6 +1204,128 @@ export default {
   margin-left: 8px;
 }
 
+.detail-section {
+  padding-bottom: 18px;
+}
+
+.detail-scroll {
+  padding-right: 10px;
+}
+
+.detail-hero {
+  display: flex;
+  align-items: center;
+}
+
+.detail-hero-meta {
+  min-width: 0;
+  margin-left: 18px;
+}
+
+.detail-title {
+  margin-bottom: 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #1f2d3d;
+}
+
+.detail-code {
+  margin-bottom: 10px;
+  font-size: 13px;
+  color: #6b7785;
+}
+
+.detail-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.detail-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.detail-kv {
+  min-width: 0;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #e7edf5;
+  border-radius: 8px;
+}
+
+.detail-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #7a8798;
+}
+
+.detail-value {
+  display: block;
+  overflow: hidden;
+  font-size: 14px;
+  color: #243447;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.detail-block + .detail-block {
+  margin-top: 18px;
+}
+
+.detail-block-title {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #243447;
+}
+
+.detail-rich-text {
+  min-height: 120px;
+  padding: 14px 16px;
+  overflow: auto;
+  line-height: 1.7;
+  color: #243447;
+  background: #ffffff;
+  border: 1px solid #e7edf5;
+  border-radius: 8px;
+}
+
+.detail-rich-text img {
+  max-width: 100%;
+  height: auto;
+}
+
+.detail-image-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 120px);
+  gap: 12px;
+}
+
+.detail-image-item {
+  width: 120px;
+  height: 120px;
+}
+
+.detail-remark,
+.empty-text {
+  min-height: 42px;
+  padding: 12px 14px;
+  line-height: 1.6;
+  color: #6b7785;
+  white-space: pre-wrap;
+  background: #ffffff;
+  border: 1px solid #e7edf5;
+  border-radius: 8px;
+}
+
+.detail-size-table {
+  background: #ffffff;
+}
+
 @media (max-width: 1200px) {
   .dialog-scroll {
     max-height: 64vh;
@@ -991,6 +1333,20 @@ export default {
 
   .goods-subline {
     gap: 8px;
+  }
+
+  .detail-kv-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    align-items: flex-start;
+  }
+
+  .detail-kv-grid {
+    grid-template-columns: 1fr;
   }
 }
 </style>
