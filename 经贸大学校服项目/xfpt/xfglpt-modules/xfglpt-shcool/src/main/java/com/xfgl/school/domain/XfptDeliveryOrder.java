@@ -148,13 +148,3 @@ public class XfptDeliveryOrder extends BaseEntity {
     @Schema(description = "发货单明细")
     private List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList;
 }
-
-    /** Order type: 1 unified purchase, 2 retail. */
-    @TableField(exist = false)
-    @Schema(description = "订单类型：1统购 2零售")
-    private String orderType;
-
-    /** 生产单ID */
-            @Excel(name = "生产单ID")
-    @JsonFormat(pattern = "yyyy-MM-dd")
-    @Excel(name = "发货时间", width = 30, dateFormat = "yyyy-MM-dd")

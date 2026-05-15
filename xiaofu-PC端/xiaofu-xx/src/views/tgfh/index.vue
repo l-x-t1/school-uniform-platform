@@ -106,7 +106,8 @@
 </template>
 
 <script>
-import { getDeliveryStatistics, listDeliveryStatistics } from '@/api/tonggou/tgfh'
+import { listDeliveryStatistics } from '@/api/school/deliveryStatistics'
+import { getDeliveryStatistics } from '@/api/tonggou/tgfh'
 
 export default {
   name: 'TgfhIndex',
@@ -162,7 +163,10 @@ export default {
       this.detailOpen = true
       this.detailInfo = row
       getDeliveryStatistics(row.id).then(response => {
-        this.detailInfo = response.data || row
+        this.detailInfo = {
+          ...row,
+          ...(response.data || {})
+        }
       })
     },
     statusText(status) {
