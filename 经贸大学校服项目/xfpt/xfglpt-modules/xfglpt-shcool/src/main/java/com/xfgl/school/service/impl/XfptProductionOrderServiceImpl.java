@@ -14,8 +14,10 @@ import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
+import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.XfptProductionOrderItem;
 import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
+import com.xfgl.school.mapper.XfptOrderInfoMapper;
 import com.xfgl.school.mapper.XfptProductionOrderMapper;
 import com.xfgl.school.domain.XfptProductionOrder;
 import com.xfgl.school.service.IXfptProductionOrderService;
@@ -28,6 +30,9 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
 
     @Autowired
     private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
+
+    @Autowired
+    private XfptOrderInfoMapper xfptOrderInfoMapper;
 
     @Override
     public List<XfptProductionOrder> selectXfptProductionOrderList(XfptProductionOrder xfptProductionOrder)
@@ -65,7 +70,7 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
         if (xfptProductionOrder.getStartTime() != null
                 && xfptProductionOrder.getFinishTime() != null
                 && !xfptProductionOrder.getStartTime().before(xfptProductionOrder.getFinishTime())) {
-            throw new ServiceException("开始生产时间必须早于生产完成时间");
+            throw new ServiceException("startTime must be before finishTime");
         }
         if (StringUtils.isEmpty(xfptProductionOrder.getOrderType())) {
             xfptProductionOrder.setOrderType("2");
@@ -93,7 +98,7 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
     {
         XfptProductionOrder productionOrder = selectXfptProductionOrderById(id);
         if (productionOrder == null) {
-            throw new ServiceException("生产单不存在");
+            throw new ServiceException("production order not found");
         }
         if ("2".equals(productionOrder.getStatus())) {
             return 1;
@@ -105,7 +110,7 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
 
         List<XfptProductionOrderItem> itemList = productionOrder.getXfptProductionOrderItemList();
         if (itemList == null || itemList.isEmpty()) {
-            throw new ServiceException("生产单明细不能为空");
+            throw new ServiceException("production order item list cannot be empty");
         }
         for (XfptProductionOrderItem item : itemList) {
             item.setProductionId(id);
@@ -125,17 +130,21 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
     {
         XfptProductionOrder productionOrder = selectXfptProductionOrderById(id);
         if (productionOrder == null) {
-            throw new ServiceException("生产单不存在");
+            throw new ServiceException("production order not found");
         }
         if (!"2".equals(productionOrder.getStatus())) {
-            throw new ServiceException("生产单未完成，不能生成发货单");
+            throw new ServiceException("production order is not finished");
         }
 
-        Long exists = xfptDeliveryOrderMapper.selectCount(Wrappers.<XfptDeliveryOrder>lambdaQuery()
+        XfptDeliveryOrder existsDeliveryOrder = xfptDeliveryOrderMapper.selectOne(Wrappers.<XfptDeliveryOrder>lambdaQuery()
                 .eq(XfptDeliveryOrder::getProductionId, id)
-                .eq(XfptDeliveryOrder::getDelFlag, "0"));
-        if (exists != null && exists > 0) {
-            throw new ServiceException("该生产单已生成发货单");
+                .eq(XfptDeliveryOrder::getDelFlag, "0")
+                .last("limit 1"));
+        if (existsDeliveryOrder != null) {
+            productionOrder.setStatus("3");
+            productionOrder.setUpdateTime(new Date());
+            xfptProductionOrderMapper.updateById(productionOrder);
+            return existsDeliveryOrder.getId();
         }
 
         Date now = new Date();
@@ -147,6 +156,7 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
         deliveryOrder.setProductionId(productionOrder.getId());
         deliveryOrder.setSchoolId(productionOrder.getSchoolId());
         deliveryOrder.setSupplierId(productionOrder.getSupplierId());
+        fillReceiverInfo(deliveryOrder, productionOrder);
         deliveryOrder.setDeliveryStatus("0");
         deliveryOrder.setDeptId(productionOrder.getDeptId());
         deliveryOrder.setCreateTime(now);
@@ -155,7 +165,7 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
 
         List<XfptProductionOrderItem> productionItemList = productionOrder.getXfptProductionOrderItemList();
         if (productionItemList == null || productionItemList.isEmpty()) {
-            throw new ServiceException("生产单明细不能为空");
+            throw new ServiceException("production order item list cannot be empty");
         }
         List<XfptDeliveryOrderItem> deliveryItemList = new java.util.ArrayList<>();
         for (XfptProductionOrderItem productionItem : productionItemList) {
@@ -174,7 +184,24 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
             deliveryItemList.add(deliveryItem);
         }
         xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(deliveryItemList);
+        productionOrder.setStatus("3");
+        productionOrder.setUpdateTime(now);
+        xfptProductionOrderMapper.updateById(productionOrder);
         return deliveryOrder.getId();
+    }
+
+    private void fillReceiverInfo(XfptDeliveryOrder deliveryOrder, XfptProductionOrder productionOrder)
+    {
+        XfptOrderInfo orderInfo = productionOrder.getOrderId() == null ? null : xfptOrderInfoMapper.selectById(productionOrder.getOrderId());
+        if (orderInfo != null) {
+            deliveryOrder.setReceiverName(StringUtils.defaultIfEmpty(orderInfo.getReceiverName(), "school receiver"));
+            deliveryOrder.setReceiverPhone(StringUtils.defaultIfEmpty(orderInfo.getReceiverPhone(), "pending"));
+            deliveryOrder.setReceiverAddress(StringUtils.defaultIfEmpty(orderInfo.getReceiverAddress(), "school address pending"));
+            return;
+        }
+        deliveryOrder.setReceiverName("school receiver");
+        deliveryOrder.setReceiverPhone("pending");
+        deliveryOrder.setReceiverAddress("school address pending");
     }
 
     @Transactional
@@ -203,12 +230,12 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
 
         if (StringUtils.isNotNull(xfptProductionOrderItemList)) {
             if (xfptProductionOrderItemList.isEmpty()) {
-                throw new ServiceException("生产单明细不能为空");
+                throw new ServiceException("production order item list cannot be empty");
             }
 
             for (XfptProductionOrderItem xfptProductionOrderItem : xfptProductionOrderItemList) {
                 if (xfptProductionOrderItem.getGoodsId() == null) {
-                    throw new ServiceException("生产单明细商品不能为空");
+                    throw new ServiceException("production order item goodsId cannot be null");
                 }
 
                 xfptProductionOrderItem.setProductionId(id);
