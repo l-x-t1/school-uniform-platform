@@ -12,7 +12,10 @@ import java.util.Calendar;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
+import com.xfgl.school.domain.XfptDeliveryOrder;
+import com.xfgl.school.domain.XfptDeliveryOrderItem;
 import com.xfgl.school.domain.XfptProductionOrderItem;
+import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
 import com.xfgl.school.mapper.XfptProductionOrderMapper;
 import com.xfgl.school.domain.XfptProductionOrder;
 import com.xfgl.school.service.IXfptProductionOrderService;
@@ -22,6 +25,9 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
 
     @Autowired
     private XfptProductionOrderMapper xfptProductionOrderMapper;
+
+    @Autowired
+    private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
 
     @Override
     public List<XfptProductionOrder> selectXfptProductionOrderList(XfptProductionOrder xfptProductionOrder)
@@ -79,6 +85,96 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
         xfptProductionOrderMapper.deleteXfptProductionOrderItemByProductionId(xfptProductionOrder.getId());
         insertXfptProductionOrderItem(xfptProductionOrder);
         return xfptProductionOrderMapper.updateById(xfptProductionOrder);
+    }
+
+    @Transactional
+    @Override
+    public int finishProductionOrder(Long id)
+    {
+        XfptProductionOrder productionOrder = selectXfptProductionOrderById(id);
+        if (productionOrder == null) {
+            throw new ServiceException("生产单不存在");
+        }
+        if ("2".equals(productionOrder.getStatus())) {
+            return 1;
+        }
+
+        Date now = new Date();
+        productionOrder.setStatus("2");
+        productionOrder.setFinishTime(now);
+
+        List<XfptProductionOrderItem> itemList = productionOrder.getXfptProductionOrderItemList();
+        if (itemList == null || itemList.isEmpty()) {
+            throw new ServiceException("生产单明细不能为空");
+        }
+        for (XfptProductionOrderItem item : itemList) {
+            item.setProductionId(id);
+            item.setStatus("2");
+            item.setFinishNum(item.getBuyNum() == null ? 0 : item.getBuyNum());
+            item.setUpdateTime(now);
+        }
+
+        xfptProductionOrderMapper.deleteXfptProductionOrderItemByProductionId(id);
+        xfptProductionOrderMapper.batchInsertXfptProductionOrderItem(itemList);
+        return xfptProductionOrderMapper.updateById(productionOrder);
+    }
+
+    @Transactional
+    @Override
+    public Long generateDeliveryOrder(Long id)
+    {
+        XfptProductionOrder productionOrder = selectXfptProductionOrderById(id);
+        if (productionOrder == null) {
+            throw new ServiceException("生产单不存在");
+        }
+        if (!"2".equals(productionOrder.getStatus())) {
+            throw new ServiceException("生产单未完成，不能生成发货单");
+        }
+
+        Long exists = xfptDeliveryOrderMapper.selectCount(Wrappers.<XfptDeliveryOrder>lambdaQuery()
+                .eq(XfptDeliveryOrder::getProductionId, id)
+                .eq(XfptDeliveryOrder::getDelFlag, "0"));
+        if (exists != null && exists > 0) {
+            throw new ServiceException("该生产单已生成发货单");
+        }
+
+        Date now = new Date();
+        XfptDeliveryOrder deliveryOrder = new XfptDeliveryOrder();
+        deliveryOrder.setDeliveryNo("DEL-" + System.currentTimeMillis() + "-" + id);
+        deliveryOrder.setNoticeId(productionOrder.getNoticeId());
+        deliveryOrder.setOrderId(productionOrder.getOrderId());
+        deliveryOrder.setOrderNo(productionOrder.getOrderNo());
+        deliveryOrder.setProductionId(productionOrder.getId());
+        deliveryOrder.setSchoolId(productionOrder.getSchoolId());
+        deliveryOrder.setSupplierId(productionOrder.getSupplierId());
+        deliveryOrder.setDeliveryStatus("0");
+        deliveryOrder.setDeptId(productionOrder.getDeptId());
+        deliveryOrder.setCreateTime(now);
+        deliveryOrder.setDelFlag("0");
+        xfptDeliveryOrderMapper.insert(deliveryOrder);
+
+        List<XfptProductionOrderItem> productionItemList = productionOrder.getXfptProductionOrderItemList();
+        if (productionItemList == null || productionItemList.isEmpty()) {
+            throw new ServiceException("生产单明细不能为空");
+        }
+        List<XfptDeliveryOrderItem> deliveryItemList = new java.util.ArrayList<>();
+        for (XfptProductionOrderItem productionItem : productionItemList) {
+            XfptDeliveryOrderItem deliveryItem = new XfptDeliveryOrderItem();
+            deliveryItem.setDeliveryId(deliveryOrder.getId());
+            deliveryItem.setOrderItemId(productionItem.getOrderItemId());
+            deliveryItem.setGoodsId(productionItem.getGoodsId());
+            deliveryItem.setSizeId(productionItem.getSizeId());
+            deliveryItem.setGoodsName(productionItem.getGoodsName());
+            deliveryItem.setSizeName(productionItem.getSizeName());
+            deliveryItem.setDeliveryNum(productionItem.getFinishNum() == null ? productionItem.getBuyNum() : productionItem.getFinishNum());
+            deliveryItem.setSignNum(0);
+            deliveryItem.setStatus("0");
+            deliveryItem.setCreateTime(now);
+            deliveryItem.setDelFlag("0");
+            deliveryItemList.add(deliveryItem);
+        }
+        xfptDeliveryOrderMapper.batchInsertXfptDeliveryOrderItem(deliveryItemList);
+        return deliveryOrder.getId();
     }
 
     @Transactional

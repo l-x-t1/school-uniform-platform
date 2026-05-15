@@ -95,6 +95,28 @@ public class XfptProductionOrderController extends BaseController {
             return toAjax(xfptProductionOrderService.updateXfptProductionOrder(xfptProductionOrder));
     }
 
+    /**
+     * 生产完成
+     */
+    @Operation(summary = "生产完成")
+    @RequiresPermissions("school:productionOrder:edit")
+    @Log(title = "生产单" , businessType = BusinessType.UPDATE)
+    @PutMapping("/finish/{id}")
+    public AjaxResult finish(@PathVariable("id") Long id) {
+            return toAjax(xfptProductionOrderService.finishProductionOrder(id));
+    }
+
+    /**
+     * 生成发货单
+     */
+    @Operation(summary = "生成发货单")
+    @RequiresPermissions("school:productionOrder:edit")
+    @Log(title = "生产单" , businessType = BusinessType.INSERT)
+    @PostMapping("/generateDelivery/{id}")
+    public AjaxResult generateDelivery(@PathVariable("id") Long id) {
+            return success(xfptProductionOrderService.generateDeliveryOrder(id));
+    }
+
 
     /**
      * 删除生产单
