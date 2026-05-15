@@ -128,6 +128,19 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/school/supplierWithdrawRecord",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/supplierWithdrawRecord/index"),
+        name: "SupplierWithdrawRecord",
+        meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
+      },
+    ],
+  },
+  {
     path: "/school/platformUsage",
     component: Layout,
     hidden: true,
