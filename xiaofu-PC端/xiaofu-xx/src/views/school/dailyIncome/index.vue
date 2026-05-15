@@ -56,22 +56,6 @@
           <el-option label="供应商" value="2" />
         </el-select>
       </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="流水单号" prop="flowNo">
         <el-input
           v-model="queryParams.flowNo"
@@ -149,39 +133,83 @@
     />
 
     <el-dialog :title="detailTitle" :visible.sync="detailOpen" width="980px" append-to-body>
-      <el-table v-loading="detailLoading" :data="detailList" border>
-        <el-table-column label="流水单号" prop="flowNo" min-width="180" show-overflow-tooltip />
-        <el-table-column label="业务类型" width="100" align="center">
-          <template slot-scope="scope">
-            {{ formatBusinessType(scope.row.businessType) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="订单号" prop="orderNo" min-width="170" show-overflow-tooltip />
-        <el-table-column label="收款方" prop="payeeName" min-width="150" show-overflow-tooltip />
-        <el-table-column label="金额" width="120" align="right">
-          <template slot-scope="scope">
-            ¥{{ formatMoney(scope.row.amount) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="到账状态" width="140" align="center">
-          <template slot-scope="scope">
-            {{ formatFlowStatus(scope.row.status) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="交易时间" width="160" align="center">
-          <template slot-scope="scope">
-            {{ parseTime(scope.row.tradeTime) || "-" }}
-          </template>
-        </el-table-column>
-      </el-table>
+      <div class="dialog-scroll income-detail-content">
+        <div class="detail-hero">
+          <div class="detail-main">
+            <div class="detail-eyebrow">每日入账</div>
+            <div class="detail-title">{{ currentIncomeDate || '-' }}</div>
+            <div class="detail-meta">
+              <span class="meta-pill">按交易日期聚合</span>
+              <span class="meta-pill">明细 {{ detailTotal }} 笔</span>
+            </div>
+          </div>
+          <div class="amount-block">
+            <div class="amount-label">入账总额</div>
+            <div class="amount-value">{{ formatAmountText(currentDailyIncome.totalAmount) }}</div>
+          </div>
+        </div>
 
-      <pagination
-        v-show="detailTotal > 0"
-        :total="detailTotal"
-        :page.sync="detailQueryParams.pageNum"
-        :limit.sync="detailQueryParams.pageSize"
-        @pagination="getDetailList"
-      />
+        <div class="mini-summary-grid">
+          <div class="mini-summary-item">
+            <span class="mini-label">入账笔数</span>
+            <strong>{{ currentDailyIncome.totalCount || 0 }}</strong>
+          </div>
+          <div class="mini-summary-item">
+            <span class="mini-label">学校入账</span>
+            <strong>{{ formatAmountText(currentDailyIncome.schoolAmount) }}</strong>
+          </div>
+          <div class="mini-summary-item">
+            <span class="mini-label">供应商入账</span>
+            <strong>{{ formatAmountText(currentDailyIncome.supplierAmount) }}</strong>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">
+            <div>
+              <h4>入账流水明细</h4>
+              <p>当前日期下已到账的收入流水</p>
+            </div>
+          </div>
+          <el-table v-loading="detailLoading" :data="detailList" border class="income-detail-table">
+            <el-table-column label="流水单号" prop="flowNo" min-width="180" show-overflow-tooltip />
+            <el-table-column label="业务类型" width="100" align="center">
+              <template slot-scope="scope">
+                <el-tag size="mini" type="info">
+                  {{ formatBusinessType(scope.row.businessType) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="订单号" prop="orderNo" min-width="170" show-overflow-tooltip />
+            <el-table-column label="收款方" prop="payeeName" min-width="150" show-overflow-tooltip />
+            <el-table-column label="金额" width="120" align="right">
+              <template slot-scope="scope">
+                <span class="amount-text">{{ formatAmountText(scope.row.amount) }}</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="到账状态" width="140" align="center">
+              <template slot-scope="scope">
+                <el-tag :type="flowStatusTagType(scope.row.status)" size="mini">
+                  {{ formatFlowStatus(scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="交易时间" width="160" align="center">
+              <template slot-scope="scope">
+                {{ parseTime(scope.row.tradeTime) || '-' }}
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <pagination
+          v-show="detailTotal > 0"
+          :total="detailTotal"
+          :page.sync="detailQueryParams.pageNum"
+          :limit.sync="detailQueryParams.pageSize"
+          @pagination="getDetailList"
+        />
+      </div>
 
       <div slot="footer" class="dialog-footer">
         <el-button @click="detailOpen = false">关 闭</el-button>
@@ -208,6 +236,7 @@ export default {
       detailOpen: false,
       detailTitle: '入账详情',
       currentIncomeDate: '',
+      currentDailyIncome: {},
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -267,6 +296,7 @@ export default {
     },
     openDetail(row) {
       this.currentIncomeDate = row.incomeDate
+      this.currentDailyIncome = { ...row }
       this.detailTitle = `${row.incomeDate || '-'} 入账详情`
       this.detailQueryParams = {
         pageNum: 1,
@@ -301,6 +331,12 @@ export default {
     formatMoney(value) {
       return this.toNumber(value).toFixed(2)
     },
+    formatAmountText(value) {
+      if (value === undefined || value === null || value === '') {
+        return '-'
+      }
+      return `¥${this.formatMoney(value)}`
+    },
     toNumber(value) {
       const numberValue = Number(value || 0)
       return Number.isNaN(numberValue) ? 0 : numberValue
@@ -320,6 +356,13 @@ export default {
         '2': '已到供应商账户'
       }
       return textMap[String(value)] || value || '-'
+    },
+    flowStatusTagType(value) {
+      const typeMap = {
+        '1': 'success',
+        '2': 'warning'
+      }
+      return typeMap[String(value)] || 'info'
     }
   }
 }
@@ -373,5 +416,189 @@ export default {
 
 .rule-alert {
   margin-bottom: 12px;
+}
+
+.dialog-scroll {
+  max-height: calc(88vh - 130px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.income-detail-content {
+  color: #1f2937;
+}
+
+.detail-hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.detail-main {
+  min-width: 0;
+}
+
+.detail-eyebrow {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 20px;
+}
+
+.detail-title {
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  word-break: break-all;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-size: 12px;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.amount-block {
+  display: flex;
+  flex: 0 0 180px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  border-left: 1px solid #dbe7f3;
+  padding-left: 18px;
+}
+
+.amount-label {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.amount-value {
+  margin-top: 8px;
+  color: #0f766e;
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 34px;
+}
+
+.mini-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 14px;
+}
+
+.mini-summary-item {
+  min-width: 0;
+  padding: 14px 16px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.mini-label {
+  display: block;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.mini-summary-item strong {
+  display: block;
+  margin-top: 6px;
+  color: #10233f;
+  font-size: 18px;
+  line-height: 26px;
+  word-break: break-all;
+}
+
+.detail-section {
+  margin-top: 16px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5edf7;
+  background: #f8fafc;
+}
+
+.section-head h4 {
+  margin: 0;
+  color: #10233f;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.section-head p {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.income-detail-table {
+  border-left: 0;
+  border-right: 0;
+}
+
+.income-detail-table ::v-deep .el-table__header th {
+  background: #f8fafc;
+  color: #334155;
+}
+
+.amount-text {
+  color: #0f766e;
+  font-weight: 700;
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    flex-direction: column;
+  }
+
+  .amount-block {
+    align-items: flex-start;
+    flex-basis: auto;
+    border-left: 0;
+    border-top: 1px solid #dbe7f3;
+    padding-top: 14px;
+    padding-left: 0;
+  }
+
+  .mini-summary-grid {
+    grid-template-columns: 1fr;
+  }
 }
 </style>
