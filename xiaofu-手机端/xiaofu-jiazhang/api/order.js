@@ -54,6 +54,28 @@ function normalizeOrderItem(item = {}) {
   }
 }
 
+function buildOrderItemPayload(item = {}, orderType = '2', createBy = getCurrentUserName()) {
+  const quantity = Number(item.quantity || item.buyNum || 1)
+  const unitPrice = Number(item.price || item.unitPrice || 0)
+
+  return {
+    id: item.id,
+    goodsId: Number(item.goodsId || item.uniformId || item.id || 0),
+    sizeId: item.sizeId ? Number(item.sizeId) : null,
+    goodsName: item.name || item.goodsName || '校服',
+    sizeName: item.size || item.sizeName || '',
+    mainImage: item.image || item.mainImage || '/static/qjxf.png',
+    saleType: item.saleType || orderType,
+    unitPrice,
+    buyNum: quantity,
+    itemAmount: Number((unitPrice * quantity).toFixed(2)),
+    deptId: item.deptId || 1,
+    createBy,
+    remark: item.remark || '',
+    delFlag: item.delFlag || '0'
+  }
+}
+
 function normalizeOrder(order = {}) {
   const items = order.xfptOrderItemList || order.orderItems || order.items || []
   return {
@@ -82,19 +104,23 @@ function buildOrderPayload(data = {}) {
     {}
   const selectedAddress = uni.getStorageSync('selectedAddress') || {}
   const items = Array.isArray(data.items) ? data.items : []
-  const totalAmount = items.reduce((sum, item) => sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1), 0)
+  const orderType = '2'
+  const orderItems = items.map((item) => buildOrderItemPayload(item, orderType, userName))
+  const totalAmount = items.reduce((sum, item) => {
+    return sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1)
+  }, 0)
 
   return {
     orderNo: `APP${Date.now()}`,
-    orderType: '2',
+    orderType,
     noticeId: 1,
-    schoolId: Number(selectedStudent.schoolId || 1),
+    schoolId: Number(selectedStudent.schoolId || selectedStudent.shcoolId || 1),
     schoolName: selectedStudent.school || selectedStudent.schoolName || '测试学校',
     supplierId: Number(items[0]?.supplierId || 1),
     supplierName: items[0]?.supplierName || '测试供应商',
     userId,
     userName,
-    studentId: Number(data.studentId || selectedStudent.id || 1),
+    studentId: Number(data.studentId || selectedStudent.id || selectedStudent.studentId || 1),
     studentName: selectedStudent.name || selectedStudent.studentName || '测试学生',
     gradeName: selectedStudent.grade || selectedStudent.gradeName || '',
     className: selectedStudent.className || '',
@@ -111,7 +137,8 @@ function buildOrderPayload(data = {}) {
     deptId: 1,
     createBy: userName,
     remark: data.remark || '',
-    delFlag: '0'
+    delFlag: '0',
+    xfptOrderItemList: orderItems
   }
 }
 
@@ -145,6 +172,7 @@ function buildOrderUpdate(order = {}, patch = {}) {
     updateBy: getCurrentUserName(),
     remark: order.remark || '',
     delFlag: order.delFlag || '0',
+    xfptOrderItemList: order.xfptOrderItemList || order.orderItems || order.items || [],
     ...patch
   }
 }

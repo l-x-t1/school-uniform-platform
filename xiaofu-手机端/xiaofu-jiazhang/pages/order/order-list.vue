@@ -27,7 +27,7 @@
         class="order-item" 
         v-for="(order, index) in orderList" 
         :key="index"
-        @click="goToOrderDetail(order.id)"
+        @click="goToOrderDetail(order.detailOrderId || order.id)"
       >
         <view class="order-header">
           <view class="order-number">
@@ -40,11 +40,18 @@
         
         <view class="order-content">
           <view class="product-list">
-            <view class="product-item" v-for="(product, pIndex) in order.products" :key="pIndex">
+            <view class="product-item" v-for="(product, pIndex) in getDisplayProducts(order.products)" :key="pIndex">
               <image class="product-image" :src="product.image" mode="aspectFill"></image>
               <view class="product-info">
                 <text class="product-name">{{product.name}}</text>
                 <text class="product-spec">{{product.size}} | {{product.color}}</text>
+                <view
+                  v-if="order.status === 'reviewed' && order.commentContent"
+                  class="product-comment"
+                >
+                  <text class="comment-label">评价：</text>
+                  <text class="comment-content">{{order.commentContent}}</text>
+                </view>
               </view>
               <view class="product-price">
                 <text class="price">¥{{product.price}}</text>
@@ -56,7 +63,7 @@
         
         <view class="order-footer">
           <view class="order-total">
-            <text>共{{getTotalProducts(order.products)}}件商品</text>
+            <text>共{{order.productCount || getTotalProducts(order.products)}}件商品</text>
             <view class="total-price">
               <text>合计：</text>
               <text class="price">¥{{order.totalAmount}}</text>
@@ -78,6 +85,16 @@
               v-if="canConfirm(order.status)"
               @click.stop="confirmReceipt(order.id)"
             >确认收货</button>
+            <button
+              class="action-btn outline"
+              v-if="canReview(order.status)"
+              @click.stop="reviewGoods(order.id)"
+            >{{ getReviewActionText(order) }}</button>
+            <button
+              class="action-btn outline"
+              v-if="canViewReviewDetail(order.status)"
+              @click.stop="viewReviewDetail(order)"
+            >评价详情</button>
             <button
               class="action-btn outline"
               v-if="canReturn(order.status)"
@@ -104,83 +121,87 @@
 </template>
 
 <script>
-import config from '@/config'
-import { listOrders, cancelOrder as cancelOrderApi, confirmOrder } from '@/api/order'
+import { listOrders, cancelOrder as cancelOrderApi, confirmOrder, getOrder } from '@/api/order'
+import { listComments } from '@/api/comment'
+import { listAfterSales } from '@/api/after-sale'
 
 export default {
   data() {
     return {
-      currentStatus: 'all', // 当前选中的状态
-      isLoading: false, // 是否正在加载
-      isLoadingMore: false, // 是否正在加载更多
-      isRefreshing: false, // 是否正在刷新
-      page: 1, // 当前页码
+      currentStatus: 'all',
+      userComments: [],
+      isLoading: false,
+      isLoadingMore: false,
+      isRefreshing: false,
+      page: 1,
       hasMore: true,
-      orderList: [], // 订单列表
+      orderList: [],
       orderStatus: [
         { status: 'all', name: '全部' },
         { status: 'unpaid', name: '待付款' },
         { status: 'unshipped', name: '待发货' },
-        { status: 'shipped', name: '已发货' },
+        { status: 'shipped', name: '待收货' },
         { status: 'completed', name: '已完成' },
+        { status: 'reviewed', name: '已评价' },
+        { status: 'afterSale', name: '退换货' },
         { status: 'cancelled', name: '已取消' }
       ]
     }
   },
+  onLoad(options) {
+    const allowedStatus = ['all', 'unpaid', 'unshipped', 'shipped', 'completed', 'reviewed', 'afterSale', 'cancelled']
+    if (options.status && allowedStatus.includes(options.status)) {
+      this.currentStatus = options.status
+    }
+  },
   onShow() {
-    this.page = 1;
-    this.hasMore = true;
-    this.orderList = [];
-    this.loadOrders();
+    this.page = 1
+    this.hasMore = true
+    this.orderList = []
+    this.loadOrders()
   },
   methods: {
-    normalizeOrder(item) {
-      const products = item.products || item.items || item.orderItems || [];
+    getDisplayProducts(products = []) {
+      return Array.isArray(products) ? products.slice(0, 2) : []
+    },
+
+    normalizeProduct(product = {}) {
       return {
+        id: product.id || product.productId || product.uniformId,
+        uniformId: product.uniformId || product.goodsId || product.productId || product.id,
+        supplierId: product.supplierId,
+        name: product.name || product.goodsName || product.productName || product.uniformName || '校服',
+        image: product.image || product.mainImage || product.productImage || product.coverImage || '/static/qjxf.png',
+        price: product.price || product.salePrice || product.unitPrice || '0.00',
+        quantity: product.quantity || product.buyNum || product.num || 1,
+        size: product.size || product.sizeName || '-',
+        color: product.color || product.colorName || '-'
+      }
+    },
+
+    normalizeOrder(item = {}) {
+      const products = item.products || item.items || item.orderItems || item.xfptOrderItemList || []
+      return {
+        ...item,
         id: item.id || item.orderId,
+        detailOrderId: item.detailOrderId || item.id || item.orderId,
         orderNo: item.orderNo || item.orderSn || item.orderCode,
         status: this.normalizeStatus(item.status),
         createTime: item.createTime,
         totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
-        products: products.map((product) => ({
-          id: product.id || product.productId || product.uniformId,
-          name: product.name || product.productName || product.uniformName || '校服',
-          image: product.image || product.productImage || product.coverImage || '/static/qjxf.png',
-          price: product.price || product.salePrice || product.unitPrice || '0.00',
-          quantity: product.quantity || product.num || 1,
-          size: product.size || product.sizeName || '-',
-          color: product.color || product.colorName || '-'
-        }))
-      };
+        products: products.map((product) => this.normalizeProduct(product)),
+        productCount: this.getTotalProducts(products)
+      }
     },
 
-    getLocalOrders() {
-      const localOrders = uni.getStorageSync('devOrders') || {};
-      return Object.keys(localOrders)
-        .map((key) => this.normalizeOrder(localOrders[key]))
-        .filter((order) => order.id)
-        .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')));
-    },
-
-    mergeLocalOrders(list) {
-      if (!config.enableMockFallback) return list;
-      const localOrders = this.filterOrdersByStatus(this.getLocalOrders(), this.currentStatus);
-      const existedIds = list.map((item) => String(item.id));
-      const merged = [
-        ...localOrders.filter((item) => !existedIds.includes(String(item.id))),
-        ...list
-      ];
-      return merged;
-    },
-
-    saveLocalOrderStatus(orderId, status) {
-      const localOrders = uni.getStorageSync('devOrders') || {};
-      if (localOrders[orderId]) {
-        localOrders[orderId].status = status;
-        if (status === 'completed') {
-          localOrders[orderId].completeTime = this.getCurrentTime();
-        }
-        uni.setStorageSync('devOrders', localOrders);
+    enrichOrderWithDetail(order, detail) {
+      if (!detail) return order
+      const normalizedDetail = this.normalizeOrder(detail)
+      return {
+        ...order,
+        products: normalizedDetail.products,
+        productCount: normalizedDetail.productCount || order.productCount || 0,
+        totalAmount: normalizedDetail.totalAmount || order.totalAmount
       }
     },
 
@@ -195,9 +216,11 @@ export default {
         unshipped: 'unshipped',
         shipped: 'shipped',
         completed: 'completed',
-        cancelled: 'cancelled'
-      };
-      return statusMap[status] || status;
+        cancelled: 'cancelled',
+        reviewed: 'reviewed',
+        afterSale: 'afterSale'
+      }
+      return statusMap[status] || status
     },
 
     getQueryParams() {
@@ -205,377 +228,397 @@ export default {
         pageNum: this.page,
         pageSize: 10,
         status: this.currentStatus === 'all' ? undefined : this.currentStatus
-      };
+      }
     },
 
     finishLoading() {
-      this.isLoading = false;
-      this.isLoadingMore = false;
-      this.isRefreshing = false;
+      this.isLoading = false
+      this.isLoadingMore = false
+      this.isRefreshing = false
     },
 
-    // 切换订单状态
-    switchStatus(status) {
-      if (this.currentStatus === status) return;
-      this.currentStatus = status;
-      this.page = 1;
-      this.hasMore = true;
-      this.orderList = [];
-      this.loadOrders();
+    isSpecialListStatus() {
+      return ['reviewed', 'afterSale'].includes(this.currentStatus)
     },
-    
-    // 加载订单数据
+
+    async loadOrderMap(orderIds = []) {
+      const uniqueIds = [...new Set(orderIds.filter(Boolean).map((item) => String(item)))]
+      const pairs = await Promise.all(
+        uniqueIds.map((orderId) =>
+          getOrder(orderId)
+            .then((res) => [String(orderId), res.data || res])
+            .catch(() => [String(orderId), null])
+        )
+      )
+      return pairs.reduce((map, [orderId, order]) => {
+        map[orderId] = order
+        return map
+      }, {})
+    },
+
+    findOrderProduct(order, record = {}) {
+      const products = order?.products || []
+      return (
+        products.find((item) => String(item.id) === String(record.orderItemId)) ||
+        products.find((item) => String(item.uniformId) === String(record.goodsId)) ||
+        products[0] ||
+        null
+      )
+    },
+
+    buildReviewedOrder(record, orderMap) {
+      const order = orderMap[String(record.orderId)]
+      const product = this.findOrderProduct(order, record)
+      const normalizedProduct = product
+        ? this.normalizeProduct(product)
+        : this.normalizeProduct({
+            id: record.orderItemId,
+            goodsId: record.goodsId,
+            name: record.goodsName,
+            quantity: 1
+          })
+
+      return {
+        id: record.id,
+        detailOrderId: record.orderId,
+        orderNo: record.orderNo,
+        status: 'reviewed',
+        createTime: record.createTime,
+        totalAmount: order?.totalAmount || normalizedProduct.price || '0.00',
+        score: record.score,
+        commentContent: record.content,
+        goodsId: record.goodsId,
+        orderItemId: record.orderItemId,
+        hasUserComment: true,
+        productCount: Number(normalizedProduct.quantity || 1),
+        products: [normalizedProduct]
+      }
+    },
+
+    async ensureUserCommentsLoaded(force = false) {
+      if (!force && this.userComments.length) {
+        return this.userComments
+      }
+      const res = await listComments({
+        pageNum: 1,
+        pageSize: 500
+      })
+      this.userComments = res.rows || res.data || res.list || []
+      return this.userComments
+    },
+
+    attachReviewState(orders = []) {
+      const commentMap = new Map()
+      this.userComments.forEach((item) => {
+        if (item.orderId) {
+          commentMap.set(String(item.orderId), true)
+        }
+      })
+      return orders.map((order) => ({
+        ...order,
+        hasUserComment: commentMap.has(String(order.detailOrderId || order.id))
+      }))
+    },
+
+    getAfterSaleDisplayStatus(status) {
+      const statusMap = {
+        '0': 'afterSalePending',
+        '1': 'afterSaleApproved',
+        '2': 'afterSaleRejected',
+        '3': 'afterSaleProcessing',
+        '4': 'afterSaleCompleted',
+        '5': 'afterSaleClosed'
+      }
+      return statusMap[String(status)] || 'afterSale'
+    },
+
+    buildAfterSaleOrder(record, orderMap) {
+      const order = orderMap[String(record.orderId)]
+      const product = this.findOrderProduct(order, record)
+      const normalizedProduct = product
+        ? this.normalizeProduct(product)
+        : this.normalizeProduct({
+            id: record.orderItemId,
+            name: record.orderNo,
+            quantity: record.applyNum || 1
+          })
+
+      return {
+        id: record.id,
+        detailOrderId: record.orderId,
+        orderNo: record.orderNo,
+        status: this.getAfterSaleDisplayStatus(record.status),
+        createTime: record.createTime,
+        totalAmount: record.applyAmount || order?.totalAmount || '0.00',
+        applyType: record.applyType,
+        reason: record.reason,
+        productCount: Number(record.applyNum || normalizedProduct.quantity || 1),
+        products: [
+          {
+            ...normalizedProduct,
+            quantity: record.applyNum || normalizedProduct.quantity || 1
+          }
+        ]
+      }
+    },
+
+    async loadReviewedOrders() {
+      const res = await listComments({
+        pageNum: this.page,
+        pageSize: 10
+      })
+      const rows = res.rows || res.data || res.list || []
+      const orderMap = await this.loadOrderMap(rows.map((item) => item.orderId))
+      return {
+        ...res,
+        rows: rows.map((item) => this.buildReviewedOrder(item, orderMap))
+      }
+    },
+
+    async loadAfterSaleOrders() {
+      const res = await listAfterSales({
+        pageNum: this.page,
+        pageSize: 10
+      })
+      const rows = res.rows || res.data || res.list || []
+      const orderMap = await this.loadOrderMap(rows.map((item) => item.orderId))
+      return {
+        ...res,
+        rows: rows.map((item) => this.buildAfterSaleOrder(item, orderMap))
+      }
+    },
+
+    switchStatus(status) {
+      if (this.currentStatus === status) return
+      this.currentStatus = status
+      this.page = 1
+      this.hasMore = true
+      this.orderList = []
+      this.loadOrders()
+    },
+
     loadOrders() {
-      if (!this.hasMore || this.isLoading) return;
-      this.isLoading = true;
-      listOrders(this.getQueryParams())
+      if (!this.hasMore || this.isLoading) return
+      this.isLoading = true
+
+      const loader = this.currentStatus === 'reviewed'
+        ? this.loadReviewedOrders()
+        : this.currentStatus === 'afterSale'
+          ? this.loadAfterSaleOrders()
+          : Promise.all([
+              listOrders(this.getQueryParams()),
+              this.ensureUserCommentsLoaded(this.page === 1)
+            ]).then(async ([res]) => {
+              const rows = (res.rows || res.data || res.list || []).map((item) => this.normalizeOrder(item))
+              const orderMap = await this.loadOrderMap(rows.map((item) => item.detailOrderId || item.id))
+              return {
+                ...res,
+                rows: this.attachReviewState(
+                  rows.map((item) => this.enrichOrderWithDetail(item, orderMap[String(item.detailOrderId || item.id)]))
+                )
+              }
+            })
+
+      loader
         .then((res) => {
-          const rows = res.rows || res.data || res.list || [];
-          const list = rows.map((item) => this.normalizeOrder(item));
-          const displayList = this.page === 1 ? this.mergeLocalOrders(list) : list;
-          this.orderList = this.page === 1 ? displayList : [...this.orderList, ...displayList];
-          this.hasMore = res.total ? this.orderList.length < res.total : list.length >= 10;
-          if (this.hasMore) this.page += 1;
-          this.finishLoading();
+          const list = res.rows || []
+          this.orderList = this.page === 1 ? list : [...this.orderList, ...list]
+          this.hasMore = res.total ? this.orderList.length < res.total : list.length >= 10
+          if (this.hasMore) this.page += 1
+          this.finishLoading()
         })
         .catch((error) => {
-          if (config.enableMockFallback) {
-            const mockOrders = this.getMockOrders(this.page);
-            const filteredOrders = this.filterOrdersByStatus(mockOrders, this.currentStatus);
-            const displayList = this.page === 1 ? this.mergeLocalOrders(filteredOrders) : filteredOrders;
-            this.orderList = this.page === 1 ? displayList : [...this.orderList, ...displayList];
-            this.hasMore = this.page < 2;
-            if (this.hasMore) this.page += 1;
-            this.finishLoading();
-            return;
-          }
-
-          this.finishLoading();
+          this.finishLoading()
           uni.showToast({
             title: error.message || '订单加载失败',
             icon: 'none'
-          });
-        });
+          })
+        })
     },
-    
-    // 加载更多订单
+
     loadMore() {
-      if (!this.hasMore || this.isLoadingMore || this.isLoading) return;
-      this.isLoadingMore = true;
-      this.loadOrders();
+      if (!this.hasMore || this.isLoadingMore || this.isLoading) return
+      this.isLoadingMore = true
+      this.loadOrders()
     },
-    
-    // 下拉刷新
+
     onRefresh() {
-      this.isRefreshing = true;
-      this.page = 1;
-      this.hasMore = true;
-      this.orderList = [];
-      this.loadOrders();
+      this.isRefreshing = true
+      this.page = 1
+      this.hasMore = true
+      this.orderList = []
+      this.loadOrders()
     },
-    
-    // 跳转到订单详情
+
     goToOrderDetail(orderId) {
       uni.navigateTo({
         url: `/pages/order/order-detail?id=${orderId}`
-      });
+      })
     },
-    
-    // 跳转到商城
+
     goToShop() {
       uni.navigateTo({
         url: '/pages/uniform/uniform-list'
-      });
+      })
     },
-    
-    // 取消订单
+
     cancelOrder(orderId) {
       uni.showModal({
         title: '确认取消',
         content: '确定要取消此订单吗？',
         success: (res) => {
           if (res.confirm) {
-            uni.showLoading({ title: '处理中' });
+            uni.showLoading({ title: '处理中' })
             cancelOrderApi(orderId)
-              .catch((error) => {
-                if (!config.enableMockFallback) return Promise.reject(error);
-              })
               .then(() => {
-                uni.hideLoading();
-                this.saveLocalOrderStatus(orderId, 'cancelled');
+                uni.hideLoading()
                 uni.showToast({
                   title: '订单已取消',
                   icon: 'success'
-                });
-                this.page = 1;
-                this.hasMore = true;
-                this.orderList = [];
-                this.loadOrders();
+                })
+                this.page = 1
+                this.hasMore = true
+                this.orderList = []
+                this.loadOrders()
               })
               .catch((error) => {
-                uni.hideLoading();
+                uni.hideLoading()
                 uni.showToast({
                   title: error.message || '取消失败',
                   icon: 'none'
-                });
-              });
+                })
+              })
           }
         }
-      });
+      })
     },
-    
-    // 支付订单
+
     payOrder(orderId) {
       uni.navigateTo({
         url: `/pages/payment/payment?id=${orderId}`
-      });
+      })
     },
-    
-    // 确认收货
+
     confirmReceipt(orderId) {
       uni.showModal({
         title: '确认收货',
         content: '确认已收到商品吗？',
         success: (res) => {
           if (res.confirm) {
-            uni.showLoading({ title: '处理中' });
+            uni.showLoading({ title: '处理中' })
             confirmOrder(orderId)
-              .catch((error) => {
-                if (!config.enableMockFallback) return Promise.reject(error);
-              })
               .then(() => {
-                uni.hideLoading();
-                this.saveLocalOrderStatus(orderId, 'completed');
+                uni.hideLoading()
                 uni.showToast({
                   title: '已确认收货',
                   icon: 'success'
-                });
-                this.page = 1;
-                this.hasMore = true;
-                this.orderList = [];
-                this.loadOrders();
+                })
+                this.page = 1
+                this.hasMore = true
+                this.orderList = []
+                this.loadOrders()
               })
               .catch((error) => {
-                uni.hideLoading();
+                uni.hideLoading()
                 uni.showToast({
                   title: error.message || '确认失败',
                   icon: 'none'
-                });
-              });
+                })
+              })
           }
         }
-      });
-    },
-    
-    // 申请退换
-    applyReturn(orderId) {
-      uni.showToast({
-        title: '退换申请待后端接入',
-        icon: 'none'
-      });
-    },
-    
-    // 获取模拟订单数据
-    getMockOrders(page = 1) {
-      const baseOrders = [
-        {
-          id: '100001',
-          orderNo: 'SJZ20230715001',
-          status: 'unpaid',
-          createTime: '2023-07-15 10:30:45',
-          totalAmount: '268.00',
-          products: [
-            {
-              id: '1',
-              name: '2023秋季校服套装',
-              image: '/static/qjxf.png',
-              price: '268.00',
-              quantity: 1,
-              size: 'L',
-              color: '深蓝色'
-            }
-          ]
-        },
-        {
-          id: '100002',
-          orderNo: 'SJZ20230713002',
-          status: 'unshipped',
-          createTime: '2023-07-13 15:22:36',
-          totalAmount: '369.00',
-          products: [
-            {
-              id: '2',
-              name: '2023秋季校服外套',
-              image: '/static/qjxf.png',
-              price: '369.00',
-              quantity: 1,
-              size: 'XL',
-              color: '黑色'
-            }
-          ]
-        },
-        {
-          id: '100003',
-          orderNo: 'SJZ20230710003',
-          status: 'shipped',
-          createTime: '2023-07-10 08:15:20',
-          totalAmount: '536.00',
-          products: [
-            {
-              id: '3',
-              name: '2023秋季校服短袖套装',
-              image: '/static/qjxf.png',
-              price: '268.00',
-              quantity: 2,
-              size: 'M',
-              color: '白色'
-            }
-          ]
-        },
-        {
-          id: '100004',
-          orderNo: 'SJZ20230705004',
-          status: 'completed',
-          createTime: '2023-07-05 16:42:18',
-          totalAmount: '536.00',
-          products: [
-            {
-              id: '1',
-              name: '2023秋季校服套装',
-              image: '/static/qjxf.png',
-              price: '268.00',
-              quantity: 2,
-              size: 'M',
-              color: '深蓝色'
-            }
-          ]
-        },
-        {
-          id: '100005',
-          orderNo: 'SJZ20230701005',
-          status: 'cancelled',
-          createTime: '2023-07-01 09:05:55',
-          totalAmount: '268.00',
-          products: [
-            {
-              id: '2',
-              name: '2023秋季校服外套',
-              image: '/static/qjxf.png',
-              price: '268.00',
-              quantity: 1,
-              size: 'L',
-              color: '黑色'
-            }
-          ]
-        }
-      ];
-      
-      // 第二页返回不同数据
-      if (page === 2) {
-        return [
-          {
-            id: '100006',
-            orderNo: 'SJZ20230628006',
-            status: 'completed',
-            createTime: '2023-06-28 14:30:22',
-            totalAmount: '369.00',
-            products: [
-              {
-                id: '3',
-                name: '2023夏季校服短袖套装',
-                image: 'https://cdn.uviewui.com/uview/common/logo.png',
-                price: '369.00',
-                quantity: 1,
-                size: 'S',
-                color: '白色'
-              }
-            ]
-          },
-          {
-            id: '100007',
-            orderNo: 'SJZ20230625007',
-            status: 'completed',
-            createTime: '2023-06-25 11:18:40',
-            totalAmount: '536.00',
-            products: [
-              {
-                id: '1',
-                name: '2023秋季校服套装',
-                image: 'https://cdn.uviewui.com/uview/common/logo.png',
-                price: '268.00',
-                quantity: 2,
-                size: 'L',
-                color: '深蓝色'
-              }
-            ]
-          }
-        ];
-      }
-      
-      return baseOrders;
-    },
-    
-    // 根据状态筛选订单
-    filterOrdersByStatus(orders, status) {
-      if (status === 'all') {
-        return orders;
-      }
-      return orders.filter(order => order.status === status);
-    },
-    
-    // 获取订单状态文本
-    getStatusText(status) {
-      const statusMap = {
-        'unpaid': '待付款',
-        'unshipped': '待发货',
-        'shipped': '已发货',
-        'completed': '已完成',
-        'cancelled': '已取消'
-      };
-      return statusMap[status] || '未知状态';
-    },
-    
-    // 获取订单状态样式
-    getStatusClass(status) {
-      const statusClassMap = {
-        'unpaid': 'status-warning',
-        'unshipped': 'status-primary',
-        'shipped': 'status-info',
-        'completed': 'status-success',
-        'cancelled': 'status-default'
-      };
-      return statusClassMap[status] || '';
-    },
-    
-    // 计算订单总商品数量
-    getTotalProducts(products) {
-      return products.reduce((total, product) => total + product.quantity, 0);
+      })
     },
 
-    getCurrentTime() {
-      const now = new Date();
-      const pad = (num) => String(num).padStart(2, '0');
-      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+    applyReturn(orderId) {
+      uni.navigateTo({
+        url: `/pages/order/after-sale-form?orderId=${orderId}`
+      })
     },
-    
-    // 是否可以取消订单
+
+    reviewGoods(orderId) {
+      uni.navigateTo({
+        url: `/pages/order/review-form?orderId=${orderId}`
+      })
+    },
+
+    viewReviewDetail(order) {
+      const product = (order.products || [])[0] || {}
+      const goodsId = product.uniformId || product.id || order.goodsId || ''
+      const orderItemId = product.id || order.orderItemId || ''
+      uni.navigateTo({
+        url: `/pages/order/review-detail?orderId=${order.detailOrderId || order.id}&goodsId=${goodsId}&orderItemId=${orderItemId}`
+      })
+    },
+
+    getStatusText(status) {
+      const statusMap = {
+        unpaid: '待付款',
+        unshipped: '待发货',
+        shipped: '待收货',
+        completed: '已完成',
+        cancelled: '已取消',
+        reviewed: '已评价',
+        afterSale: '退换货',
+        afterSalePending: '待审核',
+        afterSaleApproved: '已通过',
+        afterSaleRejected: '已驳回',
+        afterSaleProcessing: '处理中',
+        afterSaleCompleted: '已完成',
+        afterSaleClosed: '已关闭'
+      }
+      return statusMap[status] || '未知状态'
+    },
+
+    getStatusClass(status) {
+      const statusClassMap = {
+        unpaid: 'status-warning',
+        unshipped: 'status-primary',
+        shipped: 'status-info',
+        completed: 'status-success',
+        cancelled: 'status-default',
+        reviewed: 'status-success',
+        afterSale: 'status-warning',
+        afterSalePending: 'status-warning',
+        afterSaleApproved: 'status-primary',
+        afterSaleRejected: 'status-default',
+        afterSaleProcessing: 'status-info',
+        afterSaleCompleted: 'status-success',
+        afterSaleClosed: 'status-default'
+      }
+      return statusClassMap[status] || ''
+    },
+
+    getTotalProducts(products = []) {
+      return products.reduce((total, product) => total + Number(product.quantity || 0), 0)
+    },
+
     canCancel(status) {
-      return ['unpaid', 'unshipped'].includes(status);
+      return ['unpaid', 'unshipped'].includes(status)
     },
-    
-    // 是否可以支付
+
     canPay(status) {
-      return status === 'unpaid';
+      return status === 'unpaid'
     },
-    
-    // 是否可以确认收货
+
     canConfirm(status) {
-      return status === 'shipped';
+      return status === 'shipped'
     },
-    
-    // 是否可以申请退换
+
+    canReview(status) {
+      return status === 'completed'
+    },
+
+    canViewReviewDetail(status) {
+      return status === 'reviewed'
+    },
+
+    getReviewActionText(order = {}) {
+      return order.hasUserComment ? '追加评价' : '评价商品'
+    },
+
     canReturn(status) {
-      return ['unshipped', 'shipped', 'completed'].includes(status);
+      return ['unshipped', 'shipped', 'completed'].includes(status)
     }
   }
 }
@@ -715,6 +758,23 @@ export default {
             .product-spec {
               font-size: 24rpx;
               color: #999;
+            }
+
+            .product-comment {
+              display: flex;
+              margin-top: 12rpx;
+              font-size: 24rpx;
+              line-height: 1.5;
+
+              .comment-label {
+                color: #666;
+                flex-shrink: 0;
+              }
+
+              .comment-content {
+                color: #333;
+                word-break: break-all;
+              }
             }
           }
           

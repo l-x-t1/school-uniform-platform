@@ -19,23 +19,4 @@ public interface IXfptWithdrawApplyService extends IService<XfptWithdrawApply> {
      */
     public List<XfptWithdrawApply> selectXfptWithdrawApplyList(XfptWithdrawApply xfptWithdrawApply);
 
-    /**
-     * 查询结算管理列表
-     *
-     * @param xfptWithdrawApply 供应商提现申请
-     * @return 供应商提现申请集合
-     */
-    public List<XfptWithdrawApply> selectSettlementManageList(XfptWithdrawApply xfptWithdrawApply);
-
-    /**
-     * 执行结算
-     *
-     * @param id 申请结算记录ID
-     * @param payChannel 支付渠道
-     * @param tradeNo 外部交易单号
-     * @param remark 结算备注
-     * @return 更新后的申请结算记录
-     */
-    public XfptWithdrawApply settleSettlementManage(Long id, String payChannel, String tradeNo, String remark);
-
 }

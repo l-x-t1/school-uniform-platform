@@ -64,7 +64,6 @@
 </template>
 
 <script>
-import config from '@/config'
 import { createOrder } from '@/api/order'
 import { getDefaultStudent } from '@/api/student'
 import { listAddress } from '@/api/address'
@@ -134,8 +133,7 @@ export default {
       getDefaultStudent()
         .then((res) => {
           const data = res.data || res;
-          if (!data || (!data.id && !data.studentId && config.enableMockFallback)) {
-            this.useLocalStudent();
+          if (!data || (!data.id && !data.studentId)) {
             return;
           }
           this.student = {
@@ -147,26 +145,7 @@ export default {
             isPlaceholder: false
           };
           uni.setStorageSync('selectedStudent', this.student);
-        })
-        .catch(() => {
-          this.useLocalStudent();
         });
-    },
-    useLocalStudent() {
-      if (!config.enableMockFallback) return;
-      const localStudents = uni.getStorageSync('studentList') || [];
-      const localStudent = localStudents[0];
-      if (localStudent) {
-        this.student = {
-          id: localStudent.id || localStudent.studentId,
-          name: localStudent.name || localStudent.studentName || '',
-          school: localStudent.school || localStudent.schoolName || '',
-          grade: localStudent.grade || localStudent.gradeName || '',
-          className: localStudent.className || localStudent.class || '',
-          isPlaceholder: false
-        };
-        uni.setStorageSync('selectedStudent', this.student);
-      }
     },
     loadDefaultAddress() {
       const selectedAddress = uni.getStorageSync('selectedAddress');
@@ -182,22 +161,8 @@ export default {
           if (defaultAddress) {
             this.address = this.normalizeAddress(defaultAddress);
             uni.setStorageSync('selectedAddress', this.address);
-            return;
           }
-          this.useLocalAddress();
-        })
-        .catch(() => {
-          this.useLocalAddress();
         });
-    },
-    useLocalAddress() {
-      if (!config.enableMockFallback) return;
-      const local = uni.getStorageSync('addressList') || [];
-      const defaultAddress = local.find((item) => item.isDefault) || local[0];
-      if (defaultAddress) {
-        this.address = this.normalizeAddress(defaultAddress);
-        uni.setStorageSync('selectedAddress', this.address);
-      }
     },
     goBindStudent() {
       uni.navigateTo({
@@ -257,49 +222,9 @@ export default {
       };
 
       createOrder(payload)
-        .catch((error) => {
-          if (!config.enableMockFallback) return Promise.reject(error);
-          const devOrderId = `DEV${Date.now()}`;
-          return {
-            data: {
-              id: devOrderId,
-              orderId: devOrderId
-            }
-          };
-        })
         .then((res) => {
           const data = res.data || res;
           const orderId = data.id || data.orderId;
-          const localOrder = {
-            id: orderId,
-            orderNo: data.orderNo || `XF${Date.now()}`,
-            status: 'unpaid',
-            createTime: this.getCurrentTime(),
-            productsAmount: this.goodsAmount,
-            shippingFee: this.freightAmount,
-            discount: '0.00',
-            totalAmount: this.payAmount,
-            remark: this.remark,
-            student: this.student,
-            address: {
-              name: this.address.receiver,
-              phone: this.address.phone,
-              tag: this.address.tag || '默认',
-              fullAddress: this.address.fullAddress
-            },
-            products: this.items.map((item) => ({
-              id: item.uniformId || item.id,
-              name: item.name,
-              image: item.image,
-              price: item.price,
-              size: item.size,
-              color: item.color || item.spec || '默认款',
-              quantity: item.quantity
-            }))
-          };
-          const localOrders = uni.getStorageSync('devOrders') || {};
-          localOrders[orderId] = localOrder;
-          uni.setStorageSync('devOrders', localOrders);
           uni.hideLoading();
           if (this.source === 'cart') {
             const localCart = uni.getStorageSync('cartList') || [];
@@ -327,11 +252,6 @@ export default {
         .finally(() => {
           this.submitting = false;
         });
-    },
-    getCurrentTime() {
-      const now = new Date();
-      const pad = (num) => String(num).padStart(2, '0');
-      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     }
   }
 }

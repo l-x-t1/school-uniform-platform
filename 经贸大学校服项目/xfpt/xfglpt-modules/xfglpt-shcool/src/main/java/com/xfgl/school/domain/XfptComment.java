@@ -60,16 +60,6 @@ public class XfptComment extends BaseEntity {
     @Schema(description = "订单类型，1统购 2零售")
     private String orderType;
 
-    /** 学校ID */
-    @TableField(exist = false)
-    @Schema(description = "学校ID")
-    private Long schoolId;
-
-    /** 学校名称 */
-    @TableField(exist = false)
-    @Schema(description = "学校名称")
-    private String schoolName;
-
     /** 商品ID */
     @Excel(name = "商品ID")
     @Schema(description = "商品ID")
@@ -89,11 +79,6 @@ public class XfptComment extends BaseEntity {
     @Excel(name = "评价用户名称快照")
     @Schema(description = "评价用户名称快照")
     private String userName;
-
-    /** 评价用户头像 */
-    @TableField(exist = false)
-    @Schema(description = "评价用户头像")
-    private String userAvatar;
 
     /** 供应商ID */
     @Excel(name = "供应商ID")
@@ -127,11 +112,6 @@ public class XfptComment extends BaseEntity {
     @Excel(name = "评价状态", readConverterExp = "0=正常,1=隐藏")
     @Schema(description = "评价状态，0正常 1隐藏")
     private String status;
-
-    /** 回复数量 */
-    @TableField(exist = false)
-    @Schema(description = "回复数量")
-    private Integer replyCount;
 
     /** 商品评论回复信息 */
     @TableField(exist = false)

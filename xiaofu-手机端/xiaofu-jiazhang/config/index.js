@@ -3,7 +3,7 @@ const config = {
   uploadUrl: 'http://127.0.0.1:8080/common/upload',
   tokenKey: 'token',
   tokenPrefix: 'Bearer ',
-  enableMockFallback: true
+  enableMockFallback: false
 }
 
 export default config

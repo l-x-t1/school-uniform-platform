@@ -19,24 +19,6 @@ public interface XfptCommentMapper extends BaseMapper<XfptComment> {
      * @return 商品评价集合
      */
     public List<XfptComment> selectXfptCommentList(XfptComment xfptComment);
-
-    /**
-     * 查询评价管理列表
-     *
-     * @param xfptComment 商品评价
-     * @return 评价管理集合
-     */
-    public List<XfptComment> selectEvaluationCommentList(XfptComment xfptComment);
-
-    /**
-     * 查询评价管理详情
-     *
-     * @param id 商品评价主键
-     * @param scopeSchoolId 学校数据范围
-     * @return 评价管理详情
-     */
-    public XfptComment selectEvaluationCommentById(@Param("id") Long id, @Param("scopeSchoolId") Long scopeSchoolId);
-
         /**
          * 查询商品评价
          *

@@ -1,0 +1,1 @@
+SELECT u.user_id,u.user_name,u.nick_name,ur.role_id,r.role_key FROM sys_user u JOIN sys_user_role ur ON u.user_id=ur.user_id JOIN sys_role r ON ur.role_id=r.role_id WHERE r.role_key IN ('common','changshang') ORDER BY u.user_id;

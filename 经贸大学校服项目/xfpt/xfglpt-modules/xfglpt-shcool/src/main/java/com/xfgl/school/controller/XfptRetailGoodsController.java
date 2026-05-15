@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.xfgl.common.core.exception.ServiceException;
-import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.web.page.TableDataInfo;
@@ -19,7 +18,6 @@ import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.vo.XfptRetailGoodsVo;
 import com.xfgl.school.service.IXfptRetailGoodsService;
-import com.xfgl.system.api.domain.SysRole;
 import com.xfgl.system.api.domain.SysUser;
 import com.xfgl.system.api.model.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
@@ -79,31 +77,9 @@ public class XfptRetailGoodsController extends BaseController {
     private Long getCurrentSchoolId() {
         LoginUser loginUser = SecurityUtils.getLoginUser();
         SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
-        if (sysUser == null) {
-            throw new ServiceException("当前登录用户信息不存在");
-        }
-        if (isGlobalUser(sysUser)) {
-            return null;
-        }
-        if (sysUser.getDeptId() == null) {
+        if (sysUser == null || sysUser.getDeptId() == null) {
             throw new ServiceException("当前登录用户未绑定学校部门");
         }
         return sysUser.getDeptId();
-    }
-
-    private boolean isGlobalUser(SysUser sysUser) {
-        if (sysUser.isAdmin() || StringUtils.equals("admin", sysUser.getUserName())) {
-            return true;
-        }
-        List<SysRole> roles = sysUser.getRoles();
-        if (roles == null || roles.isEmpty()) {
-            return false;
-        }
-        for (SysRole role : roles) {
-            if (StringUtils.equals("gly", role.getRoleKey())) {
-                return true;
-            }
-        }
-        return false;
     }
 }

@@ -287,6 +287,27 @@
       }
     },
     {
+      "path": "pages/order/review-form",
+      "style": {
+        "navigationBarTitleText": "评价商品",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/order/review-detail",
+      "style": {
+        "navigationBarTitleText": "评价详情",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
+      "path": "pages/order/after-sale-form",
+      "style": {
+        "navigationBarTitleText": "申请退换",
+        "enablePullDownRefresh": false
+      }
+    },
+    {
       "path": "pages/user/student-info",
       "style": {
         "navigationBarTitleText": "学生信息",
