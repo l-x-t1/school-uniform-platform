@@ -2,6 +2,9 @@ package com.xfgl.school.mapper;
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xfgl.school.domain.XfptDeliveryOrder;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo;
+import com.xfgl.school.domain.vo.SupplierOptionVo;
 import org.apache.ibatis.annotations.Param;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
 
@@ -42,4 +45,9 @@ public interface XfptDeliveryOrderMapper extends BaseMapper<XfptDeliveryOrder> {
          * @return 结果
          */
         int batchInsertXfptDeliveryOrderItem(List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList);
+
+        List<DeliveryOrderStatisticsVo> selectDeliveryOrderStatisticsList(DeliveryOrderStatisticsQuery query);
+
+        List<SupplierOptionVo> selectDeliveryOrderSupplierOptions(@Param("schoolId") Long schoolId,
+                                                                  @Param("deptId") Long deptId);
 }
