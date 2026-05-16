@@ -149,4 +149,14 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
+    @TableField(exist = false)
+    private String schoolName;
+
+    @TableField(exist = false)
+    private String supplierName;
+
+    @TableField(exist = false)
+    private String userName;
+    @TableField(exist = false)
+    private String afterSaleNo;
         }

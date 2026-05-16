@@ -13,9 +13,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderNo"    column="order_no"    />
         <result property="orderType"    column="order_type"    />
         <result property="afterSaleId"    column="after_sale_id"    />
+        <result property="afterSaleNo"    column="after_sale_no"    />
         <result property="schoolId"    column="school_id"    />
+        <result property="schoolName"    column="school_name"    />
         <result property="supplierId"    column="supplier_id"    />
+        <result property="supplierName"    column="supplier_name"    />
         <result property="userId"    column="user_id"    />
+        <result property="userName"    column="user_name"    />
         <result property="amount"    column="amount"    />
         <result property="payChannel"    column="pay_channel"    />
         <result property="tradeNo"    column="trade_no"    />
@@ -38,42 +42,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptFinanceFlowVo">
-        select id, flow_no, business_type, flow_direction, order_id, order_no, order_type, after_sale_id, school_id, supplier_id, user_id, amount, pay_channel, trade_no, payee_type, payee_id, payee_name, payee_account_name, payee_bank_name, payee_bank_account_no, receipt_qr_code, status, trade_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_finance_flow
+        select f.id, f.flow_no, f.business_type, f.flow_direction, f.order_id, f.order_no, f.order_type, f.after_sale_id, a.after_sale_no, f.school_id, o.school_name, f.supplier_id, o.supplier_name, f.user_id, o.user_name, f.amount, f.pay_channel, f.trade_no, f.payee_type, f.payee_id, f.payee_name, f.payee_account_name, f.payee_bank_name, f.payee_bank_account_no, f.receipt_qr_code, f.status, f.trade_time, f.dept_id, f.create_by, f.create_time, f.update_by, f.update_time, f.remark, f.del_flag
+        from xfpt_finance_flow f
+        left join xfpt_order_info o on f.order_id = o.id
+        left join xfpt_after_sale a on f.after_sale_id = a.id
     </sql>
 
     <select id="selectXfptFinanceFlowList" parameterType="XfptFinanceFlow" resultMap="XfptFinanceFlowResult">
         <include refid="selectXfptFinanceFlowVo"/>
         <include refid="search"/>
-            <if test="flowNo != null  and flowNo != ''"> and flow_no like concat('%', #{flowNo}, '%')</if>
-            <if test="businessType != null  and businessType != ''"> and business_type = #{businessType}</if>
-            <if test="flowDirection != null  and flowDirection != ''"> and flow_direction = #{flowDirection}</if>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderType != null  and orderType != ''"> and order_type = #{orderType}</if>
-            <if test="afterSaleId != null "> and after_sale_id = #{afterSaleId}</if>
-            <if test="schoolId != null "> and school_id = #{schoolId}</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="amount != null "> and amount = #{amount}</if>
-            <if test="payChannel != null  and payChannel != ''"> and pay_channel = #{payChannel}</if>
-            <if test="tradeNo != null  and tradeNo != ''"> and trade_no like concat('%', #{tradeNo}, '%')</if>
-            <if test="payeeType != null  and payeeType != ''"> and payee_type = #{payeeType}</if>
-            <if test="payeeId != null "> and payee_id = #{payeeId}</if>
-            <if test="payeeName != null  and payeeName != ''"> and payee_name like concat('%', #{payeeName}, '%')</if>
-            <if test="payeeAccountName != null  and payeeAccountName != ''"> and payee_account_name like concat('%', #{payeeAccountName}, '%')</if>
-            <if test="payeeBankName != null  and payeeBankName != ''"> and payee_bank_name like concat('%', #{payeeBankName}, '%')</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="flowNo != null  and flowNo != ''"> and f.flow_no like concat('%', #{flowNo}, '%')</if>
+            <if test="businessType != null  and businessType != ''"> and f.business_type = #{businessType}</if>
+            <if test="flowDirection != null  and flowDirection != ''"> and f.flow_direction = #{flowDirection}</if>
+            <if test="orderId != null "> and f.order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and f.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderType != null  and orderType != ''"> and f.order_type = #{orderType}</if>
+            <if test="afterSaleId != null "> and f.after_sale_id = #{afterSaleId}</if>
+            <if test="schoolId != null "> and f.school_id = #{schoolId}</if>
+            <if test="schoolName != null and schoolName != ''"> and o.school_name like concat('%', #{schoolName}, '%')</if>
+            <if test="supplierId != null "> and f.supplier_id = #{supplierId}</if>
+            <if test="supplierName != null and supplierName != ''"> and o.supplier_name like concat('%', #{supplierName}, '%')</if>
+            <if test="userId != null "> and f.user_id = #{userId}</if>
+            <if test="userName != null and userName != ''"> and o.user_name like concat('%', #{userName}, '%')</if>
+            <if test="amount != null "> and f.amount = #{amount}</if>
+            <if test="payChannel != null  and payChannel != ''"> and f.pay_channel = #{payChannel}</if>
+            <if test="tradeNo != null  and tradeNo != ''"> and f.trade_no like concat('%', #{tradeNo}, '%')</if>
+            <if test="payeeType != null  and payeeType != ''"> and f.payee_type = #{payeeType}</if>
+            <if test="payeeId != null "> and f.payee_id = #{payeeId}</if>
+            <if test="payeeName != null  and payeeName != ''"> and f.payee_name like concat('%', #{payeeName}, '%')</if>
+            <if test="payeeAccountName != null  and payeeAccountName != ''"> and f.payee_account_name like concat('%', #{payeeAccountName}, '%')</if>
+            <if test="payeeBankName != null  and payeeBankName != ''"> and f.payee_bank_name like concat('%', #{payeeBankName}, '%')</if>
+            <if test="status != null  and status != ''"> and f.status = #{status}</if>
             <if test="tradeTime != null ">
-                and trade_time &gt;= #{tradeTime}
-                and trade_time &lt; date_add(#{tradeTime}, interval 1 day)
+                and f.trade_time &gt;= #{tradeTime}
+                and f.trade_time &lt; date_add(#{tradeTime}, interval 1 day)
             </if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="deptId != null "> and f.dept_id = #{deptId}</if>
 
     </select>
 
     <select id="selectXfptFinanceFlowById" parameterType="Long" resultMap="XfptFinanceFlowResult">
         <include refid="selectXfptFinanceFlowVo"/>
-        where id = #{id}
+        where f.id = #{id}
     </select>
 
     <insert id="insertXfptFinanceFlow" parameterType="XfptFinanceFlow" useGeneratedKeys="true" keyProperty="id">
@@ -189,6 +199,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where f.del_flag = 0
     </sql>
 </mapper>

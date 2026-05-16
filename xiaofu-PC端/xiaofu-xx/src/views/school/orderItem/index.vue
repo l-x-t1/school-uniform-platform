@@ -1,42 +1,26 @@
 <template>
   <div class="app-container">
     <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="订单主表ID" prop="orderId">
+      <el-form-item label="订单号" prop="orderNo">
         <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单主表ID"
+          v-model="queryParams.orderNo"
+          placeholder="请输入订单号"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="商品ID" prop="goodsId">
-        <el-input
-          v-model="queryParams.goodsId"
-          placeholder="请输入商品ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="尺码ID" prop="sizeId">
-        <el-input
-          v-model="queryParams.sizeId"
-          placeholder="请输入尺码ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="商品名称快照" prop="goodsName">
+      <el-form-item label="商品名称" prop="goodsName">
         <el-input
           v-model="queryParams.goodsName"
-          placeholder="请输入商品名称快照"
+          placeholder="请输入商品名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="尺码名称快照" prop="sizeName">
+      <el-form-item label="尺码名称" prop="sizeName">
         <el-input
           v-model="queryParams.sizeName"
-          placeholder="请输入尺码名称快照"
+          placeholder="请输入尺码名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -61,14 +45,6 @@
         <el-input
           v-model="queryParams.itemAmount"
           placeholder="请输入行金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -127,13 +103,10 @@
 
     <el-table v-loading="loading" :data="orderItemList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="订单主表ID" align="center" prop="orderId" />
-      <el-table-column label="商品ID" align="center" prop="goodsId" />
-      <el-table-column label="尺码ID" align="center" prop="sizeId" />
-      <el-table-column label="商品名称快照" align="center" prop="goodsName" />
-      <el-table-column label="尺码名称快照" align="center" prop="sizeName" />
-      <el-table-column label="商品主图快照" align="center" prop="mainImage" width="100">
+      <el-table-column label="订单号" align="center" prop="orderNo" />
+      <el-table-column label="商品名称" align="center" prop="goodsName" />
+      <el-table-column label="尺码名称" align="center" prop="sizeName" />
+      <el-table-column label="商品主图" align="center" prop="mainImage" width="100">
         <template slot-scope="scope">
           <image-preview :src="scope.row.mainImage" :width="50" :height="50"/>
         </template>
@@ -256,6 +229,7 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
+        orderNo: null,
         orderId: null,
         goodsId: null,
         sizeId: null,

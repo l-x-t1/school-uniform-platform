@@ -9,50 +9,18 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="统购公告ID" prop="noticeId">
-        <el-input
-          v-model="queryParams.noticeId"
-          placeholder="请输入统购公告ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校名称快照" prop="schoolName">
+      <el-form-item label="学校名称" prop="schoolName">
         <el-input
           v-model="queryParams.schoolName"
-          placeholder="请输入学校名称快照"
+          placeholder="请输入学校名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商名称快照" prop="supplierName">
+      <el-form-item label="供应商名称" prop="supplierName">
         <el-input
           v-model="queryParams.supplierName"
-          placeholder="请输入供应商名称快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="下单用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入下单用户ID"
+          placeholder="请输入供应商名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -61,14 +29,6 @@
         <el-input
           v-model="queryParams.userName"
           placeholder="请输入下单用户名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学生ID" prop="studentId">
-        <el-input
-          v-model="queryParams.studentId"
-          placeholder="请输入学生ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -97,26 +57,18 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收货地址ID" prop="addressId">
-        <el-input
-          v-model="queryParams.addressId"
-          placeholder="请输入收货地址ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="收货人姓名快照" prop="receiverName">
+      <el-form-item label="收货人姓名" prop="receiverName">
         <el-input
           v-model="queryParams.receiverName"
-          placeholder="请输入收货人姓名快照"
+          placeholder="请输入收货人姓名"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收货人电话快照" prop="receiverPhone">
+      <el-form-item label="收货人电话" prop="receiverPhone">
         <el-input
           v-model="queryParams.receiverPhone"
-          placeholder="请输入收货人电话快照"
+          placeholder="请输入收货人电话"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -168,14 +120,6 @@
           value-format="yyyy-MM-dd"
           placeholder="请选择完成时间">
         </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -231,25 +175,19 @@
 
     <el-table v-loading="loading" :data="orderInfoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="订单类型，1统购 2零售" align="center" prop="orderType" />
-      <el-table-column label="统购公告ID" align="center" prop="noticeId" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="学校名称快照" align="center" prop="schoolName" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="供应商名称快照" align="center" prop="supplierName" />
-      <el-table-column label="下单用户ID" align="center" prop="userId" />
+      <el-table-column label="公告标题" align="center" prop="noticeTitle" />
+      <el-table-column label="学校名称" align="center" prop="schoolName" />
+      <el-table-column label="供应商名称" align="center" prop="supplierName" />
       <el-table-column label="下单用户名称" align="center" prop="userName" />
-      <el-table-column label="学生ID" align="center" prop="studentId" />
       <el-table-column label="学生姓名" align="center" prop="studentName" />
       <el-table-column label="年级名称" align="center" prop="gradeName" />
       <el-table-column label="班级名称" align="center" prop="className" />
-      <el-table-column label="收货地址ID" align="center" prop="addressId" />
       <el-table-column label="收货类型，1学校 2家庭" align="center" prop="receiveType" />
-      <el-table-column label="收货人姓名快照" align="center" prop="receiverName" />
-      <el-table-column label="收货人电话快照" align="center" prop="receiverPhone" />
-      <el-table-column label="收货地址快照" align="center" prop="receiverAddress" />
+      <el-table-column label="收货人姓名" align="center" prop="receiverName" />
+      <el-table-column label="收货人电话" align="center" prop="receiverPhone" />
+      <el-table-column label="收货地址" align="center" prop="receiverAddress" />
       <el-table-column label="订单总金额" align="center" prop="totalAmount" />
       <el-table-column label="实付金额" align="center" prop="payAmount" />
       <el-table-column label="已退款金额" align="center" prop="refundAmount" />

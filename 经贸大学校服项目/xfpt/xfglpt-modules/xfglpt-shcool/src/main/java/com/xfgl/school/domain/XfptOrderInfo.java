@@ -178,4 +178,6 @@ private static final long serialVersionUID = 1L;
 @TableField(exist = false)
 @Schema(description = "订单明细")
 private List<XfptOrderItem> xfptOrderItemList;
+@TableField(exist = false)
+private String noticeTitle;
         }

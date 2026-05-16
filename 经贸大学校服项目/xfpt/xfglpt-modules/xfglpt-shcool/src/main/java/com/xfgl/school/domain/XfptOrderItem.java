@@ -88,4 +88,6 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "当前归属部门/学校")
     private Long deptId;
 
+    @TableField(exist = false)
+    private String orderNo;
         }

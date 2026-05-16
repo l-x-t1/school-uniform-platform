@@ -17,14 +17,6 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="关联订单" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入关联订单"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
       <el-form-item label="订单编号" prop="orderNo">
         <el-input
           v-model="queryParams.orderNo"
@@ -33,34 +25,26 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="售后单" prop="afterSaleId">
+      <el-form-item label="学校名称" prop="schoolName">
         <el-input
-          v-model="queryParams.afterSaleId"
-          placeholder="请输入售后单"
+          v-model="queryParams.schoolName"
+          placeholder="请输入学校名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
+      <el-form-item label="供应商名称" prop="supplierName">
         <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
+          v-model="queryParams.supplierName"
+          placeholder="请输入供应商名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
+      <el-form-item label="用户名称" prop="userName">
         <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入用户ID"
+          v-model="queryParams.userName"
+          placeholder="请输入用户名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -89,34 +73,26 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收款方ID" prop="payeeId">
-        <el-input
-          v-model="queryParams.payeeId"
-          placeholder="请输入收款方ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="收款方名称快照" prop="payeeName">
+      <el-form-item label="收款方名称" prop="payeeName">
         <el-input
           v-model="queryParams.payeeName"
-          placeholder="请输入收款方名称快照"
+          placeholder="请输入收款方名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收款账户户名快照" prop="payeeAccountName">
+      <el-form-item label="收款账户户名" prop="payeeAccountName">
         <el-input
           v-model="queryParams.payeeAccountName"
-          placeholder="请输入收款账户户名快照"
+          placeholder="请输入收款账户户名"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收款银行快照" prop="payeeBankName">
+      <el-form-item label="收款银行" prop="payeeBankName">
         <el-input
           v-model="queryParams.payeeBankName"
-          placeholder="请输入收款银行快照"
+          placeholder="请输入收款银行"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -128,14 +104,6 @@
           value-format="yyyy-MM-dd"
           placeholder="请选择交易发生时间">
         </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -191,25 +159,22 @@
 
     <el-table v-loading="loading" :data="financeFlowList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="流水单号" align="center" prop="flowNo" />
       <el-table-column label="业务类型，1支付 2退款 3提现 4结算" align="center" prop="businessType" />
       <el-table-column label="收支方向，1收入 2支出" align="center" prop="flowDirection" />
-      <el-table-column label="关联订单ID" align="center" prop="orderId" />
-      <el-table-column label="订单编号快照" align="center" prop="orderNo" />
+      <el-table-column label="订单编号" align="center" prop="orderNo" />
       <el-table-column label="订单类型，1统购 2零售" align="center" prop="orderType" />
-      <el-table-column label="关联售后单ID" align="center" prop="afterSaleId" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="用户ID" align="center" prop="userId" />
+      <el-table-column label="售后单号" align="center" prop="afterSaleNo" />
+      <el-table-column label="学校名称" align="center" prop="schoolName" />
+      <el-table-column label="供应商名称" align="center" prop="supplierName" />
+      <el-table-column label="用户名称" align="center" prop="userName" />
       <el-table-column label="流水金额" align="center" prop="amount" />
       <el-table-column label="支付渠道" align="center" prop="payChannel" />
       <el-table-column label="交易单号" align="center" prop="tradeNo" />
       <el-table-column label="收款方类型，1学校 2供应商；统购收学校，零售收供应商" align="center" prop="payeeType" />
-      <el-table-column label="收款方ID" align="center" prop="payeeId" />
-      <el-table-column label="收款方名称快照" align="center" prop="payeeName" />
-      <el-table-column label="收款账户户名快照" align="center" prop="payeeAccountName" />
-      <el-table-column label="收款银行快照" align="center" prop="payeeBankName" />
+      <el-table-column label="收款方名称" align="center" prop="payeeName" />
+      <el-table-column label="收款账户户名" align="center" prop="payeeAccountName" />
+      <el-table-column label="收款银行" align="center" prop="payeeBankName" />
       <el-table-column label="流水状态，0未支付 1已到达学校账号 2已到达供应商账号" align="center" prop="status" />
       <el-table-column label="交易发生时间" align="center" prop="tradeTime" width="180">
         <template slot-scope="scope">
@@ -356,8 +321,11 @@ export default {
         orderType: null,
         afterSaleId: null,
         schoolId: null,
+        schoolName: null,
         supplierId: null,
+        supplierName: null,
         userId: null,
+        userName: null,
         amount: null,
         payChannel: null,
         tradeNo: null,
