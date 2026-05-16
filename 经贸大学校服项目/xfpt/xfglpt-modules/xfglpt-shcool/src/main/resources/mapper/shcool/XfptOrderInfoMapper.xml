@@ -124,6 +124,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where order_id = #{id}
     </select>
 
+    <select id="selectXfptOrderItemList" resultMap="XfptOrderItemResult">
+        select id, order_id, goods_id, size_id, goods_name, size_name, main_image, sale_type, unit_price, buy_num, item_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_order_item
+        where order_id = #{order_id}
+    </select>
+
     <insert id="insertXfptOrderInfo" parameterType="XfptOrderInfo" useGeneratedKeys="true" keyProperty="id">
         insert into xfpt_order_info
         <trim prefix="(" suffix=")" suffixOverrides=",">
