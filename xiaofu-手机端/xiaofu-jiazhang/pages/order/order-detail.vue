@@ -150,6 +150,11 @@
         @click="applyReturn"
       >申请退换</button>
       <button
+        class="footer-btn primary"
+        v-if="canComment(order)"
+        @click="commentOrder"
+      >评价</button>
+      <button
         class="footer-btn outline"
         v-if="canReorder(order.status)"
         @click="reorder"
@@ -200,6 +205,7 @@ export default {
              this.canPay(this.order.status) || 
              this.canConfirm(this.order.status) || 
              this.canReturn(this.order.status) ||
+             this.canComment(this.order) ||
              this.canReorder(this.order.status);
     },
     
@@ -244,12 +250,15 @@ export default {
         },
         products: products.map((item) => ({
           id: item.id || item.uniformId,
+          orderItemId: item.orderItemId || item.id,
+          goodsId: item.goodsId || item.uniformId || item.id,
           name: item.name || item.uniformName || item.productName || '校服',
           image: item.image || item.productImage || item.coverImage || '/static/qjxf.png',
           price: item.price || item.salePrice || '0.00',
           size: item.size || item.sizeName || '-',
           color: item.color || item.spec || '默认款',
-          quantity: item.quantity || item.count || 1
+          quantity: item.quantity || item.count || 1,
+          supplierId: item.supplierId
         }))
       };
     },
@@ -393,6 +402,10 @@ export default {
     canReorder(status) {
       return ['completed', 'cancelled'].includes(status);
     },
+
+    canComment(order) {
+      return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
     
     // 取消订单
     cancelOrder() {
@@ -470,8 +483,20 @@ export default {
     
     // 申请退换
     applyReturn() {
+      const query = [
+        `id=${this.id}`,
+        `orderNo=${encodeURIComponent(this.order.orderNo || '')}`,
+        `amount=${encodeURIComponent(this.order.payAmount || this.order.totalAmount || '0.00')}`
+      ].join('&')
       uni.navigateTo({
-        url: `/pages/order/return-apply?id=${this.id}`
+        url: `/pages/order/return-apply?${query}`
+      });
+    },
+
+    commentOrder() {
+      uni.setStorageSync('pendingCommentOrder', this.order);
+      uni.navigateTo({
+        url: `/pages/order/comment-apply?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
       });
     },
     
