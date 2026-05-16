@@ -44,13 +44,17 @@ function mapBackendStatus(orderStatus, payStatus) {
 function normalizeOrderItem(item = {}) {
   return {
     id: item.id || item.goodsId,
+    orderItemId: item.id || item.orderItemId,
+    goodsId: item.goodsId || item.uniformId || item.id,
     uniformId: item.goodsId || item.uniformId || item.id,
     name: item.goodsName || item.name || '校服',
     image: item.mainImage || item.image || '/static/qjxf.png',
     price: item.unitPrice || item.price || '0.00',
     quantity: item.buyNum || item.quantity || 1,
     size: item.sizeName || item.size || '-',
-    color: item.colorName || item.color || '-'
+    color: item.colorName || item.color || '-',
+    supplierId: item.supplierId,
+    supplierName: item.supplierName || ''
   }
 }
 
