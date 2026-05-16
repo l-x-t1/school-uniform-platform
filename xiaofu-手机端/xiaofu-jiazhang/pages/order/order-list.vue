@@ -81,8 +81,13 @@
             <button
               class="action-btn outline"
               v-if="canReturn(order.status)"
-              @click.stop="applyReturn(order.id)"
+              @click.stop="applyReturn(order)"
             >申请退换</button>
+            <button
+              class="action-btn primary"
+              v-if="canComment(order)"
+              @click.stop="commentOrder(order)"
+            >评价</button>
           </view>
         </view>
       </view>
@@ -135,25 +140,24 @@ export default {
   },
   methods: {
     normalizeOrder(item) {
-      const products = item.products || item.items || item.orderItems || item.xfptOrderItemList || [];
+      const products = item.products || item.items || item.orderItems || [];
       return {
         id: item.id || item.orderId,
         orderNo: item.orderNo || item.orderSn || item.orderCode,
-        status: this.normalizeStatus(item.status || item.orderStatus),
+        status: this.normalizeStatus(item.status),
         createTime: item.createTime,
         totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
-        orderType: item.orderType || '1',
-        orderTypeText: String(item.orderType || '1') === '2' ? '零售订单' : '统购订单',
-        schoolName: item.schoolName || item.school || '',
-        studentName: item.studentName || item.student?.name || '',
         products: products.map((product) => ({
-          id: product.id || product.productId || product.uniformId || product.goodsId,
-          name: product.name || product.goodsName || product.productName || product.uniformName || '校服',
-          image: product.image || product.mainImage || product.productImage || product.coverImage || '/static/qjxf.png',
+          id: product.id || product.productId || product.uniformId,
+          orderItemId: product.orderItemId || product.id,
+          goodsId: product.goodsId || product.productId || product.uniformId || product.id,
+          name: product.name || product.productName || product.uniformName || '校服',
+          image: product.image || product.productImage || product.coverImage || '/static/qjxf.png',
           price: product.price || product.salePrice || product.unitPrice || '0.00',
-          quantity: Number(product.quantity || product.buyNum || product.num || 1),
+          quantity: product.quantity || product.num || 1,
           size: product.size || product.sizeName || '-',
-          color: String(product.saleType || product.orderType || item.orderType || '1') === '2' ? '零售购买' : '统购购买'
+          color: product.color || product.colorName || '-',
+          supplierId: product.supplierId
         }))
       };
     },
@@ -181,10 +185,8 @@ export default {
       const localOrders = uni.getStorageSync('devOrders') || {};
       if (localOrders[orderId]) {
         localOrders[orderId].status = status;
-        localOrders[orderId].orderStatus = status === 'cancelled' ? '5' : status === 'completed' ? '4' : localOrders[orderId].orderStatus;
-        localOrders[orderId].payStatus = status === 'cancelled' ? localOrders[orderId].payStatus || '0' : status === 'completed' ? '1' : localOrders[orderId].payStatus;
         if (status === 'completed') {
-          localOrders[orderId].finishTime = this.getCurrentTime();
+          localOrders[orderId].completeTime = this.getCurrentTime();
         }
         uni.setStorageSync('devOrders', localOrders);
       }
@@ -194,10 +196,9 @@ export default {
       const statusMap = {
         0: 'unpaid',
         1: 'unshipped',
-        2: 'unshipped',
-        3: 'shipped',
-        4: 'completed',
-        5: 'cancelled',
+        2: 'shipped',
+        3: 'completed',
+        4: 'cancelled',
         unpaid: 'unpaid',
         unshipped: 'unshipped',
         shipped: 'shipped',
@@ -375,10 +376,14 @@ export default {
     },
     
     // 申请退换
-    applyReturn(orderId) {
-      uni.showToast({
-        title: '退换申请待后端接入',
-        icon: 'none'
+    applyReturn(order) {
+      const query = [
+        `id=${order.id}`,
+        `orderNo=${encodeURIComponent(order.orderNo || '')}`,
+        `amount=${encodeURIComponent(order.payAmount || order.totalAmount || '0.00')}`
+      ].join('&')
+      uni.navigateTo({
+        url: `/pages/order/return-apply?${query}`
       });
     },
     
@@ -583,6 +588,17 @@ export default {
     // 是否可以申请退换
     canReturn(status) {
       return ['unshipped', 'shipped', 'completed'].includes(status);
+    },
+
+    canComment(order) {
+      return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
+
+    commentOrder(order) {
+      uni.setStorageSync('pendingCommentOrder', order);
+      uni.navigateTo({
+        url: `/pages/order/comment-apply?id=${order.id}&orderNo=${encodeURIComponent(order.orderNo || '')}`
+      });
     }
   }
 }
