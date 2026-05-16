@@ -81,8 +81,13 @@
             <button
               class="action-btn outline"
               v-if="canReturn(order.status)"
-              @click.stop="applyReturn(order.id)"
+              @click.stop="applyReturn(order)"
             >申请退换</button>
+            <button
+              class="action-btn primary"
+              v-if="canComment(order)"
+              @click.stop="commentOrder(order)"
+            >评价</button>
           </view>
         </view>
       </view>
@@ -144,12 +149,15 @@ export default {
         totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
         products: products.map((product) => ({
           id: product.id || product.productId || product.uniformId,
+          orderItemId: product.orderItemId || product.id,
+          goodsId: product.goodsId || product.productId || product.uniformId || product.id,
           name: product.name || product.productName || product.uniformName || '校服',
           image: product.image || product.productImage || product.coverImage || '/static/qjxf.png',
           price: product.price || product.salePrice || product.unitPrice || '0.00',
           quantity: product.quantity || product.num || 1,
           size: product.size || product.sizeName || '-',
-          color: product.color || product.colorName || '-'
+          color: product.color || product.colorName || '-',
+          supplierId: product.supplierId
         }))
       };
     },
@@ -368,9 +376,14 @@ export default {
     },
     
     // 申请退换
-    applyReturn(orderId) {
+    applyReturn(order) {
+      const query = [
+        `id=${order.id}`,
+        `orderNo=${encodeURIComponent(order.orderNo || '')}`,
+        `amount=${encodeURIComponent(order.payAmount || order.totalAmount || '0.00')}`
+      ].join('&')
       uni.navigateTo({
-        url: `/pages/order/return-apply?id=${orderId}`
+        url: `/pages/order/return-apply?${query}`
       });
     },
     
@@ -575,6 +588,17 @@ export default {
     // 是否可以申请退换
     canReturn(status) {
       return ['unshipped', 'shipped', 'completed'].includes(status);
+    },
+
+    canComment(order) {
+      return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
+
+    commentOrder(order) {
+      uni.setStorageSync('pendingCommentOrder', order);
+      uni.navigateTo({
+        url: `/pages/order/comment-apply?id=${order.id}&orderNo=${encodeURIComponent(order.orderNo || '')}`
+      });
     }
   }
 }
