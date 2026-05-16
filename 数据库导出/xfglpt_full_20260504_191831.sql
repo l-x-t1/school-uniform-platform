@@ -2153,7 +2153,7 @@ CREATE TABLE `xfpt_group_notice` (
 
 LOCK TABLES `xfpt_group_notice` WRITE;
 /*!40000 ALTER TABLE `xfpt_group_notice` DISABLE KEYS */;
-INSERT INTO `xfpt_group_notice` VALUES (1,237,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
+INSERT INTO `xfpt_group_notice` VALUES (1,165,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
 /*!40000 ALTER TABLE `xfpt_group_notice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4324,6 +4324,8 @@ SET @new_feature_menu_id := (
   LIMIT 1
 );
 SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+SET @OLD_SQL_SAFE_UPDATES := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
 
 SET @evaluation_menu_id := (
   SELECT `MENU_ID`
@@ -4356,13 +4358,36 @@ SET `PARENT_ID` = @new_feature_menu_id,
     `UPDATE_BY` = 'admin',
     `UPDATE_TIME` = NOW(),
     `REMARK` = '学校端评价管理菜单'
-WHERE `PERMS` = 'school:evaluation:list';
+WHERE `MENU_ID` = @evaluation_menu_id;
+
+SET @evaluation_query_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+  LIMIT 1
+);
+
+SET @evaluation_reply_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+  LIMIT 1
+);
+
+SET @evaluation_hide_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+  LIMIT 1
+);
 
 UPDATE `sys_menu`
 SET `PARENT_ID` = @evaluation_menu_id,
     `UPDATE_BY` = 'admin',
     `UPDATE_TIME` = NOW()
-WHERE `PERMS` IN ('school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide');
+WHERE `MENU_ID` = IFNULL(@evaluation_query_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_reply_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_hide_existing_id, -1);
 
 SET @evaluation_query_id := (
   SELECT `MENU_ID`
@@ -4784,6 +4809,127 @@ WHERE @evaluation_retail_order_id IS NOT NULL
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- ============================================
+-- 追加：新增功能菜单 - 账户余额 / 供应商提现记录
+-- 说明：使用 utf8mb4 十六进制字面量，避免中文编码问题
+-- ============================================
+
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'newFeature'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+
+SET @account_balance_name := CONVERT(0xE8B4A6E688B7E4BD99E9A29D USING utf8mb4);
+SET @account_balance_remark := CONVERT(0xE8B4A6E688B7E4BD99E9A29DE88F9CE58D95 USING utf8mb4);
+SET @supplier_withdraw_record_name := CONVERT(0xE4BE9BE5BA94E59586E68F90E78EB0E8AEB0E5BD95 USING utf8mb4);
+SET @supplier_withdraw_record_remark := CONVERT(0xE4BE9BE5BA94E59586E68F90E78EB0E8AEB0E5BD95E88F9CE58D95 USING utf8mb4);
+SET @OLD_SQL_SAFE_UPDATES := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+SET @account_balance_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'accountBalance'
+     OR `COMPONENT` = 'school/accountBalance/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @account_balance_menu_id := IFNULL(@account_balance_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @account_balance_menu_id, @account_balance_name, @new_feature_menu_id, 30,
+       'accountBalance', 'school/accountBalance/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:financeFlow:list', 'money',
+       'admin', NOW(), 'admin', NOW(), @account_balance_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'accountBalance'
+     OR `COMPONENT` = 'school/accountBalance/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @account_balance_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 30,
+    `PATH` = 'accountBalance',
+    `COMPONENT` = 'school/accountBalance/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:financeFlow:list',
+    `ICON` = 'money',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @account_balance_remark
+WHERE `MENU_ID` = @account_balance_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @account_balance_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @account_balance_menu_id
+);
+
+SET @supplier_withdraw_record_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierWithdrawRecord'
+     OR `COMPONENT` = 'school/supplierWithdrawRecord/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_withdraw_record_menu_id := IFNULL(@supplier_withdraw_record_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_withdraw_record_menu_id, @supplier_withdraw_record_name, @new_feature_menu_id, 31,
+       'supplierWithdrawRecord', 'school/supplierWithdrawRecord/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:withdrawApply:list', 'money',
+       'admin', NOW(), 'admin', NOW(), @supplier_withdraw_record_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierWithdrawRecord'
+     OR `COMPONENT` = 'school/supplierWithdrawRecord/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @supplier_withdraw_record_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 31,
+    `PATH` = 'supplierWithdrawRecord',
+    `COMPONENT` = 'school/supplierWithdrawRecord/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:withdrawApply:list',
+    `ICON` = 'money',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @supplier_withdraw_record_remark
+WHERE `MENU_ID` = @supplier_withdraw_record_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @supplier_withdraw_record_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @supplier_withdraw_record_menu_id
+);
+SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-05-04 19:18:33

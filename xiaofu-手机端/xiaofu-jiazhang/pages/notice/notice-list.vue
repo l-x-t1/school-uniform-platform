@@ -57,8 +57,8 @@
             <view class="notice-tag">{{ getStatusText(item) }}</view>
             <text class="notice-title">{{ item.title }}</text>
             <view class="notice-info">
-              <text class="notice-source">{{ item.deptname || item.createBy || '校服管理平台' }}</text>
-              <text class="notice-time">{{ formatDate(item.createTime) }}</text>
+              <text class="notice-source">{{ item.schoolName || item.deptname || item.createBy || '校服管理平台' }}</text>
+              <text class="notice-time">{{ formatDate(item.publishTime || item.resultPublishTime || item.createTime) }}</text>
             </view>
           </view>
           <uni-icons type="right" size="16" color="#c8ccd4"></uni-icons>
@@ -81,45 +81,6 @@
 </template>
 
 <script>
-const MOCK_NOTICES = [
-  {
-    id: "notice-1",
-    title: "2026年春季校服采购公告",
-    deptname: "石家庄市示例学校",
-    createBy: "总务处",
-    createTime: "2026-05-02 09:00:00",
-    catagory: "CGGG",
-    type: 0,
-    content:
-      "根据学校校服采购工作安排，现启动2026年春季校服采购流程。本次采购将按照公开、公平、公正原则开展，采购范围包括春秋装、夏装及冬季校服。欢迎符合条件的供应商按要求参与。",
-    attachments: ["/profile/upload/校服采购需求说明.pdf"],
-  },
-  {
-    id: "notice-2",
-    title: "校服样衣展示及家长意见征集公告",
-    deptname: "石家庄市示例学校",
-    createBy: "校服选用组织",
-    createTime: "2026-05-01 15:30:00",
-    catagory: "CGGG",
-    type: 0,
-    content:
-      "学校将对候选校服样衣进行集中展示，并同步征集家长意见。家长可在规定时间内查看样衣图片、面料说明和价格区间，并提交选购意见。",
-    attachments: [],
-  },
-  {
-    id: "notice-3",
-    title: "2026年春季校服成交结果公告",
-    deptname: "校服管理平台",
-    createBy: "采购小组",
-    createTime: "2026-04-28 10:20:00",
-    catagory: "CGGG",
-    type: 3,
-    content:
-      "经校服选用组织评议和家长代表确认，现将2026年春季校服采购成交结果予以公告。后续将按照合同约定组织尺码采集、订单确认和质量验收。",
-    attachments: ["/profile/upload/成交结果公告.pdf"],
-  },
-];
-
 export default {
   data() {
     return {
@@ -151,8 +112,8 @@ export default {
         simId: uni.getStorageSync("simId"),
         pageNum: this.page,
         pageSize: this.limit,
-        catagory: "CGGG",
-        type: this.currentTab === 0 ? 0 : 3,
+        status: this.currentTab === 0 ? "1" : "2",
+        noticeType: this.currentTab === 0 ? "1" : "2",
       };
 
       if (this.searchKeyword && this.searchKeyword.trim()) {
@@ -160,7 +121,7 @@ export default {
       }
 
       uni.request({
-        url: `${this.baseUrl}/system/xfptnotice/appList`,
+        url: `${this.baseUrl}/school/groupNotice/list`,
         method: "GET",
         data: requestData,
         header: {
@@ -169,19 +130,29 @@ export default {
         success: ({ data }) => {
           const rows = data && Array.isArray(data.rows) ? data.rows : [];
           if (rows.length) {
-            this.mergeRows(rows, data.total);
-          } else if (this.page === 1) {
-            this.useMockRows();
+            this.mergeRows(rows.map(this.normalizeNotice), data.total);
           } else {
             this.hasMore = false;
           }
           this.finishLoading();
         },
         fail: () => {
-          this.useMockRows();
+          this.notices = this.page === 1 ? [] : this.notices;
+          this.hasMore = false;
           this.finishLoading();
         },
       });
+    },
+    normalizeNotice(row) {
+      return {
+        id: row.id,
+        title: row.title || "",
+        schoolName: row.schoolName || "",
+        noticeType: row.noticeType,
+        publishTime: row.publishTime,
+        resultPublishTime: row.resultPublishTime,
+        createTime: row.createTime,
+      };
     },
     mergeRows(rows, total) {
       if (this.page === 1) {
@@ -193,16 +164,6 @@ export default {
       if (rows.length > 0) {
         this.page += 1;
       }
-    },
-    useMockRows() {
-      const type = this.currentTab === 0 ? 0 : 3;
-      const keyword = (this.searchKeyword || "").trim();
-      let rows = MOCK_NOTICES.filter((item) => item.type === type);
-      if (keyword) {
-        rows = rows.filter((item) => item.title.indexOf(keyword) !== -1);
-      }
-      this.notices = rows;
-      this.hasMore = false;
     },
     finishLoading() {
       this.isLoading = false;
@@ -236,7 +197,7 @@ export default {
       });
     },
     getStatusText(item) {
-      return Number(item.type) === 3 ? "成交公告" : "采购公告";
+      return String(item.noticeType) === "2" ? "成交公告" : "采购公告";
     },
     formatDate(value) {
       if (!value) return "暂无时间";

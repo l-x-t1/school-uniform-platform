@@ -118,8 +118,8 @@
           <view class="notice-content">
             <text class="notice-title">{{ item.isBc == 1?item.title+'（补充）':item.title }}</text>
             <view class="notice-info"> 
-              <text class="notice-source">{{ item.deptname }}</text>
-              <text class="notice-time">{{ item.createTime ? item.createTime.split(' ')[0] : '暂无' }}</text>
+              <text class="notice-source">{{ item.schoolName || item.deptname || '校服管理平台' }}</text>
+              <text class="notice-time">{{ formatNoticeTime(item) }}</text>
             </view>
           </view>
           <uni-icons type="right" size="16" color="#CCCCCC"></uni-icons>
@@ -196,8 +196,8 @@ export default {
       notices: [],
       currentNoticeTab: 0, // 0: 采购公告, 1: 中标公告, 2: 备选公告
       data:{
-        catagory: 'CGGG',
-        type: 0,
+        status: '1',
+        noticeType: '1',
         pageNum: 1,
         pageSize: 10,
         simId: uni.getStorageSync("simId"),
@@ -304,7 +304,7 @@ export default {
     getNoticeList() {
       let that = this;
       uni.request({
-        url: `${this.baseUrl}/system/xfptnotice/appList`,
+        url: `${this.baseUrl}/school/groupNotice/list`,
         method: "GET",
         data: that.data,
         header: {
@@ -312,32 +312,18 @@ export default {
         },
         success: ({ data }) => {
            const rows = data && data.rows ? data.rows : [];
-           this.notices = rows.length ? [...rows] : this.getMockNotices();
+           this.notices = rows;
            uni.stopPullDownRefresh();
          },
         fail: () => {
-          this.notices = this.getMockNotices();
+          this.notices = [];
           uni.stopPullDownRefresh();
         },
       });
     },
-    getMockNotices() {
-      return [
-        {
-          id: 'notice-1',
-          title: '2026年春季校服采购公告',
-          deptname: '石家庄市示例学校',
-          createTime: '2026-05-02 09:00:00',
-          isBc: 0
-        },
-        {
-          id: 'notice-2',
-          title: '校服质量检测报告公示',
-          deptname: '校服管理平台',
-          createTime: '2026-05-01 15:30:00',
-          isBc: 0
-        }
-      ];
+    formatNoticeTime(item) {
+      const value = item.publishTime || item.resultPublishTime || item.createTime;
+      return value ? String(value).split(' ')[0] : '暂无';
     },
     refreshHomeStats() {
       this.studentCount = (uni.getStorageSync('studentList') || []).length;
@@ -349,8 +335,8 @@ export default {
     // 切换公告标签
     switchNoticeTab(index) {
       this.currentNoticeTab = index;
-      this.data.catagory = index === 0 ? 'CGGG' : index === 1 ? 'CGGG' : 'QYRWGG';
-      this.data.type = index === 0 ? 0 : index === 1 ? 3 : null;
+      this.data.noticeType = index === 0 ? '1' : '2';
+      this.data.status = index === 0 ? '1' : '2';
       this.data.pageNum = 1;
       this.data.pageSize = 10;
       this.getNoticeList();
