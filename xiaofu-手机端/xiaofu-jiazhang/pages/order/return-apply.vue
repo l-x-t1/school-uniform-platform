@@ -98,6 +98,13 @@ export default {
   },
   onLoad(options) {
     this.orderId = options.id || options.orderId || ''
+    this.order = {
+      id: this.orderId,
+      orderNo: options.orderNo ? decodeURIComponent(options.orderNo) : '',
+      totalAmount: options.amount ? decodeURIComponent(options.amount) : '0.00',
+      payAmount: options.amount ? decodeURIComponent(options.amount) : '0.00'
+    }
+    this.form.applyAmount = this.order.payAmount || this.order.totalAmount || '0.00'
     if (this.orderId) {
       this.loadOrder()
     }
@@ -106,7 +113,14 @@ export default {
     loadOrder() {
       getOrder(this.orderId)
         .then((res) => {
-          this.order = res.data || res || {}
+          const detail = res.data || res || {}
+          this.order = {
+            ...this.order,
+            ...detail,
+            orderNo: detail.orderNo || this.order.orderNo || '',
+            totalAmount: detail.totalAmount || detail.payAmount || this.order.totalAmount || '0.00',
+            payAmount: detail.payAmount || detail.totalAmount || this.order.payAmount || '0.00'
+          }
           if (!this.form.applyAmount) {
             this.form.applyAmount = this.order.payAmount || this.order.totalAmount || '0.00'
           }
