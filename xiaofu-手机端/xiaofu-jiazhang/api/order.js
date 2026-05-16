@@ -41,23 +41,35 @@ function mapBackendStatus(orderStatus, payStatus) {
   return 'unpaid'
 }
 
+function formatPrice(value) {
+  return Number(value || 0).toFixed(2)
+}
+
+function getOrderTypeText(orderType) {
+  return String(orderType || '1') === '2' ? '零售购买' : '统购购买'
+}
+
 function normalizeOrderItem(item = {}) {
+  const price = item.unitPrice || item.price || item.salePrice || '0.00'
+  const quantity = Number(item.buyNum || item.quantity || item.num || 1)
+  const orderType = String(item.saleType || item.orderType || '1')
   return {
     id: item.id || item.goodsId,
+    orderItemId: item.orderItemId || item.id,
+    goodsId: item.goodsId || item.uniformId || item.id,
     uniformId: item.goodsId || item.uniformId || item.id,
     name: item.goodsName || item.name || '校服',
-    image: item.mainImage || item.image || '/static/qjxf.png',
-    price: item.unitPrice || item.price || '0.00',
-    quantity: item.buyNum || item.quantity || 1,
+    image: item.mainImage || item.image || item.productImage || item.coverImage || '/static/qjxf.png',
+    price,
+    quantity,
     size: item.sizeName || item.size || '-',
-    color: item.colorName || item.color || '-',
-    supplierId: item.supplierId,
-    supplierName: item.supplierName || ''
     sizeName: item.sizeName || item.size || '-',
     color: item.colorName || item.color || item.spec || '-',
-    saleType: String(item.saleType || item.orderType || '1'),
-    orderType: String(item.saleType || item.orderType || '1'),
-    orderTypeText: getOrderTypeText(item.saleType || item.orderType || '1'),
+    supplierId: item.supplierId,
+    supplierName: item.supplierName || '',
+    saleType: orderType,
+    orderType,
+    orderTypeText: getOrderTypeText(orderType),
     itemAmount: formatPrice(item.itemAmount || Number(price) * quantity)
   }
 }

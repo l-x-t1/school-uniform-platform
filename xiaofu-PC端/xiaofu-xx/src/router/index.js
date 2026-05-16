@@ -134,7 +134,7 @@ export const constantRoutes = [
     children: [
       {
         path: "index",
-        component: () => import("@/views/school/supplierWithdrawRecord/index"),
+        component: () => import("@/views/school/withdrawApply/index"),
         name: "SupplierWithdrawRecord",
         meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
       },
