@@ -81,6 +81,47 @@ function ensureSupplierMessageMenu(routes = []) {
   return routes;
 }
 
+function ensureSupplierGroupNoticeMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const exists = (children = []) =>
+    children.some(
+      (item) =>
+        item.path === "supplierGroupNotice" ||
+        item.path === "/newFeature/supplierGroupNotice" ||
+        item.component === "supplier/groupNotice/index"
+    );
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "SupplierGroupNotice",
+      path: "supplierGroupNotice",
+      component: "supplier/groupNotice/index",
+      meta: {
+        title: "学校统购公告查询",
+        icon: "message",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierGroupNoticeMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
 function ensureUsageMenu(routes = []) {
   const exists = (children = []) =>
     children.some(
@@ -158,7 +199,9 @@ const permission = {
         getRouters().then((res) => {
           const normalizedRoutes = ensureUsageMenu(
             ensureSupplierMessageMenu(
-              normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+              ensureSupplierGroupNoticeMenu(
+                normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+              )
             )
           );
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
