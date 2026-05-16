@@ -369,9 +369,8 @@ export default {
     
     // 申请退换
     applyReturn(orderId) {
-      uni.showToast({
-        title: '退换申请待后端接入',
-        icon: 'none'
+      uni.navigateTo({
+        url: `/pages/order/return-apply?id=${orderId}`
       });
     },
     
