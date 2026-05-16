@@ -199,6 +199,7 @@ export default {
       return this.canCancel(this.order.status) || 
              this.canPay(this.order.status) || 
              this.canConfirm(this.order.status) || 
+             this.canReturn(this.order.status) ||
              this.canReorder(this.order.status);
     },
     
@@ -385,7 +386,7 @@ export default {
     
     // 是否可以申请退换
     canReturn(status) {
-      return false;
+      return ['unshipped', 'shipped', 'completed'].includes(status);
     },
     
     // 是否可以再次购买
@@ -469,9 +470,8 @@ export default {
     
     // 申请退换
     applyReturn() {
-      uni.showToast({
-        title: '退换申请待后端接入',
-        icon: 'none'
+      uni.navigateTo({
+        url: `/pages/order/return-apply?id=${this.id}`
       });
     },
     
