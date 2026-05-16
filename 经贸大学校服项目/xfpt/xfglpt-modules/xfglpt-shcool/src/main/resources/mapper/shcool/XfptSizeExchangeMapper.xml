@@ -25,13 +25,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="targetSizeName" column="target_size_name" />
         <result property="applyNum" column="apply_num" />
         <result property="deptId" column="dept_id" />
-        <result property="reason" column="reason" />
-        <result property="handleResult" column="handle_result" />
-        <result property="handleRemark" column="handle_remark" />
-        <result property="createTime" column="create_time" />
     </resultMap>
 
-    <sql id="selectSizeExchangeColumns">
+    <select id="selectSizeExchangeList" parameterType="com.xfgl.school.domain.vo.XfptSizeExchangeQuery" resultMap="XfptSizeExchangeResult">
         select
             a.id as id,
             a.id as after_sale_id,
@@ -52,19 +48,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             item.size_name,
             a.target_size_name,
             a.apply_num,
-            a.dept_id,
-            a.reason,
-            a.handle_result,
-            a.handle_remark,
-            a.create_time
+            a.dept_id
         from xfpt_after_sale a
         left join xfpt_order_info oi on a.order_id = oi.id and oi.del_flag = '0'
         left join xfpt_order_item item on a.order_item_id = item.id and item.del_flag = '0'
         left join xfpt_goods g on item.goods_id = g.id and g.del_flag = '0'
-    </sql>
-
-    <select id="selectSizeExchangeList" parameterType="com.xfgl.school.domain.vo.XfptSizeExchangeQuery" resultMap="XfptSizeExchangeResult">
-        <include refid="selectSizeExchangeColumns" />
         <where>
             a.del_flag = '0'
             and a.apply_type = '3'
@@ -116,7 +104,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectSizeExchangeById" resultMap="XfptSizeExchangeResult">
-        <include refid="selectSizeExchangeColumns" />
+        select
+            a.id as id,
+            a.id as after_sale_id,
+            a.after_sale_no,
+            a.order_id,
+            a.order_item_id,
+            a.order_no,
+            item.goods_id,
+            coalesce(g.goods_name, item.goods_name) as product_name,
+            g.goods_code as product_code,
+            g.category_name as category_name,
+            coalesce(item.main_image, g.main_image) as image_url,
+            coalesce(oi.supplier_id, g.supplier_id, a.supplier_id) as supplier_id,
+            coalesce(oi.supplier_name, g.supplier_name) as manufacturer_name,
+            item.unit_price as price,
+            coalesce(a.finish_time, a.update_time, a.create_time) as operate_time,
+            a.status,
+            item.size_name,
+            a.target_size_name,
+            a.apply_num,
+            a.dept_id
+        from xfpt_after_sale a
+        left join xfpt_order_info oi on a.order_id = oi.id and oi.del_flag = '0'
+        left join xfpt_order_item item on a.order_item_id = item.id and item.del_flag = '0'
+        left join xfpt_goods g on item.goods_id = g.id and g.del_flag = '0'
         where a.del_flag = '0'
           and a.apply_type = '3'
           and a.id = #{id}

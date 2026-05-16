@@ -50,9 +50,12 @@
           <image class="uniform-image" :src="item.image" mode="aspectFill"></image>
           <view class="uniform-info">
             <text class="uniform-name">{{item.name}}</text>
+            <text class="uniform-meta" v-if="item.categoryName || item.brandName">
+              {{item.categoryName}}{{item.categoryName && item.brandName ? ' / ' : ''}}{{item.brandName}}
+            </text>
             <view class="uniform-price-row">
-              <text class="uniform-price">¥{{item.price}}</text>
-              <text class="sales-count">{{item.salesCount}}人已购买</text>
+              <text class="uniform-price">{{item.saleTypeText}}</text>
+              <text class="sales-count">{{item.supplierName || '暂无供应商信息'}}</text>
             </view>
           </view>
         </view>
@@ -66,7 +69,7 @@
       
       <!-- 无数据提示 -->
       <view class="empty-state" v-if="uniformList.length === 0 && !isLoading">
-        <image class="empty-image" src="/static/images/empty-box.png" mode="aspectFit"></image>
+        <image class="empty-image" src="/static/uni.png" mode="aspectFit"></image>
         <text class="empty-text">暂无相关校服</text>
       </view>
     </scroll-view>
@@ -136,6 +139,9 @@
 </template>
 
 <script>
+import config from '@/config'
+import { listUniforms } from '@/api/uniform'
+
 export default {
   data() {
     return {
@@ -147,6 +153,7 @@ export default {
       page: 1,
       hasMore: true,
       showFilterDrawer: false,
+      baseUrl: getApp().globalData.baseUrl,
       uniformList: [],
       categories: [
         { id: 'all', name: '全部' },
@@ -179,6 +186,93 @@ export default {
     this.fetchUniformList();
   },
   methods: {
+    resolveImage(url) {
+      if (!url) {
+        return '/static/qjxf.png';
+      }
+      if (/^https?:\/\//i.test(url)) {
+        return url;
+      }
+      const baseUrl = (this.baseUrl || config.baseUrl || '').replace(/\/$/, '');
+      return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    },
+
+    getSaleTypeText(saleType) {
+      const map = {
+        '1': '统购商品',
+        '2': '零售商品',
+        '3': '统购零售'
+      };
+      return map[String(saleType || '')] || '商品信息';
+    },
+
+    matchCategory(item) {
+      if (this.currentCategory === 'all') {
+        return true;
+      }
+      if (this.currentCategory === 'new') {
+        return true;
+      }
+      const text = [
+        item.name,
+        item.categoryName,
+        item.brandName
+      ].filter(Boolean).join(' ');
+
+      const rules = {
+        daily: ['春秋', '日常'],
+        sport: ['运动'],
+        winter: ['冬'],
+        summer: ['夏']
+      };
+      const keywords = rules[this.currentCategory] || [];
+      return keywords.some((keyword) => text.includes(keyword));
+    },
+
+    normalizeUniform(item, index) {
+      return {
+        id: item.id || item.uniformId || item.productId,
+        name: item.name || item.uniformName || item.productName || '校服',
+        image: this.resolveImage(item.image || item.coverImage || item.mainImage || item.imgUrl),
+        categoryName: item.categoryName || '',
+        brandName: item.brandName || '',
+        supplierName: item.supplierName || '',
+        saleType: item.saleType || '',
+        saleTypeText: this.getSaleTypeText(item.saleType),
+        publishTime: item.publishTime || '',
+        sortNum: Number(item.sortNum || 0),
+        index
+      };
+    },
+
+    getQueryParams() {
+      return {
+        pageNum: this.page,
+        pageSize: 10,
+        keyword: this.searchKeyword,
+        category: this.currentCategory === 'all' ? '' : this.currentCategory,
+        grade: this.filters.grade,
+        season: this.filters.season,
+        minPrice: this.filters.minPrice,
+        maxPrice: this.filters.maxPrice
+      };
+    },
+
+    applyUniformResult(rows, total) {
+      const list = rows
+        .map(this.normalizeUniform)
+        .filter((item) => this.matchCategory(item));
+      this.uniformList = this.page === 1 ? list : [...this.uniformList, ...list];
+      this.hasMore = total ? this.uniformList.length < total : list.length >= 10;
+      if (this.hasMore) this.page += 1;
+    },
+
+    finishLoading() {
+      this.isLoading = false;
+      this.isLoadingMore = false;
+      this.isRefreshing = false;
+    },
+
     // 获取校服列表
     fetchUniformList(refresh = false) {
       if (refresh) {
@@ -190,29 +284,20 @@ export default {
       if (!this.hasMore || this.isLoading) return;
       
       this.isLoading = true;
-      // 模拟API请求
-      setTimeout(() => {
-        // 这里应该是从API获取数据
-        const mockData = Array(10).fill().map((_, index) => ({
-          id: (this.page - 1) * 10 + index + 1,
-          name: `${this.currentCategory === 'all' ? '' : this.getCategoryName() + ' '}校服${(this.page - 1) * 10 + index + 1}`,
-          price: Math.floor(Math.random() * 150) + 50,
-          salesCount: Math.floor(Math.random() * 500),
-          image: index % 2 === 0 ? '/static/nanxf.png' : '/static/nvxf.png' 
-        }));
-        
-        this.uniformList = [...this.uniformList, ...mockData];
-        this.isLoading = false;
-        this.isLoadingMore = false;
-        this.isRefreshing = false;
-        
-        // 模拟没有更多数据的情况
-        if (this.page >= 3) {
-          this.hasMore = false;
-        } else {
-          this.page += 1;
+      listUniforms(this.getQueryParams())
+        .then((res) => {
+          const rows = res.rows || res.data || res.list || [];
+          this.applyUniformResult(rows, res.total);
+          this.finishLoading();
+        })
+        .catch((error) => {
+          this.finishLoading();
+          uni.showToast({
+            title: error.message || '校服列表加载失败',
+            icon: 'none'
+          });
         }
-      }, 800);
+      );
     },
     
     // 获取分类名称
@@ -230,12 +315,6 @@ export default {
     
     // 搜索校服
     searchUniform() {
-      if (!this.searchKeyword.trim()) return;
-      // 实际开发中应该调用API搜索
-      uni.showToast({
-        title: `搜索关键词: ${this.searchKeyword}`,
-        icon: 'none'
-      });
       this.fetchUniformList(true);
     },
     
@@ -281,8 +360,6 @@ export default {
     // 应用筛选条件
     applyFilter() {
       this.showFilterDrawer = false;
-      // 实际开发中应该调用API根据筛选条件查询
-      console.log('应用筛选条件', this.filters);
       this.fetchUniformList(true);
     }
   }
@@ -339,12 +416,12 @@ export default {
 
 // 分类选项卡
 .category-tabs {
-  display: flex;
   white-space: nowrap;
   background-color: #fff;
   padding: 0 20rpx;
   height: 80rpx;
   border-bottom: 1rpx solid #f0f0f0;
+  box-sizing: border-box;
   
   .tab-item {
     display: inline-block;
@@ -403,27 +480,44 @@ export default {
         .uniform-name {
           font-size: 28rpx;
           color: #333;
-          margin-bottom: 16rpx;
+          margin-bottom: 10rpx;
           display: -webkit-box;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
           overflow: hidden;
         }
+
+        .uniform-meta {
+          display: block;
+          font-size: 22rpx;
+          color: #8a94a6;
+          margin-bottom: 14rpx;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
         
         .uniform-price-row {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          column-gap: 16rpx;
           
           .uniform-price {
-            font-size: 32rpx;
+            font-size: 24rpx;
             font-weight: 500;
-            color: #f44;
+            color: #3B7AFF;
+            flex-shrink: 0;
           }
           
           .sales-count {
             font-size: 22rpx;
             color: #999;
+            text-align: right;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
         }
       }

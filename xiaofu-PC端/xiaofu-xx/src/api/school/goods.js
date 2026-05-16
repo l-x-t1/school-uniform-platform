@@ -35,6 +35,15 @@ export function updateGoods(data) {
   })
 }
 
+// 导入商品信息
+export function importGoods(data, updateSupport) {
+  return request({
+    url: '/school/goods/importData?updateSupport=' + updateSupport,
+    method: 'post',
+    data: data
+  })
+}
+
 // 删除商品信息
 export function delGoods(id) {
   return request({

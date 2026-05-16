@@ -35,6 +35,32 @@ export function updateSchoolSupplierRel(data) {
   })
 }
 
+// 取消合作
+export function cancelSchoolSupplierRel(id) {
+  return request({
+    url: '/school/schoolSupplierRel/' + id + '/cancel',
+    method: 'put'
+  })
+}
+
+// 设置服务电话
+export function setSchoolSupplierServicePhone(id, servicePhone) {
+  return request({
+    url: '/school/schoolSupplierRel/' + id + '/servicePhone',
+    method: 'put',
+    data: { servicePhone }
+  })
+}
+
+// 替换合作商品
+export function replaceSchoolSupplierGoodsRel(id, data) {
+  return request({
+    url: '/school/schoolSupplierRel/' + id + '/goods',
+    method: 'put',
+    data: data
+  })
+}
+
 // 删除学校供应商合作关系
 export function delSchoolSupplierRel(id) {
   return request({

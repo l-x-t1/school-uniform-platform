@@ -2,6 +2,7 @@ package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
 import java.io.IOException;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="资金流水管理")
 @RestController
-@RequestMapping("/financeFlow")
+@RequestMapping({"/financeFlow", "/school/financeFlow", "/xfglpt-school/financeFlow"})
 public class XfptFinanceFlowController extends BaseController {
     @Autowired
     private IXfptFinanceFlowService xfptFinanceFlowService;
@@ -47,6 +48,30 @@ public class XfptFinanceFlowController extends BaseController {
     public TableDataInfo list(XfptFinanceFlow xfptFinanceFlow) {
         startPage();
         List<XfptFinanceFlow> list = xfptFinanceFlowService.selectXfptFinanceFlowList(xfptFinanceFlow);
+        return getDataTable(list);
+    }
+
+    /**
+     * 查询每日入账金额列表
+     */
+    @Operation(summary = "查询每日入账金额列表")
+    @RequiresPermissions("school:dailyIncome:list")
+    @GetMapping("/dailyIncome/list")
+    public TableDataInfo dailyIncomeList(XfptFinanceFlow xfptFinanceFlow) {
+        startPage();
+        List<Map<String, Object>> list = xfptFinanceFlowService.selectDailyIncomeList(xfptFinanceFlow);
+        return getDataTable(list);
+    }
+
+    /**
+     * 查询每日入账金额详情
+     */
+    @Operation(summary = "查询每日入账金额详情")
+    @RequiresPermissions("school:dailyIncome:query")
+    @GetMapping("/dailyIncome/detail")
+    public TableDataInfo dailyIncomeDetail(XfptFinanceFlow xfptFinanceFlow) {
+        startPage();
+        List<XfptFinanceFlow> list = xfptFinanceFlowService.selectDailyIncomeDetail(xfptFinanceFlow);
         return getDataTable(list);
     }
 
@@ -88,7 +113,6 @@ public class XfptFinanceFlowController extends BaseController {
      * 修改资金流水
      */
     @Operation(summary = "修改资金流水")
-    @RequiresPermissions("school:financeFlow:edit")
     @Log(title = "资金流水" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptFinanceFlow xfptFinanceFlow) {

@@ -1,5 +1,14 @@
 <template>
   <view class="container">
+    <!-- 欢迎信息 -->
+    <view class="home-hero">
+      <view>
+        <text class="hero-title">校服管理平台</text>
+        <text class="hero-subtitle">{{ welcomeText }}</text>
+      </view>
+      <button class="hero-btn" @click="navigateTo('/pages/uniform/uniform-list')">去选购</button>
+    </view>
+
     <!-- 轮播图区域 -->
     <swiper
       class="banner-swiper"
@@ -19,6 +28,24 @@
       </swiper-item>
     </swiper>
 
+    <!-- 购买提醒 -->
+    <view class="reminder-card">
+      <view class="reminder-item" @click="navigateTo('/pages/user/student-info')">
+        <text class="reminder-number">{{ studentCount }}</text>
+        <text class="reminder-label">已绑定学生</text>
+      </view>
+      <view class="reminder-divider"></view>
+      <view class="reminder-item" @click="navigateTo('/pages/order/order-list')">
+        <text class="reminder-number">{{ unpaidCount }}</text>
+        <text class="reminder-label">待处理订单</text>
+      </view>
+      <view class="reminder-divider"></view>
+      <view class="reminder-item" @click="navigateTo('/pages/cart/cart')">
+        <text class="reminder-number">{{ cartCount }}</text>
+        <text class="reminder-label">购物车商品</text>
+      </view>
+    </view>
+
     <!-- 功能导航区 -->
     <view class="nav-section">
       <view
@@ -31,6 +58,25 @@
           <uni-icons :type="item.icon" size="24" color="#fff"></uni-icons>
         </view>
         <text class="nav-text">{{ item.title }}</text>
+      </view>
+    </view>
+
+    <!-- 流程公开 -->
+    <view class="section process-section">
+      <view class="section-header">
+        <text class="section-title">采购流程公开</text>
+        <view class="more-link" @click="navigateTo('/pages/stats/stats')">
+          <text>查看全部</text>
+          <uni-icons type="right" size="14" color="#999"></uni-icons>
+        </view>
+      </view>
+      <view class="process-grid">
+        <view class="process-item" v-for="item in processItems" :key="item.type" @click="viewProcessDetail(item.type)">
+          <view class="process-icon">
+            <uni-icons :type="item.icon" size="20" color="#30A3FF"></uni-icons>
+          </view>
+          <text class="process-text">{{ item.title }}</text>
+        </view>
       </view>
     </view>
 
@@ -72,8 +118,8 @@
           <view class="notice-content">
             <text class="notice-title">{{ item.isBc == 1?item.title+'（补充）':item.title }}</text>
             <view class="notice-info"> 
-              <text class="notice-source">{{ item.deptname }}</text>
-              <text class="notice-time">{{ item.createTime ? item.createTime.split(' ')[0] : '暂无' }}</text>
+              <text class="notice-source">{{ item.schoolName || item.deptname || '校服管理平台' }}</text>
+              <text class="notice-time">{{ formatNoticeTime(item) }}</text>
             </view>
           </view>
           <uni-icons type="right" size="16" color="#CCCCCC"></uni-icons>
@@ -97,6 +143,24 @@ export default {
         { image: "../../static/xf1.png" },
       ],
       navItems: [
+        {
+          title: "校服选购",
+          icon: "shop",
+          url: "/pages/uniform/uniform-list",
+          bgColor: "#30A3FF",
+        },
+        {
+          title: "我的订单",
+          icon: "paperplane",
+          url: "/pages/order/order-list",
+          bgColor: "#FF9F1C",
+        },
+        {
+          title: "购物车",
+          icon: "cart",
+          url: "/pages/cart/cart",
+          bgColor: "#12B886",
+        },
         {
           title: "公告查看",
           icon: "list",
@@ -132,17 +196,37 @@ export default {
       notices: [],
       currentNoticeTab: 0, // 0: 采购公告, 1: 中标公告, 2: 备选公告
       data:{
-        catagory: 'CGGG',
-        type: 0,
+        status: '1',
+        noticeType: '1',
         pageNum: 1,
         pageSize: 10,
         simId: uni.getStorageSync("simId"),
-      }
+      },
+      studentCount: 0,
+      unpaidCount: 0,
+      cartCount: 0,
+      processItems: [
+        { title: '会议纪要', type: 'meeting', icon: 'calendar' },
+        { title: '意见征集', type: 'survey', icon: 'chat' },
+        { title: '选用结果', type: 'result', icon: 'checkbox' },
+        { title: '质检报告', type: 'quality', icon: 'paperclip' }
+      ]
     };
   }, 
+  computed: {
+    welcomeText() {
+      const user = uni.getStorageSync('userInfo') || {};
+      const phone = uni.getStorageSync('phone') || user.phone || user.parm1 || '';
+      return phone ? `欢迎您，${phone}` : '欢迎使用家长端';
+    }
+  },
   onLoad() {
-    // 模拟获取数据
+    if (!this.checkLogin()) return;
     this.getNoticeList();
+    this.refreshHomeStats();
+  },
+  onShow() {
+    this.refreshHomeStats();
   },
   onPullDownRefresh() {
     this.getNoticeList();
@@ -155,14 +239,25 @@ export default {
         uni.reLaunch({
           url: "/pages/login/login",
         });
+        return false;
       }
+      return true;
     }, 
 
     // 导航到指定页面
     navigateTo(url) {
-      uni.navigateTo({
-        url: url,
-      });
+      const pureUrl = String(url || '').split('?')[0];
+      const tabPages = [
+        '/pages/index/index',
+        '/pages/notice/notice-list',
+        '/pages/survey/survey-list',
+        '/pages/user/user',
+      ];
+      if (tabPages.includes(pureUrl)) {
+        uni.switchTab({ url: pureUrl });
+        return;
+      }
+      uni.navigateTo({ url });
     },
 
     // 查看通知详情
@@ -209,24 +304,39 @@ export default {
     getNoticeList() {
       let that = this;
       uni.request({
-        url: `${this.baseUrl}/system/xfptnotice/appList`,
+        url: `${this.baseUrl}/school/groupNotice/list`,
         method: "GET",
         data: that.data,
         header: {
           Authorization: uni.getStorageSync("token"),
         },
         success: ({ data }) => {
-           this.notices = [...data.rows];
+           const rows = data && data.rows ? data.rows : [];
+           this.notices = rows;
            uni.stopPullDownRefresh();
          },
+        fail: () => {
+          this.notices = [];
+          uni.stopPullDownRefresh();
+        },
       });
+    },
+    formatNoticeTime(item) {
+      const value = item.publishTime || item.resultPublishTime || item.createTime;
+      return value ? String(value).split(' ')[0] : '暂无';
+    },
+    refreshHomeStats() {
+      this.studentCount = (uni.getStorageSync('studentList') || []).length;
+      this.cartCount = (uni.getStorageSync('cartList') || []).reduce((sum, item) => sum + Number(item.quantity || 1), 0);
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      this.unpaidCount = Object.keys(localOrders).filter((key) => ['unpaid', 'unshipped'].includes(localOrders[key].status)).length;
     },
     
     // 切换公告标签
     switchNoticeTab(index) {
       this.currentNoticeTab = index;
-      this.data.catagory = index === 0 ? 'CGGG' : index === 1 ? 'CGGG' : 'QYRWGG';
-      this.data.type = index === 0 ? 0 : index === 1 ? 3 : null;
+      this.data.noticeType = index === 0 ? '1' : '2';
+      this.data.status = index === 0 ? '1' : '2';
       this.data.pageNum = 1;
       this.data.pageSize = 10;
       this.getNoticeList();
@@ -248,7 +358,7 @@ export default {
       };
 
       uni.navigateTo({
-        url: `/pages/process/process-list?type=${step}&title=${stepTitles[step]}`,
+        url: `/pages/process/process-list?type=${step}&title=${encodeURIComponent(stepTitles[step] || '流程公开')}`,
       });
     },
   },
@@ -257,9 +367,46 @@ export default {
 
 <style lang="scss">
 .container {
-  height: 100%;
+  min-height: 100vh;
   background-color: #f6f6f6;
   padding-bottom: 40rpx;
+}
+
+.home-hero {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 34rpx 30rpx 28rpx;
+  background: linear-gradient(135deg, #30A3FF 0%, #1677d2 100%);
+  color: #fff;
+
+  .hero-title {
+    display: block;
+    font-size: 38rpx;
+    font-weight: 700;
+    margin-bottom: 10rpx;
+  }
+
+  .hero-subtitle {
+    display: block;
+    font-size: 26rpx;
+    opacity: 0.9;
+  }
+
+  .hero-btn {
+    width: 150rpx;
+    height: 64rpx;
+    line-height: 64rpx;
+    border-radius: 34rpx;
+    background-color: #fff;
+    color: #1677d2;
+    font-size: 26rpx;
+    margin: 0;
+
+    &::after {
+      border: none;
+    }
+  }
 }
 
 .status-bar {
@@ -303,7 +450,7 @@ export default {
 
 .banner-swiper {
   width: 100%;
-  height: 400rpx;
+  height: 320rpx;
 
   .banner-image {
     width: 100%;
@@ -311,9 +458,44 @@ export default {
   }
 }
 
-.nav-section {
+.reminder-card {
   display: flex;
-  justify-content: space-between;
+  align-items: center;
+  margin: 20rpx 30rpx;
+  padding: 28rpx 0;
+  background-color: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 4rpx 12rpx rgba(0, 0, 0, 0.05);
+
+  .reminder-item {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .reminder-number {
+    font-size: 40rpx;
+    font-weight: 700;
+    color: #30A3FF;
+    margin-bottom: 8rpx;
+  }
+
+  .reminder-label {
+    font-size: 24rpx;
+    color: #666;
+  }
+
+  .reminder-divider {
+    width: 1rpx;
+    height: 54rpx;
+    background-color: #edf0f5;
+  }
+}
+
+.nav-section {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
   padding: 30rpx 30rpx 20rpx;
   background-color: #ffffff;
   margin-bottom: 20rpx;
@@ -322,7 +504,8 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    width: 25%;
+    min-width: 0;
+    margin-bottom: 22rpx;
 
     .nav-icon {
       width: 90rpx;
@@ -338,6 +521,47 @@ export default {
       font-size: 24rpx;
       color: #333333;
     }
+  }
+}
+
+.process-section {
+  padding: 30rpx;
+
+  .section-header {
+    margin-bottom: 24rpx;
+  }
+}
+
+.process-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16rpx;
+}
+
+.process-item {
+  min-width: 0;
+  background-color: #f7fbff;
+  border-radius: 12rpx;
+  padding: 20rpx 10rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  .process-icon {
+    width: 56rpx;
+    height: 56rpx;
+    border-radius: 28rpx;
+    background-color: #eaf6ff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 12rpx;
+  }
+
+  .process-text {
+    font-size: 24rpx;
+    color: #333;
+    white-space: nowrap;
   }
 }
 

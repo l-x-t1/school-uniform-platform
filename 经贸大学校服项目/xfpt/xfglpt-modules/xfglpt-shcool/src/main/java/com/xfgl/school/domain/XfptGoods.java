@@ -79,17 +79,22 @@ private static final long serialVersionUID = 1L;
     private String detailContent;
 
     /** 销售类型，1统购 2零售 3统购零售 */
-            @Excel(name = "销售类型，1统购 2零售 3统购零售")
+            @Excel(name = "销售类型", readConverterExp = "1=统购,2=零售,3=统购零售")
     @Schema(description = "销售类型，1统购 2零售 3统购零售")
     private String saleType;
 
+    /** 零售入口筛选标记 */
+    @TableField(exist = false)
+    @Schema(description = "零售入口筛选标记")
+    private String retailOnly;
+
     /** 状态，0草稿 1启用 2停用 */
-            @Excel(name = "状态，0草稿 1启用 2停用")
+            @Excel(name = "状态", readConverterExp = "0=草稿,1=启用,2=停用")
     @Schema(description = "状态，0草稿 1启用 2停用")
     private String status;
 
     /** 上架状态，0未上架 1已上架 2已下架 */
-            @Excel(name = "上架状态，0未上架 1已上架 2已下架")
+            @Excel(name = "上架状态", readConverterExp = "0=未上架,1=已上架,2=已下架")
     @Schema(description = "上架状态，0未上架 1已上架 2已下架")
     private String publishStatus;
 

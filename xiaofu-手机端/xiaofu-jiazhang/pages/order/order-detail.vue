@@ -150,6 +150,11 @@
         @click="applyReturn"
       >申请退换</button>
       <button
+        class="footer-btn primary"
+        v-if="canComment(order)"
+        @click="commentOrder"
+      >评价</button>
+      <button
         class="footer-btn outline"
         v-if="canReorder(order.status)"
         @click="reorder"
@@ -159,44 +164,37 @@
 </template>
 
 <script>
+import config from '@/config'
+import { getOrder, cancelOrder as cancelOrderApi, confirmOrder } from '@/api/order'
+
 export default {
   data() {
     return {
       id: null,
       order: {
-        id: '1',
-        orderNo: 'XF20230715001',
-        status: 'shipped',
-        createTime: '2023-07-15 14:30:25',
-        payTime: '2023-07-15 14:35:12',
-        shipTime: '2023-07-17 10:22:48',
+        id: '',
+        orderNo: '',
+        status: 'unpaid',
+        createTime: '',
+        payTime: '',
+        shipTime: '',
         completeTime: null,
-        productsAmount: 268.00,
-        shippingFee: 0.00,
-        discount: 0.00,
-        totalAmount: 268.00,
-        remark: '男生夏季校服，请发S码',
+        productsAmount: '0.00',
+        shippingFee: '0.00',
+        discount: '0.00',
+        totalAmount: '0.00',
+        remark: '',
         address: {
-          name: '张三',
-          phone: '138****1234',
-          tag: '学校',
-          fullAddress: '河北省石家庄市裕华区育才街126号石家庄市第一中学'
+          name: '家长',
+          phone: '',
+          tag: '',
+          fullAddress: '暂无收货地址'
         },
-        products: [
-          {
-            id: '101',
-            name: '2023款夏季校服短袖套装',
-            image: 'https://img.alicdn.com/imgextra/i2/2206478235626/O1CN01qJLSGY1qUiksCZB34_!!2206478235626.jpg',
-            price: 268.00,
-            size: 'M',
-            color: '藏青色',
-            quantity: 1
-          }
-        ]
+        products: []
       },
       logistics: {
-        status: '已发出，正在配送中',
-        updateTime: '2023-07-17 14:35'
+        status: '暂无物流信息',
+        updateTime: ''
       }
     }
   },
@@ -206,7 +204,8 @@ export default {
       return this.canCancel(this.order.status) || 
              this.canPay(this.order.status) || 
              this.canConfirm(this.order.status) || 
-             this.canReturn(this.order.status) || 
+             this.canReturn(this.order.status) ||
+             this.canComment(this.order) ||
              this.canReorder(this.order.status);
     },
     
@@ -222,10 +221,86 @@ export default {
     }
   },
   methods: {
+    normalizeOrder(data = {}) {
+      const products = data.products || data.items || data.orderItems || [];
+      const address = data.address || {};
+      const fullAddress =
+        address.fullAddress ||
+        data.fullAddress ||
+        `${address.province || data.province || ''}${address.city || data.city || ''}${address.district || data.district || ''}${address.detailAddress || address.address || data.detailAddress || data.address || ''}`;
+      return {
+        ...this.order,
+        id: data.id || data.orderId || this.id,
+        orderNo: data.orderNo || data.orderSn || data.orderCode || this.id,
+        status: this.normalizeStatus(data.status),
+        createTime: data.createTime || '',
+        payTime: data.payTime || '',
+        shipTime: data.shipTime || data.deliveryTime || '',
+        completeTime: data.completeTime || null,
+        productsAmount: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
+        shippingFee: data.shippingFee || data.freightAmount || '0.00',
+        discount: data.discount || '0.00',
+        totalAmount: data.totalAmount || data.payAmount || '0.00',
+        remark: data.remark || '',
+        address: {
+          name: address.name || address.receiver || data.receiver || '家长',
+          phone: address.phone || address.mobile || data.phone || data.mobile || '',
+          tag: address.tag || address.label || '默认',
+          fullAddress: fullAddress || '暂无收货地址'
+        },
+        products: products.map((item) => ({
+          id: item.id || item.uniformId,
+          orderItemId: item.orderItemId || item.id,
+          goodsId: item.goodsId || item.uniformId || item.id,
+          name: item.name || item.uniformName || item.productName || '校服',
+          image: item.image || item.productImage || item.coverImage || '/static/qjxf.png',
+          price: item.price || item.salePrice || '0.00',
+          size: item.size || item.sizeName || '-',
+          color: item.color || item.spec || '默认款',
+          quantity: item.quantity || item.count || 1,
+          supplierId: item.supplierId
+        }))
+      };
+    },
+
+    normalizeStatus(status) {
+      const map = {
+        0: 'unpaid',
+        1: 'unshipped',
+        2: 'shipped',
+        3: 'completed',
+        4: 'cancelled',
+        unpaid: 'unpaid',
+        unshipped: 'unshipped',
+        shipped: 'shipped',
+        completed: 'completed',
+        cancelled: 'cancelled'
+      };
+      return map[status] || status || 'unpaid';
+    },
+
+    getLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      return localOrders[this.id];
+    },
+
     // 获取订单详情数据
     fetchOrderDetail() {
-      // 模拟API请求，实际开发中应替换为真实API调用
-      console.log('获取订单详情，ID:', this.id);
+      const localOrder = this.getLocalOrder();
+      if (config.enableMockFallback && localOrder) {
+        this.order = this.normalizeOrder(localOrder);
+        return;
+      }
+      getOrder(this.id)
+        .then((res) => {
+          this.order = this.normalizeOrder(res.data || res);
+        })
+        .catch((error) => {
+          uni.showToast({
+            title: error.message || '订单详情加载失败',
+            icon: 'none'
+          });
+        });
     },
     
     // 获取订单状态图标
@@ -299,7 +374,7 @@ export default {
     // 查看物流
     viewLogistics() {
       uni.navigateTo({
-        url: `/pages/order/logistics?id=${this.id}`
+        url: `/pages/logistics/logistics-detail?id=${this.id}`
       });
     },
     
@@ -327,6 +402,10 @@ export default {
     canReorder(status) {
       return ['completed', 'cancelled'].includes(status);
     },
+
+    canComment(order) {
+      return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
     
     // 取消订单
     cancelOrder() {
@@ -335,17 +414,27 @@ export default {
         content: '确定要取消此订单吗？',
         success: (res) => {
           if (res.confirm) {
-            // 模拟取消订单
             uni.showLoading({ title: '处理中' });
-            setTimeout(() => {
-              uni.hideLoading();
-              uni.showToast({
-                title: '订单已取消',
-                icon: 'success'
+            cancelOrderApi(this.id)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+              })
+              .then(() => {
+                uni.hideLoading();
+                this.order.status = 'cancelled';
+                this.saveLocalOrder();
+                uni.showToast({
+                  title: '订单已取消',
+                  icon: 'success'
+                });
+              })
+              .catch((error) => {
+                uni.hideLoading();
+                uni.showToast({
+                  title: error.message || '取消失败',
+                  icon: 'none'
+                });
               });
-              // 更新订单状态
-              this.order.status = 'cancelled';
-            }, 1000);
           }
         }
       });
@@ -365,18 +454,28 @@ export default {
         content: '确认已收到商品吗？',
         success: (res) => {
           if (res.confirm) {
-            // 模拟确认收货
             uni.showLoading({ title: '处理中' });
-            setTimeout(() => {
-              uni.hideLoading();
-              uni.showToast({
-                title: '已确认收货',
-                icon: 'success'
+            confirmOrder(this.id)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+              })
+              .then(() => {
+                uni.hideLoading();
+                this.order.status = 'completed';
+                this.order.completeTime = this.getCurrentTime();
+                this.saveLocalOrder();
+                uni.showToast({
+                  title: '已确认收货',
+                  icon: 'success'
+                });
+              })
+              .catch((error) => {
+                uni.hideLoading();
+                uni.showToast({
+                  title: error.message || '确认失败',
+                  icon: 'none'
+                });
               });
-              // 更新订单状态
-              this.order.status = 'completed';
-              this.order.completeTime = this.getCurrentTime();
-            }, 1000);
           }
         }
       });
@@ -384,13 +483,32 @@ export default {
     
     // 申请退换
     applyReturn() {
+      const query = [
+        `id=${this.id}`,
+        `orderNo=${encodeURIComponent(this.order.orderNo || '')}`,
+        `amount=${encodeURIComponent(this.order.payAmount || this.order.totalAmount || '0.00')}`
+      ].join('&')
       uni.navigateTo({
-        url: `/pages/order/return-apply?id=${this.id}`
+        url: `/pages/order/return-apply?${query}`
+      });
+    },
+
+    commentOrder() {
+      uni.setStorageSync('pendingCommentOrder', this.order);
+      uni.navigateTo({
+        url: `/pages/order/comment-apply?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
       });
     },
     
     // 再次购买
     reorder() {
+      if (!this.order.products || !this.order.products.length) {
+        uni.showToast({
+          title: '暂无可购买商品',
+          icon: 'none'
+        });
+        return;
+      }
       uni.showLoading({ title: '加载中' });
       setTimeout(() => {
         uni.hideLoading();
@@ -398,6 +516,14 @@ export default {
           url: `/pages/uniform/uniform-detail?id=${this.order.products[0].id}`
         });
       }, 500);
+    },
+
+    saveLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      if (localOrders[this.id]) {
+        localOrders[this.id] = this.order;
+        uni.setStorageSync('devOrders', localOrders);
+      }
     }
   }
 }

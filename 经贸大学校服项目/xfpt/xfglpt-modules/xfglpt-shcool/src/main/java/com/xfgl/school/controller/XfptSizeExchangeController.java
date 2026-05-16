@@ -1,6 +1,7 @@
 package com.xfgl.school.controller;
 
 import com.xfgl.common.core.web.controller.BaseController;
+import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.web.page.TableDataInfo;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.school.domain.vo.XfptSizeExchangeQuery;

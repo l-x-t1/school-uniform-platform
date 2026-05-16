@@ -2,6 +2,7 @@ package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.school.domain.XfptComment;
+import com.xfgl.school.domain.XfptCommentReply;
 
 /**
  * 商品评价Service接口
@@ -18,6 +19,43 @@ public interface IXfptCommentService extends IService<XfptComment> {
      * @return 商品评价集合
      */
     public List<XfptComment> selectXfptCommentList(XfptComment xfptComment);
+
+        /**
+         * 查询评价管理列表
+         *
+         * @param xfptComment 商品评价
+         * @return 评价管理集合
+         */
+        public List<XfptComment> selectEvaluationCommentList(XfptComment xfptComment);
+
+        /**
+         * 查询评价管理详情
+         *
+         * @param id 商品评价主键
+         * @param scopeSchoolId 学校数据范围
+         * @return 评价管理详情
+         */
+        public XfptComment selectEvaluationCommentById(Long id, Long scopeSchoolId);
+
+        /**
+         * 回复评价
+         *
+         * @param id 商品评价主键
+         * @param xfptCommentReply 回复内容
+         * @param scopeSchoolId 学校数据范围
+         * @return 结果
+         */
+        public int replyEvaluationComment(Long id, XfptCommentReply xfptCommentReply, Long scopeSchoolId);
+
+        /**
+         * 更新评价管理状态
+         *
+         * @param id 商品评价主键
+         * @param status 评价状态，0正常 1隐藏
+         * @param scopeSchoolId 学校数据范围
+         * @return 结果
+         */
+        public int updateEvaluationCommentStatus(Long id, String status, Long scopeSchoolId);
 
         /**
          * 查询商品评价

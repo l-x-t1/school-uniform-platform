@@ -64,9 +64,14 @@ private static final long serialVersionUID = 1L;
     private Long contractId;
 
     /** 合作状态，1合作中 2已取消 3历史合作 4公告期内 */
-            @Excel(name = "合作状态，1合作中 2已取消 3历史合作 4公告期内")
+            @Excel(name = "合作状态", readConverterExp = "1=合作中,2=已取消,3=历史合作,4=公告期内")
     @Schema(description = "合作状态，1合作中 2已取消 3历史合作 4公告期内")
     private String cooperateStatus;
+
+    /** 服务电话 */
+            @Excel(name = "服务电话")
+    @Schema(description = "服务电话")
+    private String servicePhone;
 
 /** 学校供应商合作商品信息 */
 @TableField(exist = false)

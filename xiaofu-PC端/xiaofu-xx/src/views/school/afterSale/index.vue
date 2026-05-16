@@ -1,604 +1,675 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="售后单号" prop="afterSaleNo">
-        <el-input
-          v-model="queryParams.afterSaleNo"
-          placeholder="请输入售后单号"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单主表ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单主表ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单明细ID" prop="orderItemId">
-        <el-input
-          v-model="queryParams.orderItemId"
-          placeholder="请输入订单明细ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单编号快照" prop="orderNo">
-        <el-input
-          v-model="queryParams.orderNo"
-          placeholder="请输入订单编号快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="发起用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入发起用户ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="发起用户名快照" prop="userName">
-        <el-input
-          v-model="queryParams.userName"
-          placeholder="请输入发起用户名快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学生姓名快照" prop="studentName">
-        <el-input
-          v-model="queryParams.studentName"
-          placeholder="请输入学生姓名快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="换货目标尺码ID" prop="targetSizeId">
-        <el-input
-          v-model="queryParams.targetSizeId"
-          placeholder="请输入换货目标尺码ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="换货目标尺码名称" prop="targetSizeName">
-        <el-input
-          v-model="queryParams.targetSizeName"
-          placeholder="请输入换货目标尺码名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="申请数量" prop="applyNum">
-        <el-input
-          v-model="queryParams.applyNum"
-          placeholder="请输入申请数量"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="申请金额" prop="applyAmount">
-        <el-input
-          v-model="queryParams.applyAmount"
-          placeholder="请输入申请金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="实际退款金额" prop="actualRefundAmount">
-        <el-input
-          v-model="queryParams.actualRefundAmount"
-          placeholder="请输入实际退款金额"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="退款完成时间" prop="refundTime">
-        <el-date-picker clearable
-          v-model="queryParams.refundTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择退款完成时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="审核人" prop="auditBy">
-        <el-input
-          v-model="queryParams.auditBy"
-          placeholder="请输入审核人"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="审核时间" prop="auditTime">
-        <el-date-picker clearable
-          v-model="queryParams.auditTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择审核时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="完成时间" prop="finishTime">
-        <el-date-picker clearable
-          v-model="queryParams.finishTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择完成时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['school:afterSale:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['school:afterSale:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['school:afterSale:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['school:afterSale:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="afterSaleList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="售后单号" align="center" prop="afterSaleNo" />
-      <el-table-column label="订单主表ID" align="center" prop="orderId" />
-      <el-table-column label="订单明细ID" align="center" prop="orderItemId" />
-      <el-table-column label="订单编号快照" align="center" prop="orderNo" />
-      <el-table-column label="订单类型，1统购 2零售" align="center" prop="orderType" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="发起用户ID" align="center" prop="userId" />
-      <el-table-column label="发起用户名快照" align="center" prop="userName" />
-      <el-table-column label="学生姓名快照" align="center" prop="studentName" />
-      <el-table-column label="申请类型，1仅退款 2退货退款 3换货" align="center" prop="applyType" />
-      <el-table-column label="换货目标尺码ID" align="center" prop="targetSizeId" />
-      <el-table-column label="换货目标尺码名称" align="center" prop="targetSizeName" />
-      <el-table-column label="申请原因" align="center" prop="reason" />
-      <el-table-column label="申请数量" align="center" prop="applyNum" />
-      <el-table-column label="申请金额" align="center" prop="applyAmount" />
-      <el-table-column label="实际退款金额" align="center" prop="actualRefundAmount" />
-      <el-table-column label="退款状态，0未退款 1退款中 2退款成功 3退款失败" align="center" prop="refundStatus" />
-      <el-table-column label="退款完成时间" align="center" prop="refundTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.refundTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="售后状态，0待审核 1已通过 2已驳回 3处理中 4已完成 5已关闭" align="center" prop="status" />
-      <el-table-column label="审核人" align="center" prop="auditBy" />
-      <el-table-column label="审核时间" align="center" prop="auditTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.auditTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="处理结果" align="center" prop="handleResult" />
-      <el-table-column label="处理备注" align="center" prop="handleRemark" />
-      <el-table-column label="完成时间" align="center" prop="finishTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.finishTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="当前归属部门/学校" align="center" prop="deptId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:afterSale:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['school:afterSale:remove']"
-          >删除</el-button>
-        </template>
-      </el-table-column>
-    </el-table>
-
-    <pagination
-      v-show="total>0"
-      :total="total"
-      :page.sync="queryParams.pageNum"
-      :limit.sync="queryParams.pageSize"
-      @pagination="getList"
-    />
-
-    <!-- 添加或修改售后主对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+  <div class="app-container after-sale-page">
+    <el-card v-show="showSearch" shadow="never" class="search-card">
+      <el-form
+        ref="queryForm"
+        :model="queryParams"
+        size="small"
+        :inline="true"
+        label-width="96px"
+      >
         <el-form-item label="售后单号" prop="afterSaleNo">
-          <el-input v-model="form.afterSaleNo" placeholder="请输入售后单号" />
+          <el-input
+            v-model="queryParams.afterSaleNo"
+            placeholder="请输入售后单号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item label="订单主表ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入订单主表ID" />
+        <el-form-item label="订单编号" prop="orderNo">
+          <el-input
+            v-model="queryParams.orderNo"
+            placeholder="请输入订单编号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item label="订单明细ID" prop="orderItemId">
-          <el-input v-model="form.orderItemId" placeholder="请输入订单明细ID" />
+        <el-form-item label="申请用户" prop="userName">
+          <el-input
+            v-model="queryParams.userName"
+            placeholder="请输入申请用户"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item label="订单编号快照" prop="orderNo">
-          <el-input v-model="form.orderNo" placeholder="请输入订单编号快照" />
+        <el-form-item label="学生姓名" prop="studentName">
+          <el-input
+            v-model="queryParams.studentName"
+            placeholder="请输入学生姓名"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
         </el-form-item>
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
+        <el-form-item label="订单类型" prop="orderType">
+          <el-select v-model="queryParams.orderType" placeholder="请选择订单类型" clearable>
+            <el-option label="统购" value="1" />
+            <el-option label="零售" value="2" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
+        <el-form-item label="申请类型" prop="applyType">
+          <el-select v-model="queryParams.applyType" placeholder="请选择申请类型" clearable>
+            <el-option label="仅退款" value="1" />
+            <el-option label="退货退款" value="2" />
+            <el-option label="换货" value="3" />
+          </el-select>
         </el-form-item>
-        <el-form-item label="发起用户ID" prop="userId">
-          <el-input v-model="form.userId" placeholder="请输入发起用户ID" />
-        </el-form-item>
-        <el-form-item label="发起用户名快照" prop="userName">
-          <el-input v-model="form.userName" placeholder="请输入发起用户名快照" />
-        </el-form-item>
-        <el-form-item label="学生姓名快照" prop="studentName">
-          <el-input v-model="form.studentName" placeholder="请输入学生姓名快照" />
-        </el-form-item>
-        <el-form-item label="换货目标尺码ID" prop="targetSizeId">
-          <el-input v-model="form.targetSizeId" placeholder="请输入换货目标尺码ID" />
-        </el-form-item>
-        <el-form-item label="换货目标尺码名称" prop="targetSizeName">
-          <el-input v-model="form.targetSizeName" placeholder="请输入换货目标尺码名称" />
-        </el-form-item>
-        <el-form-item label="申请原因" prop="reason">
-          <el-input v-model="form.reason" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="图片凭证JSON文本" prop="imagesJson">
-          <el-input v-model="form.imagesJson" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="申请数量" prop="applyNum">
-          <el-input v-model="form.applyNum" placeholder="请输入申请数量" />
-        </el-form-item>
-        <el-form-item label="申请金额" prop="applyAmount">
-          <el-input v-model="form.applyAmount" placeholder="请输入申请金额" />
-        </el-form-item>
-        <el-form-item label="实际退款金额" prop="actualRefundAmount">
-          <el-input v-model="form.actualRefundAmount" placeholder="请输入实际退款金额" />
-        </el-form-item>
-        <el-form-item label="退款完成时间" prop="refundTime">
-          <el-date-picker clearable
-            v-model="form.refundTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择退款完成时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="审核人" prop="auditBy">
-          <el-input v-model="form.auditBy" placeholder="请输入审核人" />
-        </el-form-item>
-        <el-form-item label="审核时间" prop="auditTime">
-          <el-date-picker clearable
-            v-model="form.auditTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择审核时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="处理结果" prop="handleResult">
-          <el-input v-model="form.handleResult" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="处理备注" prop="handleRemark">
-          <el-input v-model="form.handleRemark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="完成时间" prop="finishTime">
-          <el-date-picker clearable
-            v-model="form.finishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择完成时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+          <el-button
+            v-hasPermi="['school:afterSale:export']"
+            type="warning"
+            plain
+            icon="el-icon-download"
+            size="mini"
+            @click="handleExport"
+          >
+            导出
+          </el-button>
         </el-form-item>
       </el-form>
+    </el-card>
+
+    <el-card shadow="never">
+      <div class="page-header">
+        <div>
+          <div class="page-title">售后单处理</div>
+          <div class="page-subtitle">查询待处理、已退回和已更换/已完成售后单，并完成审核处理</div>
+        </div>
+        <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
+      </div>
+
+      <el-tabs v-model="activeTab" @tab-click="handleTabChange">
+        <el-tab-pane label="待处理" name="pending" />
+        <el-tab-pane label="已退回" name="rejected" />
+        <el-tab-pane label="已更换/已完成" name="replaced" />
+      </el-tabs>
+
+      <el-table v-loading="loading" :data="afterSaleList" border>
+        <el-table-column label="售后单号" prop="afterSaleNo" min-width="180" show-overflow-tooltip />
+        <el-table-column label="订单编号" prop="orderNo" min-width="170" show-overflow-tooltip />
+        <el-table-column label="订单类型" width="90" align="center">
+          <template slot-scope="scope">
+            <el-tag size="mini" :type="scope.row.orderType === '1' ? 'warning' : 'success'">
+              {{ formatOrderType(scope.row.orderType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="申请类型" width="110" align="center">
+          <template slot-scope="scope">
+            <el-tag size="mini" :type="getApplyTagType(scope.row.applyType)">
+              {{ formatApplyType(scope.row.applyType) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="申请用户" prop="userName" width="120" align="center" />
+        <el-table-column label="学生姓名" prop="studentName" width="120" align="center" />
+        <el-table-column label="目标尺码" prop="targetSizeName" width="110" align="center">
+          <template slot-scope="scope">
+            {{ scope.row.targetSizeName || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="申请数量" prop="applyNum" width="90" align="center" />
+        <el-table-column label="申请金额" width="120" align="center">
+          <template slot-scope="scope">
+            {{ formatAmount(scope.row.applyAmount) }}
+          </template>
+        </el-table-column>
+        <el-table-column label="申请原因" min-width="220" show-overflow-tooltip>
+          <template slot-scope="scope">
+            {{ scope.row.reason || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="申请时间" prop="createTime" width="160" align="center">
+          <template slot-scope="scope">
+            {{ parseTime(scope.row.createTime, '{y}-{m}-{d} {h}:{i}') || '-' }}
+          </template>
+        </el-table-column>
+        <el-table-column label="当前状态" width="100" align="center">
+          <template slot-scope="scope">
+            <el-tag size="mini" :type="getStatusTagType(scope.row.status)">
+              {{ formatStatus(scope.row.status, scope.row) }}
+            </el-tag>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="220" align="center" fixed="right">
+          <template slot-scope="scope">
+            <el-button type="text" icon="el-icon-view" @click="handleView(scope.row)">查看详情</el-button>
+            <el-button
+              v-if="isPendingRow(scope.row)"
+              v-hasPermi="['school:afterSale:edit']"
+              type="text"
+              icon="el-icon-check"
+              @click="handleAudit(scope.row, 'approve')"
+            >
+              通过
+            </el-button>
+            <el-button
+              v-if="isPendingRow(scope.row)"
+              v-hasPermi="['school:afterSale:edit']"
+              type="text"
+              icon="el-icon-close"
+              @click="handleAudit(scope.row, 'reject')"
+            >
+              退回
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        :page.sync="queryParams.pageNum"
+        :limit.sync="queryParams.pageSize"
+        @pagination="getList"
+      />
+    </el-card>
+
+    <el-dialog title="售后详情" :visible.sync="detailOpen" width="980px" append-to-body>
+      <div v-loading="detailLoading" class="detail-wrap">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="售后单号">{{ detailForm.afterSaleNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="当前状态">{{ formatStatus(detailForm.status, detailForm) }}</el-descriptions-item>
+          <el-descriptions-item label="订单编号">{{ detailForm.orderNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="订单类型">{{ formatOrderType(detailForm.orderType) }}</el-descriptions-item>
+          <el-descriptions-item label="申请类型">{{ formatApplyType(detailForm.applyType) }}</el-descriptions-item>
+          <el-descriptions-item label="申请用户">{{ detailForm.userName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="学生姓名">{{ detailForm.studentName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="目标尺码">{{ detailForm.targetSizeName || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="申请数量">{{ detailForm.applyNum || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="申请金额">{{ formatAmount(detailForm.applyAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="实际退款金额">{{ formatAmount(detailForm.actualRefundAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="退款状态">{{ formatRefundStatus(detailForm.refundStatus) }}</el-descriptions-item>
+          <el-descriptions-item label="申请时间">
+            {{ parseTime(detailForm.createTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="审核时间">
+            {{ parseTime(detailForm.auditTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="完成时间">
+            {{ parseTime(detailForm.finishTime, '{y}-{m}-{d} {h}:{i}:{s}') || '-' }}
+          </el-descriptions-item>
+          <el-descriptions-item label="审核人">{{ detailForm.auditBy || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <div class="section-block">
+          <div class="section-title">申请原因</div>
+          <div class="plain-box">{{ detailForm.reason || '暂无申请原因' }}</div>
+        </div>
+
+        <div v-if="detailImages.length" class="section-block">
+          <div class="section-title">凭证图片</div>
+          <div class="image-list">
+            <el-image
+              v-for="(item, index) in detailImages"
+              :key="`${item}-${index}`"
+              :src="buildFileUrl(item)"
+              :preview-src-list="detailPreviewImages"
+              fit="cover"
+              class="proof-image"
+            />
+          </div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-title">处理结果</div>
+          <div class="plain-box">{{ detailForm.handleResult || '暂无处理结果' }}</div>
+        </div>
+
+        <div class="section-block">
+          <div class="section-title">处理备注</div>
+          <div class="plain-box">{{ detailForm.handleRemark || '暂无处理备注' }}</div>
+        </div>
+      </div>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="detailOpen = false">关 闭</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog :title="auditType === 'approve' ? '通过售后单' : '退回售后单'" :visible.sync="auditOpen" width="680px" append-to-body>
+      <div v-loading="auditLoading">
+        <el-descriptions :column="2" border class="audit-info">
+          <el-descriptions-item label="售后单号">{{ auditForm.afterSaleNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="订单编号">{{ auditForm.orderNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="申请类型">{{ formatApplyType(auditForm.applyType) }}</el-descriptions-item>
+          <el-descriptions-item label="申请用户">{{ auditForm.userName || '-' }}</el-descriptions-item>
+        </el-descriptions>
+
+        <div class="section-block">
+          <div class="section-title">申请原因</div>
+          <div class="plain-box">{{ auditForm.reason || '暂无申请原因' }}</div>
+        </div>
+
+        <el-form ref="auditRef" :model="auditSubmitForm" :rules="auditRules" label-width="110px">
+          <el-form-item
+            v-if="showRefundAmountField"
+            label="实际退款金额"
+            prop="actualRefundAmount"
+          >
+            <el-input-number
+              v-model="auditSubmitForm.actualRefundAmount"
+              :min="0"
+              :precision="2"
+              :step="1"
+              :max="getMaxRefundAmount(auditForm)"
+              controls-position="right"
+              style="width: 100%"
+            />
+          </el-form-item>
+          <el-form-item label="处理备注" prop="handleRemark">
+            <el-input
+              v-model="auditSubmitForm.handleRemark"
+              type="textarea"
+              :rows="5"
+              maxlength="300"
+              show-word-limit
+              :placeholder="auditType === 'approve' ? '请输入通过说明，可选' : '请输入退回原因'"
+            />
+          </el-form-item>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="auditOpen = false">取 消</el-button>
+        <el-button type="primary" :loading="submitLoading" @click="submitAudit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listAfterSale, getAfterSale, delAfterSale, addAfterSale, updateAfterSale } from "@/api/school/afterSale";
+import { getAfterSale, listAfterSale, updateAfterSale } from '@/api/school/afterSale'
+
+const createDefaultAfterSale = () => ({
+  id: undefined,
+  afterSaleNo: '',
+  orderId: undefined,
+  orderItemId: undefined,
+  orderNo: '',
+  orderType: '',
+  schoolId: undefined,
+  supplierId: undefined,
+  userId: undefined,
+  userName: '',
+  studentName: '',
+  applyType: '',
+  targetSizeId: undefined,
+  targetSizeName: '',
+  reason: '',
+  imagesJson: '',
+  applyNum: undefined,
+  applyAmount: undefined,
+  actualRefundAmount: undefined,
+  refundStatus: '',
+  refundTime: undefined,
+  status: '',
+  auditBy: '',
+  auditTime: undefined,
+  handleResult: '',
+  handleRemark: '',
+  finishTime: undefined,
+  deptId: undefined,
+  remark: '',
+  createTime: undefined,
+  updateTime: undefined,
+  delFlag: '0'
+})
+
+const createAuditSubmitForm = () => ({
+  actualRefundAmount: undefined,
+  handleRemark: ''
+})
 
 export default {
-  name: "AfterSale",
+  name: 'AfterSale',
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
+      activeTab: 'pending',
       showSearch: true,
-      // 总条数
+      loading: false,
+      detailLoading: false,
+      auditLoading: false,
+      submitLoading: false,
+      detailOpen: false,
+      auditOpen: false,
+      auditType: 'approve',
       total: 0,
-      // 售后主表格数据
       afterSaleList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
-      open: false,
-      // 查询参数
+      detailForm: createDefaultAfterSale(),
+      auditForm: createDefaultAfterSale(),
+      auditSubmitForm: createAuditSubmitForm(),
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        afterSaleNo: null,
-        orderId: null,
-        orderItemId: null,
-        orderNo: null,
-        orderType: null,
-        schoolId: null,
-        supplierId: null,
-        userId: null,
-        userName: null,
-        studentName: null,
-        applyType: null,
-        targetSizeId: null,
-        targetSizeName: null,
-        reason: null,
-        applyNum: null,
-        applyAmount: null,
-        actualRefundAmount: null,
-        refundStatus: null,
-        refundTime: null,
-        status: null,
-        auditBy: null,
-        auditTime: null,
-        handleResult: null,
-        handleRemark: null,
-        finishTime: null,
-        deptId: null,
+        afterSaleNo: '',
+        orderNo: '',
+        orderType: '',
+        applyType: '',
+        userName: '',
+        studentName: ''
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        afterSaleNo: [
-          { required: true, message: "售后单号不能为空", trigger: "blur" }
+      auditRules: {
+        actualRefundAmount: [
+          {
+            validator: (rule, value, callback) => {
+              if (!this.showRefundAmountField) {
+                callback()
+                return
+              }
+              if (value === undefined || value === null || value === '') {
+                callback(new Error('请输入实际退款金额'))
+                return
+              }
+              callback()
+            },
+            trigger: 'blur'
+          }
         ],
-        orderId: [
-          { required: true, message: "订单主表ID不能为空", trigger: "blur" }
-        ],
-        orderNo: [
-          { required: true, message: "订单编号快照不能为空", trigger: "blur" }
-        ],
-        orderType: [
-          { required: true, message: "订单类型，1统购 2零售不能为空", trigger: "change" }
-        ],
-        supplierId: [
-          { required: true, message: "供应商ID不能为空", trigger: "blur" }
-        ],
-        userId: [
-          { required: true, message: "发起用户ID不能为空", trigger: "blur" }
-        ],
-        userName: [
-          { required: true, message: "发起用户名快照不能为空", trigger: "blur" }
-        ],
-        applyType: [
-          { required: true, message: "申请类型，1仅退款 2退货退款 3换货不能为空", trigger: "change" }
-        ],
-        applyNum: [
-          { required: true, message: "申请数量不能为空", trigger: "blur" }
-        ],
-        status: [
-          { required: true, message: "售后状态，0待审核 1已通过 2已驳回 3处理中 4已完成 5已关闭不能为空", trigger: "change" }
-        ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
+        handleRemark: [
+          {
+            validator: (rule, value, callback) => {
+              if (this.auditType === 'reject' && !value) {
+                callback(new Error('请输入退回原因'))
+                return
+              }
+              callback()
+            },
+            trigger: 'blur'
+          }
         ]
       }
-    };
+    }
+  },
+  computed: {
+    detailImages() {
+      return this.parseImages(this.detailForm.imagesJson)
+    },
+    detailPreviewImages() {
+      return this.detailImages.map((item) => this.buildFileUrl(item))
+    },
+    showRefundAmountField() {
+      return this.auditType === 'approve' && ['1', '2'].includes(String(this.auditForm.applyType || ''))
+    },
+    currentUserName() {
+      const userInfo = this.$store.getters.userInfo || {}
+      return userInfo.nickName || userInfo.userName || this.$store.getters.nickName || this.$store.getters.name || '管理员'
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
-    /** 查询售后主列表 */
     getList() {
-      this.loading = true;
-      listAfterSale(this.queryParams).then(response => {
-        this.afterSaleList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
+      this.loading = true
+      listAfterSale({
+        ...this.queryParams,
+        ...this.getTabFilters()
+      })
+        .then((response) => {
+          this.afterSaleList = response.rows || []
+          this.total = response.total || 0
+        })
+        .finally(() => {
+          this.loading = false
+        })
     },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
+    getTabFilters() {
+      if (this.activeTab === 'pending') {
+        return { status: '0' }
+      }
+      if (this.activeTab === 'rejected') {
+        return { status: '2' }
+      }
+      return { status: '4' }
     },
-    // 表单重置
-    reset() {
-      this.form = {
-        id: null,
-        afterSaleNo: null,
-        orderId: null,
-        orderItemId: null,
-        orderNo: null,
-        orderType: null,
-        schoolId: null,
-        supplierId: null,
-        userId: null,
-        userName: null,
-        studentName: null,
-        applyType: null,
-        targetSizeId: null,
-        targetSizeName: null,
-        reason: null,
-        imagesJson: null,
-        applyNum: null,
-        applyAmount: null,
-        actualRefundAmount: null,
-        refundStatus: null,
-        refundTime: null,
-        status: null,
-        auditBy: null,
-        auditTime: null,
-        handleResult: null,
-        handleRemark: null,
-        finishTime: null,
-        deptId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null
-      };
-      this.resetForm("form");
+    handleTabChange() {
+      this.queryParams.pageNum = 1
+      this.getList()
     },
-    /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.queryParams.pageNum = 1
+      this.getList()
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加售后主";
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids
-      getAfterSale(id).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改售后主";
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          if (this.form.id != null) {
-            updateAfterSale(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addAfterSale(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除售后主编号为"' + ids + '"的数据项？').then(function() {
-        return delAfterSale(ids);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
-    },
-    /** 导出按钮操作 */
     handleExport() {
-      this.download('school/afterSale/export', {
-        ...this.queryParams
-      }, `afterSale_${new Date().getTime()}.xlsx`)
+      this.download(
+        'school/afterSale/export',
+        {
+          ...this.queryParams,
+          ...this.getTabFilters()
+        },
+        `afterSale_${new Date().getTime()}.xlsx`
+      )
+    },
+    handleView(row) {
+      this.detailOpen = true
+      this.loadAfterSaleDetail(row, 'detail')
+    },
+    handleAudit(row, type) {
+      this.auditType = type
+      this.auditOpen = true
+      this.auditSubmitForm = createAuditSubmitForm()
+      this.$nextTick(() => {
+        if (this.$refs.auditRef) {
+          this.$refs.auditRef.clearValidate()
+        }
+      })
+      this.loadAfterSaleDetail(row, 'audit')
+    },
+    loadAfterSaleDetail(row, target) {
+      const loadingKey = target === 'detail' ? 'detailLoading' : 'auditLoading'
+      this[loadingKey] = true
+      getAfterSale(row.id)
+        .then((response) => {
+          const data = {
+            ...createDefaultAfterSale(),
+            ...row,
+            ...(response.data || {})
+          }
+          if (target === 'detail') {
+            this.detailForm = data
+          } else {
+            this.auditForm = data
+            if (['1', '2'].includes(String(data.applyType || ''))) {
+              this.auditSubmitForm.actualRefundAmount = data.actualRefundAmount || data.applyAmount || 0
+            }
+          }
+        })
+        .finally(() => {
+          this[loadingKey] = false
+        })
+    },
+    submitAudit() {
+      this.$refs.auditRef.validate((valid) => {
+        if (!valid) {
+          return
+        }
+        const source = this.auditForm
+        const today = this.formatToday()
+        const isApprove = this.auditType === 'approve'
+        const isRefundType = ['1', '2'].includes(String(source.applyType || ''))
+        const payload = {
+          ...source,
+          status: isApprove ? '4' : '2',
+          auditBy: this.currentUserName,
+          auditTime: today,
+          handleResult: isApprove
+            ? (String(source.applyType) === '3' ? '已通过换货处理' : '已通过售后处理')
+            : '已退回售后申请',
+          handleRemark: this.auditSubmitForm.handleRemark,
+          finishTime: isApprove ? today : source.finishTime,
+          actualRefundAmount: isApprove && isRefundType
+            ? this.auditSubmitForm.actualRefundAmount
+            : source.actualRefundAmount,
+          refundStatus: isApprove && isRefundType ? '2' : source.refundStatus,
+          refundTime: isApprove && isRefundType ? today : source.refundTime
+        }
+        this.submitLoading = true
+        updateAfterSale(payload)
+          .then(() => {
+            this.$modal.msgSuccess(isApprove ? '处理通过成功' : '退回成功')
+            this.auditOpen = false
+            this.getList()
+            if (this.detailOpen && this.detailForm.id === source.id) {
+              this.loadAfterSaleDetail(source, 'detail')
+            }
+          })
+          .finally(() => {
+            this.submitLoading = false
+          })
+      })
+    },
+    isPendingRow(row) {
+      return String(row.status) === '0'
+    },
+    formatOrderType(value) {
+      if (String(value) === '1') return '统购'
+      if (String(value) === '2') return '零售'
+      return '-'
+    },
+    formatApplyType(value) {
+      if (String(value) === '1') return '仅退款'
+      if (String(value) === '2') return '退货退款'
+      if (String(value) === '3') return '换货'
+      return '-'
+    },
+    formatStatus(value, row = {}) {
+      if (String(value) === '0') return '待处理'
+      if (String(value) === '1') return '已通过'
+      if (String(value) === '2') return '已退回'
+      if (String(value) === '3') return '处理中'
+      if (String(value) === '4') return String(row.applyType) === '3' ? '已更换' : '已完成'
+      if (String(value) === '5') return '已关闭'
+      return '-'
+    },
+    formatRefundStatus(value) {
+      if (String(value) === '0') return '未退款'
+      if (String(value) === '1') return '退款中'
+      if (String(value) === '2') return '退款成功'
+      if (String(value) === '3') return '退款失败'
+      return '-'
+    },
+    getApplyTagType(value) {
+      if (String(value) === '1') return 'info'
+      if (String(value) === '2') return 'warning'
+      if (String(value) === '3') return 'success'
+      return ''
+    },
+    getStatusTagType(value) {
+      if (String(value) === '0') return 'warning'
+      if (String(value) === '2') return 'danger'
+      if (String(value) === '4') return 'success'
+      return 'info'
+    },
+    formatAmount(value) {
+      if (value === undefined || value === null || value === '') {
+        return '-'
+      }
+      return `¥${Number(value).toFixed(2)}`
+    },
+    parseImages(imagesJson) {
+      if (!imagesJson) return []
+      if (Array.isArray(imagesJson)) return imagesJson.filter(Boolean)
+      const raw = String(imagesJson).trim()
+      if (!raw) return []
+      try {
+        const parsed = JSON.parse(raw)
+        if (Array.isArray(parsed)) {
+          return parsed
+            .map((item) => {
+              if (typeof item === 'string') return item
+              if (item && typeof item === 'object') return item.url || item.name || ''
+              return ''
+            })
+            .filter(Boolean)
+        }
+      } catch (error) {
+        // Fall back to comma-separated paths.
+      }
+      return raw.split(',').map((item) => item.trim()).filter(Boolean)
+    },
+    buildFileUrl(path) {
+      if (!path) return ''
+      if (/^https?:\/\//.test(path)) return path
+      return `${process.env.VUE_APP_IMAGE_BASE_API}${path}`
+    },
+    formatToday() {
+      return this.parseTime(new Date(), '{y}-{m}-{d}')
+    },
+    getMaxRefundAmount(row) {
+      return Number(row.applyAmount || 99999999)
     }
   }
-};
+}
 </script>
+
+<style scoped>
+.search-card {
+  margin-bottom: 16px;
+}
+
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #909399;
+}
+
+.detail-wrap {
+  min-height: 220px;
+}
+
+.section-block {
+  margin-top: 20px;
+}
+
+.section-title {
+  margin-bottom: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.plain-box {
+  padding: 16px;
+  border: 1px solid #ebeef5;
+  border-radius: 4px;
+  background: #fafafa;
+  line-height: 1.8;
+  color: #606266;
+  word-break: break-all;
+}
+
+.image-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.proof-image {
+  width: 120px;
+  height: 120px;
+  border-radius: 6px;
+  border: 1px solid #ebeef5;
+}
+
+.audit-info {
+  margin-bottom: 20px;
+}
+</style>

@@ -4,12 +4,12 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.xfgl.school.controller.util.SimRequestUtil;
 import com.xfgl.common.core.web.domain.AjaxResult;
-
-
+import com.xfgl.school.controller.util.SimRequestUtil;
+import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.XfptSimUser;
 import com.xfgl.school.domain.XfptStudentInfo;
+import com.xfgl.school.service.IXfptSchoolMessageService;
 import com.xfgl.school.service.IXfptSimUserService;
 import com.xfgl.school.service.IXfptStudentInfoService;
 import com.xfgl.school.service.Token2Service;
@@ -21,8 +21,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 对接石i民登录
@@ -31,20 +34,43 @@ import java.util.Map;
 @RequestMapping("/simOpen")
 @Slf4j
 public class SimController {
+    private static final String PARENT_APP_ROLE_KEY = "parent_app";
+    private static final Set<String> PARENT_APP_PERMISSIONS = Collections.unmodifiableSet(new LinkedHashSet<String>() {{
+        add("system:xfptnotice:list");
+        add("system:xfptnotice:query");
+        add("school:groupNotice:list");
+        add("school:groupNotice:query");
+        add("school:goods:list");
+        add("school:goods:query");
+        add("school:cartItem:list");
+        add("school:cartItem:query");
+        add("school:cartItem:add");
+        add("school:cartItem:edit");
+        add("school:cartItem:remove");
+        add("school:userAddress:list");
+        add("school:userAddress:query");
+        add("school:userAddress:add");
+        add("school:userAddress:edit");
+        add("school:userAddress:remove");
+        add("school:orderInfo:list");
+        add("school:orderInfo:query");
+        add("school:orderInfo:add");
+        add("school:orderInfo:edit");
+    }});
 
-    @Value("${sim.ip}")
+    @Value("${sim.ip:}")
     private String simIp;
 
-    @Value("${sim.getCode}")
+    @Value("${sim.getCode:}")
     private String simGetCodeUri;
 
-    @Value("${sim.getToken}")
+    @Value("${sim.getToken:}")
     private String simGetTokenUri;
 
-    @Value("${sim.redirecturi}")
+    @Value("${sim.redirecturi:}")
     private String simRedirectUri;
 
-    @Value("${sim.getUser}")
+    @Value("${sim.getUser:}")
     private String simGetUserUri;
 
     @Autowired
@@ -55,6 +81,8 @@ public class SimController {
     private Token2Service tokenService;
     @Autowired
     private IXfptStudentInfoService iXfptStudentInfoService;
+    @Autowired
+    private IXfptSchoolMessageService iXfptSchoolMessageService;
 
     /**
      * 本地开发登录。只用于绕过石i民真实授权，方便本机调试 H5。
@@ -65,10 +93,10 @@ public class SimController {
                 .eq(XfptSimUser::getIdCard, "LOCAL_DEV_USER")
                 .list();
         if (CollUtil.isEmpty(list)) {
-            list = iXfptSimUserService.lambdaQuery()
-                    .eq(XfptSimUser::getDelFlag, "0")
-                    .last("limit 1")
-                    .list();
+            XfptSimUser devLoginUser = findFirstAvailableParentUser();
+            if (devLoginUser != null) {
+                list = Collections.singletonList(devLoginUser);
+            }
         }
         if (CollUtil.isEmpty(list)) {
             return AjaxResult.error("本地库没有可用的石i民用户");
@@ -140,25 +168,79 @@ public class SimController {
         if (CollUtil.isEmpty(list)) {
             return AjaxResult.error("登录失败");
         }
-        LoginUser loginUser=new LoginUser();
-        SysUser sysUser=new SysUser();
-        sysUser.setUserId(1l);
-        sysUser.setUserName(list.get(0).getParm_2());
+        XfptSimUser simUser = list.get(0);
+        XfptSchoolMessage schoolMessage = resolveSchoolForSimUser(simUser);
+        if (schoolMessage == null || schoolMessage.getDeptId() == null) {
+            return AjaxResult.error("当前家长未关联学校信息，请先绑定学生后再登录");
+        }
+
+        LoginUser loginUser = new LoginUser();
+        SysUser sysUser = new SysUser();
+        sysUser.setUserId(simUser.getId());
+        sysUser.setDeptId(schoolMessage.getDeptId());
+        sysUser.setUserName(StrUtil.blankToDefault(simUser.getParm_2(), "sim_user_" + simUser.getId()));
+        sysUser.setNickName(StrUtil.blankToDefault(simUser.getName(), "家长用户"));
+        sysUser.setPhonenumber(simUser.getParm1());
         loginUser.setSysUser(sysUser);
+        loginUser.setUserid(simUser.getId());
+        loginUser.setUsername(sysUser.getUserName());
+        loginUser.setRoles(Collections.singleton(PARENT_APP_ROLE_KEY));
+        loginUser.setPermissions(new LinkedHashSet<>(PARENT_APP_PERMISSIONS));
         Map<String, Object> token = tokenService.createToken(loginUser);
         //判断是否完善过学生信息
-        Long id = list.get(0).getId();
-        List<XfptStudentInfo> list1 = iXfptStudentInfoService.lambdaQuery().eq(XfptStudentInfo::getSimId, id).list();
+        Long id = simUser.getId();
+        List<XfptStudentInfo> list1 = iXfptStudentInfoService.lambdaQuery()
+                .eq(XfptStudentInfo::getSimId, String.valueOf(id))
+                .list();
         if(CollUtil.isNotEmpty(list1)){
             for (XfptStudentInfo xfptStudentInfo : list1) {
-                xfptStudentInfo.setPhone(list.get(0).getParm1());
+                xfptStudentInfo.setPhone(simUser.getParm1());
             }
             token.put("is_improve", "1");
         }else {
             token.put("is_improve", "0");
         }
         //返回自己系统token
-        token.put("user",list.get(0));
+        token.put("user", simUser);
+        token.put("school", schoolMessage);
+        token.put("roles", loginUser.getRoles());
+        token.put("permissions", loginUser.getPermissions());
         return AjaxResult.success(token);
+    }
+
+    private XfptSimUser findFirstAvailableParentUser() {
+        List<XfptSimUser> simUsers = iXfptSimUserService.lambdaQuery()
+                .eq(XfptSimUser::getDelFlag, "0")
+                .orderByAsc(XfptSimUser::getId)
+                .list();
+        for (XfptSimUser simUser : simUsers) {
+            if (resolveSchoolForSimUser(simUser) != null) {
+                return simUser;
+            }
+        }
+        return CollUtil.isEmpty(simUsers) ? null : simUsers.get(0);
+    }
+
+    private XfptSchoolMessage resolveSchoolForSimUser(XfptSimUser simUser) {
+        if (simUser == null || simUser.getId() == null) {
+            return null;
+        }
+        XfptStudentInfo studentInfo = iXfptStudentInfoService.lambdaQuery()
+                .eq(XfptStudentInfo::getSimId, String.valueOf(simUser.getId()))
+                .last("limit 1")
+                .one();
+        if (studentInfo == null || StrUtil.isBlank(studentInfo.getShcoolId())) {
+            return null;
+        }
+        Long schoolId;
+        try {
+            schoolId = Long.valueOf(studentInfo.getShcoolId());
+        } catch (NumberFormatException e) {
+            log.warn("家长端登录解析学校ID失败, simUserId={}, schoolId={}", simUser.getId(), studentInfo.getShcoolId());
+            return null;
+        }
+        return iXfptSchoolMessageService.lambdaQuery()
+                .eq(XfptSchoolMessage::getId, schoolId)
+                .one();
     }
 }

@@ -48,7 +48,7 @@ private static final long serialVersionUID = 1L;
     private Integer sortNum;
 
     /** 性别类型，0通用 1男 2女 */
-            @Excel(name = "性别类型，0通用 1男 2女")
+            @Excel(name = "性别类型", readConverterExp = "0=通用,1=男,2=女")
     @Schema(description = "性别类型，0通用 1男 2女")
     private String genderType;
 
@@ -72,7 +72,7 @@ private static final long serialVersionUID = 1L;
     private Integer stockNum;
 
     /** 状态，0停用 1启用 */
-            @Excel(name = "状态，0停用 1启用")
+            @Excel(name = "状态", readConverterExp = "0=停用,1=启用")
     @Schema(description = "状态，0停用 1启用")
     private String status;
 

@@ -115,6 +115,97 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/school/accountBalance",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/accountBalance/index"),
+        name: "AccountBalance",
+        meta: { title: "账户余额", activeMenu: "/newFeature/accountBalance" },
+      },
+    ],
+  },
+  {
+    path: "/school/supplierWithdrawRecord",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/withdrawApply/index"),
+        name: "SupplierWithdrawRecord",
+        meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
+      },
+    ],
+  },
+  {
+    path: "/school/platformUsage",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/platformUsage/index"),
+        name: "PlatformUsage",
+        meta: { title: "使用情况", activeMenu: "/newFeature/platformUsage" },
+      },
+    ],
+  },
+  {
+    path: "/supplier/groupNotice",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/supplier/groupNotice/index"),
+        name: "SupplierGroupNotice",
+        meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
+      },
+    ],
+  },
+  {
+    path: "/school/schoolUsage",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/schoolUsage/index"),
+        name: "SchoolUsage",
+        meta: { title: "使用情况", activeMenu: "/newFeature/schoolUsage" },
+      },
+    ],
+  },
+  {
+    path: "/sxjjl",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "detail",
+        component: () => import("@/views/sxjjl/detail"),
+        name: "SxjjlDetail",
+        meta: { title: "尺码调换详情", activeMenu: "/tonggou/sxjjl" },
+      },
+    ],
+  },
+  {
+    path: "/zjbg",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "detail",
+        component: () => import("@/views/zjbg/detail"),
+        name: "ZjbgDetail",
+        meta: { title: "质检报告详情", activeMenu: "/tonggou/zjbg" },
+      },
+    ],
+  },
+  {
     path: "/bxactiveAdd",
     component: Layout,
     name: "Bxactive",

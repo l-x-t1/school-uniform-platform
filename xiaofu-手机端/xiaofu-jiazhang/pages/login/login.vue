@@ -75,16 +75,19 @@
 </template>
 
 <script>
+import config from '@/config'
+import { mobileLogin, sendSmsCode, wechatPhoneLogin } from '@/api/auth'
+import { setToken, setUserInfo } from '@/utils/auth'
+
 export default {
   data() {
     return {
       phone: '', // 手机号
-      code: '', // 验证码
+      verifyCode: '', // 验证码
       counting: false, // 是否在倒计时
       counter: 60, // 倒计时秒数
       codeText: '获取验证码', // 验证码按钮文字
-      timer: null, // 定时器
-      isFormValid: true,
+      timer: null // 定时器
     }
   },
   computed: {
@@ -94,10 +97,14 @@ export default {
     },
     // 表单是否有效（手机号和验证码都填写且格式正确）
     isFormValid() {
-      return this.isPhoneValid && this.code.length === 6;
+      return this.isPhoneValid && this.verifyCode.length === 6;
     }
   },
   methods: {
+    validatePhone() {
+      this.phone = String(this.phone || '').slice(0, 11);
+    },
+
     // 获取验证码
     getVerificationCode() {
       if (this.counting || !this.isPhoneValid) return;
@@ -107,17 +114,143 @@ export default {
         title: '发送中...'
       });
       
-      // 模拟发送验证码请求
-      setTimeout(() => {
+      sendSmsCode({ phone: this.phone, scene: 'parent_login' })
+        .then(() => {
+          uni.hideLoading();
+          uni.showToast({
+            title: '验证码已发送',
+            icon: 'success'
+          });
+          this.startCountdown();
+        })
+        .catch((error) => {
+          if (config.enableMockFallback) {
+            uni.hideLoading();
+            uni.showToast({
+              title: '开发环境验证码：123456',
+              icon: 'none'
+            });
+            this.verifyCode = '123456';
+            this.startCountdown();
+            return;
+          }
+
+          uni.hideLoading();
+          uni.showToast({
+            title: error.message || '验证码发送失败',
+            icon: 'none'
+          });
+        });
+    },
+
+    completeLogin(payload = {}) {
+      if (payload.token) {
+        setToken(payload.token);
+      }
+
+      setUserInfo({
+        phone: this.phone,
+        userType: 'parent',
+        ...(payload.user || payload.userInfo || {})
+      });
+      uni.setStorageSync('isLoggedIn', true);
+
+      if (payload.simId) uni.setStorageSync('simId', payload.simId);
+      if (payload.isImprove !== undefined) uni.setStorageSync('isImprove', payload.isImprove);
+      if (this.phone) uni.setStorageSync('phone', this.phone);
+
+      uni.reLaunch({
+        url: payload.isImprove === false ? '/pages/user/student-info' : '/pages/index/index'
+      });
+    },
+    
+    mockLogin() {
+      setToken('dev-token');
+      this.completeLogin({
+        token: 'dev-token',
+        user: {
+          phone: this.phone,
+          userType: 'parent',
+          nickName: '家长用户'
+        },
+        isImprove: true
+      });
+    },
+    
+    // 处理登录
+    handleLogin() {
+      if (!this.isFormValid) return;
+      
+      uni.showLoading({
+        title: '登录中...'
+      });
+
+      mobileLogin({
+        phone: this.phone,
+        code: this.verifyCode
+      })
+        .then((res) => {
+          uni.hideLoading();
+          this.completeLogin(res.data || res);
+        })
+        .catch((error) => {
+          if (config.enableMockFallback && this.verifyCode === '123456') {
+            uni.hideLoading();
+            this.mockLogin();
+            return;
+          }
+
+          uni.hideLoading();
+          uni.showToast({
+            title: error.message || '登录失败',
+            icon: 'none'
+          });
+        });
+    },
+    
+    // 微信一键登录
+    getPhoneNumber(e) {
+      if (e.detail.errMsg === 'getPhoneNumber:ok') {
+        uni.showLoading({
+          title: '登录中...'
+        });
+
+        wechatPhoneLogin({
+          code: e.detail.code,
+          encryptedData: e.detail.encryptedData,
+          iv: e.detail.iv
+        })
+          .then((res) => {
+            uni.hideLoading();
+            this.completeLogin(res.data || res);
+          })
+          .catch((error) => {
+            if (config.enableMockFallback) {
+              uni.hideLoading();
+              this.completeLogin({
+                token: 'dev-wechat-token',
+                user: {
+                  userType: 'parent',
+                  isWechatLogin: true
+                },
+                isImprove: true
+              });
+              return;
+            }
+
+            uni.hideLoading();
+            uni.showToast({
+              title: error.message || '微信登录失败',
+              icon: 'none'
+            });
+          });
+      } else {
         uni.hideLoading();
         uni.showToast({
-          title: '验证码已发送',
-          icon: 'success'
+          title: '获取手机号失败',
+          icon: 'none'
         });
-        
-        // 开始倒计时
-        this.startCountdown();
-      }, 1500);
+      }
     },
     
     // 开始倒计时
@@ -137,63 +270,6 @@ export default {
         }
       }, 1000);
     },
-    
-    // 处理登录
-    handleLogin() {
-      if (!this.isFormValid) return;
-      
-      // 显示加载提示
-      uni.showLoading({
-        title: '登录中...'
-      });
-      
-      // 模拟登录请求
-      setTimeout(() => {
-        uni.hideLoading();
-        
-        // 模拟登录成功，存储登录状态
-        uni.setStorageSync('isLoggedIn', true);
-        uni.setStorageSync('userInfo', {
-          phone: this.phone,
-          userType: 'parent'
-        });
-        
-        // 登录成功后跳转到首页
-        uni.reLaunch({
-          url: '/pages/index/index'
-        });
-      }, 1500);
-    },
-    
-    // 微信一键登录
-    getPhoneNumber(e) {
-      if (e.detail.errMsg === 'getPhoneNumber:ok') {
-        // 正常情况下需要发送 encryptedData 和 iv 到后端换取手机号
-        // 这里模拟登录成功
-        uni.showLoading({
-          title: '登录中...'
-        });
-        
-        setTimeout(() => {
-          uni.hideLoading();
-          uni.setStorageSync('isLoggedIn', true);
-          uni.setStorageSync('userInfo', {
-            userType: 'parent',
-            isWechatLogin: true
-          });
-          
-          uni.reLaunch({
-            url: '/pages/index/index'
-          });
-        }, 1500);
-      } else {
-        uni.showToast({
-          title: '获取手机号失败',
-          icon: 'none'
-        });
-      }
-    },
-    
     // 显示隐私政策
     showPrivacyPolicy() {
       uni.navigateTo({

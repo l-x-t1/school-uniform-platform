@@ -3,7 +3,7 @@
 		<view class="content">
 			<!-- 空购物车状态 -->
 			<view class="empty-cart" v-if="cartList.length === 0">
-				<image src="/static/images/empty-cart.png" mode="aspectFit" class="empty-image"></image>
+				<image src="/static/uni.png" mode="aspectFit" class="empty-image"></image>
 				<text class="empty-text">购物车还是空的</text>
 				<button class="go-shopping" @click="goShopping">去选购校服</button>
 			</view>
@@ -13,15 +13,24 @@
 				<view class="cart-item" v-for="(item, index) in cartList" :key="index"
 					@longpress="enterEditMode"
 					@click="handleItemClick(index)">
-					<view class="checkbox" @click.stop="toggleSelect(index)" v-if="isEdit">
+					<view class="checkbox" @click.stop="toggleSelect(index)">
 						<uni-icons :type="item.selected ? 'checkbox-filled' : 'circle'" size="24" :color="item.selected ? '#2979ff' : '#DDDDDD'"></uni-icons>
 					</view>
 					<image :src="item.image" mode="aspectFill" class="item-image"></image>
 					<view class="item-info">
 						<view class="item-name">{{item.name}}</view>
+						<view class="item-remove" @click.stop="removeItem(index)">
+							<uni-icons type="trash" size="16" color="#ff6b6b"></uni-icons>
+							<text>取消</text>
+						</view>
 						<view class="item-spec">
-							<text class="spec-tag">{{item.spec}}</text>
-							<text class="spec-tag">{{item.size}}</text>
+							<text class="spec-tag">{{item.orderTypeText}}</text>
+							<text class="spec-tag" v-if="item.spec">{{item.spec}}</text>
+							<text class="spec-tag" v-if="item.size">{{item.size}}</text>
+						</view>
+						<view class="item-meta">
+							<text class="meta-text" v-if="item.studentName">{{item.studentName}}</text>
+							<text class="meta-text" v-if="item.goodsCode">{{item.goodsCode}}</text>
 						</view>
 						<view class="item-bottom">
 							<text class="price">¥<text class="price-num">{{item.price}}</text></text>
@@ -70,30 +79,18 @@
 </template>
 
 <script>
+	import config from '@/config'
+	import { listCart, updateCart, deleteCart } from '@/api/cart'
+
 	export default {
 		data() {
 			return {
 				isEdit: false,
-				cartList: [{
-					id: 1,
-					name: '夏季校服短袖套装',
-					spec: '男生款',
-					size: 'L码',
-					price: '128.00',
-					quantity: 1,
-					selected: false,
-					image: '/static/nanxf.png'
-				}, {
-					id: 2,
-					name: '夏季校服短袖套装',
-					spec: '女生款',
-					size: 'M码',
-					price: '128.00',
-					quantity: 1,
-					selected: false,
-					image: '/static/nvxf.png'
-				}]
+				cartList: []
 			}
+		},
+		onShow() {
+			this.loadCart();
 		},
 		onNavigationBarButtonTap(e) {
 			if (e.index === 0) {
@@ -103,6 +100,9 @@
 		watch: {
 			isEdit: {
 				handler(val) {
+					if (typeof uni.setNavigationBarRightButton !== 'function') {
+						return;
+					}
 					if (val) {
 						uni.setNavigationBarRightButton({
 							text: '取消',
@@ -113,8 +113,6 @@
 						uni.setNavigationBarRightButton({
 							text: ''
 						});
-						// 退出编辑模式时取消所有选择
-						this.cartList.forEach(item => item.selected = false);
 					}
 				},
 				immediate: true
@@ -130,11 +128,66 @@
 			totalAmount() {
 				return this.cartList
 					.filter(item => item.selected)
-					.reduce((sum, item) => sum + parseFloat(item.price) * item.quantity, 0)
+					.reduce((sum, item) => sum + parseFloat(item.price || 0) * Number(item.quantity || 1), 0)
 					.toFixed(2);
 			}
 		},
 		methods: {
+			normalizeCartItem(item) {
+				return {
+					id: item.id || item.cartId || item.uniformId,
+					userId: item.userId,
+					studentId: item.studentId,
+					uniformId: item.uniformId || item.goodsId || item.productId || item.id,
+					goodsId: item.goodsId || item.uniformId || item.id,
+					skuId: item.skuId || item.sizeId,
+					sizeId: item.sizeId || item.skuId,
+					name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
+					spec: item.spec || item.color || '',
+					size: item.size || item.sizeName || '-',
+					sizeName: item.sizeName || item.size || '-',
+					price: item.price || item.salePrice || item.unitPrice || '0.00',
+					unitPrice: item.unitPrice || item.price || '0.00',
+					quantity: Number(item.quantity || item.buyNum || item.num || 1),
+					buyNum: Number(item.buyNum || item.quantity || item.num || 1),
+					selected: item.selected !== undefined ? item.selected : String(item.checkedFlag || '1') === '1',
+					checkedFlag: item.checkedFlag || (item.selected === false ? '0' : '1'),
+					orderType: String(item.orderType || item.saleType || '1'),
+					orderTypeText: String(item.orderType || item.saleType || '1') === '2' ? '零售购买' : '统购购买',
+					noticeId: item.noticeId || null,
+					image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png',
+					mainImage: item.mainImage || item.image || item.productImage || item.coverImage || '/static/qjxf.png',
+					studentName: item.studentName || '',
+					goodsCode: item.goodsCode || ''
+				};
+			},
+			loadCart() {
+				listCart()
+					.then((res) => {
+						const rows = res.rows || res.data || res.list || [];
+						if (rows.length) {
+							this.cartList = rows.map(this.normalizeCartItem);
+							this.saveLocalCart();
+							return;
+						}
+						const localCart = uni.getStorageSync('cartList') || [];
+						this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : [];
+					})
+					.catch((error) => {
+						if (config.enableMockFallback) {
+							const localCart = uni.getStorageSync('cartList') || [];
+							this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : [];
+							return;
+						}
+						uni.showToast({
+							title: error.message || '购物车加载失败',
+							icon: 'none'
+						});
+					});
+			},
+			saveLocalCart() {
+				uni.setStorageSync('cartList', this.cartList);
+			},
 			enterEditMode() {
 				if (!this.isEdit) {
 					this.isEdit = true;
@@ -146,28 +199,105 @@
 			},
 			exitEditMode() {
 				this.isEdit = false;
-				this.cartList.forEach(item => item.selected = false);
+				this.cartList.forEach(item => {
+					item.selected = true;
+					item.checkedFlag = '1';
+				});
+				Promise.allSettled(this.cartList.map((item) => updateCart({
+					id: item.id,
+					selected: true,
+					checkedFlag: '1'
+				}))).catch(() => {
+					if (config.enableMockFallback) this.saveLocalCart();
+				});
+				this.saveLocalCart();
 			},
 			handleItemClick(index) {
 				if (!this.isEdit) {
 					// 单击进入商品详情
 					uni.navigateTo({
-						url: `/pages/uniform/uniform-detail?id=${this.cartList[index].id}`
+						url: `/pages/uniform/uniform-detail?id=${this.cartList[index].uniformId || this.cartList[index].id}`
 					});
 				}
 			},
 			toggleSelect(index) {
 				this.cartList[index].selected = !this.cartList[index].selected;
+				this.cartList[index].checkedFlag = this.cartList[index].selected ? '1' : '0';
+				const item = this.cartList[index];
+				updateCart({
+					id: item.id,
+					selected: item.selected,
+					checkedFlag: item.checkedFlag
+				}).catch(() => {
+					if (config.enableMockFallback) this.saveLocalCart();
+				});
+				this.saveLocalCart();
 			},
 			toggleSelectAll() {
 				const newStatus = !this.isAllSelected;
-				this.cartList.forEach(item => item.selected = newStatus);
+				this.cartList.forEach(item => {
+					item.selected = newStatus;
+					item.checkedFlag = newStatus ? '1' : '0';
+				});
+				Promise.allSettled(this.cartList.map((item) => updateCart({
+					id: item.id,
+					selected: item.selected,
+					checkedFlag: item.checkedFlag
+				}))).catch(() => {
+					if (config.enableMockFallback) this.saveLocalCart();
+				});
+				this.saveLocalCart();
 			},
 			updateQuantity(index, delta) {
 				const newQuantity = this.cartList[index].quantity + delta;
 				if (newQuantity > 0 && newQuantity <= 99) {
 					this.cartList[index].quantity = newQuantity;
+					this.cartList[index].buyNum = newQuantity;
+					const item = this.cartList[index];
+					updateCart({
+						id: item.id,
+						quantity: item.quantity,
+						buyNum: item.quantity,
+						uniformId: item.uniformId,
+						goodsId: item.goodsId,
+						skuId: item.skuId,
+						sizeId: item.sizeId,
+						name: item.name,
+						sizeName: item.sizeName,
+						image: item.image,
+						price: item.price,
+						orderType: item.orderType,
+						selected: item.selected,
+						checkedFlag: item.checkedFlag,
+						studentId: item.studentId,
+						noticeId: item.noticeId
+					}).catch(() => {
+						if (config.enableMockFallback) this.saveLocalCart();
+					});
+					this.saveLocalCart();
 				}
+			},
+			removeItem(index) {
+				const item = this.cartList[index];
+				uni.showModal({
+					title: '移除商品',
+					content: `确定将“${item.name}”从购物车中移除吗？`,
+					success: ({ confirm }) => {
+						if (!confirm) return;
+						this.cartList.splice(index, 1);
+						this.saveLocalCart();
+						deleteCart(item.id).catch(() => {
+							if (config.enableMockFallback) this.saveLocalCart();
+						});
+						uni.showToast({
+							title: '已移除',
+							icon: 'success'
+						});
+						if (this.cartList.length === 0) {
+							this.isEdit = false;
+						}
+					}
+				});
 			},
 			handleSubmit() {
 				if (this.isEdit) {
@@ -178,21 +308,40 @@
 						});
 						return;
 					}
-					// 删除选中商品
+					const ids = this.cartList.filter(item => item.selected).map(item => item.id).join(',');
 					this.cartList = this.cartList.filter(item => !item.selected);
+					this.saveLocalCart();
+					deleteCart(ids).catch(() => {
+						if (config.enableMockFallback) this.saveLocalCart();
+					});
 					if (this.cartList.length === 0) {
 						this.exitEditMode();
 					}
 				} else {
-					// 结算
+					if (this.selectedCount === 0) {
+						uni.showToast({
+							title: '请选择要结算的商品',
+							icon: 'none'
+						});
+						return;
+					}
+					uni.setStorageSync('confirmOrderItems', this.cartList.filter(item => item.selected).map((item) => ({
+						...item,
+						price: item.price,
+						unitPrice: item.unitPrice || item.price,
+						quantity: Number(item.quantity || 1),
+						buyNum: Number(item.quantity || 1),
+						orderType: item.orderType || '1',
+						saleType: item.orderType || '1'
+					})));
 					uni.navigateTo({
-						url: '/pages/order/create'
+						url: '/pages/order/order-confirm?source=cart'
 					});
 				}
 			},
 			goShopping() {
-				uni.switchTab({
-					url: '/pages/uniform/uniform-purchase'
+				uni.navigateTo({
+					url: '/pages/uniform/uniform-list'
 				});
 			}
 		}
@@ -274,12 +423,28 @@
 				.item-name {
 					font-size: 30rpx;
 					color: #333333;
-					margin-bottom: 16rpx;
+					margin-bottom: 12rpx;
 					font-weight: 500;
+					padding-right: 120rpx;
+				}
+
+				.item-remove {
+					display: inline-flex;
+					align-items: center;
+					padding: 6rpx 16rpx;
+					border-radius: 999rpx;
+					background: rgba(255, 107, 107, 0.08);
+					margin-bottom: 16rpx;
+
+					text {
+						font-size: 22rpx;
+						color: #ff6b6b;
+						margin-left: 6rpx;
+					}
 				}
 				
 				.item-spec {
-					margin-bottom: 24rpx;
+					margin-bottom: 12rpx;
 					
 					.spec-tag {
 						display: inline-block;
@@ -289,6 +454,18 @@
 						font-size: 24rpx;
 						border-radius: 8rpx;
 						margin-right: 16rpx;
+					}
+				}
+
+				.item-meta {
+					display: flex;
+					flex-wrap: wrap;
+					gap: 12rpx;
+					margin-bottom: 20rpx;
+
+					.meta-text {
+						font-size: 22rpx;
+						color: #97a0af;
 					}
 				}
 				

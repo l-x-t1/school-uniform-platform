@@ -64,9 +64,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="schoolId != null "> and school_id = #{schoolId}</if>
             <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="plannedFinishTime != null "> and planned_finish_time = #{plannedFinishTime}</if>
-            <if test="startTime != null "> and start_time = #{startTime}</if>
-            <if test="finishTime != null "> and finish_time = #{finishTime}</if>
+            <if test="plannedFinishTime != null "> and date(planned_finish_time) = date(#{plannedFinishTime})</if>
+            <if test="startTime != null "> and date(start_time) = date(#{startTime})</if>
+            <if test="finishTime != null "> and date(finish_time) = date(#{finishTime})</if>
             <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>

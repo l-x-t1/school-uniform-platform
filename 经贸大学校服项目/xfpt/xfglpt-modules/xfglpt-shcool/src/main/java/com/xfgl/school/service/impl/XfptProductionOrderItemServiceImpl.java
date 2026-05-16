@@ -1,11 +1,9 @@
 package com.xfgl.school.service.impl;
+
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Map;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.mapper.XfptProductionOrderItemMapper;
@@ -24,6 +22,16 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
     @Autowired
     private XfptProductionOrderItemMapper xfptProductionOrderItemMapper;
 
+    @Override
+    public boolean save(XfptProductionOrderItem xfptProductionOrderItem)
+    {
+        if (xfptProductionOrderItem.getGoodsId() == null) {
+            throw new ServiceException("生产单明细商品不能为空");
+        }
+        initDefaultValue(xfptProductionOrderItem);
+        return super.save(xfptProductionOrderItem);
+    }
+
     /**
      * 查询生产单明细列表
      *
@@ -36,12 +44,8 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
         return xfptProductionOrderItemMapper.selectXfptProductionOrderItemList(xfptProductionOrderItem);
     }
 
-    @Override
-    public boolean save(XfptProductionOrderItem xfptProductionOrderItem)
+    private void initDefaultValue(XfptProductionOrderItem xfptProductionOrderItem)
     {
-        if (xfptProductionOrderItem.getGoodsId() == null) {
-            throw new ServiceException("生产单明细商品不能为空");
-        }
         if (StringUtils.isEmpty(xfptProductionOrderItem.getStatus())) {
             xfptProductionOrderItem.setStatus("0");
         }
@@ -51,8 +55,5 @@ public class XfptProductionOrderItemServiceImpl extends ServiceImpl<XfptProducti
         if (StringUtils.isEmpty(xfptProductionOrderItem.getDelFlag())) {
             xfptProductionOrderItem.setDelFlag("0");
         }
-        return super.save(xfptProductionOrderItem);
     }
-
-
 }

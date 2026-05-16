@@ -30,7 +30,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptGoodsXfptGoodsSizeResult" type="XfptGoods" extends="XfptGoodsResult">
-        <collection property="xfptGoodsSizeList" ofType="XfptGoodsSize" column="id" select="selectXfptGoodsSizeList" />
+        <collection property="xfptGoodsSizeList" ofType="XfptGoodsSize" column="id" select="selectXfptGoodsSizeById" />
     </resultMap>
 
     <resultMap type="XfptGoodsSize" id="XfptGoodsSizeResult">
@@ -69,8 +69,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="saleType != null  and saleType != ''"> and sale_type = #{saleType}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
             <if test="publishStatus != null  and publishStatus != ''"> and publish_status = #{publishStatus}</if>
-            <if test="publishTime != null "> and publish_time = #{publishTime}</if>
-            <if test="offShelfTime != null "> and off_shelf_time = #{offShelfTime}</if>
+            <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
+            <if test="offShelfTime != null "> and date_format(off_shelf_time, '%Y-%m-%d') = date_format(#{offShelfTime}, '%Y-%m-%d')</if>
             <if test="sortNum != null "> and sort_num = #{sortNum}</if>
 
     </select>
@@ -81,10 +81,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{id}
     </select>
 
-    <select id="selectXfptGoodsSizeList" resultMap="XfptGoodsSizeResult">
+    <select id="selectXfptGoodsSizeById" resultMap="XfptGoodsSizeResult">
         select id, goods_id, size_code, sort_num, gender_type, measure_json, retail_price, group_price, stock_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_goods_size
-        where goods_id = #{goods_id}
+        where goods_id = #{id}
     </select>
 
     <insert id="insertXfptGoods" parameterType="XfptGoods" useGeneratedKeys="true" keyProperty="id">
@@ -184,10 +184,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </delete>
 
     <delete id="deleteXfptGoodsSizeByGoodsId" parameterType="Long">
-        delete from xfpt_goods_size where goods_id = #{goodsId}
+        delete from xfpt_goods_size where goods_id = #{id}
     </delete>
 
-    <insert id="batchXfptGoodsSize">
+    <insert id="batchInsertXfptGoodsSize">
         insert into xfpt_goods_size( id, goods_id, size_code, sort_num, gender_type, measure_json, retail_price, group_price, stock_num, status, create_by, create_time, update_by, update_time, remark, del_flag) values
         <foreach item="item" index="index" collection="list" separator=",">
             ( #{item.id}, #{item.goodsId}, #{item.sizeCode}, #{item.sortNum}, #{item.genderType}, #{item.measureJson}, #{item.retailPrice}, #{item.groupPrice}, #{item.stockNum}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})

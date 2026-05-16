@@ -10,9 +10,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="noticeId"    column="notice_id"    />
         <result property="orderId"    column="order_id"    />
         <result property="orderNo"    column="order_no"    />
+        <result property="orderType"    column="order_type"    />
         <result property="productionId"    column="production_id"    />
         <result property="schoolId"    column="school_id"    />
+        <result property="schoolName"    column="school_name"    />
         <result property="supplierId"    column="supplier_id"    />
+        <result property="supplierName"    column="supplier_name"    />
         <result property="receiverName"    column="receiver_name"    />
         <result property="receiverPhone"    column="receiver_phone"    />
         <result property="receiverAddress"    column="receiver_address"    />
@@ -32,7 +35,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <resultMap id="XfptDeliveryOrderXfptDeliveryOrderItemResult" type="XfptDeliveryOrder" extends="XfptDeliveryOrderResult">
-        <collection property="xfptDeliveryOrderItemList" ofType="XfptDeliveryOrderItem" column="id" select="selectXfptDeliveryOrderItemList" />
+        <collection property="xfptDeliveryOrderItemList" ofType="XfptDeliveryOrderItem" column="id" select="selectXfptDeliveryOrderItemById" />
     </resultMap>
 
     <resultMap type="XfptDeliveryOrderItem" id="XfptDeliveryOrderItemResult">
@@ -55,29 +58,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptDeliveryOrderVo">
-        select id, delivery_no, notice_id, order_id, order_no, production_id, school_id, supplier_id, receiver_name, receiver_phone, receiver_address, logistics_company, logistics_no, delivery_status, delivery_time, sign_time, carriage_fee, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_delivery_order
+        select d.id, d.delivery_no, d.notice_id, d.order_id, d.order_no, o.order_type, d.production_id, d.school_id, o.school_name, d.supplier_id, o.supplier_name, d.receiver_name, d.receiver_phone, d.receiver_address, d.logistics_company, d.logistics_no, d.delivery_status, d.delivery_time, d.sign_time, d.carriage_fee, d.dept_id, d.create_by, d.create_time, d.update_by, d.update_time, d.remark, d.del_flag
+        from xfpt_delivery_order d
+        left join xfpt_order_info o on o.id = d.order_id and o.del_flag = 0
     </sql>
 
     <select id="selectXfptDeliveryOrderList" parameterType="XfptDeliveryOrder" resultMap="XfptDeliveryOrderResult">
         <include refid="selectXfptDeliveryOrderVo"/>
         <include refid="search"/>
-            <if test="deliveryNo != null  and deliveryNo != ''"> and delivery_no like concat('%', #{deliveryNo}, '%')</if>
-            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="productionId != null "> and production_id = #{productionId}</if>
-            <if test="schoolId != null "> and school_id = #{schoolId}</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="receiverName != null  and receiverName != ''"> and receiver_name like concat('%', #{receiverName}, '%')</if>
-            <if test="receiverPhone != null  and receiverPhone != ''"> and receiver_phone = #{receiverPhone}</if>
-            <if test="receiverAddress != null  and receiverAddress != ''"> and receiver_address = #{receiverAddress}</if>
-            <if test="logisticsCompany != null  and logisticsCompany != ''"> and logistics_company = #{logisticsCompany}</if>
-            <if test="logisticsNo != null  and logisticsNo != ''"> and logistics_no like concat('%', #{logisticsNo}, '%')</if>
-            <if test="deliveryStatus != null  and deliveryStatus != ''"> and delivery_status = #{deliveryStatus}</if>
-            <if test="deliveryTime != null "> and delivery_time = #{deliveryTime}</if>
-            <if test="signTime != null "> and sign_time = #{signTime}</if>
-            <if test="carriageFee != null "> and carriage_fee = #{carriageFee}</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="deliveryNo != null  and deliveryNo != ''"> and d.delivery_no like concat('%', #{deliveryNo}, '%')</if>
+            <if test="noticeId != null "> and d.notice_id = #{noticeId}</if>
+            <if test="orderId != null "> and d.order_id = #{orderId}</if>
+            <if test="orderNo != null  and orderNo != ''"> and d.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderType != null  and orderType != ''"> and o.order_type = #{orderType}</if>
+            <if test="productionId != null "> and d.production_id = #{productionId}</if>
+            <if test="schoolId != null "> and d.school_id = #{schoolId}</if>
+            <if test="supplierId != null "> and d.supplier_id = #{supplierId}</if>
+            <if test="receiverName != null  and receiverName != ''"> and d.receiver_name like concat('%', #{receiverName}, '%')</if>
+            <if test="receiverPhone != null  and receiverPhone != ''"> and d.receiver_phone = #{receiverPhone}</if>
+            <if test="receiverAddress != null  and receiverAddress != ''"> and d.receiver_address = #{receiverAddress}</if>
+            <if test="logisticsCompany != null  and logisticsCompany != ''"> and d.logistics_company = #{logisticsCompany}</if>
+            <if test="logisticsNo != null  and logisticsNo != ''"> and d.logistics_no like concat('%', #{logisticsNo}, '%')</if>
+            <if test="deliveryStatus != null  and deliveryStatus != ''"> and d.delivery_status = #{deliveryStatus}</if>
+            <if test="deliveryTime != null "> and d.delivery_time = #{deliveryTime}</if>
+            <if test="signTime != null "> and d.sign_time = #{signTime}</if>
+            <if test="carriageFee != null "> and d.carriage_fee = #{carriageFee}</if>
+            <if test="deptId != null "> and d.dept_id = #{deptId}</if>
 
     </select>
 
@@ -206,6 +212,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </insert>
     <sql id="search">
-        where del_flag = 0
+        where d.del_flag = 0
     </sql>
 </mapper>

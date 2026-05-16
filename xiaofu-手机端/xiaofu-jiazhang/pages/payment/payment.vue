@@ -10,13 +10,17 @@
           <text class="label">订单编号</text>
           <text class="value">{{orderInfo.orderNo}}</text>
         </view>
-        <view class="order-school">
+      <view class="order-school">
           <text class="label">所属学校</text>
-          <text class="value">{{orderInfo.school}}</text>
+          <text class="value">{{orderInfo.schoolName}}</text>
         </view>
         <view class="order-student">
           <text class="label">学生信息</text>
-          <text class="value">{{orderInfo.studentName}} {{orderInfo.studentClass}}</text>
+          <text class="value">{{orderInfo.studentName}} {{orderInfo.className}}</text>
+        </view>
+        <view class="order-student">
+          <text class="label">订单类型</text>
+          <text class="value">{{orderInfo.orderTypeText}}</text>
         </view>
       </view>
     </view>
@@ -36,11 +40,11 @@
           <text class="goods-name">{{item.name}}</text>
           <view class="goods-spec">
             <text class="spec-text">{{item.size}}</text>
-            <text class="spec-text">{{item.color}}</text>
+            <text class="spec-text">{{item.orderTypeText}}</text>
           </view>
           <view class="goods-price-row">
             <text class="goods-price">¥{{item.price}}</text>
-            <text class="goods-count">x{{item.count}}</text>
+            <text class="goods-count">x{{item.quantity}}</text>
           </view>
         </view>
       </view>
@@ -117,40 +121,26 @@
 </template>
 
 <script>
+import config from '@/config'
+import { getOrder, payOrder } from '@/api/order'
+
 export default {
   data() {
     return {
       orderId: '',
       selectedMethod: 'wxpay',
       orderInfo: {
-        orderNo: 'SJZ20230912001',
-        school: '石家庄市第一中学',
-        studentName: '张三',
-        studentClass: '高一(3)班',
-        totalGoodsPrice: 338.00,
-        shippingFee: 0.00,
-        discount: 20.00,
-        totalAmount: 318.00,
-        items: [
-          {
-            id: '1',
-            name: '2023秋季校服套装',
-            size: 'L码',
-            color: '藏青色',
-            price: 169.00,
-            count: 1,
-            image: '/static/images/uniform-1.png'
-          },
-          {
-            id: '2',
-            name: '2023冬季加厚校服外套',
-            size: 'L码',
-            color: '藏青色',
-            price: 169.00,
-            count: 1,
-            image: '/static/images/uniform-2.png'
-          }
-        ]
+        orderNo: '',
+        schoolName: '',
+        studentName: '',
+        className: '',
+        orderType: '1',
+        orderTypeText: '统购订单',
+        totalGoodsPrice: '0.00',
+        shippingFee: '0.00',
+        discount: '0.00',
+        totalAmount: '0.00',
+        items: []
       },
       paymentMethods: [
         {
@@ -161,9 +151,9 @@ export default {
           color: '#09BB07'
         },
         {
-          id: 'alipay',
-          name: '支付宝',
-          desc: '支付宝安全支付',
+          id: 'offline',
+          name: '线下确认',
+          desc: '用于联调和学校线下收款场景',
           icon: 'wallet',
           color: '#1296DB'
         }
@@ -173,81 +163,142 @@ export default {
   onLoad(options) {
     if (options.id) {
       this.orderId = options.id;
-      // 在实际项目中，这里应该根据订单ID获取订单信息
-      // this.getOrderInfo(this.orderId);
+      this.getOrderInfo();
     }
   },
   methods: {
-    // 选择支付方式
+    normalizeOrder(data = {}) {
+      const products = data.products || data.items || data.orderItems || data.xfptOrderItemList || [];
+      const student = data.student || {};
+      return {
+        orderNo: data.orderNo || data.orderSn || data.orderCode || this.orderId,
+        schoolName: data.schoolName || data.school || student.school || student.schoolName || '石家庄市示例学校',
+        studentName: data.studentName || student.name || student.studentName || '学生',
+        className: data.className || data.studentClass || student.className || student.grade || '',
+        orderType: data.orderType || '1',
+        orderTypeText: String(data.orderType || '1') === '2' ? '零售订单' : '统购订单',
+        totalGoodsPrice: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
+        shippingFee: data.shippingFee || data.freightAmount || '0.00',
+        discount: data.discount || '0.00',
+        totalAmount: data.totalAmount || data.payAmount || '0.00',
+        items: products.map((item) => ({
+          id: item.id || item.uniformId || item.goodsId,
+          name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
+          size: item.size || item.sizeName || '-',
+          orderTypeText: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          color: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          price: item.price || item.unitPrice || item.salePrice || '0.00',
+          quantity: item.quantity || item.buyNum || item.count || 1,
+          image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png'
+        }))
+      };
+    },
+    getLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      return localOrders[this.orderId];
+    },
+    getOrderInfo() {
+      const localOrder = this.getLocalOrder();
+      if (config.enableMockFallback && localOrder) {
+        this.orderInfo = this.normalizeOrder(localOrder);
+        return;
+      }
+      getOrder(this.orderId)
+        .then((res) => {
+          this.orderInfo = this.normalizeOrder(res.data || res);
+        })
+        .catch((error) => {
+          uni.showToast({
+            title: error.message || '订单信息加载失败',
+            icon: 'none'
+          });
+        });
+    },
     selectPaymentMethod(methodId) {
       this.selectedMethod = methodId;
     },
-    
-    // 确认支付
     confirmPay() {
+      uni.showModal({
+        title: '确认支付',
+        content: `确认支付¥${this.orderInfo.totalAmount}？`,
+        success: (res) => {
+          if (!res.confirm) return;
+          this.submitPay();
+        }
+      });
+    },
+    submitPay() {
       uni.showLoading({
         title: '支付处理中...'
       });
-      
-      // 模拟支付过程
-      setTimeout(() => {
-        uni.hideLoading();
-        
-        // 这里应该调用实际的支付接口
-        if (this.selectedMethod === 'wxpay') {
-          // 调用微信支付
-          this.wxPay();
-        } else if (this.selectedMethod === 'alipay') {
-          // 调用支付宝支付
-          this.aliPay();
-        }
-      }, 1000);
+
+      payOrder(this.orderId, {
+        payType: this.selectedMethod
+      })
+        .catch((error) => {
+          if (!config.enableMockFallback) return Promise.reject(error);
+          return { data: { paid: true } };
+        })
+        .then(() => {
+          this.paymentSuccess();
+        })
+        .catch((error) => {
+          uni.hideLoading();
+          uni.showToast({
+            title: error.message || '支付失败',
+            icon: 'none'
+          });
+        });
     },
-    
-    // 微信支付
-    wxPay() {
-      // 在实际项目中，这里应该调用微信支付API
-      uni.showModal({
-        title: '支付提示',
-        content: '确认使用微信支付¥' + this.orderInfo.totalAmount + '?',
-        success: (res) => {
-          if (res.confirm) {
-            // 模拟支付成功
-            this.paymentSuccess();
-          }
-        }
-      });
-    },
-    
-    // 支付宝支付
-    aliPay() {
-      // 在实际项目中，这里应该调用支付宝支付API
-      uni.showModal({
-        title: '支付提示',
-        content: '确认使用支付宝支付¥' + this.orderInfo.totalAmount + '?',
-        success: (res) => {
-          if (res.confirm) {
-            // 模拟支付成功
-            this.paymentSuccess();
-          }
-        }
-      });
-    },
-    
-    // 支付成功处理
     paymentSuccess() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      const currentOrder = localOrders[this.orderId] || {
+        id: this.orderId,
+        orderNo: this.orderInfo.orderNo || this.orderId,
+        status: 'unpaid',
+        orderType: this.orderInfo.orderType || '1',
+        orderTypeText: this.orderInfo.orderTypeText || '统购订单',
+        productsAmount: this.orderInfo.totalGoodsPrice,
+        shippingFee: this.orderInfo.shippingFee,
+        discount: this.orderInfo.discount,
+        totalAmount: this.orderInfo.totalAmount,
+        payAmount: this.orderInfo.totalAmount,
+        products: this.orderInfo.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          orderType: this.orderInfo.orderType || '1',
+          saleType: this.orderInfo.orderType || '1'
+        }))
+      };
+      currentOrder.status = 'unshipped';
+      currentOrder.payTime = this.getCurrentTime();
+      currentOrder.payStatus = '1';
+      currentOrder.orderStatus = '2';
+      localOrders[this.orderId] = currentOrder;
+      uni.setStorageSync('devOrders', localOrders);
+
+      uni.hideLoading();
       uni.showToast({
         title: '支付成功',
         icon: 'success',
-        duration: 2000
+        duration: 1200
       });
-      
-      // 延迟跳转到订单详情页
+
       setTimeout(() => {
         uni.redirectTo({
           url: '/pages/order/order-detail?id=' + this.orderId + '&from=pay'
         });
-      }, 2000);
+      }, 1200);
+    },
+    getCurrentTime() {
+      const now = new Date();
+      const pad = (num) => String(num).padStart(2, '0');
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     }
   }
 }

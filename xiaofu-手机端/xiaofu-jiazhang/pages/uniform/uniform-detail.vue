@@ -1,61 +1,136 @@
 <template>
   <view class="container">
-    <!-- 轮播图 -->
-    <swiper class="swiper" :indicator-dots="true" :autoplay="false" :duration="500">
+    <swiper class="swiper" :indicator-dots="uniform.images.length > 1" :autoplay="false" :duration="500">
       <swiper-item v-for="(item, index) in uniform.images" :key="index">
-        <image :src="item" mode="aspectFill" class="swiper-image"></image>
+        <image :src="item" mode="aspectFill" class="swiper-image" @click="previewImage(uniform.images, index)"></image>
       </swiper-item>
     </swiper>
-    
-    <!-- 基本信息 -->
+
     <view class="info-section">
+      <view class="purchase-mode" v-if="uniform.saleType === '3'">
+        <text class="purchase-mode-label">购买方式</text>
+        <view class="sale-type-switch">
+          <view
+            class="sale-type-pill"
+            :class="{ active: purchaseType === '1' }"
+            @click="switchPurchaseType('1')"
+          >
+            统购
+          </view>
+          <view
+            class="sale-type-pill"
+            :class="{ active: purchaseType === '2' }"
+            @click="switchPurchaseType('2')"
+          >
+            零售
+          </view>
+        </view>
+      </view>
       <view class="price-row">
-        <text class="price">¥{{uniform.price}}</text>
-        <text class="original-price" v-if="uniform.originalPrice">¥{{uniform.originalPrice}}</text>
+        <text class="price">¥{{ displayPrice }}</text>
+        <text class="original-price" v-if="displayOriginalPrice">¥{{ displayOriginalPrice }}</text>
       </view>
       <view class="name-row">
-        <text class="name">{{uniform.name}}</text>
+        <view class="name-wrap">
+          <text class="name">{{ uniform.name }}</text>
+          <text class="sub-name">{{ uniform.categoryName }} / {{ uniform.brandName }}</text>
+        </view>
         <button class="share-btn" open-type="share">
           <uni-icons type="redo" size="20" color="#666"></uni-icons>
           <text>分享</text>
         </button>
       </view>
       <view class="tags-row">
-        <text class="tag" v-for="(tag, index) in uniform.tags" :key="index">{{tag}}</text>
+        <text class="tag">{{ uniform.saleTypeText }}</text>
+        <text class="tag">{{ uniform.genderTypeText }}</text>
+        <text class="tag">供应商：{{ uniform.supplierName }}</text>
+      </view>
+      <view class="summary-card">
+        <view class="summary-item">
+          <text class="summary-label">商品编码</text>
+          <text class="summary-value">{{ uniform.goodsCode || '--' }}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">上架时间</text>
+          <text class="summary-value">{{ uniform.publishTime || '--' }}</text>
+        </view>
+        <view class="summary-item">
+          <text class="summary-label">库存合计</text>
+          <text class="summary-value">{{ uniform.totalStock }}</text>
+        </view>
       </view>
     </view>
-    
-    <!-- 选择尺码 -->
+
     <view class="specs-section section-card">
       <view class="section-header">
         <text class="title">选择尺码</text>
-        <text class="size-guide" @click="showSizeGuide">尺码对照表</text>
       </view>
       <view class="size-list">
-        <view 
-          v-for="(size, index) in uniform.sizes" 
+        <view
+          v-for="(size, index) in uniform.sizes"
           :key="index"
           class="size-item"
-          :class="{'size-selected': selectedSize === size.name, 'size-disabled': !size.inStock}"
+          :class="{ 'size-selected': selectedSizeId === size.id, 'size-disabled': !size.inStock }"
           @click="selectSize(size)"
         >
-          {{size.name}}
+          <text class="size-code">{{ size.name }}</text>
+          <text class="size-stock">{{ size.stockText }}</text>
+        </view>
+      </view>
+      <view class="selected-size-card" v-if="selectedSize">
+        <view class="selected-row">
+          <text class="selected-label">购买方式</text>
+          <text class="selected-value">{{ purchaseTypeText }}</text>
+        </view>
+        <view class="selected-row">
+          <text class="selected-label">当前尺码</text>
+          <text class="selected-value">{{ selectedSize.name }}</text>
+        </view>
+        <view class="selected-row" v-if="showRetailPrice">
+          <text class="selected-label">零售价</text>
+          <text class="selected-value price-highlight">¥{{ formatPrice(selectedSize.retailPrice) }}</text>
+        </view>
+        <view class="selected-row" v-if="showGroupPrice">
+          <text class="selected-label">统购价</text>
+          <text class="selected-value price-highlight">¥{{ formatPrice(selectedSize.groupPrice) }}</text>
+        </view>
+        <view class="selected-row">
+          <text class="selected-label">库存</text>
+          <text class="selected-value">{{ selectedSize.stockNum }}</text>
+        </view>
+        <view class="selected-row">
+          <text class="selected-label">适用性别</text>
+          <text class="selected-value">{{ selectedSize.genderTypeText }}</text>
         </view>
       </view>
     </view>
-    
-    <!-- 校服详情 -->
+
     <view class="detail-section section-card">
-      <view class="section-title">校服详情</view>
+      <view class="section-title">商品信息</view>
       <view class="detail-content">
         <view class="spec-item" v-for="(spec, index) in uniform.specs" :key="index">
-          <text class="spec-label">{{spec.label}}</text>
-          <text class="spec-value">{{spec.value}}</text>
+          <text class="spec-label">{{ spec.label }}</text>
+          <text class="spec-value">{{ spec.value }}</text>
         </view>
       </view>
     </view>
-    
-    <!-- 质检报告 -->
+
+    <view class="size-table-section section-card" v-if="uniform.sizes.length">
+      <view class="section-title">尺码价格表</view>
+      <view class="table-header">
+        <text class="table-cell">尺码</text>
+        <text class="table-cell" v-if="showRetailPrice">零售价</text>
+        <text class="table-cell" v-if="showGroupPrice">统购价</text>
+        <text class="table-cell">库存</text>
+      </view>
+      <view class="table-row" v-for="(size, index) in uniform.sizes" :key="index">
+        <text class="table-cell">{{ size.name }}</text>
+        <text class="table-cell" v-if="showRetailPrice">¥{{ formatPrice(size.retailPrice) }}</text>
+        <text class="table-cell" v-if="showGroupPrice">¥{{ formatPrice(size.groupPrice) }}</text>
+        <text class="table-cell">{{ size.stockNum }}</text>
+      </view>
+    </view>
+
     <view class="report-section section-card" @click="viewReport">
       <view class="report-header">
         <view class="section-title">质检报告</view>
@@ -66,26 +141,24 @@
       </view>
       <view class="report-summary">
         <view class="report-tag report-pass">检测合格</view>
-        <text class="report-desc">该校服已通过国家纺织品质量检测中心检测，符合国家校服质量标准。</text>
+        <text class="report-desc">当前商品已完成质检归档，家长端可查看公开的质检结果与说明。</text>
       </view>
     </view>
-    
-    <!-- 穿着展示 -->
-    <view class="display-section section-card">
-      <view class="section-title">穿着展示</view>
+
+    <view class="display-section section-card" v-if="uniform.displayImages.length">
+      <view class="section-title">商品展示</view>
       <view class="display-images">
-        <image 
-          v-for="(img, index) in uniform.displayImages" 
-          :key="index" 
-          :src="img" 
-          mode="widthFix" 
+        <image
+          v-for="(img, index) in uniform.displayImages"
+          :key="index"
+          :src="img"
+          mode="widthFix"
           class="display-image"
           @click="previewImage(uniform.displayImages, index)"
         ></image>
       </view>
     </view>
-    
-    <!-- 底部操作栏 -->
+
     <view class="footer-bar">
       <view class="left-actions">
         <view class="action-btn" @click="contactService">
@@ -106,43 +179,79 @@
 </template>
 
 <script>
+import config from '@/config'
+import { getUniform } from '@/api/uniform'
+import { upsertCart, listCart } from '@/api/cart'
+
+const DEFAULT_IMAGE = '/static/qjxf.png';
+
 export default {
   data() {
     return {
       id: null,
-      selectedSize: '',
+      baseUrl: getApp().globalData.baseUrl,
+      selectedSizeId: null,
+      purchaseType: '1',
       uniform: {
-        id: '1',
-        name: '2023秋季校服套装（男）',
-        price: '268.00',
-        originalPrice: '298.00',
-        tags: ['纯棉面料', '环保染料', '舒适透气'],
-        images: [
-          '/static/nanxf.png',  
-        ],
-        sizes: [
-          { name: 'S', inStock: true },
-          { name: 'M', inStock: true },
-          { name: 'L', inStock: true },
-          { name: 'XL', inStock: true },
-          { name: 'XXL', inStock: false }
-        ],
-        specs: [
-          { label: '面料成分', value: '100%纯棉' },
-          { label: '颜色', value: '藏青色' },
-          { label: '适用季节', value: '秋季' },
-          { label: '洗涤说明', value: '30℃以下水温手洗，不可漂白' }
-        ],
-        displayImages: [
-          '/static/nanxf.png',  // 请确保这些图片存在
-          '/static/nanxf.png'
-        ]
+        id: '',
+        name: '',
+        goodsCode: '',
+        categoryName: '',
+        brandName: '',
+        supplierName: '',
+        publishTime: '',
+        saleTypeText: '商品信息',
+        genderTypeText: '通用',
+        totalStock: 0,
+        images: [DEFAULT_IMAGE],
+        displayImages: [DEFAULT_IMAGE],
+        sizes: [],
+        specs: [],
+        detailContent: ''
       }
     }
   },
-  onShow() {
-    // 确保页面每次显示时都能看到数据
-    this.initData();
+  computed: {
+    selectedSize() {
+      return this.uniform.sizes.find((item) => String(item.id) === String(this.selectedSizeId)) || null;
+    },
+    purchaseTypeText() {
+      return this.purchaseType === '2' ? '零售购买' : '统购购买';
+    },
+    showGroupPrice() {
+      return this.uniform.saleType === '1' || this.uniform.saleType === '3';
+    },
+    showRetailPrice() {
+      return this.uniform.saleType === '2' || this.uniform.saleType === '3';
+    },
+    displayPrice() {
+      if (this.selectedSize) {
+        return this.formatPrice(this.getSelectedUnitPrice(this.selectedSize));
+      }
+      if (!this.uniform.sizes.length) {
+        return '0.00';
+      }
+      const minPrice = this.uniform.sizes.reduce((min, item) => {
+        const current = this.getSelectedUnitPrice(item);
+        return min === null || current < min ? current : min;
+      }, null);
+      return this.formatPrice(minPrice || 0);
+    },
+    displayOriginalPrice() {
+      if (!this.selectedSize) {
+        return '';
+      }
+      if (this.uniform.saleType !== '3') {
+        return '';
+      }
+      if (this.purchaseType === '1' && this.showRetailPrice) {
+        return this.formatPrice(this.selectedSize.retailPrice || 0);
+      }
+      if (this.purchaseType === '2' && this.showGroupPrice) {
+        return this.formatPrice(this.selectedSize.groupPrice || 0);
+      }
+      return '';
+    }
   },
   onLoad(options) {
     if (options.id) {
@@ -151,59 +260,258 @@ export default {
     this.initData();
   },
   methods: {
-    initData() {
-      // 如果后端API还没准备好，可以先使用本地数据
+    resolveImage(url) {
+      if (!url) {
+        return DEFAULT_IMAGE;
+      }
+      if (/^https?:\/\//i.test(url)) {
+        return url;
+      }
+      if (url.indexOf('/profile/upload/') === 0) {
+        return url.replace('/profile/upload/', 'http://127.0.0.1:9300/filestatics/upload/');
+      }
+      const baseUrl = (this.baseUrl || config.baseUrl || '').replace(/\/$/, '');
+      return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    },
+
+    safeParseJson(text, fallback = null) {
+      if (!text) {
+        return fallback;
+      }
+      if (typeof text === 'object') {
+        return text;
+      }
       try {
-        // 这里可以调用API
-        // const res = await this.fetchUniformDetail();
-        // this.uniform = res.data;
-        
-        // 暂时使用本地数据
-        console.log('初始化数据成功');
+        return JSON.parse(text);
       } catch (error) {
-        uni.showToast({
-          title: '加载失败，请重试',
-          icon: 'none'
-        });
+        return fallback;
       }
     },
-    
+
+    formatPrice(value) {
+      const num = Number(value || 0);
+      return Number.isNaN(num) ? '0.00' : num.toFixed(2);
+    },
+
+    getSaleTypeText(saleType) {
+      const map = {
+        '1': '统购商品',
+        '2': '零售商品',
+        '3': '统购零售'
+      };
+      return map[String(saleType || '')] || '商品信息';
+    },
+
+    getDefaultPurchaseType(saleType) {
+      if (String(saleType) === '2') {
+        return '2';
+      }
+      return '1';
+    },
+
+    getSelectedUnitPrice(size) {
+      if (!size) {
+        return 0;
+      }
+      if (this.purchaseType === '2') {
+        return Number(size.retailPrice || 0);
+      }
+      return Number(size.groupPrice || 0);
+    },
+
+    getGenderTypeText(genderType) {
+      const map = {
+        '0': '通用',
+        '1': '男款',
+        '2': '女款'
+      };
+      return map[String(genderType || '0')] || '通用';
+    },
+
+    buildSpecs(data, sizes) {
+      return [
+        { label: '商品编码', value: data.goodsCode || '--' },
+        { label: '品类名称', value: data.categoryName || '--' },
+        { label: '品牌名称', value: data.brandName || '--' },
+        { label: '供应商', value: data.supplierName || '--' },
+        { label: '销售类型', value: this.getSaleTypeText(data.saleType) },
+        { label: '上架时间', value: data.publishTime || '--' },
+        { label: '尺码数量', value: `${sizes.length} 个` },
+        { label: '商品说明', value: data.detailContent || '暂无商品说明' }
+      ];
+    },
+
+    normalizeUniform(data = {}) {
+      const detailImages = this.safeParseJson(data.detailImagesJson, []);
+      const imageList = Array.isArray(detailImages) && detailImages.length
+        ? detailImages.map((item) => this.resolveImage(item))
+        : [];
+      const mainImage = this.resolveImage(data.image || data.coverImage || data.mainImage);
+      const rawSizes = Array.isArray(data.xfptGoodsSizeList) ? data.xfptGoodsSizeList : [];
+      const sizes = rawSizes
+        .filter((item) => String(item.status || '1') === '1')
+        .sort((a, b) => Number(a.sortNum || 0) - Number(b.sortNum || 0))
+        .map((item) => {
+          const stockNum = Number(item.stockNum || 0);
+          return {
+            id: item.id,
+            name: item.sizeCode || '--',
+            sizeCode: item.sizeCode || '--',
+            sortNum: Number(item.sortNum || 0),
+            genderType: item.genderType || '0',
+            genderTypeText: this.getGenderTypeText(item.genderType),
+            retailPrice: Number(item.retailPrice || 0),
+            groupPrice: Number(item.groupPrice || 0),
+            stockNum,
+            stockText: stockNum > 0 ? `库存 ${stockNum}` : '缺货',
+            inStock: stockNum > 0,
+            skuId: item.id,
+            measureJson: item.measureJson || ''
+          };
+        });
+
+      const totalStock = sizes.reduce((sum, item) => sum + Number(item.stockNum || 0), 0);
+      const genderTypeText = sizes.length
+        ? this.getGenderTypeText(sizes[0].genderType)
+        : '通用';
+
+      return {
+        id: data.id || this.id || '',
+        name: data.goodsName || data.name || '校服商品',
+        goodsCode: data.goodsCode || '',
+        categoryName: data.categoryName || '未分类',
+        brandName: data.brandName || '未设置品牌',
+        supplierId: data.supplierId || '',
+        supplierName: data.supplierName || '未设置供应商',
+        schoolId: data.schoolId || data.deptId || '',
+        schoolName: data.schoolName || '',
+        deptId: data.deptId || data.schoolId || '',
+        publishTime: data.publishTime || '',
+        saleType: String(data.saleType || ''),
+        saleTypeText: this.getSaleTypeText(data.saleType),
+        genderTypeText,
+        totalStock,
+        images: imageList.length ? [mainImage, ...imageList.filter((item) => item !== mainImage)] : [mainImage],
+        displayImages: imageList.length ? imageList : [mainImage],
+        sizes,
+        specs: this.buildSpecs(data, sizes),
+        detailContent: data.detailContent || ''
+      };
+    },
+
+    initData() {
+      if (!this.id) return;
+
+      getUniform(this.id)
+        .then((res) => {
+          this.uniform = this.normalizeUniform(res.data || res);
+          this.purchaseType = this.getDefaultPurchaseType(this.uniform.saleType);
+          if (this.uniform.sizes.length) {
+            const defaultSize = this.uniform.sizes.find((item) => item.inStock) || this.uniform.sizes[0];
+            this.selectedSizeId = defaultSize.id;
+          }
+        })
+        .catch((error) => {
+          uni.showToast({
+            title: error.message || '加载失败，请重试',
+            icon: 'none'
+          });
+        });
+    },
+
     selectSize(size) {
       if (!size.inStock) return;
-      this.selectedSize = size.name;
+      this.selectedSizeId = size.id;
     },
-    
-    showSizeGuide() {
-      uni.navigateTo({
-        url: '/pages/uniform/size-guide'
-      });
+
+    switchPurchaseType(type) {
+      if (this.uniform.saleType !== '3') {
+        return;
+      }
+      this.purchaseType = type;
     },
-    
+
     viewReport() {
       uni.navigateTo({
-        url: '/pages/report/report-detail?id=1'
+        url: `/pages/uniform/quality-report?id=${this.uniform.id}`
       });
     },
-    
+
     previewImage(images, current) {
       uni.previewImage({
-        current: current,
+        current,
         urls: images
       });
     },
-    
+
     contactService() {
       uni.showToast({
         title: '正在连接客服...',
         icon: 'none'
       });
-      // 实际开发中接入客服系统
     },
-    
+
     navigateTo(url) {
       uni.navigateTo({ url });
     },
-    
+
+    buildOrderItem() {
+      const selectedSku = this.selectedSize || {};
+      const price = this.getSelectedUnitPrice(selectedSku);
+      const selectedStudent = uni.getStorageSync('selectedStudent') || {};
+      return {
+        id: this.uniform.id,
+        uniformId: this.uniform.id,
+        goodsId: this.uniform.id,
+        skuId: selectedSku.skuId,
+        sizeId: selectedSku.skuId,
+        name: this.uniform.name,
+        goodsName: this.uniform.name,
+        goodsCode: this.uniform.goodsCode || '',
+        image: this.uniform.images[0],
+        mainImage: this.uniform.images[0],
+        price: this.formatPrice(price),
+        unitPrice: this.formatPrice(price),
+        quantity: 1,
+        buyNum: 1,
+        size: selectedSku.name || '',
+        sizeName: selectedSku.name || '',
+        color: selectedSku.genderTypeText || '通用',
+        spec: selectedSku.name || '',
+        studentId: selectedStudent.id || selectedStudent.studentId || 0,
+        schoolId: this.uniform.schoolId || selectedStudent.schoolId || selectedStudent.deptId || 0,
+        schoolName: this.uniform.schoolName || selectedStudent.school || selectedStudent.schoolName || '',
+        deptId: this.uniform.deptId || this.uniform.schoolId || selectedStudent.schoolId || selectedStudent.deptId || 0,
+        supplierId: this.uniform.supplierId || 1,
+        supplierName: this.uniform.supplierName || '',
+        selected: true,
+        checkedFlag: '1',
+        noticeId: null,
+        saleType: this.purchaseType,
+        orderType: this.purchaseType
+      };
+    },
+
+    syncLocalCartItem(item) {
+      const cartList = uni.getStorageSync('cartList') || [];
+      const existed = cartList.find((cart) =>
+        String(cart.uniformId || cart.goodsId) === String(item.uniformId) &&
+        String(cart.skuId || cart.sizeId || '') === String(item.skuId || '') &&
+        String(cart.orderType || '1') === String(item.orderType || '1')
+      );
+      if (existed) {
+        existed.quantity = Number(existed.quantity || 1) + Number(item.quantity || 1);
+        existed.buyNum = existed.quantity;
+        existed.price = item.price;
+        existed.unitPrice = item.price;
+        existed.selected = true;
+        existed.checkedFlag = '1';
+      } else {
+        cartList.push({ ...item, selected: true });
+      }
+      uni.setStorageSync('cartList', cartList);
+    },
+
     addToCart() {
       if (!this.selectedSize) {
         return uni.showToast({
@@ -211,14 +519,38 @@ export default {
           icon: 'none'
         });
       }
-      
-      // 模拟添加到购物车
-      uni.showToast({
-        title: '已加入购物车',
-        icon: 'success'
-      });
+
+      const item = this.buildOrderItem();
+      upsertCart(item)
+        .catch((error) => {
+          if (!config.enableMockFallback) return Promise.reject(error);
+          this.syncLocalCartItem(item);
+          return { localOnly: true };
+        })
+        .then((res) => {
+          if (!res || !res.localOnly) {
+            return listCart().then((cartRes) => {
+              const rows = cartRes.rows || [];
+              uni.setStorageSync('cartList', rows);
+            }).catch(() => {
+              this.syncLocalCartItem(item);
+            });
+          }
+        })
+        .then(() => {
+          uni.showToast({
+            title: '已加入购物车',
+            icon: 'success'
+          });
+        })
+        .catch((error) => {
+          uni.showToast({
+            title: error.message || '加入购物车失败',
+            icon: 'none'
+          });
+        });
     },
-    
+
     buyNow() {
       if (!this.selectedSize) {
         return uni.showToast({
@@ -226,9 +558,9 @@ export default {
           icon: 'none'
         });
       }
-      
+      uni.setStorageSync('confirmOrderItems', [this.buildOrderItem()]);
       uni.navigateTo({
-        url: `/pages/order/order-confirm?id=${this.uniform.id}&size=${this.selectedSize}`
+        url: '/pages/order/order-confirm?source=buyNow'
       });
     }
   }
@@ -237,15 +569,15 @@ export default {
 
 <style lang="scss">
 .container {
-  padding-bottom: 120rpx;
-  background-color: #f5f5f5; // 添加背景色
+  padding-bottom: 140rpx;
+  background-color: #f5f5f5;
 }
 
 .swiper {
-  width: 100vw;  // 确保宽度正确
-  height: 20vh;
+  width: 100vw;
+  height: 520rpx;
   background-color: #fff;
-  
+
   .swiper-image {
     width: 100%;
     height: 100%;
@@ -256,37 +588,47 @@ export default {
   padding: 30rpx;
   background-color: #fff;
   margin-bottom: 20rpx;
-  
+
   .price-row {
     margin-bottom: 16rpx;
-    
+
     .price {
-      font-size: 40rpx;
+      font-size: 48rpx;
       color: #e74c3c;
       font-weight: 600;
       margin-right: 16rpx;
     }
-    
+
     .original-price {
       font-size: 28rpx;
       color: #999;
       text-decoration: line-through;
     }
   }
-  
+
   .name-row {
     display: flex;
     justify-content: space-between;
-    margin-bottom: 16rpx;
-    
-    .name {
+    margin-bottom: 20rpx;
+
+    .name-wrap {
       flex: 1;
-      font-size: 32rpx;
-      color: #333;
-      font-weight: 500;
-      line-height: 1.4;
     }
-    
+
+    .name {
+      display: block;
+      font-size: 34rpx;
+      color: #333;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 10rpx;
+    }
+
+    .sub-name {
+      font-size: 24rpx;
+      color: #8792a7;
+    }
+
     .share-btn {
       background: none;
       padding: 0;
@@ -296,31 +638,97 @@ export default {
       margin: 0 0 0 20rpx;
       line-height: 1.2;
       width: 80rpx;
-      
+
       text {
         font-size: 22rpx;
         color: #666;
         margin-top: 4rpx;
       }
-      
+
       &::after {
         border: none;
       }
     }
   }
-  
+
   .tags-row {
     display: flex;
     flex-wrap: wrap;
-    
+    margin-bottom: 24rpx;
+
     .tag {
-      padding: 4rpx 12rpx;
+      padding: 8rpx 16rpx;
       font-size: 22rpx;
-      color: #3B7AFF;
+      color: #3b7aff;
       background-color: rgba(59, 122, 255, 0.1);
-      border-radius: 4rpx;
+      border-radius: 999rpx;
       margin-right: 16rpx;
+      margin-bottom: 12rpx;
+    }
+  }
+
+  .purchase-mode {
+    margin-bottom: 18rpx;
+
+    .purchase-mode-label {
+      display: block;
+      font-size: 24rpx;
+      color: #7c879b;
+      margin-bottom: 12rpx;
+      font-weight: 500;
+    }
+  }
+
+  .sale-type-switch {
+    display: inline-flex;
+    padding: 8rpx;
+    background: #f3f6fb;
+    border-radius: 999rpx;
+    gap: 10rpx;
+  }
+
+  .sale-type-pill {
+    min-width: 128rpx;
+    height: 58rpx;
+    line-height: 58rpx;
+    padding: 0 22rpx;
+    text-align: center;
+    border-radius: 999rpx;
+    font-size: 24rpx;
+    color: #6f7f98;
+    font-weight: 500;
+    background: transparent;
+
+    &.active {
+      background: #3b7aff;
+      color: #fff;
+      box-shadow: 0 8rpx 20rpx rgba(59, 122, 255, 0.24);
+    }
+  }
+
+  .summary-card {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16rpx;
+    padding: 24rpx;
+    border-radius: 24rpx;
+    background: linear-gradient(135deg, #f7faff 0%, #f0f5ff 100%);
+
+    .summary-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .summary-label {
+      font-size: 22rpx;
+      color: #8b95a9;
       margin-bottom: 8rpx;
+    }
+
+    .summary-value {
+      font-size: 26rpx;
+      color: #2c3550;
+      font-weight: 500;
     }
   }
 }
@@ -334,7 +742,7 @@ export default {
 .section-title {
   font-size: 30rpx;
   color: #333;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 20rpx;
 }
 
@@ -343,67 +751,152 @@ export default {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20rpx;
-  
+
   .title {
     font-size: 30rpx;
     color: #333;
-    font-weight: 500;
+    font-weight: 600;
   }
-  
+
   .size-guide {
     font-size: 24rpx;
-    color: #3B7AFF;
+    color: #3b7aff;
   }
 }
 
 .size-list {
   display: flex;
   flex-wrap: wrap;
-  
+  gap: 18rpx;
+
   .size-item {
-    padding: 12rpx 30rpx;
-    border: 1rpx solid #ddd;
-    border-radius: 6rpx;
-    margin-right: 20rpx;
-    margin-bottom: 20rpx;
-    font-size: 28rpx;
-    color: #333;
-    
+    width: 150rpx;
+    padding: 18rpx 0;
+    border: 1rpx solid #dfe5ef;
+    border-radius: 18rpx;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-color: #fff;
+
+    .size-code {
+      font-size: 30rpx;
+      color: #2d3a52;
+      font-weight: 600;
+      margin-bottom: 8rpx;
+    }
+
+    .size-stock {
+      font-size: 22rpx;
+      color: #8d97a8;
+    }
+
     &.size-selected {
-      color: #3B7AFF;
-      border-color: #3B7AFF;
-      background-color: rgba(59, 122, 255, 0.05);
+      border-color: #3b7aff;
+      background-color: rgba(59, 122, 255, 0.08);
+
+      .size-code,
+      .size-stock {
+        color: #3b7aff;
+      }
     }
-    
+
     &.size-disabled {
-      color: #ccc;
-      border-color: #eee;
-      background-color: #f8f8f8;
+      border-color: #eceff4;
+      background-color: #f7f8fb;
+
+      .size-code,
+      .size-stock {
+        color: #c2c8d3;
+      }
     }
+  }
+}
+
+.selected-size-card {
+  margin-top: 24rpx;
+  padding: 24rpx;
+  border-radius: 20rpx;
+  background-color: #f8fbff;
+
+  .selected-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10rpx 0;
+  }
+
+  .selected-label {
+    font-size: 24rpx;
+    color: #7c879b;
+  }
+
+  .selected-value {
+    font-size: 26rpx;
+    color: #2d3a52;
+    font-weight: 500;
+  }
+
+  .price-highlight {
+    color: #e74c3c;
   }
 }
 
 .detail-content {
   .spec-item {
     display: flex;
-    padding: 16rpx 0;
+    padding: 18rpx 0;
     border-bottom: 1rpx solid #f0f0f0;
-    
+
     &:last-child {
       border-bottom: none;
     }
-    
+
     .spec-label {
-      width: 200rpx;
-      font-size: 26rpx;
-      color: #999;
+      width: 180rpx;
+      font-size: 25rpx;
+      color: #98a1b2;
+      flex-shrink: 0;
     }
-    
+
     .spec-value {
       flex: 1;
       font-size: 26rpx;
       color: #333;
+      line-height: 1.6;
+      word-break: break-all;
     }
+  }
+}
+
+.size-table-section {
+  .table-header,
+  .table-row {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr 1fr 0.9fr;
+    align-items: center;
+  }
+
+  .table-header {
+    padding: 18rpx 0;
+    border-bottom: 1rpx solid #edf1f6;
+    color: #8b95a9;
+    font-size: 24rpx;
+  }
+
+  .table-row {
+    padding: 20rpx 0;
+    border-bottom: 1rpx solid #f4f6fa;
+    font-size: 25rpx;
+    color: #2d3a52;
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+
+  .table-cell {
+    text-align: center;
   }
 }
 
@@ -413,7 +906,7 @@ export default {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20rpx;
-    
+
     .report-more {
       display: flex;
       align-items: center;
@@ -421,23 +914,23 @@ export default {
       color: #999;
     }
   }
-  
+
   .report-summary {
     display: flex;
     align-items: flex-start;
-    
+
     .report-tag {
       padding: 6rpx 16rpx;
       font-size: 24rpx;
       border-radius: 6rpx;
       margin-right: 20rpx;
-      
+
       &.report-pass {
         background-color: rgba(46, 204, 113, 0.1);
         color: #2ecc71;
       }
     }
-    
+
     .report-desc {
       flex: 1;
       font-size: 26rpx;
@@ -452,7 +945,7 @@ export default {
     width: 100%;
     margin-bottom: 20rpx;
     border-radius: 12rpx;
-    
+
     &:last-child {
       margin-bottom: 0;
     }
@@ -464,61 +957,62 @@ export default {
   left: 0;
   right: 0;
   bottom: 0;
-  height: 100rpx;
+  height: 110rpx;
   background-color: #fff;
-  padding-bottom: env(safe-area-inset-bottom); // 适配iPhone X等机型
+  padding-bottom: env(safe-area-inset-bottom);
   display: flex;
   border-top: 1rpx solid #f0f0f0;
   z-index: 999;
-  
+
   .left-actions {
     display: flex;
-    
+
     .action-btn {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       width: 120rpx;
-      height: 100rpx;
+      height: 110rpx;
       font-size: 22rpx;
       color: #666;
     }
   }
-  
+
   .right-actions {
     flex: 1;
     display: flex;
     align-items: center;
     justify-content: space-around;
     padding-right: 20rpx;
-    
-    .add-cart-btn, .buy-btn {
+
+    .add-cart-btn,
+    .buy-btn {
       width: 240rpx;
-      height: 72rpx;
-      line-height: 72rpx;
-      border-radius: 36rpx;
+      height: 76rpx;
+      line-height: 76rpx;
+      border-radius: 38rpx;
       font-size: 28rpx;
       padding: 0;
     }
-    
+
     .add-cart-btn {
       background-color: rgba(59, 122, 255, 0.1);
-      color: #3B7AFF;
-      
+      color: #3b7aff;
+
       &::after {
         border: none;
       }
     }
-    
+
     .buy-btn {
-      background-color: #3B7AFF;
+      background-color: #3b7aff;
       color: #fff;
-      
+
       &::after {
         border: none;
       }
     }
   }
 }
-</style> 
+</style>
