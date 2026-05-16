@@ -1674,12 +1674,12 @@ CREATE TABLE `xfpt_comment` (
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标记，0正常 1删除',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `uk_xfpt_comment_order_item_user` (`order_item_id`,`user_id`),
   KEY `idx_xfpt_comment_order` (`order_id`),
   KEY `idx_xfpt_comment_goods` (`goods_id`),
   KEY `idx_xfpt_comment_supplier` (`supplier_id`,`status`),
-  KEY `idx_xfpt_comment_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='商品评价';
+  KEY `idx_xfpt_comment_user` (`user_id`),
+  KEY `idx_xfpt_comment_order_item_user` (`order_item_id`,`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='商品评价';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1688,7 +1688,7 @@ CREATE TABLE `xfpt_comment` (
 
 LOCK TABLES `xfpt_comment` WRITE;
 /*!40000 ALTER TABLE `xfpt_comment` DISABLE KEYS */;
-INSERT INTO `xfpt_comment` VALUES (1,4,4,'DEMO-ORDER-20260504185529-2-46-4',4,'校园运动鞋',42,'李蒙莎',8,5,'面料厚实，尺码合适，孩子穿着舒适。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0'),(2,3,3,'DEMO-ORDER-20260504185529-2-42-3',3,'冬季加绒冲锋衣校服',38,'魏鹏远',2,4,'发货速度可以，袖口做工还需要再细一点。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0');
+INSERT INTO `xfpt_comment` VALUES (1,4,4,'DEMO-ORDER-20260504185529-2-46-4',4,'校园运动鞋',42,'李蒙莎',8,5,'面料厚实，尺码合适，孩子穿着舒适。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0'),(2,3,3,'DEMO-ORDER-20260504185529-2-42-3',3,'冬季加绒冲锋衣校服',38,'魏鹏远',2,4,'发货速度可以，袖口做工还需要再细一点。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0'),(3,10,9,'TEST-ORDER-20260514181224-COMPLETED',4,'????',2,'????',15,5,'??????','[]',NULL,NULL,'0','????','2026-05-15 13:43:26',NULL,NULL,NULL,'0'),(4,9,8,'TEST-ORDER-20260514181224-SHIPPED',3,'?????????',2,'家长用户',8,5,'好衣服','[]',NULL,NULL,'0','家长用户','2026-05-15 13:50:52',NULL,NULL,NULL,'0'),(17,9,8,'TEST-ORDER-20260514181224-SHIPPED',3,'?????????',2,'家长用户',8,5,'强强强强强强强强','[]',NULL,NULL,'0','家长用户','2026-05-16 18:56:49',NULL,NULL,NULL,'0');
 /*!40000 ALTER TABLE `xfpt_comment` ENABLE KEYS */;
 UNLOCK TABLES;
 
