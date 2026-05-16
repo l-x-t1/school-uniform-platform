@@ -7,6 +7,8 @@ function normalizeStudent(item = {}) {
     studentId: item.id || item.studentId,
     studentName: item.name || item.studentName || '',
     name: item.name || item.studentName || '',
+    schoolId: item.schoolId || item.deptId || item.sysDepts?.deptId || '',
+    deptId: item.deptId || item.schoolId || item.sysDepts?.deptId || '',
     school: item.school || item.schoolName || item.sysDepts?.deptName || '',
     schoolName: item.school || item.schoolName || item.sysDepts?.deptName || '',
     grade: item.grade || item.gradeName || '',

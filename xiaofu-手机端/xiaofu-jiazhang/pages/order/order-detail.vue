@@ -69,9 +69,17 @@
           <text class="label">发货时间</text>
           <text class="value">{{order.shipTime}}</text>
         </view>
-        <view class="order-detail-row" v-if="order.completeTime">
+        <view class="order-detail-row" v-if="order.finishTime">
           <text class="label">完成时间</text>
-          <text class="value">{{order.completeTime}}</text>
+          <text class="value">{{order.finishTime}}</text>
+        </view>
+        <view class="order-detail-row">
+          <text class="label">订单类型</text>
+          <text class="value">{{order.orderTypeText}}</text>
+        </view>
+        <view class="order-detail-row" v-if="order.schoolName">
+          <text class="label">所属学校</text>
+          <text class="value">{{order.schoolName}}</text>
         </view>
         <view class="order-detail-row">
           <text class="label">订单备注</text>
@@ -91,7 +99,7 @@
             <image class="product-image" :src="product.image" mode="aspectFill"></image>
             <view class="product-info">
               <text class="product-name">{{product.name}}</text>
-              <text class="product-spec">{{product.size}} | {{product.color}}</text>
+              <text class="product-spec">{{product.orderTypeText}} | {{product.size}}</text>
               <view class="product-price-row">
                 <text class="product-price">¥{{product.price}}</text>
                 <text class="product-quantity">x{{product.quantity}}</text>
@@ -170,10 +178,13 @@ export default {
         id: '',
         orderNo: '',
         status: 'unpaid',
+        orderType: '1',
+        orderTypeText: '统购订单',
+        schoolName: '',
         createTime: '',
         payTime: '',
         shipTime: '',
-        completeTime: null,
+        finishTime: null,
         productsAmount: '0.00',
         shippingFee: '0.00',
         discount: '0.00',
@@ -215,40 +226,41 @@ export default {
   },
   methods: {
     normalizeOrder(data = {}) {
-      const products = data.products || data.items || data.orderItems || [];
+      const products = data.products || data.items || data.orderItems || data.xfptOrderItemList || [];
       const address = data.address || {};
-      const fullAddress =
-        address.fullAddress ||
-        data.fullAddress ||
-        `${address.province || data.province || ''}${address.city || data.city || ''}${address.district || data.district || ''}${address.detailAddress || address.address || data.detailAddress || data.address || ''}`;
+      const fullAddress = address.fullAddress || data.receiverAddress || data.fullAddress || '';
       return {
         ...this.order,
         id: data.id || data.orderId || this.id,
         orderNo: data.orderNo || data.orderSn || data.orderCode || this.id,
-        status: this.normalizeStatus(data.status),
+        status: this.normalizeStatus(data.status || data.orderStatus),
+        orderType: data.orderType || '1',
+        orderTypeText: String(data.orderType || '1') === '2' ? '零售订单' : '统购订单',
+        schoolName: data.schoolName || data.school || '',
         createTime: data.createTime || '',
         payTime: data.payTime || '',
         shipTime: data.shipTime || data.deliveryTime || '',
-        completeTime: data.completeTime || null,
+        finishTime: data.finishTime || data.completeTime || null,
         productsAmount: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
         shippingFee: data.shippingFee || data.freightAmount || '0.00',
         discount: data.discount || '0.00',
         totalAmount: data.totalAmount || data.payAmount || '0.00',
         remark: data.remark || '',
         address: {
-          name: address.name || address.receiver || data.receiver || '家长',
-          phone: address.phone || address.mobile || data.phone || data.mobile || '',
-          tag: address.tag || address.label || '默认',
+          name: address.name || address.receiver || data.receiverName || data.receiver || '家长',
+          phone: address.phone || address.mobile || data.receiverPhone || data.phone || data.mobile || '',
+          tag: address.tag || address.label || (String(data.receiveType || '2') === '1' ? '学校' : '家'),
           fullAddress: fullAddress || '暂无收货地址'
         },
         products: products.map((item) => ({
-          id: item.id || item.uniformId,
-          name: item.name || item.uniformName || item.productName || '校服',
-          image: item.image || item.productImage || item.coverImage || '/static/qjxf.png',
-          price: item.price || item.salePrice || '0.00',
+          id: item.id || item.uniformId || item.goodsId,
+          name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
+          image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png',
+          price: item.price || item.unitPrice || item.salePrice || '0.00',
           size: item.size || item.sizeName || '-',
-          color: item.color || item.spec || '默认款',
-          quantity: item.quantity || item.count || 1
+          color: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          orderTypeText: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          quantity: item.quantity || item.buyNum || item.count || 1
         }))
       };
     },
@@ -257,9 +269,10 @@ export default {
       const map = {
         0: 'unpaid',
         1: 'unshipped',
-        2: 'shipped',
-        3: 'completed',
-        4: 'cancelled',
+        2: 'unshipped',
+        3: 'shipped',
+        4: 'completed',
+        5: 'cancelled',
         unpaid: 'unpaid',
         unshipped: 'unshipped',
         shipped: 'shipped',
@@ -448,7 +461,7 @@ export default {
               .then(() => {
                 uni.hideLoading();
                 this.order.status = 'completed';
-                this.order.completeTime = this.getCurrentTime();
+                this.order.finishTime = this.getCurrentTime();
                 this.saveLocalOrder();
                 uni.showToast({
                   title: '已确认收货',

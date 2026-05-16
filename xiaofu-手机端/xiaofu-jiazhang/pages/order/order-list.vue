@@ -135,21 +135,25 @@ export default {
   },
   methods: {
     normalizeOrder(item) {
-      const products = item.products || item.items || item.orderItems || [];
+      const products = item.products || item.items || item.orderItems || item.xfptOrderItemList || [];
       return {
         id: item.id || item.orderId,
         orderNo: item.orderNo || item.orderSn || item.orderCode,
-        status: this.normalizeStatus(item.status),
+        status: this.normalizeStatus(item.status || item.orderStatus),
         createTime: item.createTime,
         totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
+        orderType: item.orderType || '1',
+        orderTypeText: String(item.orderType || '1') === '2' ? '零售订单' : '统购订单',
+        schoolName: item.schoolName || item.school || '',
+        studentName: item.studentName || item.student?.name || '',
         products: products.map((product) => ({
-          id: product.id || product.productId || product.uniformId,
-          name: product.name || product.productName || product.uniformName || '校服',
-          image: product.image || product.productImage || product.coverImage || '/static/qjxf.png',
+          id: product.id || product.productId || product.uniformId || product.goodsId,
+          name: product.name || product.goodsName || product.productName || product.uniformName || '校服',
+          image: product.image || product.mainImage || product.productImage || product.coverImage || '/static/qjxf.png',
           price: product.price || product.salePrice || product.unitPrice || '0.00',
-          quantity: product.quantity || product.num || 1,
+          quantity: Number(product.quantity || product.buyNum || product.num || 1),
           size: product.size || product.sizeName || '-',
-          color: product.color || product.colorName || '-'
+          color: String(product.saleType || product.orderType || item.orderType || '1') === '2' ? '零售购买' : '统购购买'
         }))
       };
     },
@@ -177,8 +181,10 @@ export default {
       const localOrders = uni.getStorageSync('devOrders') || {};
       if (localOrders[orderId]) {
         localOrders[orderId].status = status;
+        localOrders[orderId].orderStatus = status === 'cancelled' ? '5' : status === 'completed' ? '4' : localOrders[orderId].orderStatus;
+        localOrders[orderId].payStatus = status === 'cancelled' ? localOrders[orderId].payStatus || '0' : status === 'completed' ? '1' : localOrders[orderId].payStatus;
         if (status === 'completed') {
-          localOrders[orderId].completeTime = this.getCurrentTime();
+          localOrders[orderId].finishTime = this.getCurrentTime();
         }
         uni.setStorageSync('devOrders', localOrders);
       }
@@ -188,9 +194,10 @@ export default {
       const statusMap = {
         0: 'unpaid',
         1: 'unshipped',
-        2: 'shipped',
-        3: 'completed',
-        4: 'cancelled',
+        2: 'unshipped',
+        3: 'shipped',
+        4: 'completed',
+        5: 'cancelled',
         unpaid: 'unpaid',
         unshipped: 'unshipped',
         shipped: 'shipped',
