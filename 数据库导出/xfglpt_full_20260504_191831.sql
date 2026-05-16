@@ -4356,13 +4356,36 @@ SET `PARENT_ID` = @new_feature_menu_id,
     `UPDATE_BY` = 'admin',
     `UPDATE_TIME` = NOW(),
     `REMARK` = '学校端评价管理菜单'
-WHERE `PERMS` = 'school:evaluation:list';
+WHERE `MENU_ID` = @evaluation_menu_id;
+
+SET @evaluation_query_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+  LIMIT 1
+);
+
+SET @evaluation_reply_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+  LIMIT 1
+);
+
+SET @evaluation_hide_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+  LIMIT 1
+);
 
 UPDATE `sys_menu`
 SET `PARENT_ID` = @evaluation_menu_id,
     `UPDATE_BY` = 'admin',
     `UPDATE_TIME` = NOW()
-WHERE `PERMS` IN ('school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide');
+WHERE `MENU_ID` = IFNULL(@evaluation_query_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_reply_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_hide_existing_id, -1);
 
 SET @evaluation_query_id := (
   SELECT `MENU_ID`
