@@ -287,6 +287,13 @@
                                 }
                   },
                   {
+                      "path":  "pages/order/comment-apply",
+                      "style":  {
+                                    "navigationBarTitleText":  "订单评价",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
                       "path":  "pages/order/order-confirm",
                       "style":  {
                                     "navigationBarTitleText":  "确认订单",
