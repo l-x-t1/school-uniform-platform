@@ -102,16 +102,40 @@
         <if test="deptId != null "> and dept_id = #{deptId}</if>
     </select>
 
+    <select id="selectSupplierGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
+        <include refid="selectXfptGroupNoticeVo"/>
+        <include refid="search"/>
+        <if test="schoolName != null and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="title != null and title != ''"> and title like concat('%', #{title}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="noticeType != null and noticeType != ''"> and notice_type = #{noticeType}</if>
+        <if test="status != null and status != ''"> and status = #{status}</if>
+        and status in ('1', '2')
+        order by
+        case when publish_time is null then 1 else 0 end,
+        publish_time desc,
+        id desc
+    </select>
+
     <select id="selectXfptGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeXfptGroupNoticeItemResult">
         select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice
         where id = #{id}
     </select>
 
+    <select id="selectSupplierGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeResult">
+        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_group_notice
+        where id = #{id}
+          and del_flag = 0
+          and status in ('1', '2')
+    </select>
+
     <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
         select id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice_item
         where notice_id = #{id}
+          and del_flag = 0
     </select>
 
     <select id="selectGroupNoticeProgressList" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">

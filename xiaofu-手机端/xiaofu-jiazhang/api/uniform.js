@@ -1,16 +1,36 @@
 import request from '@/utils/request'
 
 function normalizeGoods(item = {}) {
+  const id = item.id || item.goodsId
+  const mainImage = item.mainImage || item.coverImage || item.image || ''
+
   return {
     ...item,
-    id: item.id || item.goodsId,
-    uniformId: item.id || item.goodsId,
+    id,
+    goodsId: id,
+    uniformId: id,
     name: item.goodsName || item.name || '校服',
     uniformName: item.goodsName || item.name || '校服',
-    image: item.mainImage || item.coverImage || item.image || '/static/qjxf.png',
-    price: item.salePrice || item.price || item.minPrice || 0,
-    salePrice: item.salePrice || item.price || item.minPrice || 0,
-    salesCount: item.saleCount || item.salesCount || item.buyCount || 0
+    goodsName: item.goodsName || item.name || '校服',
+    image: mainImage,
+    mainImage,
+    price: item.salePrice || item.price || item.minPrice || '',
+    salePrice: item.salePrice || item.price || item.minPrice || '',
+    salesCount: item.saleCount || item.salesCount || item.buyCount || '',
+    categoryName: item.categoryName || '',
+    goodsCode: item.goodsCode || '',
+    supplierId: item.supplierId || '',
+    supplierName: item.supplierName || '',
+    brandName: item.brandName || '',
+    saleType: item.saleType || '',
+    deptId: item.deptId || item.schoolId || '',
+    schoolId: item.schoolId || item.deptId || '',
+    schoolName: item.schoolName || '',
+    publishStatus: item.publishStatus || '',
+    publishTime: item.publishTime || '',
+    detailContent: item.detailContent || '',
+    detailImagesJson: item.detailImagesJson || '',
+    status: item.status || ''
   }
 }
 

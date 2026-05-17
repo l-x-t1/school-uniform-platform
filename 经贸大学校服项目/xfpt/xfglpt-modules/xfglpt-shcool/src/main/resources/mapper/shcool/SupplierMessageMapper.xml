@@ -16,6 +16,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="supplierIntroduce"    column="supplier_introduce"    />
         <result property="equipmentConditions"    column="equipment_conditions"    />
         <result property="businessLicense"    column="business_license"    />
+        <result property="registeredCapital"    column="registered_capital"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -26,11 +27,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="deptId"    column="dept_id"    />
         <result property="deptName"    column="dept_name"    />
         <result property="ancestors"    column="ancestors"    />
+        <result property="xypj"    column="xypj"    />
         <result property="violationReason"    column="violation_reason"    />
     </resultMap>
 
     <sql id="selectSupplierMessageVo">
-        select violation_reason,id, supplier_name, supplier_phone, supplier_type, legal_representative, turnover_time, staff_number, established_time, supplier_address, supplier_introduce, equipment_conditions, business_license, create_by, create_time, update_by, update_time, remark,registered_capital,insured_number,blacklist_status,dept_id,dept_name,ancestors from xfpt_supplier_message
+        select violation_reason,id, supplier_name, supplier_phone, supplier_type, legal_representative, turnover_time, staff_number, established_time, supplier_address, supplier_introduce, equipment_conditions, business_license, create_by, create_time, update_by, update_time, remark,registered_capital,insured_number,blacklist_status,dept_id,dept_name,ancestors,xypj from xfpt_supplier_message
     </sql>
 
     <select id="selectSupplierMessageList" parameterType="com.xfgl.school.domain.SupplierMessage" resultMap="SupplierMessageResult">
@@ -74,6 +76,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="supplierIntroduce != null">supplier_introduce,</if>
             <if test="equipmentConditions != null">equipment_conditions,</if>
             <if test="businessLicense != null">business_license,</if>
+            <if test="registeredCapital != null">registered_capital,</if>
             <if test="createBy != null">create_by,</if>
             <if test="createTime != null">create_time,</if>
             <if test="updateBy != null">update_by,</if>
@@ -84,6 +87,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deptId != null">dept_id,</if>
             <if test="deptName != null">dept_name,</if>
             <if test="ancestors != null">ancestors,</if>
+            <if test="xypj != null">xypj,</if>
 
 
          </trim>
@@ -99,6 +103,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="supplierIntroduce != null">#{supplierIntroduce},</if>
             <if test="equipmentConditions != null">#{equipmentConditions},</if>
             <if test="businessLicense != null">#{businessLicense},</if>
+            <if test="registeredCapital != null">#{registeredCapital},</if>
             <if test="createBy != null">#{createBy},</if>
             <if test="createTime != null">#{createTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
@@ -109,6 +114,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="deptId != null">#{deptId},</if>
             <if test="deptName != null">#{deptName},</if>
             <if test="ancestors != null">#{ancestors},</if>
+            <if test="xypj != null">#{xypj},</if>
 
          </trim>
     </insert>
@@ -127,6 +133,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="supplierIntroduce != null">supplier_introduce = #{supplierIntroduce},</if>
             <if test="equipmentConditions != null">equipment_conditions = #{equipmentConditions},</if>
             <if test="businessLicense != null">business_license = #{businessLicense},</if>
+            <if test="registeredCapital != null">registered_capital = #{registeredCapital},</if>
             <if test="createBy != null">create_by = #{createBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
@@ -136,7 +143,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="blacklistStatus != null">blacklist_status = #{blacklistStatus},</if>
             <if test="deptId != null">dept_id = #{deptId},</if>
             <if test="deptName != null">dept_name = #{deptName},</if>
-
+            <if test="xypj != null">xypj = #{xypj},</if>
             <if test="ancestors != null">dept_name = #{ancestors},</if>
         </trim>
         where id = #{id}

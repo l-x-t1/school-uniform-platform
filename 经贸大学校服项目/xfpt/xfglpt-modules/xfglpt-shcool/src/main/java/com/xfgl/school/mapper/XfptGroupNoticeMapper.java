@@ -22,12 +22,21 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
      * @return 统购公告集合
      */
     public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice);
+
+    /**
+     * 供应商查询学校发布的统购公告列表
+     *
+     * @param xfptGroupNotice 统购公告
+     * @return 统购公告集合
+     */
+    public List<XfptGroupNotice> selectSupplierGroupNoticeList(XfptGroupNotice xfptGroupNotice);
         /**
          * 查询统购公告
          *
          * @param id 统购公告主键
          * @return 统购公告
          */
+        XfptGroupNotice selectSupplierGroupNoticeById(@Param("id") Long id);
         List<XfptGroupNoticeItem> selectXfptGroupNoticeItemById(@Param("id")Long id);
 
         /**

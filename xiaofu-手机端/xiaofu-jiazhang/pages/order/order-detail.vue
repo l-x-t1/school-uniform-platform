@@ -146,14 +146,14 @@
       >确认收货</button>
       <button
         class="footer-btn outline"
-        v-if="canReview(order.status)"
-        @click="reviewGoods"
-      >{{ getReviewActionText() }}</button>
-      <button
-        class="footer-btn outline"
         v-if="canReturn(order.status)"
         @click="applyReturn"
       >申请退换</button>
+      <button
+        class="footer-btn primary"
+        v-if="canComment(order)"
+        @click="commentOrder"
+      >评价</button>
       <button
         class="footer-btn outline"
         v-if="canReorder(order.status)"
@@ -164,8 +164,8 @@
 </template>
 
 <script>
+import config from '@/config'
 import { getOrder, cancelOrder as cancelOrderApi, confirmOrder } from '@/api/order'
-import { listComments } from '@/api/comment'
 
 export default {
   data() {
@@ -195,8 +195,7 @@ export default {
       logistics: {
         status: '暂无物流信息',
         updateTime: ''
-      },
-      hasUserComment: false
+      }
     }
   },
   computed: {
@@ -205,8 +204,8 @@ export default {
       return this.canCancel(this.order.status) || 
              this.canPay(this.order.status) || 
              this.canConfirm(this.order.status) || 
-             this.canReview(this.order.status) ||
              this.canReturn(this.order.status) ||
+             this.canComment(this.order) ||
              this.canReorder(this.order.status);
     },
     
@@ -251,12 +250,15 @@ export default {
         },
         products: products.map((item) => ({
           id: item.id || item.uniformId,
+          orderItemId: item.orderItemId || item.id,
+          goodsId: item.goodsId || item.uniformId || item.id,
           name: item.name || item.uniformName || item.productName || '校服',
           image: item.image || item.productImage || item.coverImage || '/static/qjxf.png',
           price: item.price || item.salePrice || '0.00',
           size: item.size || item.sizeName || '-',
           color: item.color || item.spec || '默认款',
-          quantity: item.quantity || item.count || 1
+          quantity: item.quantity || item.count || 1,
+          supplierId: item.supplierId
         }))
       };
     },
@@ -277,33 +279,27 @@ export default {
       return map[status] || status || 'unpaid';
     },
 
+    getLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      return localOrders[this.id];
+    },
+
     // 获取订单详情数据
     fetchOrderDetail() {
+      const localOrder = this.getLocalOrder();
+      if (config.enableMockFallback && localOrder) {
+        this.order = this.normalizeOrder(localOrder);
+        return;
+      }
       getOrder(this.id)
         .then((res) => {
           this.order = this.normalizeOrder(res.data || res);
-          this.fetchReviewState();
         })
         .catch((error) => {
           uni.showToast({
             title: error.message || '订单详情加载失败',
             icon: 'none'
           });
-        });
-    },
-
-    fetchReviewState() {
-      listComments({
-        pageNum: 1,
-        pageSize: 100,
-        orderId: this.id
-      })
-        .then((res) => {
-          const rows = res.rows || res.data || res.list || [];
-          this.hasUserComment = rows.length > 0;
-        })
-        .catch(() => {
-          this.hasUserComment = false;
         });
     },
     
@@ -326,7 +322,7 @@ export default {
       const textMap = {
         'unpaid': '待付款',
         'unshipped': '待发货',
-        'shipped': '待收货',
+        'shipped': '运输中',
         'completed': '已完成',
         'cancelled': '已取消',
         'refunding': '退款中',
@@ -396,15 +392,6 @@ export default {
     canConfirm(status) {
       return status === 'shipped';
     },
-
-    // 是否可以评价商品
-    canReview(status) {
-      return status === 'completed';
-    },
-
-    getReviewActionText() {
-      return this.hasUserComment ? '追加评价' : '评价商品';
-    },
     
     // 是否可以申请退换
     canReturn(status) {
@@ -414,6 +401,10 @@ export default {
     // 是否可以再次购买
     canReorder(status) {
       return ['completed', 'cancelled'].includes(status);
+    },
+
+    canComment(order) {
+      return order.status === 'completed' && !order.commentFlag && !order.commented;
     },
     
     // 取消订单
@@ -425,9 +416,13 @@ export default {
           if (res.confirm) {
             uni.showLoading({ title: '处理中' });
             cancelOrderApi(this.id)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+              })
               .then(() => {
                 uni.hideLoading();
                 this.order.status = 'cancelled';
+                this.saveLocalOrder();
                 uni.showToast({
                   title: '订单已取消',
                   icon: 'success'
@@ -461,10 +456,14 @@ export default {
           if (res.confirm) {
             uni.showLoading({ title: '处理中' });
             confirmOrder(this.id)
+              .catch((error) => {
+                if (!config.enableMockFallback) return Promise.reject(error);
+              })
               .then(() => {
                 uni.hideLoading();
                 this.order.status = 'completed';
                 this.order.completeTime = this.getCurrentTime();
+                this.saveLocalOrder();
                 uni.showToast({
                   title: '已确认收货',
                   icon: 'success'
@@ -484,15 +483,20 @@ export default {
     
     // 申请退换
     applyReturn() {
+      const query = [
+        `id=${this.id}`,
+        `orderNo=${encodeURIComponent(this.order.orderNo || '')}`,
+        `amount=${encodeURIComponent(this.order.payAmount || this.order.totalAmount || '0.00')}`
+      ].join('&')
       uni.navigateTo({
-        url: `/pages/order/after-sale-form?orderId=${this.id}`
+        url: `/pages/order/return-apply?${query}`
       });
     },
 
-    // 评价商品
-    reviewGoods() {
+    commentOrder() {
+      uni.setStorageSync('pendingCommentOrder', this.order);
       uni.navigateTo({
-        url: `/pages/order/review-form?orderId=${this.id}`
+        url: `/pages/order/comment-apply?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
       });
     },
     
@@ -512,6 +516,14 @@ export default {
           url: `/pages/uniform/uniform-detail?id=${this.order.products[0].id}`
         });
       }, 500);
+    },
+
+    saveLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      if (localOrders[this.id]) {
+        localOrders[this.id] = this.order;
+        uni.setStorageSync('devOrders', localOrders);
+      }
     }
   }
 }

@@ -3,7 +3,9 @@
     <div class="page-header">
       <div>
         <div class="page-title">使用情况</div>
-        <div class="page-desc">整合平台使用情况、学校使用情况、教育局使用情况和价格趋势分析，支持按部门 ID 查询。</div>
+        <div class="page-desc">
+          整合平台使用情况、学校使用情况、教育局使用情况和价格趋势分析，支持按部门 ID 查询。
+        </div>
       </div>
       <el-form :model="queryParams" size="small" inline class="filter-form" @submit.native.prevent>
         <el-form-item label="部门ID">
@@ -28,6 +30,7 @@
           <div class="section-tip">区县平台、学校平台、学生平台整体接入与本年数据表现。</div>
         </div>
       </div>
+
       <el-row :gutter="16" class="metric-grid">
         <el-col :xs="24" :sm="12" :lg="6">
           <div class="metric-card blue">
@@ -39,8 +42,8 @@
         <el-col :xs="24" :sm="12" :lg="6">
           <div class="metric-card green">
             <div class="metric-label">本年订购金额</div>
-            <div class="metric-value">¥{{ formatMoney(peopleStats.thisMoneyYearCount) }}</div>
-            <div class="metric-sub">去年 ¥{{ formatMoney(peopleStats.lastMoneyYearCount) }}</div>
+            <div class="metric-value">￥{{ formatMoney(peopleStats.thisMoneyYearCount) }}</div>
+            <div class="metric-sub">去年 ￥{{ formatMoney(peopleStats.lastMoneyYearCount) }}</div>
           </div>
         </el-col>
         <el-col :xs="24" :sm="12" :lg="6">
@@ -85,14 +88,15 @@
       <div class="section-head">
         <div>
           <div class="section-title">学校使用情况</div>
-          <div class="section-tip">学校侧订购规模、近五年趋势和校服品类统计。</div>
+          <div class="section-tip">学校端采购规模、近五年趋势和校服品类统计。</div>
         </div>
       </div>
+
       <el-row :gutter="16" class="metric-grid">
         <el-col :xs="24" :sm="12" :lg="6">
           <div class="mini-card">
             <div class="mini-title">总订购金额</div>
-            <div class="mini-value">¥{{ formatMoney(schoolSummary.moneyTotal) }}</div>
+            <div class="mini-value">￥{{ formatMoney(schoolSummary.moneyTotal) }}</div>
           </div>
         </el-col>
         <el-col :xs="24" :sm="12" :lg="6">
@@ -109,7 +113,7 @@
         </el-col>
         <el-col :xs="24" :sm="12" :lg="6">
           <div class="mini-card">
-            <div class="mini-title">班级 / 团队数</div>
+            <div class="mini-title">班子 / 团队数</div>
             <div class="mini-value">{{ schoolSummary.teamCount || 0 }}</div>
           </div>
         </el-col>
@@ -144,6 +148,7 @@
           <div class="section-tip">各县区教育局视角下的学生、学校、供应商和金额统计。</div>
         </div>
       </div>
+
       <el-row :gutter="16" class="metric-grid">
         <el-col :xs="24" :sm="12" :lg="6">
           <div class="neutral-card">
@@ -166,7 +171,7 @@
         <el-col :xs="24" :sm="12" :lg="6">
           <div class="neutral-card">
             <div class="neutral-title">采购总金额</div>
-            <div class="neutral-value">¥{{ formatMoney(jyjSummary.moneyTotal) }}</div>
+            <div class="neutral-value">￥{{ formatMoney(jyjSummary.moneyTotal) }}</div>
           </div>
         </el-col>
       </el-row>
@@ -188,6 +193,7 @@
           <div class="section-tip">展示价格变化趋势，辅助决策分析。</div>
         </div>
       </div>
+
       <el-row :gutter="16" class="chart-grid">
         <el-col :xs="24">
           <el-card class="chart-card" shadow="hover">
@@ -300,51 +306,56 @@ export default {
     async loadData() {
       this.loading = true;
       const query = this.buildQuery();
-      const tasks = await Promise.allSettled([
-        getPersonMoney(),
-        getOrderCount(),
-        getOrderAmount(),
-        getSchoolOrderCount(query),
-        getSchoolOrderAmount(query),
-        getSchoolUniformType(),
-        getPlatformUsage(query),
-        getPriceTrendData(query),
-        getSchoolTopList(query),
-        getJyjTopList(query),
-      ]);
+      try {
+        const tasks = await Promise.allSettled([
+          getPersonMoney(),
+          getOrderCount(),
+          getOrderAmount(),
+          getSchoolOrderCount(query),
+          getSchoolOrderAmount(query),
+          getSchoolUniformType(),
+          getPlatformUsage(query),
+          getPriceTrendData(query),
+          getSchoolTopList(query),
+          getJyjTopList(query),
+        ]);
 
-      const [
-        peopleRes,
-        countRes,
-        moneyRes,
-        fiveYearCountRes,
-        fiveYearMoneyRes,
-        uniformTypeRes,
-        usageRes,
-        priceTrendRes,
-        schoolSummaryRes,
-        jyjSummaryRes,
-      ] = tasks;
+        const [
+          peopleRes,
+          countRes,
+          moneyRes,
+          fiveYearCountRes,
+          fiveYearMoneyRes,
+          uniformTypeRes,
+          usageRes,
+          priceTrendRes,
+          schoolSummaryRes,
+          jyjSummaryRes,
+        ] = tasks;
 
-      this.peopleStats = peopleRes.status === "fulfilled" ? this.extractData(peopleRes.value, {}) : {};
-      this.currentYearCountList = countRes.status === "fulfilled" ? this.extractData(countRes.value, []) : [];
-      this.currentYearMoneyList = moneyRes.status === "fulfilled" ? this.extractData(moneyRes.value, []) : [];
-      this.schoolFiveYearCountList = fiveYearCountRes.status === "fulfilled" ? this.extractData(fiveYearCountRes.value, []) : [];
-      this.schoolFiveYearMoneyList = fiveYearMoneyRes.status === "fulfilled" ? this.extractData(fiveYearMoneyRes.value, []) : [];
-      this.uniformTypeList = uniformTypeRes.status === "fulfilled" ? this.extractData(uniformTypeRes.value, []) : [];
-      this.platformUsage = usageRes.status === "fulfilled" ? this.extractData(usageRes.value, {}) : {};
-      this.priceTrendList = priceTrendRes.status === "fulfilled" ? this.extractData(priceTrendRes.value, []) : [];
-      this.schoolSummary = schoolSummaryRes.status === "fulfilled" ? this.extractData(schoolSummaryRes.value, {}) : {};
-      this.jyjSummary = jyjSummaryRes.status === "fulfilled" ? this.extractData(jyjSummaryRes.value, {}) : {};
+        this.peopleStats = peopleRes.status === "fulfilled" ? this.extractData(peopleRes.value, {}) : {};
+        this.currentYearCountList = countRes.status === "fulfilled" ? this.extractData(countRes.value, []) : [];
+        this.currentYearMoneyList = moneyRes.status === "fulfilled" ? this.extractData(moneyRes.value, []) : [];
+        this.schoolFiveYearCountList =
+          fiveYearCountRes.status === "fulfilled" ? this.extractData(fiveYearCountRes.value, []) : [];
+        this.schoolFiveYearMoneyList =
+          fiveYearMoneyRes.status === "fulfilled" ? this.extractData(fiveYearMoneyRes.value, []) : [];
+        this.uniformTypeList = uniformTypeRes.status === "fulfilled" ? this.extractData(uniformTypeRes.value, []) : [];
+        this.platformUsage = usageRes.status === "fulfilled" ? this.extractData(usageRes.value, {}) : {};
+        this.priceTrendList = priceTrendRes.status === "fulfilled" ? this.extractData(priceTrendRes.value, []) : [];
+        this.schoolSummary = schoolSummaryRes.status === "fulfilled" ? this.extractData(schoolSummaryRes.value, {}) : {};
+        this.jyjSummary = jyjSummaryRes.status === "fulfilled" ? this.extractData(jyjSummaryRes.value, {}) : {};
 
-      const failedCount = tasks.filter((item) => item.status === "rejected").length;
-      this.$nextTick(() => {
-        this.renderCharts();
-      });
-      if (failedCount > 0) {
-        this.$message.warning(`有 ${failedCount} 个统计接口加载失败，页面已展示成功返回的数据`);
+        const failedCount = tasks.filter((item) => item.status === "rejected").length;
+        this.$nextTick(() => {
+          this.renderCharts();
+        });
+        if (failedCount > 0) {
+          this.$message.warning(`有 ${failedCount} 个统计接口加载失败，页面已展示成功返回的数据`);
+        }
+      } finally {
+        this.loading = false;
       }
-      this.loading = false;
     },
     disposeCharts() {
       [
@@ -357,6 +368,7 @@ export default {
         this.jyjSummaryChart,
         this.priceTrendChart,
       ].forEach((chart) => chart && chart.dispose());
+
       this.orderCountChart = null;
       this.orderAmountChart = null;
       this.fiveYearCountChart = null;
@@ -368,46 +380,87 @@ export default {
     },
     renderCharts() {
       this.disposeCharts();
-      this.renderBarChart("orderCountChart", "今年订购人数统计", this.currentYearCountList, {
-        color: "#3b82f6",
-        yName: "人数",
-        isMoney: false,
-      }, (chart) => {
-        this.orderCountChart = chart;
-      });
-      this.renderBarChart("orderAmountChart", "今年金额统计", this.currentYearMoneyList, {
-        color: "#22c55e",
-        yName: "金额(元)",
-        isMoney: true,
-      }, (chart) => {
-        this.orderAmountChart = chart;
-      });
-      this.renderLineChart("fiveYearCountChart", "学校近5年订购人数", this.schoolFiveYearCountList, "人数", "#6366f1", (chart) => {
-        this.fiveYearCountChart = chart;
-      });
-      this.renderLineChart("fiveYearMoneyChart", "学校近5年金额统计", this.schoolFiveYearMoneyList, "金额(元)", "#f59e0b", (chart) => {
-        this.fiveYearMoneyChart = chart;
-      }, true);
+
+      this.renderBarChart(
+        "orderCountChart",
+        "今年订购人数统计",
+        this.currentYearCountList,
+        { color: "#3b82f6", yName: "人数", isMoney: false },
+        (chart) => {
+          this.orderCountChart = chart;
+        }
+      );
+
+      this.renderBarChart(
+        "orderAmountChart",
+        "今年金额统计",
+        this.currentYearMoneyList,
+        { color: "#22c55e", yName: "金额(元)", isMoney: true },
+        (chart) => {
+          this.orderAmountChart = chart;
+        }
+      );
+
+      this.renderLineChart(
+        "fiveYearCountChart",
+        "学校近5年订购人数",
+        this.schoolFiveYearCountList,
+        "人数",
+        "#6366f1",
+        (chart) => {
+          this.fiveYearCountChart = chart;
+        }
+      );
+
+      this.renderLineChart(
+        "fiveYearMoneyChart",
+        "学校近5年金额统计",
+        this.schoolFiveYearMoneyList,
+        "金额(元)",
+        "#f59e0b",
+        (chart) => {
+          this.fiveYearMoneyChart = chart;
+        },
+        true
+      );
+
       this.renderPieChart("uniformTypeChart", "校服品类统计", this.uniformTypeList, (chart) => {
         this.uniformTypeChart = chart;
       });
+
       this.renderPlatformUsageChart((chart) => {
         this.platformUsageChart = chart;
       });
+
       this.renderJyjSummaryChart((chart) => {
         this.jyjSummaryChart = chart;
       });
-      this.renderLineChart("priceTrendChart", "价格趋势分析", this.priceTrendList, "金额(元)", "#ef4444", (chart) => {
-        this.priceTrendChart = chart;
-      }, true);
+
+      this.renderLineChart(
+        "priceTrendChart",
+        "价格趋势分析",
+        this.priceTrendList,
+        "金额(元)",
+        "#ef4444",
+        (chart) => {
+          this.priceTrendChart = chart;
+        },
+        true
+      );
     },
     renderBarChart(refName, title, list, style, setter) {
       const dom = this.$refs[refName];
       if (!dom) return;
       const chart = echarts.init(dom, "macarons");
       const points = this.toPoints(list);
+
       chart.setOption({
-        title: { text: title, left: "center", top: 8, textStyle: { fontSize: 14, color: "#334155" } },
+        title: {
+          text: title,
+          left: "center",
+          top: 8,
+          textStyle: { fontSize: 14, color: "#334155" },
+        },
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "shadow" },
@@ -417,7 +470,7 @@ export default {
           formatter: (params) => {
             const item = params && params[0];
             if (!item) return "";
-            const value = style.isMoney ? `¥${Number(item.value || 0).toLocaleString()}` : item.value;
+            const value = style.isMoney ? `￥${Number(item.value || 0).toLocaleString()}` : item.value;
             return `${item.name}<br/>${item.seriesName}: ${value}`;
           },
         },
@@ -433,7 +486,7 @@ export default {
           name: style.yName,
           axisLabel: {
             color: "#64748b",
-            formatter: (value) => (style.isMoney ? `¥${Math.round(value)}` : `${Math.round(value)}`),
+            formatter: (value) => (style.isMoney ? `￥${Math.round(value)}` : `${Math.round(value)}`),
           },
           splitLine: { lineStyle: { color: "#e2e8f0", type: "dashed" } },
         },
@@ -454,6 +507,7 @@ export default {
           },
         ],
       });
+
       setter(chart);
     },
     renderLineChart(refName, title, list, yName, color, setter, isMoney = false) {
@@ -461,8 +515,14 @@ export default {
       if (!dom) return;
       const chart = echarts.init(dom, "macarons");
       const points = this.toPoints(list);
+
       chart.setOption({
-        title: { text: title, left: "center", top: 8, textStyle: { fontSize: 14, color: "#334155" } },
+        title: {
+          text: title,
+          left: "center",
+          top: 8,
+          textStyle: { fontSize: 14, color: "#334155" },
+        },
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "line" },
@@ -472,7 +532,7 @@ export default {
           formatter: (params) => {
             const item = params && params[0];
             if (!item) return "";
-            const value = isMoney ? `¥${Number(item.value || 0).toLocaleString()}` : `${item.value}`;
+            const value = isMoney ? `￥${Number(item.value || 0).toLocaleString()}` : `${item.value}`;
             return `${item.name}<br/>${item.seriesName}: ${value}`;
           },
         },
@@ -488,7 +548,7 @@ export default {
           name: yName,
           axisLabel: {
             color: "#64748b",
-            formatter: (value) => (isMoney ? `¥${Math.round(value)}` : `${Math.round(value)}`),
+            formatter: (value) => (isMoney ? `￥${Math.round(value)}` : `${Math.round(value)}`),
           },
           splitLine: { lineStyle: { color: "#e2e8f0", type: "dashed" } },
         },
@@ -500,10 +560,7 @@ export default {
             symbol: "circle",
             symbolSize: 8,
             data: points.map((item) => item.value),
-            lineStyle: {
-              width: 3,
-              color,
-            },
+            lineStyle: { width: 3, color },
             itemStyle: {
               color,
               borderWidth: 2,
@@ -518,6 +575,7 @@ export default {
           },
         ],
       });
+
       setter(chart);
     },
     renderPieChart(refName, title, list, setter) {
@@ -526,8 +584,14 @@ export default {
       const chart = echarts.init(dom, "macarons");
       const points = this.toPoints(list);
       const colors = ["#3b82f6", "#22c55e", "#f59e0b", "#ef4444", "#8b5cf6", "#14b8a6", "#06b6d4", "#f97316"];
+
       chart.setOption({
-        title: { text: title, left: "center", top: 8, textStyle: { fontSize: 14, color: "#334155" } },
+        title: {
+          text: title,
+          left: "center",
+          top: 8,
+          textStyle: { fontSize: 14, color: "#334155" },
+        },
         tooltip: {
           trigger: "item",
           backgroundColor: "rgba(37, 99, 235, 0.92)",
@@ -560,6 +624,7 @@ export default {
           },
         ],
       });
+
       setter(chart);
     },
     renderPlatformUsageChart(setter) {
@@ -571,8 +636,14 @@ export default {
         { name: "学校平台使用情况", value: Number(this.platformUsage.schoolPlatformTotal || 0), color: "#22c55e" },
         { name: "学生平台使用情况", value: Number(this.platformUsage.studentPlatformTotal || 0), color: "#f59e0b" },
       ];
+
       chart.setOption({
-        title: { text: "平台使用情况", left: "center", top: 8, textStyle: { fontSize: 14, color: "#334155" } },
+        title: {
+          text: "平台使用情况",
+          left: "center",
+          top: 8,
+          textStyle: { fontSize: 14, color: "#334155" },
+        },
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "shadow" },
@@ -610,6 +681,7 @@ export default {
           },
         ],
       });
+
       setter(chart);
     },
     renderJyjSummaryChart(setter) {
@@ -622,8 +694,14 @@ export default {
         { name: "供应商总数", value: Number(this.jyjSummary.supplierTotal || 0), color: "#8b5cf6" },
         { name: "采购总金额", value: Number(this.jyjSummary.moneyTotal || 0), color: "#ef4444" },
       ];
+
       chart.setOption({
-        title: { text: "教育局使用情况", left: "center", top: 8, textStyle: { fontSize: 14, color: "#334155" } },
+        title: {
+          text: "教育局使用情况",
+          left: "center",
+          top: 8,
+          textStyle: { fontSize: 14, color: "#334155" },
+        },
         tooltip: {
           trigger: "axis",
           axisPointer: { type: "shadow" },
@@ -633,7 +711,7 @@ export default {
           formatter: (params) => {
             const item = params && params[0];
             if (!item) return "";
-            const prefix = item.name === "采购总金额" ? "¥" : "";
+            const prefix = item.name === "采购总金额" ? "￥" : "";
             return `${item.name}<br/>${prefix}${Number(item.value || 0).toLocaleString()}`;
           },
         },
@@ -668,6 +746,7 @@ export default {
           },
         ],
       });
+
       setter(chart);
     },
   },

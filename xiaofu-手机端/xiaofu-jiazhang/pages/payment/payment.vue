@@ -10,13 +10,17 @@
           <text class="label">订单编号</text>
           <text class="value">{{orderInfo.orderNo}}</text>
         </view>
-        <view class="order-school">
+      <view class="order-school">
           <text class="label">所属学校</text>
-          <text class="value">{{orderInfo.school}}</text>
+          <text class="value">{{orderInfo.schoolName}}</text>
         </view>
         <view class="order-student">
           <text class="label">学生信息</text>
-          <text class="value">{{orderInfo.studentName}} {{orderInfo.studentClass}}</text>
+          <text class="value">{{orderInfo.studentName}} {{orderInfo.className}}</text>
+        </view>
+        <view class="order-student">
+          <text class="label">订单类型</text>
+          <text class="value">{{orderInfo.orderTypeText}}</text>
         </view>
       </view>
     </view>
@@ -36,11 +40,11 @@
           <text class="goods-name">{{item.name}}</text>
           <view class="goods-spec">
             <text class="spec-text">{{item.size}}</text>
-            <text class="spec-text">{{item.color}}</text>
+            <text class="spec-text">{{item.orderTypeText}}</text>
           </view>
           <view class="goods-price-row">
             <text class="goods-price">¥{{item.price}}</text>
-            <text class="goods-count">x{{item.count}}</text>
+            <text class="goods-count">x{{item.quantity}}</text>
           </view>
         </view>
       </view>
@@ -111,27 +115,27 @@
         <text class="label">实付款：</text>
         <text class="amount">¥{{orderInfo.totalAmount}}</text>
       </view>
-      <button class="pay-btn" :disabled="isSubmitting" @click="confirmPay">
-        {{ isSubmitting ? '支付处理中...' : '确认支付' }}
-      </button>
+      <button class="pay-btn" @click="confirmPay">确认支付</button>
     </view>
   </view>
 </template>
 
 <script>
+import config from '@/config'
 import { getOrder, payOrder } from '@/api/order'
 
 export default {
   data() {
     return {
       orderId: '',
-      isSubmitting: false,
       selectedMethod: 'wxpay',
       orderInfo: {
         orderNo: '',
-        school: '',
+        schoolName: '',
         studentName: '',
-        studentClass: '',
+        className: '',
+        orderType: '1',
+        orderTypeText: '统购订单',
         totalGoodsPrice: '0.00',
         shippingFee: '0.00',
         discount: '0.00',
@@ -166,29 +170,39 @@ export default {
     normalizeOrder(data = {}) {
       const products = data.products || data.items || data.orderItems || data.xfptOrderItemList || [];
       const student = data.student || {};
-      const gradeName = data.gradeName || student.grade || student.gradeName || '';
-      const className = data.className || data.studentClass || student.className || '';
       return {
         orderNo: data.orderNo || data.orderSn || data.orderCode || this.orderId,
-        school: data.school || data.schoolName || student.school || student.schoolName || '石家庄市示例学校',
+        schoolName: data.schoolName || data.school || student.school || student.schoolName || '石家庄市示例学校',
         studentName: data.studentName || student.name || student.studentName || '学生',
-        studentClass: [gradeName, className].filter(Boolean).join(' '),
+        className: data.className || data.studentClass || student.className || student.grade || '',
+        orderType: data.orderType || '1',
+        orderTypeText: String(data.orderType || '1') === '2' ? '零售订单' : '统购订单',
         totalGoodsPrice: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
         shippingFee: data.shippingFee || data.freightAmount || '0.00',
         discount: data.discount || '0.00',
         totalAmount: data.totalAmount || data.payAmount || '0.00',
         items: products.map((item) => ({
-          id: item.id || item.uniformId,
+          id: item.id || item.uniformId || item.goodsId,
           name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
           size: item.size || item.sizeName || '-',
-          color: item.color || item.colorName || item.spec || '默认款',
+          orderTypeText: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          color: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
           price: item.price || item.unitPrice || item.salePrice || '0.00',
-          count: item.count || item.quantity || item.buyNum || 1,
+          quantity: item.quantity || item.buyNum || item.count || 1,
           image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png'
         }))
       };
     },
+    getLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      return localOrders[this.orderId];
+    },
     getOrderInfo() {
+      const localOrder = this.getLocalOrder();
+      if (config.enableMockFallback && localOrder) {
+        this.orderInfo = this.normalizeOrder(localOrder);
+        return;
+      }
       getOrder(this.orderId)
         .then((res) => {
           this.orderInfo = this.normalizeOrder(res.data || res);
@@ -214,8 +228,6 @@ export default {
       });
     },
     submitPay() {
-      if (this.isSubmitting) return;
-      this.isSubmitting = true;
       uni.showLoading({
         title: '支付处理中...'
       });
@@ -223,6 +235,10 @@ export default {
       payOrder(this.orderId, {
         payType: this.selectedMethod
       })
+        .catch((error) => {
+          if (!config.enableMockFallback) return Promise.reject(error);
+          return { data: { paid: true } };
+        })
         .then(() => {
           this.paymentSuccess();
         })
@@ -232,12 +248,40 @@ export default {
             title: error.message || '支付失败',
             icon: 'none'
           });
-        })
-        .finally(() => {
-          this.isSubmitting = false;
         });
     },
     paymentSuccess() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      const currentOrder = localOrders[this.orderId] || {
+        id: this.orderId,
+        orderNo: this.orderInfo.orderNo || this.orderId,
+        status: 'unpaid',
+        orderType: this.orderInfo.orderType || '1',
+        orderTypeText: this.orderInfo.orderTypeText || '统购订单',
+        productsAmount: this.orderInfo.totalGoodsPrice,
+        shippingFee: this.orderInfo.shippingFee,
+        discount: this.orderInfo.discount,
+        totalAmount: this.orderInfo.totalAmount,
+        payAmount: this.orderInfo.totalAmount,
+        products: this.orderInfo.items.map((item) => ({
+          id: item.id,
+          name: item.name,
+          image: item.image,
+          price: item.price,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          orderType: this.orderInfo.orderType || '1',
+          saleType: this.orderInfo.orderType || '1'
+        }))
+      };
+      currentOrder.status = 'unshipped';
+      currentOrder.payTime = this.getCurrentTime();
+      currentOrder.payStatus = '1';
+      currentOrder.orderStatus = '2';
+      localOrders[this.orderId] = currentOrder;
+      uni.setStorageSync('devOrders', localOrders);
+
       uni.hideLoading();
       uni.showToast({
         title: '支付成功',
@@ -247,9 +291,14 @@ export default {
 
       setTimeout(() => {
         uni.redirectTo({
-          url: '/pages/order/order-list?status=unshipped'
+          url: '/pages/order/order-detail?id=' + this.orderId + '&from=pay'
         });
       }, 1200);
+    },
+    getCurrentTime() {
+      const now = new Date();
+      const pad = (num) => String(num).padStart(2, '0');
+      return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
     }
   }
 }

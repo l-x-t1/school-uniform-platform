@@ -81,6 +81,145 @@ function ensureSupplierMessageMenu(routes = []) {
   return routes;
 }
 
+function ensureSupplierGroupNoticeMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const exists = (children = []) =>
+    children.some(
+      (item) =>
+        item.path === "supplierGroupNotice" ||
+        item.path === "/newFeature/supplierGroupNotice" ||
+        item.component === "school/groupNotice/index"
+    );
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "SupplierGroupNotice",
+      path: "supplierGroupNotice",
+      component: "school/groupNotice/index",
+      meta: {
+        title: "学校统购公告查询",
+        icon: "message",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierGroupNoticeMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
+function ensureSupplierWithdrawRecordMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const menuTitle = "供应商提现记录";
+  const menuComponent = "school/withdrawApply/index";
+  const isWithdrawMenu = (item) =>
+    item.path === "supplierWithdrawRecord" ||
+    item.path === "/newFeature/supplierWithdrawRecord" ||
+    item.path === "/school/supplierWithdrawRecord" ||
+    item.component === "school/supplierWithdrawRecord/index" ||
+    item.component === menuComponent ||
+    (item.meta && item.meta.title === menuTitle);
+
+  const normalizeMenu = (item) => {
+    item.name = "SupplierWithdrawRecord";
+    item.path = item.path === "/newFeature/supplierWithdrawRecord" ? item.path : "supplierWithdrawRecord";
+    item.component = menuComponent;
+    item.meta = {
+      ...(item.meta || {}),
+      title: menuTitle,
+      icon: (item.meta && item.meta.icon) || "money",
+    };
+  };
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    const existing = route.children.find(isWithdrawMenu);
+    if (existing) {
+      normalizeMenu(existing);
+      return;
+    }
+    route.children.push({
+      name: "SupplierWithdrawRecord",
+      path: "supplierWithdrawRecord",
+      component: menuComponent,
+      meta: {
+        title: menuTitle,
+        icon: "money",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (isWithdrawMenu(route)) {
+      normalizeMenu(route);
+    }
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierWithdrawRecordMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
+function ensureUsageMenu(routes = []) {
+  const exists = (children = []) =>
+    children.some(
+      (item) =>
+        item.path === "platformUsage" ||
+        item.path === "/newFeature/platformUsage" ||
+        item.component === "school/platformUsage/index"
+    );
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "PlatformUsage",
+      path: "platformUsage",
+      component: "school/platformUsage/index",
+      meta: {
+        title: "使用情况",
+        icon: "chart",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    if (route.path === "newFeature" || route.path === "/newFeature") {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureUsageMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
 const permission = {
   state: {
     routes: [],
@@ -117,9 +256,15 @@ const permission = {
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = ensureSupplierMessageMenu(normalizeUsageMenus(
-            JSON.parse(JSON.stringify(res.data || []))
-          ));
+          const normalizedRoutes = ensureUsageMenu(
+            ensureSupplierWithdrawRecordMenu(
+              ensureSupplierMessageMenu(
+                ensureSupplierGroupNoticeMenu(
+                  normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+                )
+              )
+            )
+          );
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);

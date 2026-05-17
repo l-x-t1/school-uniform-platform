@@ -1,22 +1,25 @@
 <template>
-  <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校名称快照" prop="schoolName">
-        <el-input
-          v-model="queryParams.schoolName"
-          placeholder="请输入学校名称快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
+  <div class="app-container group-notice-query-page">
+    <el-card shadow="never" class="summary-card">
+      <div class="summary-header">
+        <div>
+          <div class="summary-title">统购公告</div>
+          <div class="summary-subtitle">
+            仅用于查询学校发布的统购公告，并查看学校发送公告后确认的生产信息。
+          </div>
+        </div>
+        <el-tag type="info" effect="plain">只读页面</el-tag>
+      </div>
+    </el-card>
+
+    <el-form
+      ref="queryForm"
+      :model="queryParams"
+      size="small"
+      :inline="true"
+      label-width="82px"
+      class="query-form"
+    >
       <el-form-item label="公告标题" prop="title">
         <el-input
           v-model="queryParams.title"
@@ -33,594 +36,360 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="班子会议ID" prop="teamMeetingId">
+      <el-form-item label="学校名称" prop="schoolName">
         <el-input
-          v-model="queryParams.teamMeetingId"
-          placeholder="请输入班子会议ID"
+          v-model="queryParams.schoolName"
+          placeholder="请输入学校名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="采购流程ID" prop="purchaseProcessId">
-        <el-input
-          v-model="queryParams.purchaseProcessId"
-          placeholder="请输入采购流程ID"
+      <el-form-item label="公告类型" prop="noticeType">
+        <el-select
+          v-model="queryParams.noticeType"
+          placeholder="请选择公告类型"
           clearable
-          @keyup.enter.native="handleQuery"
-        />
+        >
+          <el-option
+            v-for="item in noticeTypeOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </el-form-item>
-      <el-form-item label="公告开始时间" prop="startTime">
-        <el-date-picker clearable
-          v-model="queryParams.startTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择公告开始时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="公告截止时间" prop="endTime">
-        <el-date-picker clearable
-          v-model="queryParams.endTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择公告截止时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="发布时间" prop="publishTime">
-        <el-date-picker clearable
-          v-model="queryParams.publishTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择发布时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="结果发布时间" prop="resultPublishTime">
-        <el-date-picker clearable
-          v-model="queryParams.resultPublishTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择结果发布时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
+      <el-form-item label="公告状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择公告状态"
           clearable
-          @keyup.enter.native="handleQuery"
-        />
+        >
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
       </el-form-item>
       <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
+        <el-button type="primary" icon="el-icon-search" @click="handleQuery">
+          搜索
+        </el-button>
+        <el-button icon="el-icon-refresh" @click="resetQuery">重置</el-button>
       </el-form-item>
     </el-form>
 
-    <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-          v-hasPermi="['school:groupNotice:add']"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-          v-hasPermi="['school:groupNotice:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-          v-hasPermi="['school:groupNotice:remove']"
-        >删除</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          type="warning"
-          plain
-          icon="el-icon-download"
-          size="mini"
-          @click="handleExport"
-          v-hasPermi="['school:groupNotice:export']"
-        >导出</el-button>
-      </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
-    </el-row>
-
-    <el-table v-loading="loading" :data="groupNoticeList" @selection-change="handleSelectionChange">
-      <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="学校名称快照" align="center" prop="schoolName" />
-      <el-table-column label="公告标题" align="center" prop="title" />
-      <el-table-column label="公告编号" align="center" prop="noticeCode" />
-      <el-table-column label="公告类型，1选购公告 2结果公告" align="center" prop="noticeType" />
-      <el-table-column label="年级ID集合" align="center" prop="gradeIds" />
-      <el-table-column label="年级名称集合" align="center" prop="gradeNames" />
-      <el-table-column label="班子会议ID" align="center" prop="teamMeetingId" />
-      <el-table-column label="采购流程ID" align="center" prop="purchaseProcessId" />
-      <el-table-column label="公告开始时间" align="center" prop="startTime" width="180">
+    <el-table
+      v-loading="loading"
+      :data="groupNoticeList"
+      border
+      stripe
+      class="notice-table"
+    >
+      <el-table-column label="公告编号" prop="noticeCode" min-width="140" />
+      <el-table-column label="公告标题" prop="title" min-width="220" show-overflow-tooltip />
+      <el-table-column label="学校名称" prop="schoolName" min-width="180" show-overflow-tooltip />
+      <el-table-column label="公告类型" min-width="110">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="mini" :type="scope.row.noticeType === '2' ? 'success' : 'primary'">
+            {{ formatNoticeType(scope.row.noticeType) }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="公告截止时间" align="center" prop="endTime" width="180">
+      <el-table-column label="公告状态" min-width="110">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.endTime, '{y}-{m}-{d}') }}</span>
+          <el-tag size="mini" :type="getStatusTagType(scope.row.status)">
+            {{ formatStatus(scope.row.status) }}
+          </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态，0草稿 1已发布 2已结束 3已撤回" align="center" prop="status" />
-      <el-table-column label="报名状态，0未开放 1报名中 2报名结束" align="center" prop="applyStatus" />
-      <el-table-column label="发布时间" align="center" prop="publishTime" width="180">
+      <el-table-column label="报名状态" min-width="110">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.publishTime, '{y}-{m}-{d}') }}</span>
+          {{ formatApplyStatus(scope.row.applyStatus) }}
         </template>
       </el-table-column>
-      <el-table-column label="结果发布时间" align="center" prop="resultPublishTime" width="180">
+      <el-table-column label="公告开始时间" min-width="120">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.resultPublishTime, '{y}-{m}-{d}') }}</span>
+          {{ formatDate(scope.row.startTime) }}
         </template>
       </el-table-column>
-      <el-table-column label="当前归属部门/学校" align="center" prop="deptId" />
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
+      <el-table-column label="公告截止时间" min-width="120">
         <template slot-scope="scope">
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="handleView(scope.row)"
-            v-hasPermi="['school:groupNotice:query']"
-          >{{ detailButtonText }}</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:groupNotice:edit']"
-          >修改</el-button>
-          <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-            v-hasPermi="['school:groupNotice:remove']"
-          >删除</el-button>
+          {{ formatDate(scope.row.endTime) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="结果发布时间" min-width="120">
+        <template slot-scope="scope">
+          {{ formatDate(scope.row.resultPublishTime) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" align="center" width="120" fixed="right">
+        <template slot-scope="scope">
+          <el-button type="text" size="mini" @click="handleView(scope.row)">
+            查看详情
+          </el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <!-- 添加或修改统购公告对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px" :disabled="isViewMode">
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" disabled placeholder="请输入学校ID" />
-        </el-form-item>
-        <el-form-item label="学校名称快照" prop="schoolName">
-          <el-input v-model="form.schoolName" disabled placeholder="请输入学校名称快照" />
-        </el-form-item>
-        <el-form-item label="公告标题" prop="title">
-          <el-input v-model="form.title" placeholder="请输入公告标题" />
-        </el-form-item>
-        <el-form-item label="公告编号" prop="noticeCode">
-          <el-input v-model="form.noticeCode" placeholder="请输入公告编号" />
-        </el-form-item>
-        <el-form-item label="公告类型" prop="noticeType">
-          <el-select v-model="form.noticeType" placeholder="请选择公告类型">
-            <el-option label="选购公告" value="1" />
-            <el-option label="结果公告" value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="公告正文">
-          <editor v-model="form.content" :min-height="192"/>
-        </el-form-item>
-        <el-form-item label="年级ID集合" prop="gradeIds">
-          <el-input v-model="form.gradeIds" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="年级名称集合" prop="gradeNames">
-          <el-input v-model="form.gradeNames" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="班子会议ID" prop="teamMeetingId">
-          <el-input v-model="form.teamMeetingId" placeholder="请输入班子会议ID" />
-        </el-form-item>
-        <el-form-item label="采购流程ID" prop="purchaseProcessId">
-          <el-input v-model="form.purchaseProcessId" placeholder="请输入采购流程ID" />
-        </el-form-item>
-        <el-form-item label="公告开始时间" prop="startTime">
-          <el-date-picker clearable
-            v-model="form.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择公告开始时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="公告截止时间" prop="endTime">
-          <el-date-picker clearable
-            v-model="form.endTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择公告截止时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="公告状态" prop="status">
-          <el-select v-model="form.status" placeholder="请选择公告状态">
-            <el-option label="草稿" value="0" />
-            <el-option label="已发布" value="1" />
-            <el-option label="已结束" value="2" />
-            <el-option label="已撤回" value="3" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="报名状态" prop="applyStatus">
-          <el-select v-model="form.applyStatus" placeholder="请选择报名状态">
-            <el-option label="未开放" value="0" />
-            <el-option label="报名中" value="1" />
-            <el-option label="报名结束" value="2" />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="发布时间" prop="publishTime">
-          <el-date-picker clearable
-            v-model="form.publishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择发布时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="结果发布时间" prop="resultPublishTime">
-          <el-date-picker clearable
-            v-model="form.resultPublishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择结果发布时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" disabled placeholder="请输入当前归属部门/学校" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
-        </el-form-item>
-        <el-divider content-position="center">统购公告商品信息</el-divider>
-        <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
-            <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAddXfptGroupNoticeItem">添加</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDeleteXfptGroupNoticeItem">删除</el-button>
-          </el-col>
-        </el-row>
-        <el-table :data="xfptGroupNoticeItemList" :row-class-name="rowXfptGroupNoticeItemIndex" @selection-change="handleXfptGroupNoticeItemSelectionChange" ref="xfptGroupNoticeItem">
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="序号" align="center" prop="index" width="50"/>
-          <el-table-column label="商品ID" prop="goodsId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsId" placeholder="请输入商品ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="商品名称快照" prop="goodsName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称快照" />
-            </template>
-          </el-table-column>
-          <el-table-column label="单位" prop="unitName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.unitName" placeholder="请输入单位" />
-            </template>
-          </el-table-column>
-          <el-table-column label="采购数量" prop="buyNum" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.buyNum" placeholder="请输入采购数量" />
-            </template>
-          </el-table-column>
-          <el-table-column label="当前归属部门/学校" prop="deptId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.deptId" placeholder="请输入当前归属部门/学校" />
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-form>
+    <el-dialog
+      title="学校发送公告确定生产信息"
+      :visible.sync="open"
+      width="1080px"
+      append-to-body
+    >
+      <div v-loading="detailLoading" class="detail-wrap">
+        <el-descriptions :column="2" border class="base-info">
+          <el-descriptions-item label="公告标题">
+            {{ form.title || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="公告编号">
+            {{ form.noticeCode || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="学校名称">
+            {{ form.schoolName || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="公告类型">
+            {{ formatNoticeType(form.noticeType) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="公告状态">
+            {{ formatStatus(form.status) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="报名状态">
+            {{ formatApplyStatus(form.applyStatus) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="公告开始时间">
+            {{ formatDate(form.startTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="公告截止时间">
+            {{ formatDate(form.endTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="发布时间">
+            {{ formatDate(form.publishTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="结果发布时间">
+            {{ formatDate(form.resultPublishTime) }}
+          </el-descriptions-item>
+          <el-descriptions-item label="适用年级">
+            {{ form.gradeNames || "-" }}
+          </el-descriptions-item>
+          <el-descriptions-item label="采购流程ID">
+            {{ form.purchaseProcessId || "-" }}
+          </el-descriptions-item>
+        </el-descriptions>
+
+        <el-card shadow="never" class="detail-section">
+          <div slot="header" class="section-title">公告正文</div>
+          <div class="notice-content" v-html="form.content || '<p>暂无公告正文</p>'"></div>
+        </el-card>
+
+        <el-card shadow="never" class="detail-section">
+          <div slot="header" class="section-title">生产信息明细</div>
+          <el-table
+            :data="xfptGroupNoticeItemList"
+            border
+            stripe
+            empty-text="暂无生产信息"
+          >
+            <el-table-column label="商品ID" prop="goodsId" min-width="100" />
+            <el-table-column label="商品名称" prop="goodsName" min-width="180" show-overflow-tooltip />
+            <el-table-column label="单位" prop="unitName" min-width="90" />
+            <el-table-column label="采购数量" prop="buyNum" min-width="100" />
+            <el-table-column label="价格说明" prop="priceDesc" min-width="180" show-overflow-tooltip />
+            <el-table-column label="适用年级" prop="gradeNames" min-width="180" show-overflow-tooltip />
+            <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip />
+          </el-table>
+        </el-card>
+      </div>
       <div slot="footer" class="dialog-footer">
-        <el-button v-if="!isViewMode" type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="open = false">关 闭</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listGroupNotice, getGroupNotice, delGroupNotice, addGroupNotice, updateGroupNotice } from "@/api/school/groupNotice";
-import { getSchoolInfoDetail } from "@/api/questionnaire";
+import { listSupplierGroupNotice, getSupplierGroupNotice } from "@/api/school/groupNotice";
 
 export default {
   name: "GroupNotice",
   data() {
     return {
-      // 遮罩层
-      loading: true,
-      // 选中数组
-      ids: [],
-      // 子表选中数据
-      checkedXfptGroupNoticeItem: [],
-      // 非单个禁用
-      single: true,
-      // 非多个禁用
-      multiple: true,
-      // 显示搜索条件
-      showSearch: true,
-      // 总条数
+      loading: false,
+      detailLoading: false,
       total: 0,
-      // 统购公告表格数据
       groupNoticeList: [],
-      // 统购公告商品表格数据
-      xfptGroupNoticeItemList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
       open: false,
-      isViewMode: false,
-      detailButtonText: "\u8be6\u60c5",
-      currentSchool: null,
-      // 查询参数
+      form: {},
+      xfptGroupNoticeItemList: [],
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        schoolId: null,
-        schoolName: null,
         title: null,
         noticeCode: null,
+        schoolName: null,
         noticeType: null,
-        gradeIds: null,
-        gradeNames: null,
-        teamMeetingId: null,
-        purchaseProcessId: null,
-        startTime: null,
-        endTime: null,
         status: null,
-        applyStatus: null,
-        publishTime: null,
-        resultPublishTime: null,
-        deptId: null,
       },
-      // 表单参数
-      form: {},
-      // 表单校验
-      rules: {
-        schoolId: [
-          { required: true, message: "学校ID不能为空", trigger: "blur" }
-        ],
-        schoolName: [
-          { required: true, message: "学校名称快照不能为空", trigger: "blur" }
-        ],
-        title: [
-          { required: true, message: "公告标题不能为空", trigger: "blur" }
-        ],
-        noticeCode: [
-          { required: true, message: "公告编号不能为空", trigger: "blur" }
-        ],
-        noticeType: [
-          { required: true, message: "公告类型，1选购公告 2结果公告不能为空", trigger: "change" }
-        ],
-        status: [
-          { required: true, message: "状态，0草稿 1已发布 2已结束 3已撤回不能为空", trigger: "change" }
-        ],
-        applyStatus: [
-          { required: true, message: "报名状态，0未开放 1报名中 2报名结束不能为空", trigger: "change" }
-        ],
-        delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
-        ]
-      }
+      noticeTypeOptions: [
+        { label: "选购公告", value: "1" },
+        { label: "结果公告", value: "2" },
+      ],
+      statusOptions: [
+        { label: "草稿", value: "0" },
+        { label: "已发布", value: "1" },
+        { label: "已结束", value: "2" },
+        { label: "已撤回", value: "3" },
+      ],
+      applyStatusOptions: [
+        { label: "未开放", value: "0" },
+        { label: "报名中", value: "1" },
+        { label: "报名结束", value: "2" },
+      ],
     };
   },
   created() {
     this.getList();
   },
   methods: {
-    /** 查询统购公告列表 */
     getList() {
       this.loading = true;
-      listGroupNotice(this.queryParams).then(response => {
-        this.groupNoticeList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
+      listSupplierGroupNotice(this.queryParams)
+        .then((response) => {
+          this.groupNoticeList = response.rows || [];
+          this.total = response.total || 0;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
     },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
-    },
-    // 表单重置
-    reset() {
-      this.form = {
-        id: null,
-        schoolId: null,
-        schoolName: null,
-        title: null,
-        noticeCode: null,
-        noticeType: "1",
-        content: null,
-        gradeIds: null,
-        gradeNames: null,
-        teamMeetingId: null,
-        purchaseProcessId: null,
-        startTime: null,
-        endTime: null,
-        status: "0",
-        applyStatus: "0",
-        publishTime: null,
-        resultPublishTime: null,
-        deptId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: "0"
-      };
-      this.xfptGroupNoticeItemList = [];
-      this.resetForm("form");
-    },
-    /** 搜索按钮操作 */
     handleQuery() {
       this.queryParams.pageNum = 1;
       this.getList();
     },
-    /** 重置按钮操作 */
     resetQuery() {
       this.resetForm("queryForm");
       this.handleQuery();
     },
-    // 多选框选中数据
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
-    },
-    /** 新增按钮操作 */
-    handleAdd() {
-      this.reset();
-      this.isViewMode = false;
-      this.loadCurrentSchoolInfo().then(() => {
-        this.open = true;
-        this.title = "\u6dfb\u52a0\u7edf\u8d2d\u516c\u544a";
-      });
-    },
     handleView(row) {
-      this.reset();
-      this.isViewMode = true;
-      const id = row.id || this.ids
-      getGroupNotice(id).then(response => {
-        this.form = response.data;
-        this.xfptGroupNoticeItemList = response.data.xfptGroupNoticeItemList;
-        this.open = true;
-        this.title = "\u516c\u544a\u8be6\u60c5";
-      });
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      this.isViewMode = false;
-      const id = row.id || this.ids
-      getGroupNotice(id).then(response => {
-        this.form = response.data;
-        this.xfptGroupNoticeItemList = response.data.xfptGroupNoticeItemList;
-        this.open = true;
-        this.title = "修改统购公告";
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          this.form.xfptGroupNoticeItemList = this.xfptGroupNoticeItemList;
-          if (this.form.id != null) {
-            updateGroupNotice(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addGroupNotice(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除统购公告编号为"' + ids + '"的数据项？').then(function() {
-        return delGroupNotice(ids);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
-    },
-	/** 统购公告商品序号 */
-    rowXfptGroupNoticeItemIndex({ row, rowIndex }) {
-      row.index = rowIndex + 1;
-    },
-    /** 统购公告商品添加按钮操作 */
-    handleAddXfptGroupNoticeItem() {
-      let obj = {};
-      obj.goodsId = "";
-      obj.goodsName = "";
-      obj.unitName = "";
-      obj.buyNum = "";
-      obj.priceDesc = "";
-      obj.gradeIds = "";
-      obj.gradeNames = "";
-      obj.deptId = "";
-      obj.remark = "";
-      this.xfptGroupNoticeItemList.push(obj);
-    },
-    /** 统购公告商品删除按钮操作 */
-    handleDeleteXfptGroupNoticeItem() {
-      if (this.checkedXfptGroupNoticeItem.length == 0) {
-        this.$modal.msgError("请先选择要删除的统购公告商品数据");
-      } else {
-        const xfptGroupNoticeItemList = this.xfptGroupNoticeItemList;
-        const checkedXfptGroupNoticeItem = this.checkedXfptGroupNoticeItem;
-        this.xfptGroupNoticeItemList = xfptGroupNoticeItemList.filter(function(item) {
-          return checkedXfptGroupNoticeItem.indexOf(item.index) == -1
+      const noticeId = row.id;
+      if (!noticeId) {
+        this.$message.error("当前公告缺少主键，无法查看详情");
+        return;
+      }
+      this.detailLoading = true;
+      this.open = true;
+      getSupplierGroupNotice(noticeId)
+        .then((response) => {
+          this.form = response.data || {};
+          this.xfptGroupNoticeItemList = this.form.xfptGroupNoticeItemList || [];
+        })
+        .finally(() => {
+          this.detailLoading = false;
         });
+    },
+    formatNoticeType(value) {
+      return this.findOptionLabel(this.noticeTypeOptions, value);
+    },
+    formatStatus(value) {
+      return this.findOptionLabel(this.statusOptions, value);
+    },
+    formatApplyStatus(value) {
+      return this.findOptionLabel(this.applyStatusOptions, value);
+    },
+    findOptionLabel(options, value) {
+      const match = options.find((item) => String(item.value) === String(value));
+      return match ? match.label : value || "-";
+    },
+    getStatusTagType(value) {
+      const map = {
+        0: "info",
+        1: "success",
+        2: "warning",
+        3: "danger",
+      };
+      return map[value] || "info";
+    },
+    formatDate(value) {
+      if (!value) {
+        return "-";
       }
+      return this.parseTime(value, "{y}-{m}-{d}");
     },
-    /** 复选框选中数据 */
-    handleXfptGroupNoticeItemSelectionChange(selection) {
-      this.checkedXfptGroupNoticeItem = selection.map(item => item.index)
-    },
-    /** 导出按钮操作 */
-    loadCurrentSchoolInfo() {
-      const deptId = this.$store.state.user.deptId;
-      if (!deptId) {
-        this.$modal.msgError("\u672a\u83b7\u53d6\u5230\u5f53\u524d\u767b\u5f55\u5b66\u6821");
-        return Promise.reject(new Error("missing deptId"));
-      }
-      return getSchoolInfoDetail(deptId).then(response => {
-        if (!response.data) {
-          this.$modal.msgError("\u5f53\u524d\u5b66\u6821\u4fe1\u606f\u4e0d\u5b58\u5728\uff0c\u8bf7\u5148\u5b8c\u5584\u5b66\u6821\u4fe1\u606f");
-          return Promise.reject(new Error("missing school"));
-        }
-        this.currentSchool = response.data;
-        this.form.deptId = response.data.deptId;
-        this.form.schoolId = response.data.id;
-        this.form.schoolName = response.data.schoolName;
-      });
-    },
-    handleExport() {
-      this.download('school/groupNotice/export', {
-        ...this.queryParams
-      }, `groupNotice_${new Date().getTime()}.xlsx`)
-    }
-  }
+  },
 };
 </script>
+
+<style lang="scss" scoped>
+.group-notice-query-page {
+  .summary-card {
+    margin-bottom: 16px;
+  }
+
+  .summary-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .summary-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1f2d3d;
+  }
+
+  .summary-subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+    color: #6b7280;
+    line-height: 1.6;
+  }
+
+  .query-form {
+    padding: 18px 20px 2px;
+    margin-bottom: 16px;
+    background: #fff;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+  }
+
+  .notice-table {
+    margin-bottom: 16px;
+  }
+
+  .detail-wrap {
+    min-height: 240px;
+  }
+
+  .base-info {
+    margin-bottom: 16px;
+  }
+
+  .detail-section {
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1f2d3d;
+  }
+
+  .notice-content {
+    min-height: 80px;
+    color: #303133;
+    line-height: 1.8;
+    word-break: break-word;
+  }
+}
+</style>

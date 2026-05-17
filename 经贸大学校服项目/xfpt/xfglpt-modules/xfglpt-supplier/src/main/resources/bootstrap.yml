@@ -7,7 +7,7 @@ spring:
     allow-bean-definition-overriding: true
   application:
     # 应用名称
-    name: xfglpt-question
+    name: xfglpt-supplier
   profiles:
     # 环境配置
     active: dev

@@ -128,6 +128,19 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/school/supplierWithdrawRecord",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/supplierWithdrawRecord/index"),
+        name: "SupplierWithdrawRecord",
+        meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
+      },
+    ],
+  },
+  {
     path: "/school/platformUsage",
     component: Layout,
     hidden: true,
@@ -137,6 +150,19 @@ export const constantRoutes = [
         component: () => import("@/views/school/platformUsage/index"),
         name: "PlatformUsage",
         meta: { title: "使用情况", activeMenu: "/newFeature/platformUsage" },
+      },
+    ],
+  },
+  {
+    path: "/supplier/groupNotice",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/groupNotice/index"),
+        name: "SupplierGroupNotice",
+        meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
       },
     ],
   },

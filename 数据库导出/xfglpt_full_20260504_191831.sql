@@ -917,9 +917,81 @@ CREATE TABLE `sys_menu` (
 
 LOCK TABLES `sys_menu` WRITE;
 /*!40000 ALTER TABLE `sys_menu` DISABLE KEYS */;
-INSERT INTO `sys_menu` VALUES (1,'系统管理',0,70,'system',NULL,'','',1,0,'M','0','0','','system','admin','2025-03-24 16:44:46','admin','2025-04-18 17:02:30','系统管理目录',NULL),(2,'系统监控',0,80,'monitor',NULL,'','',1,0,'M','0','0','','monitor','admin','2025-03-24 16:44:46','admin','2025-04-18 17:02:48','系统监控目录',NULL),(3,'系统工具',0,69,'tool',NULL,'','',1,0,'M','0','0','','tool','admin','2025-03-24 16:44:46','admin','2025-04-18 17:02:58','系统工具目录',NULL),(100,'用户管理',1,1,'user','system/user/index','','',1,0,'C','0','0','system:user:list','user','admin','2025-03-24 16:44:46','',NULL,'用户管理菜单',NULL),(101,'角色管理',1,2,'role','system/role/index','','',1,0,'C','0','0','system:role:list','peoples','admin','2025-03-24 16:44:46','',NULL,'角色管理菜单',NULL),(102,'菜单管理',1,3,'menu','system/menu/index','','',1,0,'C','0','0','system:menu:list','tree-table','admin','2025-03-24 16:44:46','',NULL,'菜单管理菜单',NULL),(103,'部门管理',1,4,'dept','system/dept/index','','',1,0,'C','0','0','system:dept:list','tree','admin','2025-03-24 16:44:46','',NULL,'部门管理菜单',NULL),(104,'岗位管理',1,5,'post','system/post/index','','',1,0,'C','1','1','system:post:list','post','admin','2025-03-24 16:44:46','admin',NULL,'岗位管理菜单',NULL),(105,'字典管理',1,6,'dict','system/dict/index','','',1,0,'C','0','0','system:dict:list','dict','admin','2025-03-24 16:44:46','',NULL,'字典管理菜单',NULL),(106,'参数设置',1,7,'config','system/config/index','','',1,0,'C','0','0','system:config:list','edit','admin','2025-03-24 16:44:46','',NULL,'参数设置菜单',NULL),(107,'通知公告',1,8,'notice','system/notice/index','','',1,0,'C','1','1','system:notice:list','message','admin','2025-03-24 16:44:46','admin',NULL,'通知公告菜单',NULL),(108,'日志管理',1,9,'log','','','',1,0,'M','0','0','','log','admin','2025-03-24 16:44:46','',NULL,'日志管理菜单',NULL),(109,'在线用户',2,1,'online','monitor/online/index','','',1,0,'C','0','0','monitor:online:list','online','admin','2025-03-24 16:44:46','',NULL,'在线用户菜单',NULL),(110,'定时任务',2,2,'job','monitor/job/index','','',1,0,'C','0','0','monitor:job:list','job','admin','2025-03-24 16:44:46','',NULL,'定时任务菜单',NULL),(111,'Sentinel控制台',2,3,'http://localhost:8718','','','',0,0,'C','0','0','monitor:sentinel:list','sentinel','admin','2025-03-24 16:44:46','',NULL,'流量控制菜单',NULL),(112,'Nacos控制台',2,4,'http://localhost:8848/nacos','','','',0,0,'C','0','0','monitor:nacos:list','nacos','admin','2025-03-24 16:44:46','',NULL,'服务治理菜单',NULL),(113,'Admin控制台',2,5,'http://localhost:9100/login','','','',0,0,'C','0','0','monitor:server:list','server','admin','2025-03-24 16:44:46','',NULL,'服务监控菜单',NULL),(114,'表单构建',3,1,'build','tool/build/index','','',1,0,'C','0','0','tool:build:list','build','admin','2025-03-24 16:44:46','',NULL,'表单构建菜单',NULL),(115,'代码生成',3,2,'gen','tool/gen/index','','',1,0,'C','0','0','tool:gen:list','code','admin','2025-03-24 16:44:46','',NULL,'代码生成菜单',NULL),(116,'系统接口',3,3,'http://localhost:8080/swagger-ui/index.html','','','',0,0,'C','0','0','tool:swagger:list','swagger','admin','2025-03-24 16:44:46','',NULL,'系统接口菜单',NULL),(500,'操作日志',108,1,'operlog','system/operlog/index','','',1,0,'C','0','0','system:operlog:list','form','admin','2025-03-24 16:44:46','',NULL,'操作日志菜单',NULL),(501,'登录日志',108,2,'logininfor','system/logininfor/index','','',1,0,'C','0','0','system:logininfor:list','logininfor','admin','2025-03-24 16:44:46','',NULL,'登录日志菜单',NULL),(1000,'用户查询',100,1,'','','','',1,0,'F','0','0','system:user:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1001,'用户新增',100,2,'','','','',1,0,'F','0','0','system:user:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1002,'用户修改',100,3,'','','','',1,0,'F','0','0','system:user:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1003,'用户删除',100,4,'','','','',1,0,'F','0','0','system:user:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1004,'用户导出',100,5,'','','','',1,0,'F','0','0','system:user:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1005,'用户导入',100,6,'','','','',1,0,'F','0','0','system:user:import','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1006,'重置密码',100,7,'','','','',1,0,'F','0','0','system:user:resetPwd','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1007,'角色查询',101,1,'','','','',1,0,'F','0','0','system:role:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1008,'角色新增',101,2,'','','','',1,0,'F','0','0','system:role:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1009,'角色修改',101,3,'','','','',1,0,'F','0','0','system:role:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1010,'角色删除',101,4,'','','','',1,0,'F','0','0','system:role:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1011,'角色导出',101,5,'','','','',1,0,'F','0','0','system:role:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1012,'菜单查询',102,1,'','','','',1,0,'F','0','0','system:menu:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1013,'菜单新增',102,2,'','','','',1,0,'F','0','0','system:menu:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1014,'菜单修改',102,3,'','','','',1,0,'F','0','0','system:menu:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1015,'菜单删除',102,4,'','','','',1,0,'F','0','0','system:menu:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1016,'部门查询',103,1,'','','','',1,0,'F','0','0','system:dept:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1017,'部门新增',103,2,'','','','',1,0,'F','0','0','system:dept:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1018,'部门修改',103,3,'','','','',1,0,'F','0','0','system:dept:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1019,'部门删除',103,4,'','','','',1,0,'F','0','0','system:dept:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1020,'岗位查询',104,1,'','','','',1,0,'F','0','0','system:post:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1021,'岗位新增',104,2,'','','','',1,0,'F','0','0','system:post:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1022,'岗位修改',104,3,'','','','',1,0,'F','0','0','system:post:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1023,'岗位删除',104,4,'','','','',1,0,'F','0','0','system:post:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1024,'岗位导出',104,5,'','','','',1,0,'F','0','0','system:post:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1025,'字典查询',105,1,'#','','','',1,0,'F','0','0','system:dict:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1026,'字典新增',105,2,'#','','','',1,0,'F','0','0','system:dict:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1027,'字典修改',105,3,'#','','','',1,0,'F','0','0','system:dict:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1028,'字典删除',105,4,'#','','','',1,0,'F','0','0','system:dict:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1029,'字典导出',105,5,'#','','','',1,0,'F','0','0','system:dict:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1030,'参数查询',106,1,'#','','','',1,0,'F','0','0','system:config:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1031,'参数新增',106,2,'#','','','',1,0,'F','0','0','system:config:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1032,'参数修改',106,3,'#','','','',1,0,'F','0','0','system:config:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1033,'参数删除',106,4,'#','','','',1,0,'F','0','0','system:config:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1034,'参数导出',106,5,'#','','','',1,0,'F','0','0','system:config:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1035,'公告查询',107,1,'#','','','',1,0,'F','0','0','system:notice:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1036,'公告新增',107,2,'#','','','',1,0,'F','0','0','system:notice:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1037,'公告修改',107,3,'#','','','',1,0,'F','0','0','system:notice:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1038,'公告删除',107,4,'#','','','',1,0,'F','0','0','system:notice:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1039,'操作查询',500,1,'#','','','',1,0,'F','0','0','system:operlog:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1040,'操作删除',500,2,'#','','','',1,0,'F','0','0','system:operlog:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1041,'日志导出',500,3,'#','','','',1,0,'F','0','0','system:operlog:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1042,'登录查询',501,1,'#','','','',1,0,'F','0','0','system:logininfor:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1043,'登录删除',501,2,'#','','','',1,0,'F','0','0','system:logininfor:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1044,'日志导出',501,3,'#','','','',1,0,'F','0','0','system:logininfor:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1045,'账户解锁',501,4,'#','','','',1,0,'F','0','0','system:logininfor:unlock','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1046,'在线查询',109,1,'#','','','',1,0,'F','0','0','monitor:online:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1047,'批量强退',109,2,'#','','','',1,0,'F','0','0','monitor:online:batchLogout','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1048,'单条强退',109,3,'#','','','',1,0,'F','0','0','monitor:online:forceLogout','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1049,'任务查询',110,1,'#','','','',1,0,'F','0','0','monitor:job:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1050,'任务新增',110,2,'#','','','',1,0,'F','0','0','monitor:job:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1051,'任务修改',110,3,'#','','','',1,0,'F','0','0','monitor:job:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1052,'任务删除',110,4,'#','','','',1,0,'F','0','0','monitor:job:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1053,'状态修改',110,5,'#','','','',1,0,'F','0','0','monitor:job:changeStatus','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1054,'任务导出',110,6,'#','','','',1,0,'F','0','0','monitor:job:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1055,'生成查询',115,1,'#','','','',1,0,'F','0','0','tool:gen:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1056,'生成修改',115,2,'#','','','',1,0,'F','0','0','tool:gen:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1057,'生成删除',115,3,'#','','','',1,0,'F','0','0','tool:gen:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1058,'导入代码',115,2,'#','','','',1,0,'F','0','0','tool:gen:import','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1059,'预览代码',115,4,'#','','','',1,0,'F','0','0','tool:gen:preview','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1060,'生成代码',115,5,'#','','','',1,0,'F','0','0','tool:gen:code','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(2021,'校服采购流程',0,1,'cg','cg/index',NULL,'',1,0,'C','0','0','','druid','admin','2025-04-12 00:46:50','admin','2025-05-24 19:11:43','',NULL),(2039,'信息发布',2098,6,'article','xfptnotice/index',NULL,'',1,0,'C','0','0','','documentation','admin','2025-04-17 18:03:43','admin','2025-05-16 17:55:38','',NULL),(2094,'网上调查管理',0,777,'wjdc','wjdc/index',NULL,'',1,0,'C','0','0','','edit','admin','2025-04-25 23:52:19','admin','2025-05-24 19:06:08','',NULL),(2096,'学校年级配置',0,4,'grade','grade/index',NULL,'',1,0,'C','1','1','','peoples','admin','2025-04-26 17:14:44','admin','2025-05-24 19:06:30','',NULL),(2097,'选购模板配置',0,3,'configuration','configuration',NULL,'configuration',1,0,'C','0','0','','druid','admin','2025-04-26 22:04:36','admin','2025-05-24 19:06:17','',NULL),(2098,'信息管理',0,5,'/xxgl',NULL,NULL,'',1,0,'M','0','0','','education','admin','2025-05-06 18:40:06','admin','2025-05-24 19:09:31','',NULL),(2099,'栏目分类',2098,1,'category','system/category/index',NULL,'',1,0,'C','0','0','system:category:list','cascader','admin',NULL,'admin','2025-05-06 18:46:04','栏目分类菜单',NULL),(2100,'栏目分类查询',2099,1,'#','',NULL,'',1,0,'F','0','0','system:category:query','#','admin',NULL,'admin','2025-05-06 18:45:26','',NULL),(2101,'栏目分类新增',2099,2,'#','',NULL,'',1,0,'F','0','0','system:category:add','#','admin',NULL,'admin','2025-05-06 18:45:30','',NULL),(2102,'栏目分类修改',2099,3,'#','',NULL,'',1,0,'F','0','0','system:category:edit','#','admin',NULL,'admin','2025-05-06 18:45:34','',NULL),(2103,'栏目分类删除',2099,4,'#','',NULL,'',1,0,'F','0','0','system:category:remove','#','admin',NULL,'admin','2025-05-06 18:45:38','',NULL),(2104,'栏目分类导出',2099,5,'#','',NULL,'',1,0,'F','0','0','system:category:export','#','admin',NULL,'admin','2025-05-06 18:45:42','',NULL),(2105,'校服厂商管理',0,5,'manufacturers','manufacturers',NULL,'manufacturers',1,0,'C','0','0','','edit','admin','2025-05-09 01:42:14','admin','2025-05-24 19:07:02','',NULL),(2106,'校服报备统计',0,1,'jiaoyuju/process','jiaoyuju/process',NULL,'jiaoyuju/process',1,0,'C','0','0','','education','admin','2025-05-14 22:56:17','admin','2025-05-29 18:46:12','',NULL),(2108,'校服质量检测',0,3,'mass','transaction/mass',NULL,'mass',1,0,'C','0','0','','documentation','admin','2025-05-15 18:36:56','admin','2025-05-24 19:08:57','',NULL),(2109,'校服订购统计',0,2,'dgtj','dinggoutongji/index',NULL,'',1,0,'C','0','0','','example','admin','2025-05-17 18:54:39','admin','2025-05-24 19:08:41','',NULL),(2110,'轮播图',2098,1,'lbimage','system/lbimage/index',NULL,'',1,0,'C','1','1','system:lbimage:list','eye-open','admin',NULL,'admin','2025-05-24 19:09:53','轮播图菜单',NULL),(2111,'轮播图查询',2110,1,'#','',NULL,'',1,0,'F','0','0','system:lbimage:query','#','admin',NULL,'',NULL,'',NULL),(2112,'轮播图新增',2110,2,'#','',NULL,'',1,0,'F','0','0','system:lbimage:add','#','admin',NULL,'',NULL,'',NULL),(2113,'轮播图修改',2110,3,'#','',NULL,'',1,0,'F','0','0','system:lbimage:edit','#','admin',NULL,'',NULL,'',NULL),(2114,'轮播图删除',2110,4,'#','',NULL,'',1,0,'F','0','0','system:lbimage:remove','#','admin',NULL,'',NULL,'',NULL),(2115,'轮播图导出',2110,5,'#','',NULL,'',1,0,'F','0','0','system:lbimage:export','#','admin',NULL,'',NULL,'',NULL),(2116,'校服厂商列表',0,4,'vendors','transaction/vendors',NULL,'vendors',1,0,'C','1','1','','dashboard','admin','2025-05-20 17:09:20','admin','2025-05-24 19:09:21','',NULL),(2117,'学校管理',0,3,'schoolManagement','transaction/schoolManagement',NULL,'schoolManagement',1,0,'C','0','0','','exit-fullscreen','admin','2025-05-21 19:10:43','admin','2025-05-24 01:21:21','',NULL),(2118,'意见建议',0,6,'opinion','opinion',NULL,'opinion',1,0,'C','0','0','','documentation','admin','2025-05-24 18:46:54','admin','2025-05-24 19:07:31','',NULL),(2119,'列表',2039,1,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:list','#','admin','2025-05-24 19:13:19','admin','2025-05-24 19:16:36','',NULL),(2120,'详情',2039,2,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:query','#','admin','2025-05-24 19:13:40','admin','2025-05-24 19:16:39','',NULL),(2121,'新增',2039,3,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:add','#','admin','2025-05-24 19:13:56','admin','2025-05-24 19:16:45','',NULL),(2122,'修改',2039,4,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:edit','#','admin','2025-05-24 19:14:08','admin','2025-05-24 19:16:48','',NULL),(2123,'删除',2039,5,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:remove','#','admin','2025-05-24 19:14:22','admin','2025-05-24 19:16:51','',NULL),(2124,'添加',2094,1,'',NULL,NULL,'',1,0,'F','0','0','school:survey:add','#','admin','2025-05-24 19:40:41','admin','2025-05-26 23:51:51','',NULL),(2125,'添加',2097,1,'',NULL,NULL,'',1,0,'F','0','0','school:config:add','#','admin','2025-05-26 22:11:10','',NULL,'',NULL),(2126,'编辑',2097,2,'',NULL,NULL,'',1,0,'F','0','0','school:config:edit','#','admin','2025-05-26 22:11:29','',NULL,'',NULL),(2127,'删除',2097,3,'',NULL,NULL,'',1,0,'F','0','0','school:config:remove','#','admin','2025-05-26 22:12:01','',NULL,'',NULL),(2128,'导出',2097,4,'',NULL,NULL,'',1,0,'F','0','0','school:config:export','#','admin','2025-05-26 22:28:24','',NULL,'',NULL),(2129,'家长购买意见征集-添加',2021,1,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-add','#','admin','2025-05-27 17:49:20','admin','2025-05-27 17:50:34','',NULL),(2130,'家长购买意见征集-修改',2021,2,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-edit','#','admin','2025-05-27 17:49:42','admin','2025-05-27 17:50:37','',NULL),(2131,'家长购买意见征集-删除',2021,3,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-remove','#','admin','2025-05-27 17:50:29','',NULL,'',NULL),(2132,'家长购买意见征集-编辑征集结果',2021,4,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-bjzjjg','#','admin','2025-05-27 17:51:38','',NULL,'',NULL),(2133,'组织名单报备公开-添加',2021,5,'',NULL,NULL,'',1,0,'F','0','0','xfpg:zzmdbbgk-add','#','admin','2025-05-27 17:52:55','admin','2025-05-27 17:55:21','',NULL),(2134,'组织名单报备公开-编辑',2021,6,'',NULL,NULL,'',1,0,'F','0','0','xfpg:zzmdbbgk-edit','#','admin','2025-05-27 17:53:37','',NULL,'',NULL),(2135,'组织名单报备公开-删除',2021,7,'',NULL,NULL,'',1,0,'F','0','0','xfpg:zzmdbbgk-remove','#','admin','2025-05-27 17:54:27','',NULL,'',NULL),(2136,'选购模式报备与公开-添加',2021,8,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgmsbbgk-add','#','admin','2025-05-27 17:55:15','',NULL,'',NULL),(2137,'选购模式报备与公开-修改',2021,9,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgmsbbgk-edit','#','admin','2025-05-27 17:56:02','',NULL,'',NULL),(2138,'选购模式报备与公开-删除',2021,10,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgmsbbgk-remove','#','admin','2025-05-27 17:56:29','',NULL,'',NULL),(2139,'模式一-添加',2021,11,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-add','#','admin','2025-05-27 17:57:13','',NULL,'',NULL),(2140,'模式一-撤回',2021,12,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-ch','#','admin','2025-05-27 17:58:15','',NULL,'',NULL),(2141,'模式一-修改',2021,13,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-edit','#','admin','2025-05-27 17:58:35','',NULL,'',NULL),(2142,'模式一-删除',2021,14,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-remove','#','admin','2025-05-27 17:58:54','',NULL,'',NULL),(2143,'模式二-添加',2021,15,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-add','#','admin','2025-05-27 17:59:29','',NULL,'',NULL),(2144,'模式二-撤回',2021,16,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-ch','#','admin','2025-05-27 17:59:53','',NULL,'',NULL),(2145,'模式二-删除',2021,17,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-remove','#','admin','2025-05-27 18:00:12','',NULL,'',NULL),(2146,'模式三-添加',2021,19,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-add','#','admin','2025-05-27 18:02:36','admin','2025-05-27 18:05:08','',NULL),(2147,'模式三-删除',2021,20,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-remove','#','admin','2025-05-27 18:03:09','admin','2025-05-27 18:05:14','',NULL),(2148,'模式三-修改',2021,21,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-edit','#','admin','2025-05-27 18:03:27','admin','2025-05-27 18:05:18','',NULL),(2149,'模式三-撤回',2021,22,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-ch','#','admin','2025-05-27 18:04:13','admin','2025-05-27 18:05:21','',NULL),(2150,'模式二-修改',2021,18,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-edit','#','admin','2025-05-27 18:05:48','',NULL,'',NULL),(2151,'评定小组投票确定厂商-添加',2021,23,'',NULL,NULL,'',1,0,'F','0','0','xfpg:pdxzqdcs-add','#','admin','2025-05-27 18:07:59','admin','2025-05-27 18:08:06','',NULL),(2152,'评定小组投票确定厂商-删除',2021,24,'',NULL,NULL,'',1,0,'F','0','0','xfpg:pdxzqdcs-remove','#','admin','2025-05-27 18:08:33','',NULL,'',NULL),(2153,'评定小组投票确定厂商-修改',2021,25,'',NULL,NULL,'',1,0,'F','0','0','xfpg:pdxzqdcs-edit','#','admin','2025-05-27 18:09:06','',NULL,'',NULL),(2154,'选购结果公示报备与公开-添加',2021,26,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-add','#','admin','2025-05-27 18:09:47','',NULL,'',NULL),(2155,'选购结果公示报备与公开-修改',2021,27,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-edit','#','admin','2025-05-27 18:10:21','',NULL,'',NULL),(2156,'选购结果公示报备与公开-删除',2021,28,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-remove','#','admin','2025-05-27 18:10:49','',NULL,'',NULL),(2157,'选购结果公示报备与公开-撤回',2021,30,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-ch','#','admin','2025-05-27 18:12:11','',NULL,'',NULL),(2158,'选购结果公示报备与公开-发布',2021,29,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-fb','#','admin','2025-05-27 18:13:08','',NULL,'',NULL),(2159,'采购合同报备与公开-添加',2021,31,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cghtbb-add','#','admin','2025-05-27 18:13:55','admin','2025-05-27 18:14:15','',NULL),(2160,'采购合同报备与公开-添加采购合同',2021,32,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cghtbb-addht','#','admin','2025-05-27 18:14:48','',NULL,'',NULL),(2161,'采购合同报备与公开-取消合作',2021,33,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cghtbb-qxhz','#','admin','2025-05-27 18:15:05','',NULL,'',NULL),(2162,'质量检验报告报备与公开-添加厂商',2021,34,'',NULL,NULL,'',1,0,'F','0','0','xfpt:zljy:addgs','#','admin','2025-05-27 18:16:51','',NULL,'',NULL),(2163,'质量检验报告报备与公开-删除',2021,35,'',NULL,NULL,'',1,0,'F','0','0','xfpt:zljy:remove','#','admin','2025-05-27 18:17:22','',NULL,'',NULL),(2164,'质量检验报告报备与公开-上传质检报告',2021,36,'',NULL,NULL,'',1,0,'F','0','0','xfpt:zljy:sczjbg','#','admin','2025-05-27 18:17:51','',NULL,'',NULL),(2165,'家长满意度总结-添加',2021,37,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzmydzj:add','#','admin','2025-05-27 18:18:53','',NULL,'',NULL),(2166,'家长满意度总结-删除',2021,38,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzmydzj:remove','#','admin','2025-05-27 18:27:53','',NULL,'',NULL),(2167,'家长满意度总结-编辑调查结果',2021,39,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzmydzj:editjg','#','admin','2025-05-27 18:28:28','admin','2025-05-28 17:36:03','',NULL),(2168,'采购信息报备-按钮',2021,40,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cgxxbb','#','admin','2025-05-27 18:29:06','',NULL,'',NULL),(2169,'list',2021,99999,'',NULL,NULL,'',1,0,'F','0','0','list','#','admin','2025-05-28 18:10:42','',NULL,'',NULL),(2170,'新增班子会议',2021,0,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xzbzhy:add','#','admin','2025-05-28 18:14:06','',NULL,'',NULL),(2171,'班子会议修改',2021,0,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xzbzhy:edit','#','admin','2025-05-28 18:15:31','',NULL,'',NULL),(2172,'班子会议删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xzbzhy:remove','#','admin','2025-05-28 18:15:48','',NULL,'',NULL),(2173,'设置学校信息',0,99999,'',NULL,NULL,'',1,0,'F','0','0','xfpt:szxxxx','#','admin','2025-05-28 19:02:36','',NULL,'',NULL),(2174,'添加',2105,1,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:add','#','admin','2025-05-28 22:02:41','admin','2025-05-28 22:26:15','',NULL),(2175,'修改',2105,2,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:edit','#','admin','2025-05-28 22:03:34','admin','2025-05-28 22:26:24','',NULL),(2176,'修改',2118,1,'',NULL,NULL,'',1,0,'F','0','0','school:parentsFeedback:edit','#','admin','2025-05-29 01:32:01','',NULL,'',NULL),(2177,'删除',2118,2,'',NULL,NULL,'',1,0,'F','0','0','school:parentsFeedback:remove','#','admin','2025-05-29 01:32:24','',NULL,'',NULL),(2178,'历史采购数据',0,7,'oldData','school/oldData/index',NULL,'',1,0,'C','1','1','school:oldData:list','example','admin',NULL,'admin','2025-08-08 23:26:34','采购历史数据菜单',NULL),(2179,'采购历史数据查询',2178,1,'#','',NULL,'',1,0,'F','0','0','school:oldData:query','#','admin',NULL,'',NULL,'',NULL),(2180,'采购历史数据新增',2178,2,'#','',NULL,'',1,0,'F','0','0','school:oldData:add','#','admin',NULL,'',NULL,'',NULL),(2181,'采购历史数据修改',2178,3,'#','',NULL,'',1,0,'F','0','0','school:oldData:edit','#','admin',NULL,'',NULL,'',NULL),(2182,'采购历史数据删除',2178,4,'#','',NULL,'',1,0,'F','0','0','school:oldData:remove','#','admin',NULL,'',NULL,'',NULL),(2183,'采购历史数据导出',2178,5,'#','',NULL,'',1,0,'F','0','0','school:oldData:export','#','admin',NULL,'',NULL,'',NULL),(2184,'黑名单',2105,3,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:hmd','#','admin','2025-06-04 21:43:34','',NULL,'',NULL),(2185,'家长购买意见征集-查看',2021,99,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-look','#','admin','2025-06-07 18:22:58','',NULL,'',NULL),(2186,'查看服务学校列表',2105,2,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:view','#','admin','2025-06-07 23:53:00','admin','2025-06-07 23:55:51','',NULL),(2187,'采购流程-添加',2021,1,'',NULL,NULL,'',1,0,'F','0','0','school:cglcprocess:add','#','admin','2025-08-06 23:09:46','',NULL,'',NULL),(2188,'采购流程-修改',2021,2,'',NULL,NULL,'',1,0,'F','0','0','school:cglcprocess:edit','#','admin','2025-08-06 23:15:51','',NULL,'',NULL),(2189,'入围公告-修改',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:edit','#','admin','2025-08-11 18:04:52','',NULL,'',NULL),(2190,'入围公告-删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:remove','#','admin','2025-08-11 18:05:17','',NULL,'',NULL),(2191,'入围公告-补充',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:bc','#','admin','2025-08-11 18:05:35','',NULL,'',NULL),(2192,'入围公告-添加',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:add','#','admin','2025-08-11 18:31:36','',NULL,'',NULL),(2193,'补充',2021,0,'',NULL,NULL,'',1,0,'F','0','0','bc-gonggao','#','admin','2025-08-14 22:02:04','',NULL,'',NULL),(2194,'采购流程删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcprocess:remove','#','admin',NULL,'',NULL,'',NULL),(2195,'利旧回收',0,999,'ljhs',NULL,NULL,'',1,0,'M','0','0','','education','admin',NULL,'admin',NULL,'',NULL),(2196,'利旧回收列表',2195,1,'ljhs','school/ljhs/index',NULL,'',1,0,'C','0','0','school:ljhs:list','#','admin',NULL,'',NULL,'利旧回收菜单',NULL),(2197,'利旧回收查询',2196,1,'#','',NULL,'',1,0,'F','0','0','school:ljhs:query','#','admin',NULL,'',NULL,'',NULL),(2198,'利旧回收新增',2196,2,'#','',NULL,'',1,0,'F','0','0','school:ljhs:add','#','admin',NULL,'',NULL,'',NULL),(2200,'利旧回收删除',2196,4,'#','',NULL,'',1,0,'F','0','0','school:ljhs:remove','#','admin',NULL,'',NULL,'',NULL),(2201,'利旧回收导出',2196,5,'#','',NULL,'',1,0,'F','0','0','school:ljhs:export','#','admin',NULL,'',NULL,'',NULL),(2202,'学生管理',0,888,'info','school/schoolStudentInfo/index',NULL,'',1,0,'C','0','0','school:schoolStudentInfo:list','user','admin',NULL,'admin',NULL,'家长绑定学生信息菜单',NULL),(2203,'家长绑定学生信息查询',2202,1,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:query','#','admin',NULL,'admin',NULL,'',NULL),(2204,'家长绑定学生信息新增',2202,2,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:add','#','admin',NULL,'admin',NULL,'',NULL),(2205,'家长绑定学生信息修改',2202,3,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:edit','#','admin',NULL,'admin',NULL,'',NULL),(2206,'家长绑定学生信息删除',2202,4,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:remove','#','admin',NULL,'admin',NULL,'',NULL),(2207,'家长绑定学生信息导出',2202,5,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:export','#','admin',NULL,'admin',NULL,'',NULL),(2208,'补充添加',2021,1,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:add','#','admin',NULL,'',NULL,'',NULL),(2209,'采购总结新增',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcgzzj:add','#','admin',NULL,'',NULL,'',NULL),(2210,'采购总结编辑',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcgzzj:edit','#','admin',NULL,'',NULL,'',NULL),(2211,'采购总结删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcgzzj:remove','#','admin',NULL,'',NULL,'',NULL),(2212,'7查看详情',2021,1,'',NULL,NULL,'',1,0,'F','0','0','school:pdxzSupplier:edit','#','admin',NULL,'',NULL,'',NULL),(2213,'购物车明细',2333,1,'cartItem','school/cartItem/index',NULL,'',1,0,'C','0','0','school:cartItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','购物车明细菜单',NULL),(2214,'购物车明细查询',2213,1,'#','',NULL,'',1,0,'F','0','0','school:cartItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2215,'购物车明细新增',2213,2,'#','',NULL,'',1,0,'F','0','0','school:cartItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2216,'购物车明细修改',2213,3,'#','',NULL,'',1,0,'F','0','0','school:cartItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2217,'购物车明细删除',2213,4,'#','',NULL,'',1,0,'F','0','0','school:cartItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2218,'购物车明细导出',2213,5,'#','',NULL,'',1,0,'F','0','0','school:cartItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2219,'商品信息',2333,1,'goods','school/goods/index',NULL,'',1,0,'C','0','0','school:goods:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品信息菜单',NULL),(2220,'商品信息查询',2219,1,'#','',NULL,'',1,0,'F','0','0','school:goods:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2221,'商品信息新增',2219,2,'#','',NULL,'',1,0,'F','0','0','school:goods:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2222,'商品信息修改',2219,3,'#','',NULL,'',1,0,'F','0','0','school:goods:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2223,'商品信息删除',2219,4,'#','',NULL,'',1,0,'F','0','0','school:goods:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2224,'商品信息导出',2219,5,'#','',NULL,'',1,0,'F','0','0','school:goods:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2225,'商品尺码',2333,1,'goodsSize','school/goodsSize/index',NULL,'',1,0,'C','0','0','school:goodsSize:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品尺码菜单',NULL),(2226,'商品尺码查询',2225,1,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2227,'商品尺码新增',2225,2,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2228,'商品尺码修改',2225,3,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2229,'商品尺码删除',2225,4,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2230,'商品尺码导出',2225,5,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2231,'统购公告商品',2333,1,'groupNoticeItem','school/groupNoticeItem/index',NULL,'',1,0,'C','0','0','school:groupNoticeItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','统购公告商品菜单',NULL),(2232,'统购公告商品查询',2231,1,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2233,'统购公告商品新增',2231,2,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2234,'统购公告商品修改',2231,3,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2235,'统购公告商品删除',2231,4,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2236,'统购公告商品导出',2231,5,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2237,'统购公告',2333,1,'groupNotice','school/groupNotice/index',NULL,'',1,0,'C','0','0','school:groupNotice:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','统购公告菜单',NULL),(2238,'统购公告查询',2237,1,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2239,'统购公告新增',2237,2,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2240,'统购公告修改',2237,3,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2241,'统购公告删除',2237,4,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2242,'统购公告导出',2237,5,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2243,'订单信息',2333,1,'orderInfo','school/orderInfo/index',NULL,'',1,0,'C','0','0','school:orderInfo:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','订单信息菜单',NULL),(2244,'订单信息查询',2243,1,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2245,'订单信息新增',2243,2,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2246,'订单信息修改',2243,3,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2247,'订单信息删除',2243,4,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2248,'订单信息导出',2243,5,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2249,'学校供应商合作商品',2333,1,'schoolSupplierGoodsRel','school/schoolSupplierGoodsRel/index',NULL,'',1,0,'C','0','0','school:schoolSupplierGoodsRel:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','学校供应商合作商品菜单',NULL),(2250,'学校供应商合作商品查询',2249,1,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2251,'学校供应商合作商品新增',2249,2,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2252,'学校供应商合作商品修改',2249,3,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2253,'学校供应商合作商品删除',2249,4,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2254,'学校供应商合作商品导出',2249,5,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2255,'学校供应商合作关系',2333,1,'schoolSupplierRel','school/schoolSupplierRel/index',NULL,'',1,0,'C','0','0','school:schoolSupplierRel:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','学校供应商合作关系菜单',NULL),(2256,'学校供应商合作关系查询',2255,1,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2257,'学校供应商合作关系新增',2255,2,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2258,'学校供应商合作关系修改',2255,3,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2259,'学校供应商合作关系删除',2255,4,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2260,'学校供应商合作关系导出',2255,5,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2261,'供应商报名',2333,1,'supplierApply','school/supplierApply/index',NULL,'',1,0,'C','0','0','school:supplierApply:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','供应商报名菜单',NULL),(2262,'供应商报名查询',2261,1,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2263,'供应商报名新增',2261,2,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2264,'供应商报名修改',2261,3,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2265,'供应商报名删除',2261,4,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2266,'供应商报名导出',2261,5,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2267,'用户收货地址',2333,1,'userAddress','school/userAddress/index',NULL,'',1,0,'C','0','0','school:userAddress:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','用户收货地址菜单',NULL),(2268,'用户收货地址查询',2267,1,'#','',NULL,'',1,0,'F','0','0','school:userAddress:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2269,'用户收货地址新增',2267,2,'#','',NULL,'',1,0,'F','0','0','school:userAddress:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2270,'用户收货地址修改',2267,3,'#','',NULL,'',1,0,'F','0','0','school:userAddress:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2271,'用户收货地址删除',2267,4,'#','',NULL,'',1,0,'F','0','0','school:userAddress:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2272,'用户收货地址导出',2267,5,'#','',NULL,'',1,0,'F','0','0','school:userAddress:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2273,'售后主',2333,1,'afterSale','school/afterSale/index',NULL,'',1,0,'C','0','0','school:afterSale:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','售后主菜单',NULL),(2274,'售后主查询',2273,1,'#','',NULL,'',1,0,'F','0','0','school:afterSale:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2275,'售后主新增',2273,2,'#','',NULL,'',1,0,'F','0','0','school:afterSale:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2276,'售后主修改',2273,3,'#','',NULL,'',1,0,'F','0','0','school:afterSale:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2277,'售后主删除',2273,4,'#','',NULL,'',1,0,'F','0','0','school:afterSale:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2278,'售后主导出',2273,5,'#','',NULL,'',1,0,'F','0','0','school:afterSale:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2279,'商品评价',2333,1,'comment','school/comment/index',NULL,'',1,0,'C','0','0','school:comment:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品评价菜单',NULL),(2280,'商品评价查询',2279,1,'#','',NULL,'',1,0,'F','0','0','school:comment:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2281,'商品评价新增',2279,2,'#','',NULL,'',1,0,'F','0','0','school:comment:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2282,'商品评价修改',2279,3,'#','',NULL,'',1,0,'F','0','0','school:comment:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2283,'商品评价删除',2279,4,'#','',NULL,'',1,0,'F','0','0','school:comment:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2284,'商品评价导出',2279,5,'#','',NULL,'',1,0,'F','0','0','school:comment:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2285,'商品评论回复',2333,1,'commentReply','school/commentReply/index',NULL,'',1,0,'C','0','0','school:commentReply:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品评论回复菜单',NULL),(2286,'商品评论回复查询',2285,1,'#','',NULL,'',1,0,'F','0','0','school:commentReply:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2287,'商品评论回复新增',2285,2,'#','',NULL,'',1,0,'F','0','0','school:commentReply:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2288,'商品评论回复修改',2285,3,'#','',NULL,'',1,0,'F','0','0','school:commentReply:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2289,'商品评论回复删除',2285,4,'#','',NULL,'',1,0,'F','0','0','school:commentReply:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2290,'商品评论回复导出',2285,5,'#','',NULL,'',1,0,'F','0','0','school:commentReply:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2291,'发货单明细',2333,1,'deliveryOrderItem','school/deliveryOrderItem/index',NULL,'',1,0,'C','0','0','school:deliveryOrderItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','发货单明细菜单',NULL),(2292,'发货单明细查询',2291,1,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2293,'发货单明细新增',2291,2,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2294,'发货单明细修改',2291,3,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2295,'发货单明细删除',2291,4,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2296,'发货单明细导出',2291,5,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2297,'发货单',2333,1,'deliveryOrder','school/deliveryOrder/index',NULL,'',1,0,'C','0','0','school:deliveryOrder:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','发货单菜单',NULL),(2298,'发货单查询',2297,1,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2299,'发货单新增',2297,2,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2300,'发货单修改',2297,3,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2301,'发货单删除',2297,4,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2302,'发货单导出',2297,5,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2303,'资金流水',2333,1,'financeFlow','school/financeFlow/index',NULL,'',1,0,'C','0','0','school:financeFlow:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','资金流水菜单',NULL),(2304,'资金流水查询',2303,1,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2305,'资金流水新增',2303,2,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2306,'资金流水修改',2303,3,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2307,'资金流水删除',2303,4,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2308,'资金流水导出',2303,5,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2309,'订单明细',2333,1,'orderItem','school/orderItem/index',NULL,'',1,0,'C','0','0','school:orderItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','订单明细菜单',NULL),(2310,'订单明细查询',2309,1,'#','',NULL,'',1,0,'F','0','0','school:orderItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2311,'订单明细新增',2309,2,'#','',NULL,'',1,0,'F','0','0','school:orderItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2312,'订单明细修改',2309,3,'#','',NULL,'',1,0,'F','0','0','school:orderItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2313,'订单明细删除',2309,4,'#','',NULL,'',1,0,'F','0','0','school:orderItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2314,'订单明细导出',2309,5,'#','',NULL,'',1,0,'F','0','0','school:orderItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2315,'生产单明细',2333,1,'productionOrderItem','school/productionOrderItem/index',NULL,'',1,0,'C','0','0','school:productionOrderItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','生产单明细菜单',NULL),(2316,'生产单明细查询',2315,1,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2317,'生产单明细新增',2315,2,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2318,'生产单明细修改',2315,3,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2319,'生产单明细删除',2315,4,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2320,'生产单明细导出',2315,5,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2321,'生产单',2333,1,'productionOrder','school/productionOrder/index',NULL,'',1,0,'C','0','0','school:productionOrder:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','生产单菜单',NULL),(2322,'生产单查询',2321,1,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2323,'生产单新增',2321,2,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2324,'生产单修改',2321,3,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2325,'生产单删除',2321,4,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2326,'生产单导出',2321,5,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2327,'供应商提现申请',2333,1,'withdrawApply','school/withdrawApply/index',NULL,'',1,0,'C','0','0','school:withdrawApply:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','供应商提现申请菜单',NULL),(2328,'供应商提现申请查询',2327,1,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2329,'供应商提现申请新增',2327,2,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2330,'供应商提现申请修改',2327,3,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2331,'供应商提现申请删除',2327,4,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2332,'供应商提现申请导出',2327,5,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2333,'新增功能',0,99,'newFeature',NULL,NULL,NULL,1,0,'M','0','0','','tree','admin','2026-05-04 10:05:01','admin','2026-05-04 10:48:08','新增功能目录',NULL);
+INSERT INTO `sys_menu` VALUES (1,'系统管理',0,70,'system',NULL,'','',1,0,'M','0','0','','system','admin','2025-03-24 16:44:46','admin','2025-04-18 17:02:30','系统管理目录',NULL),(2,'系统监控',0,80,'monitor',NULL,'','',1,0,'M','0','0','','monitor','admin','2025-03-24 16:44:46','admin','2025-04-18 17:02:48','系统监控目录',NULL),(3,'系统工具',0,69,'tool',NULL,'','',1,0,'M','0','0','','tool','admin','2025-03-24 16:44:46','admin','2025-04-18 17:02:58','系统工具目录',NULL),(100,'用户管理',1,1,'user','system/user/index','','',1,0,'C','0','0','system:user:list','user','admin','2025-03-24 16:44:46','',NULL,'用户管理菜单',NULL),(101,'角色管理',1,2,'role','system/role/index','','',1,0,'C','0','0','system:role:list','peoples','admin','2025-03-24 16:44:46','',NULL,'角色管理菜单',NULL),(102,'菜单管理',1,3,'menu','system/menu/index','','',1,0,'C','0','0','system:menu:list','tree-table','admin','2025-03-24 16:44:46','',NULL,'菜单管理菜单',NULL),(103,'部门管理',1,4,'dept','system/dept/index','','',1,0,'C','0','0','system:dept:list','tree','admin','2025-03-24 16:44:46','',NULL,'部门管理菜单',NULL),(104,'岗位管理',1,5,'post','system/post/index','','',1,0,'C','1','1','system:post:list','post','admin','2025-03-24 16:44:46','admin',NULL,'岗位管理菜单',NULL),(105,'字典管理',1,6,'dict','system/dict/index','','',1,0,'C','0','0','system:dict:list','dict','admin','2025-03-24 16:44:46','',NULL,'字典管理菜单',NULL),(106,'参数设置',1,7,'config','system/config/index','','',1,0,'C','0','0','system:config:list','edit','admin','2025-03-24 16:44:46','',NULL,'参数设置菜单',NULL),(107,'通知公告',1,8,'notice','system/notice/index','','',1,0,'C','1','1','system:notice:list','message','admin','2025-03-24 16:44:46','admin',NULL,'通知公告菜单',NULL),(108,'日志管理',1,9,'log','','','',1,0,'M','0','0','','log','admin','2025-03-24 16:44:46','',NULL,'日志管理菜单',NULL),(109,'在线用户',2,1,'online','monitor/online/index','','',1,0,'C','0','0','monitor:online:list','online','admin','2025-03-24 16:44:46','',NULL,'在线用户菜单',NULL),(110,'定时任务',2,2,'job','monitor/job/index','','',1,0,'C','0','0','monitor:job:list','job','admin','2025-03-24 16:44:46','',NULL,'定时任务菜单',NULL),(111,'Sentinel控制台',2,3,'http://localhost:8718','','','',0,0,'C','0','0','monitor:sentinel:list','sentinel','admin','2025-03-24 16:44:46','',NULL,'流量控制菜单',NULL),(112,'Nacos控制台',2,4,'http://localhost:8848/nacos','','','',0,0,'C','0','0','monitor:nacos:list','nacos','admin','2025-03-24 16:44:46','',NULL,'服务治理菜单',NULL),(113,'Admin控制台',2,5,'http://localhost:9100/login','','','',0,0,'C','0','0','monitor:server:list','server','admin','2025-03-24 16:44:46','',NULL,'服务监控菜单',NULL),(114,'表单构建',3,1,'build','tool/build/index','','',1,0,'C','0','0','tool:build:list','build','admin','2025-03-24 16:44:46','',NULL,'表单构建菜单',NULL),(115,'代码生成',3,2,'gen','tool/gen/index','','',1,0,'C','0','0','tool:gen:list','code','admin','2025-03-24 16:44:46','',NULL,'代码生成菜单',NULL),(116,'系统接口',3,3,'http://localhost:8080/swagger-ui/index.html','','','',0,0,'C','0','0','tool:swagger:list','swagger','admin','2025-03-24 16:44:46','',NULL,'系统接口菜单',NULL),(500,'操作日志',108,1,'operlog','system/operlog/index','','',1,0,'C','0','0','system:operlog:list','form','admin','2025-03-24 16:44:46','',NULL,'操作日志菜单',NULL),(501,'登录日志',108,2,'logininfor','system/logininfor/index','','',1,0,'C','0','0','system:logininfor:list','logininfor','admin','2025-03-24 16:44:46','',NULL,'登录日志菜单',NULL),(1000,'用户查询',100,1,'','','','',1,0,'F','0','0','system:user:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1001,'用户新增',100,2,'','','','',1,0,'F','0','0','system:user:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1002,'用户修改',100,3,'','','','',1,0,'F','0','0','system:user:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1003,'用户删除',100,4,'','','','',1,0,'F','0','0','system:user:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1004,'用户导出',100,5,'','','','',1,0,'F','0','0','system:user:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1005,'用户导入',100,6,'','','','',1,0,'F','0','0','system:user:import','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1006,'重置密码',100,7,'','','','',1,0,'F','0','0','system:user:resetPwd','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1007,'角色查询',101,1,'','','','',1,0,'F','0','0','system:role:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1008,'角色新增',101,2,'','','','',1,0,'F','0','0','system:role:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1009,'角色修改',101,3,'','','','',1,0,'F','0','0','system:role:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1010,'角色删除',101,4,'','','','',1,0,'F','0','0','system:role:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1011,'角色导出',101,5,'','','','',1,0,'F','0','0','system:role:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1012,'菜单查询',102,1,'','','','',1,0,'F','0','0','system:menu:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1013,'菜单新增',102,2,'','','','',1,0,'F','0','0','system:menu:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1014,'菜单修改',102,3,'','','','',1,0,'F','0','0','system:menu:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1015,'菜单删除',102,4,'','','','',1,0,'F','0','0','system:menu:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1016,'部门查询',103,1,'','','','',1,0,'F','0','0','system:dept:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1017,'部门新增',103,2,'','','','',1,0,'F','0','0','system:dept:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1018,'部门修改',103,3,'','','','',1,0,'F','0','0','system:dept:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1019,'部门删除',103,4,'','','','',1,0,'F','0','0','system:dept:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1020,'岗位查询',104,1,'','','','',1,0,'F','0','0','system:post:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1021,'岗位新增',104,2,'','','','',1,0,'F','0','0','system:post:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1022,'岗位修改',104,3,'','','','',1,0,'F','0','0','system:post:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1023,'岗位删除',104,4,'','','','',1,0,'F','0','0','system:post:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1024,'岗位导出',104,5,'','','','',1,0,'F','0','0','system:post:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1025,'字典查询',105,1,'#','','','',1,0,'F','0','0','system:dict:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1026,'字典新增',105,2,'#','','','',1,0,'F','0','0','system:dict:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1027,'字典修改',105,3,'#','','','',1,0,'F','0','0','system:dict:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1028,'字典删除',105,4,'#','','','',1,0,'F','0','0','system:dict:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1029,'字典导出',105,5,'#','','','',1,0,'F','0','0','system:dict:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1030,'参数查询',106,1,'#','','','',1,0,'F','0','0','system:config:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1031,'参数新增',106,2,'#','','','',1,0,'F','0','0','system:config:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1032,'参数修改',106,3,'#','','','',1,0,'F','0','0','system:config:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1033,'参数删除',106,4,'#','','','',1,0,'F','0','0','system:config:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1034,'参数导出',106,5,'#','','','',1,0,'F','0','0','system:config:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1035,'公告查询',107,1,'#','','','',1,0,'F','0','0','system:notice:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1036,'公告新增',107,2,'#','','','',1,0,'F','0','0','system:notice:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1037,'公告修改',107,3,'#','','','',1,0,'F','0','0','system:notice:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1038,'公告删除',107,4,'#','','','',1,0,'F','0','0','system:notice:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1039,'操作查询',500,1,'#','','','',1,0,'F','0','0','system:operlog:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1040,'操作删除',500,2,'#','','','',1,0,'F','0','0','system:operlog:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1041,'日志导出',500,3,'#','','','',1,0,'F','0','0','system:operlog:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1042,'登录查询',501,1,'#','','','',1,0,'F','0','0','system:logininfor:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1043,'登录删除',501,2,'#','','','',1,0,'F','0','0','system:logininfor:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1044,'日志导出',501,3,'#','','','',1,0,'F','0','0','system:logininfor:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1045,'账户解锁',501,4,'#','','','',1,0,'F','0','0','system:logininfor:unlock','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1046,'在线查询',109,1,'#','','','',1,0,'F','0','0','monitor:online:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1047,'批量强退',109,2,'#','','','',1,0,'F','0','0','monitor:online:batchLogout','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1048,'单条强退',109,3,'#','','','',1,0,'F','0','0','monitor:online:forceLogout','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1049,'任务查询',110,1,'#','','','',1,0,'F','0','0','monitor:job:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1050,'任务新增',110,2,'#','','','',1,0,'F','0','0','monitor:job:add','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1051,'任务修改',110,3,'#','','','',1,0,'F','0','0','monitor:job:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1052,'任务删除',110,4,'#','','','',1,0,'F','0','0','monitor:job:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1053,'状态修改',110,5,'#','','','',1,0,'F','0','0','monitor:job:changeStatus','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1054,'任务导出',110,6,'#','','','',1,0,'F','0','0','monitor:job:export','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1055,'生成查询',115,1,'#','','','',1,0,'F','0','0','tool:gen:query','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1056,'生成修改',115,2,'#','','','',1,0,'F','0','0','tool:gen:edit','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1057,'生成删除',115,3,'#','','','',1,0,'F','0','0','tool:gen:remove','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1058,'导入代码',115,2,'#','','','',1,0,'F','0','0','tool:gen:import','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1059,'预览代码',115,4,'#','','','',1,0,'F','0','0','tool:gen:preview','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(1060,'生成代码',115,5,'#','','','',1,0,'F','0','0','tool:gen:code','#','admin','2025-03-24 16:44:46','',NULL,'',NULL),(2021,'校服采购流程',0,1,'cg','cg/index',NULL,'',1,0,'C','0','0','','druid','admin','2025-04-12 00:46:50','admin','2025-05-24 19:11:43','',NULL),(2039,'信息发布',2098,6,'article','xfptnotice/index',NULL,'',1,0,'C','0','0','','documentation','admin','2025-04-17 18:03:43','admin','2025-05-16 17:55:38','',NULL),(2094,'网上调查管理',0,777,'wjdc','wjdc/index',NULL,'',1,0,'C','0','0','','edit','admin','2025-04-25 23:52:19','admin','2025-05-24 19:06:08','',NULL),(2096,'学校年级配置',0,4,'grade','grade/index',NULL,'',1,0,'C','1','1','','peoples','admin','2025-04-26 17:14:44','admin','2025-05-24 19:06:30','',NULL),(2097,'选购模板配置',0,3,'configuration','configuration',NULL,'configuration',1,0,'C','0','0','','druid','admin','2025-04-26 22:04:36','admin','2025-05-24 19:06:17','',NULL),(2098,'信息管理',0,5,'/xxgl',NULL,NULL,'',1,0,'M','0','0','','education','admin','2025-05-06 18:40:06','admin','2025-05-24 19:09:31','',NULL),(2099,'栏目分类',2098,1,'category','system/category/index',NULL,'',1,0,'C','0','0','system:category:list','cascader','admin',NULL,'admin','2025-05-06 18:46:04','栏目分类菜单',NULL),(2100,'栏目分类查询',2099,1,'#','',NULL,'',1,0,'F','0','0','system:category:query','#','admin',NULL,'admin','2025-05-06 18:45:26','',NULL),(2101,'栏目分类新增',2099,2,'#','',NULL,'',1,0,'F','0','0','system:category:add','#','admin',NULL,'admin','2025-05-06 18:45:30','',NULL),(2102,'栏目分类修改',2099,3,'#','',NULL,'',1,0,'F','0','0','system:category:edit','#','admin',NULL,'admin','2025-05-06 18:45:34','',NULL),(2103,'栏目分类删除',2099,4,'#','',NULL,'',1,0,'F','0','0','system:category:remove','#','admin',NULL,'admin','2025-05-06 18:45:38','',NULL),(2104,'栏目分类导出',2099,5,'#','',NULL,'',1,0,'F','0','0','system:category:export','#','admin',NULL,'admin','2025-05-06 18:45:42','',NULL),(2105,'校服厂商管理',0,5,'manufacturers','manufacturers',NULL,'manufacturers',1,0,'C','0','0','','edit','admin','2025-05-09 01:42:14','admin','2025-05-24 19:07:02','',NULL),(2106,'校服报备统计',0,1,'jiaoyuju/process','jiaoyuju/process',NULL,'jiaoyuju/process',1,0,'C','0','0','','education','admin','2025-05-14 22:56:17','admin','2025-05-29 18:46:12','',NULL),(2108,'校服质量检测',0,3,'mass','transaction/mass',NULL,'mass',1,0,'C','0','0','','documentation','admin','2025-05-15 18:36:56','admin','2025-05-24 19:08:57','',NULL),(2109,'校服订购统计',0,2,'dgtj','dinggoutongji/index',NULL,'',1,0,'C','0','0','','example','admin','2025-05-17 18:54:39','admin','2025-05-24 19:08:41','',NULL),(2110,'轮播图',2098,1,'lbimage','system/lbimage/index',NULL,'',1,0,'C','1','1','system:lbimage:list','eye-open','admin',NULL,'admin','2025-05-24 19:09:53','轮播图菜单',NULL),(2111,'轮播图查询',2110,1,'#','',NULL,'',1,0,'F','0','0','system:lbimage:query','#','admin',NULL,'',NULL,'',NULL),(2112,'轮播图新增',2110,2,'#','',NULL,'',1,0,'F','0','0','system:lbimage:add','#','admin',NULL,'',NULL,'',NULL),(2113,'轮播图修改',2110,3,'#','',NULL,'',1,0,'F','0','0','system:lbimage:edit','#','admin',NULL,'',NULL,'',NULL),(2114,'轮播图删除',2110,4,'#','',NULL,'',1,0,'F','0','0','system:lbimage:remove','#','admin',NULL,'',NULL,'',NULL),(2115,'轮播图导出',2110,5,'#','',NULL,'',1,0,'F','0','0','system:lbimage:export','#','admin',NULL,'',NULL,'',NULL),(2116,'校服厂商列表',0,4,'vendors','transaction/vendors',NULL,'vendors',1,0,'C','1','1','','dashboard','admin','2025-05-20 17:09:20','admin','2025-05-24 19:09:21','',NULL),(2117,'学校管理',0,3,'schoolManagement','transaction/schoolManagement',NULL,'schoolManagement',1,0,'C','0','0','','exit-fullscreen','admin','2025-05-21 19:10:43','admin','2025-05-24 01:21:21','',NULL),(2118,'意见建议',0,6,'opinion','opinion',NULL,'opinion',1,0,'C','0','0','','documentation','admin','2025-05-24 18:46:54','admin','2025-05-24 19:07:31','',NULL),(2119,'列表',2039,1,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:list','#','admin','2025-05-24 19:13:19','admin','2025-05-24 19:16:36','',NULL),(2120,'详情',2039,2,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:query','#','admin','2025-05-24 19:13:40','admin','2025-05-24 19:16:39','',NULL),(2121,'新增',2039,3,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:add','#','admin','2025-05-24 19:13:56','admin','2025-05-24 19:16:45','',NULL),(2122,'修改',2039,4,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:edit','#','admin','2025-05-24 19:14:08','admin','2025-05-24 19:16:48','',NULL),(2123,'删除',2039,5,'',NULL,NULL,'',1,0,'F','0','0','system:xfptnotice:remove','#','admin','2025-05-24 19:14:22','admin','2025-05-24 19:16:51','',NULL),(2124,'添加',2094,1,'',NULL,NULL,'',1,0,'F','0','0','school:survey:add','#','admin','2025-05-24 19:40:41','admin','2025-05-26 23:51:51','',NULL),(2125,'添加',2097,1,'',NULL,NULL,'',1,0,'F','0','0','school:config:add','#','admin','2025-05-26 22:11:10','',NULL,'',NULL),(2126,'编辑',2097,2,'',NULL,NULL,'',1,0,'F','0','0','school:config:edit','#','admin','2025-05-26 22:11:29','',NULL,'',NULL),(2127,'删除',2097,3,'',NULL,NULL,'',1,0,'F','0','0','school:config:remove','#','admin','2025-05-26 22:12:01','',NULL,'',NULL),(2128,'导出',2097,4,'',NULL,NULL,'',1,0,'F','0','0','school:config:export','#','admin','2025-05-26 22:28:24','',NULL,'',NULL),(2129,'家长购买意见征集-添加',2021,1,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-add','#','admin','2025-05-27 17:49:20','admin','2025-05-27 17:50:34','',NULL),(2130,'家长购买意见征集-修改',2021,2,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-edit','#','admin','2025-05-27 17:49:42','admin','2025-05-27 17:50:37','',NULL),(2131,'家长购买意见征集-删除',2021,3,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-remove','#','admin','2025-05-27 17:50:29','',NULL,'',NULL),(2132,'家长购买意见征集-编辑征集结果',2021,4,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-bjzjjg','#','admin','2025-05-27 17:51:38','',NULL,'',NULL),(2133,'组织名单报备公开-添加',2021,5,'',NULL,NULL,'',1,0,'F','0','0','xfpg:zzmdbbgk-add','#','admin','2025-05-27 17:52:55','admin','2025-05-27 17:55:21','',NULL),(2134,'组织名单报备公开-编辑',2021,6,'',NULL,NULL,'',1,0,'F','0','0','xfpg:zzmdbbgk-edit','#','admin','2025-05-27 17:53:37','',NULL,'',NULL),(2135,'组织名单报备公开-删除',2021,7,'',NULL,NULL,'',1,0,'F','0','0','xfpg:zzmdbbgk-remove','#','admin','2025-05-27 17:54:27','',NULL,'',NULL),(2136,'选购模式报备与公开-添加',2021,8,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgmsbbgk-add','#','admin','2025-05-27 17:55:15','',NULL,'',NULL),(2137,'选购模式报备与公开-修改',2021,9,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgmsbbgk-edit','#','admin','2025-05-27 17:56:02','',NULL,'',NULL),(2138,'选购模式报备与公开-删除',2021,10,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgmsbbgk-remove','#','admin','2025-05-27 17:56:29','',NULL,'',NULL),(2139,'模式一-添加',2021,11,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-add','#','admin','2025-05-27 17:57:13','',NULL,'',NULL),(2140,'模式一-撤回',2021,12,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-ch','#','admin','2025-05-27 17:58:15','',NULL,'',NULL),(2141,'模式一-修改',2021,13,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-edit','#','admin','2025-05-27 17:58:35','',NULL,'',NULL),(2142,'模式一-删除',2021,14,'',NULL,NULL,'',1,0,'F','0','0','xfpt:msy-remove','#','admin','2025-05-27 17:58:54','',NULL,'',NULL),(2143,'模式二-添加',2021,15,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-add','#','admin','2025-05-27 17:59:29','',NULL,'',NULL),(2144,'模式二-撤回',2021,16,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-ch','#','admin','2025-05-27 17:59:53','',NULL,'',NULL),(2145,'模式二-删除',2021,17,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-remove','#','admin','2025-05-27 18:00:12','',NULL,'',NULL),(2146,'模式三-添加',2021,19,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-add','#','admin','2025-05-27 18:02:36','admin','2025-05-27 18:05:08','',NULL),(2147,'模式三-删除',2021,20,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-remove','#','admin','2025-05-27 18:03:09','admin','2025-05-27 18:05:14','',NULL),(2148,'模式三-修改',2021,21,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-edit','#','admin','2025-05-27 18:03:27','admin','2025-05-27 18:05:18','',NULL),(2149,'模式三-撤回',2021,22,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mss-ch','#','admin','2025-05-27 18:04:13','admin','2025-05-27 18:05:21','',NULL),(2150,'模式二-修改',2021,18,'',NULL,NULL,'',1,0,'F','0','0','xfpt:mse-edit','#','admin','2025-05-27 18:05:48','',NULL,'',NULL),(2151,'评定小组投票确定厂商-添加',2021,23,'',NULL,NULL,'',1,0,'F','0','0','xfpg:pdxzqdcs-add','#','admin','2025-05-27 18:07:59','admin','2025-05-27 18:08:06','',NULL),(2152,'评定小组投票确定厂商-删除',2021,24,'',NULL,NULL,'',1,0,'F','0','0','xfpg:pdxzqdcs-remove','#','admin','2025-05-27 18:08:33','',NULL,'',NULL),(2153,'评定小组投票确定厂商-修改',2021,25,'',NULL,NULL,'',1,0,'F','0','0','xfpg:pdxzqdcs-edit','#','admin','2025-05-27 18:09:06','',NULL,'',NULL),(2154,'选购结果公示报备与公开-添加',2021,26,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-add','#','admin','2025-05-27 18:09:47','',NULL,'',NULL),(2155,'选购结果公示报备与公开-修改',2021,27,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-edit','#','admin','2025-05-27 18:10:21','',NULL,'',NULL),(2156,'选购结果公示报备与公开-删除',2021,28,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-remove','#','admin','2025-05-27 18:10:49','',NULL,'',NULL),(2157,'选购结果公示报备与公开-撤回',2021,30,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-ch','#','admin','2025-05-27 18:12:11','',NULL,'',NULL),(2158,'选购结果公示报备与公开-发布',2021,29,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xgjggk-fb','#','admin','2025-05-27 18:13:08','',NULL,'',NULL),(2159,'采购合同报备与公开-添加',2021,31,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cghtbb-add','#','admin','2025-05-27 18:13:55','admin','2025-05-27 18:14:15','',NULL),(2160,'采购合同报备与公开-添加采购合同',2021,32,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cghtbb-addht','#','admin','2025-05-27 18:14:48','',NULL,'',NULL),(2161,'采购合同报备与公开-取消合作',2021,33,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cghtbb-qxhz','#','admin','2025-05-27 18:15:05','',NULL,'',NULL),(2162,'质量检验报告报备与公开-添加厂商',2021,34,'',NULL,NULL,'',1,0,'F','0','0','xfpt:zljy:addgs','#','admin','2025-05-27 18:16:51','',NULL,'',NULL),(2163,'质量检验报告报备与公开-删除',2021,35,'',NULL,NULL,'',1,0,'F','0','0','xfpt:zljy:remove','#','admin','2025-05-27 18:17:22','',NULL,'',NULL),(2164,'质量检验报告报备与公开-上传质检报告',2021,36,'',NULL,NULL,'',1,0,'F','0','0','xfpt:zljy:sczjbg','#','admin','2025-05-27 18:17:51','',NULL,'',NULL),(2165,'家长满意度总结-添加',2021,37,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzmydzj:add','#','admin','2025-05-27 18:18:53','',NULL,'',NULL),(2166,'家长满意度总结-删除',2021,38,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzmydzj:remove','#','admin','2025-05-27 18:27:53','',NULL,'',NULL),(2167,'家长满意度总结-编辑调查结果',2021,39,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzmydzj:editjg','#','admin','2025-05-27 18:28:28','admin','2025-05-28 17:36:03','',NULL),(2168,'采购信息报备-按钮',2021,40,'',NULL,NULL,'',1,0,'F','0','0','xfpt:cgxxbb','#','admin','2025-05-27 18:29:06','',NULL,'',NULL),(2169,'list',2021,99999,'',NULL,NULL,'',1,0,'F','0','0','list','#','admin','2025-05-28 18:10:42','',NULL,'',NULL),(2170,'新增班子会议',2021,0,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xzbzhy:add','#','admin','2025-05-28 18:14:06','',NULL,'',NULL),(2171,'班子会议修改',2021,0,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xzbzhy:edit','#','admin','2025-05-28 18:15:31','',NULL,'',NULL),(2172,'班子会议删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','xfpt:xzbzhy:remove','#','admin','2025-05-28 18:15:48','',NULL,'',NULL),(2173,'设置学校信息',0,99999,'',NULL,NULL,'',1,0,'F','0','0','xfpt:szxxxx','#','admin','2025-05-28 19:02:36','',NULL,'',NULL),(2174,'添加',2105,1,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:add','#','admin','2025-05-28 22:02:41','admin','2025-05-28 22:26:15','',NULL),(2175,'修改',2105,2,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:edit','#','admin','2025-05-28 22:03:34','admin','2025-05-28 22:26:24','',NULL),(2176,'修改',2118,1,'',NULL,NULL,'',1,0,'F','0','0','school:parentsFeedback:edit','#','admin','2025-05-29 01:32:01','',NULL,'',NULL),(2177,'删除',2118,2,'',NULL,NULL,'',1,0,'F','0','0','school:parentsFeedback:remove','#','admin','2025-05-29 01:32:24','',NULL,'',NULL),(2178,'历史采购数据',0,7,'oldData','school/oldData/index',NULL,'',1,0,'C','1','1','school:oldData:list','example','admin',NULL,'admin','2025-08-08 23:26:34','采购历史数据菜单',NULL),(2179,'采购历史数据查询',2178,1,'#','',NULL,'',1,0,'F','0','0','school:oldData:query','#','admin',NULL,'',NULL,'',NULL),(2180,'采购历史数据新增',2178,2,'#','',NULL,'',1,0,'F','0','0','school:oldData:add','#','admin',NULL,'',NULL,'',NULL),(2181,'采购历史数据修改',2178,3,'#','',NULL,'',1,0,'F','0','0','school:oldData:edit','#','admin',NULL,'',NULL,'',NULL),(2182,'采购历史数据删除',2178,4,'#','',NULL,'',1,0,'F','0','0','school:oldData:remove','#','admin',NULL,'',NULL,'',NULL),(2183,'采购历史数据导出',2178,5,'#','',NULL,'',1,0,'F','0','0','school:oldData:export','#','admin',NULL,'',NULL,'',NULL),(2184,'黑名单',2105,3,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:hmd','#','admin','2025-06-04 21:43:34','',NULL,'',NULL),(2185,'家长购买意见征集-查看',2021,99,'',NULL,NULL,'',1,0,'F','0','0','xfpt:jzgmyjzj-look','#','admin','2025-06-07 18:22:58','',NULL,'',NULL),(2186,'查看服务学校列表',2105,2,'',NULL,NULL,'',1,0,'F','0','0','school:manufacturers:view','#','admin','2025-06-07 23:53:00','admin','2025-06-07 23:55:51','',NULL),(2187,'采购流程-添加',2021,1,'',NULL,NULL,'',1,0,'F','0','0','school:cglcprocess:add','#','admin','2025-08-06 23:09:46','',NULL,'',NULL),(2188,'采购流程-修改',2021,2,'',NULL,NULL,'',1,0,'F','0','0','school:cglcprocess:edit','#','admin','2025-08-06 23:15:51','',NULL,'',NULL),(2189,'入围公告-修改',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:edit','#','admin','2025-08-11 18:04:52','',NULL,'',NULL),(2190,'入围公告-删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:remove','#','admin','2025-08-11 18:05:17','',NULL,'',NULL),(2191,'入围公告-补充',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:bc','#','admin','2025-08-11 18:05:35','',NULL,'',NULL),(2192,'入围公告-添加',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:add','#','admin','2025-08-11 18:31:36','',NULL,'',NULL),(2193,'补充',2021,0,'',NULL,NULL,'',1,0,'F','0','0','bc-gonggao','#','admin','2025-08-14 22:02:04','',NULL,'',NULL),(2194,'采购流程删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcprocess:remove','#','admin',NULL,'',NULL,'',NULL),(2195,'利旧回收',0,999,'ljhs',NULL,NULL,'',1,0,'M','0','0','','education','admin',NULL,'admin',NULL,'',NULL),(2196,'利旧回收列表',2195,1,'ljhs','school/ljhs/index',NULL,'',1,0,'C','0','0','school:ljhs:list','#','admin',NULL,'',NULL,'利旧回收菜单',NULL),(2197,'利旧回收查询',2196,1,'#','',NULL,'',1,0,'F','0','0','school:ljhs:query','#','admin',NULL,'',NULL,'',NULL),(2198,'利旧回收新增',2196,2,'#','',NULL,'',1,0,'F','0','0','school:ljhs:add','#','admin',NULL,'',NULL,'',NULL),(2200,'利旧回收删除',2196,4,'#','',NULL,'',1,0,'F','0','0','school:ljhs:remove','#','admin',NULL,'',NULL,'',NULL),(2201,'利旧回收导出',2196,5,'#','',NULL,'',1,0,'F','0','0','school:ljhs:export','#','admin',NULL,'',NULL,'',NULL),(2202,'学生管理',0,888,'info','school/schoolStudentInfo/index',NULL,'',1,0,'C','0','0','school:schoolStudentInfo:list','user','admin',NULL,'admin',NULL,'家长绑定学生信息菜单',NULL),(2203,'家长绑定学生信息查询',2202,1,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:query','#','admin',NULL,'admin',NULL,'',NULL),(2204,'家长绑定学生信息新增',2202,2,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:add','#','admin',NULL,'admin',NULL,'',NULL),(2205,'家长绑定学生信息修改',2202,3,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:edit','#','admin',NULL,'admin',NULL,'',NULL),(2206,'家长绑定学生信息删除',2202,4,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:remove','#','admin',NULL,'admin',NULL,'',NULL),(2207,'家长绑定学生信息导出',2202,5,'#','',NULL,'',1,0,'F','0','0','school:schoolStudentInfo:export','#','admin',NULL,'admin',NULL,'',NULL),(2208,'补充添加',2021,1,'',NULL,NULL,'',1,0,'F','0','0','school:rwggzs:add','#','admin',NULL,'',NULL,'',NULL),(2209,'采购总结新增',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcgzzj:add','#','admin',NULL,'',NULL,'',NULL),(2210,'采购总结编辑',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcgzzj:edit','#','admin',NULL,'',NULL,'',NULL),(2211,'采购总结删除',2021,0,'',NULL,NULL,'',1,0,'F','0','0','school:cglcgzzj:remove','#','admin',NULL,'',NULL,'',NULL),(2212,'7查看详情',2021,1,'',NULL,NULL,'',1,0,'F','0','0','school:pdxzSupplier:edit','#','admin',NULL,'',NULL,'',NULL),(2213,'购物车明细',2333,1,'cartItem','school/cartItem/index',NULL,'',1,0,'C','0','0','school:cartItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','购物车明细菜单',NULL),(2214,'购物车明细查询',2213,1,'#','',NULL,'',1,0,'F','0','0','school:cartItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2215,'购物车明细新增',2213,2,'#','',NULL,'',1,0,'F','0','0','school:cartItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2216,'购物车明细修改',2213,3,'#','',NULL,'',1,0,'F','0','0','school:cartItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2217,'购物车明细删除',2213,4,'#','',NULL,'',1,0,'F','0','0','school:cartItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2218,'购物车明细导出',2213,5,'#','',NULL,'',1,0,'F','0','0','school:cartItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2219,'商品信息',2333,1,'goods','school/goods/index',NULL,'',1,0,'C','0','0','school:goods:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品信息菜单',NULL),(2220,'商品信息查询',2219,1,'#','',NULL,'',1,0,'F','0','0','school:goods:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2221,'商品信息新增',2219,2,'#','',NULL,'',1,0,'F','0','0','school:goods:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2222,'商品信息修改',2219,3,'#','',NULL,'',1,0,'F','0','0','school:goods:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2223,'商品信息删除',2219,4,'#','',NULL,'',1,0,'F','0','0','school:goods:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2224,'商品信息导出',2219,5,'#','',NULL,'',1,0,'F','0','0','school:goods:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2225,'商品尺码',2333,1,'goodsSize','school/goodsSize/index',NULL,'',1,0,'C','0','0','school:goodsSize:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品尺码菜单',NULL),(2226,'商品尺码查询',2225,1,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2227,'商品尺码新增',2225,2,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2228,'商品尺码修改',2225,3,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2229,'商品尺码删除',2225,4,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2230,'商品尺码导出',2225,5,'#','',NULL,'',1,0,'F','0','0','school:goodsSize:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2231,'统购公告商品',2333,1,'groupNoticeItem','school/groupNoticeItem/index',NULL,'',1,0,'C','0','0','school:groupNoticeItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','统购公告商品菜单',NULL),(2232,'统购公告商品查询',2231,1,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2233,'统购公告商品新增',2231,2,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2234,'统购公告商品修改',2231,3,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2235,'统购公告商品删除',2231,4,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2236,'统购公告商品导出',2231,5,'#','',NULL,'',1,0,'F','0','0','school:groupNoticeItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2237,'统购公告',2333,1,'groupNotice','school/groupNotice/index',NULL,'',1,0,'C','0','0','school:groupNotice:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','统购公告菜单',NULL),(2238,'统购公告查询',2237,1,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2239,'统购公告新增',2237,2,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2240,'统购公告修改',2237,3,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2241,'统购公告删除',2237,4,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2242,'统购公告导出',2237,5,'#','',NULL,'',1,0,'F','0','0','school:groupNotice:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2243,'订单信息',2333,1,'orderInfo','school/orderInfo/index',NULL,'',1,0,'C','0','0','school:orderInfo:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','订单信息菜单',NULL),(2244,'订单信息查询',2243,1,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2245,'订单信息新增',2243,2,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2246,'订单信息修改',2243,3,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2247,'订单信息删除',2243,4,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2248,'订单信息导出',2243,5,'#','',NULL,'',1,0,'F','0','0','school:orderInfo:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2249,'学校供应商合作商品',2333,1,'schoolSupplierGoodsRel','school/schoolSupplierGoodsRel/index',NULL,'',1,0,'C','0','0','school:schoolSupplierGoodsRel:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','学校供应商合作商品菜单',NULL),(2250,'学校供应商合作商品查询',2249,1,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2251,'学校供应商合作商品新增',2249,2,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2252,'学校供应商合作商品修改',2249,3,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2253,'学校供应商合作商品删除',2249,4,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2254,'学校供应商合作商品导出',2249,5,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierGoodsRel:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2255,'学校供应商合作关系',2333,1,'schoolSupplierRel','school/schoolSupplierRel/index',NULL,'',1,0,'C','0','0','school:schoolSupplierRel:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','学校供应商合作关系菜单',NULL),(2256,'学校供应商合作关系查询',2255,1,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2257,'学校供应商合作关系新增',2255,2,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2258,'学校供应商合作关系修改',2255,3,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2259,'学校供应商合作关系删除',2255,4,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2260,'学校供应商合作关系导出',2255,5,'#','',NULL,'',1,0,'F','0','0','school:schoolSupplierRel:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2261,'供应商报名',2333,1,'supplierApply','school/supplierApply/index',NULL,'',1,0,'C','0','0','school:supplierApply:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','供应商报名菜单',NULL),(2262,'供应商报名查询',2261,1,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2263,'供应商报名新增',2261,2,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2264,'供应商报名修改',2261,3,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2265,'供应商报名删除',2261,4,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2266,'供应商报名导出',2261,5,'#','',NULL,'',1,0,'F','0','0','school:supplierApply:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2267,'用户收货地址',2333,1,'userAddress','school/userAddress/index',NULL,'',1,0,'C','0','0','school:userAddress:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','用户收货地址菜单',NULL),(2268,'用户收货地址查询',2267,1,'#','',NULL,'',1,0,'F','0','0','school:userAddress:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2269,'用户收货地址新增',2267,2,'#','',NULL,'',1,0,'F','0','0','school:userAddress:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2270,'用户收货地址修改',2267,3,'#','',NULL,'',1,0,'F','0','0','school:userAddress:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2271,'用户收货地址删除',2267,4,'#','',NULL,'',1,0,'F','0','0','school:userAddress:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2272,'用户收货地址导出',2267,5,'#','',NULL,'',1,0,'F','0','0','school:userAddress:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2273,'售后主',2333,1,'afterSale','school/afterSale/index',NULL,'',1,0,'C','0','0','school:afterSale:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','售后主菜单',NULL),(2274,'售后主查询',2273,1,'#','',NULL,'',1,0,'F','0','0','school:afterSale:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2275,'售后主新增',2273,2,'#','',NULL,'',1,0,'F','0','0','school:afterSale:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2276,'售后主修改',2273,3,'#','',NULL,'',1,0,'F','0','0','school:afterSale:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2277,'售后主删除',2273,4,'#','',NULL,'',1,0,'F','0','0','school:afterSale:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2278,'售后主导出',2273,5,'#','',NULL,'',1,0,'F','0','0','school:afterSale:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2279,'商品评价',2333,1,'comment','school/comment/index',NULL,'',1,0,'C','0','0','school:comment:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品评价菜单',NULL),(2280,'商品评价查询',2279,1,'#','',NULL,'',1,0,'F','0','0','school:comment:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2281,'商品评价新增',2279,2,'#','',NULL,'',1,0,'F','0','0','school:comment:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2282,'商品评价修改',2279,3,'#','',NULL,'',1,0,'F','0','0','school:comment:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2283,'商品评价删除',2279,4,'#','',NULL,'',1,0,'F','0','0','school:comment:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2284,'商品评价导出',2279,5,'#','',NULL,'',1,0,'F','0','0','school:comment:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2285,'商品评论回复',2333,1,'commentReply','school/commentReply/index',NULL,'',1,0,'C','0','0','school:commentReply:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','商品评论回复菜单',NULL),(2286,'商品评论回复查询',2285,1,'#','',NULL,'',1,0,'F','0','0','school:commentReply:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2287,'商品评论回复新增',2285,2,'#','',NULL,'',1,0,'F','0','0','school:commentReply:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2288,'商品评论回复修改',2285,3,'#','',NULL,'',1,0,'F','0','0','school:commentReply:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2289,'商品评论回复删除',2285,4,'#','',NULL,'',1,0,'F','0','0','school:commentReply:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2290,'商品评论回复导出',2285,5,'#','',NULL,'',1,0,'F','0','0','school:commentReply:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2291,'发货单明细',2333,1,'deliveryOrderItem','school/deliveryOrderItem/index',NULL,'',1,0,'C','0','0','school:deliveryOrderItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','发货单明细菜单',NULL),(2292,'发货单明细查询',2291,1,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2293,'发货单明细新增',2291,2,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2294,'发货单明细修改',2291,3,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2295,'发货单明细删除',2291,4,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2296,'发货单明细导出',2291,5,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrderItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2297,'发货单',2333,1,'deliveryOrder','school/deliveryOrder/index',NULL,'',1,0,'C','0','0','school:deliveryOrder:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','发货单菜单',NULL),(2298,'发货单查询',2297,1,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2299,'发货单新增',2297,2,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2300,'发货单修改',2297,3,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2301,'发货单删除',2297,4,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2302,'发货单导出',2297,5,'#','',NULL,'',1,0,'F','0','0','school:deliveryOrder:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2303,'资金流水',2333,1,'financeFlow','school/financeFlow/index',NULL,'',1,0,'C','0','0','school:financeFlow:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','资金流水菜单',NULL),(2304,'资金流水查询',2303,1,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2305,'资金流水新增',2303,2,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2306,'资金流水修改',2303,3,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2307,'资金流水删除',2303,4,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2308,'资金流水导出',2303,5,'#','',NULL,'',1,0,'F','0','0','school:financeFlow:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2309,'订单明细',2333,1,'orderItem','school/orderItem/index',NULL,'',1,0,'C','0','0','school:orderItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','订单明细菜单',NULL),(2310,'订单明细查询',2309,1,'#','',NULL,'',1,0,'F','0','0','school:orderItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2311,'订单明细新增',2309,2,'#','',NULL,'',1,0,'F','0','0','school:orderItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2312,'订单明细修改',2309,3,'#','',NULL,'',1,0,'F','0','0','school:orderItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2313,'订单明细删除',2309,4,'#','',NULL,'',1,0,'F','0','0','school:orderItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2314,'订单明细导出',2309,5,'#','',NULL,'',1,0,'F','0','0','school:orderItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2315,'生产单明细',2333,1,'productionOrderItem','school/productionOrderItem/index',NULL,'',1,0,'C','0','0','school:productionOrderItem:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','生产单明细菜单',NULL),(2316,'生产单明细查询',2315,1,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2317,'生产单明细新增',2315,2,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2318,'生产单明细修改',2315,3,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2319,'生产单明细删除',2315,4,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2320,'生产单明细导出',2315,5,'#','',NULL,'',1,0,'F','0','0','school:productionOrderItem:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2321,'生产单',2333,1,'productionOrder','school/productionOrder/index',NULL,'',1,0,'C','0','0','school:productionOrder:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','生产单菜单',NULL),(2322,'生产单查询',2321,1,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2323,'生产单新增',2321,2,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2324,'生产单修改',2321,3,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2325,'生产单删除',2321,4,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2326,'生产单导出',2321,5,'#','',NULL,'',1,0,'F','0','0','school:productionOrder:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2327,'供应商提现申请',2333,1,'withdrawApply','school/withdrawApply/index',NULL,'',1,0,'C','0','0','school:withdrawApply:list','#','admin','2026-05-04 09:58:36','admin','2026-05-04 10:05:01','供应商提现申请菜单',NULL),(2328,'供应商提现申请查询',2327,1,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:query','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2329,'供应商提现申请新增',2327,2,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:add','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2330,'供应商提现申请修改',2327,3,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:edit','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2331,'供应商提现申请删除',2327,4,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:remove','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2332,'供应商提现申请导出',2327,5,'#','',NULL,'',1,0,'F','0','0','school:withdrawApply:export','#','admin','2026-05-04 09:58:36','',NULL,'',NULL),(2333,'新增功能',0,99,'newFeature',NULL,NULL,NULL,1,0,'M','0','0','','tree','admin','2026-05-04 10:05:01','admin','2026-05-04 10:48:08','新增功能目录',NULL),(2350,'每日入账金额',2333,98,'dailyIncome','school/dailyIncome/index',NULL,'',1,0,'C','0','0','school:dailyIncome:list','money','admin','2026-05-12 00:00:00','',NULL,'每日入账金额菜单',NULL),(2351,'每日入账金额查询',2350,1,'#','',NULL,'',1,0,'F','0','0','school:dailyIncome:query','#','admin','2026-05-12 00:00:00','',NULL,'',NULL),(2352,'每日入账金额导出',2350,2,'#','',NULL,'',1,0,'F','0','0','school:dailyIncome:export','#','admin','2026-05-12 00:00:00','',NULL,'',NULL);
 /*!40000 ALTER TABLE `sys_menu` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- 学校端申请结算列表菜单及权限
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+VALUES
+  (2353, '申请结算列表', 2333, 97, 'settlementApply', 'school/settlementApply/index', NULL, '',
+   1, 0, 'C', '0', '0', 'school:settlementApply:list', 'money',
+   'admin', '2026-05-13 00:00:00', '', NULL, '申请结算列表菜单', NULL),
+  (2354, '申请结算查询', 2353, 1, '#', '', NULL, '',
+   1, 0, 'F', '0', '0', 'school:settlementApply:query', '#',
+   'admin', '2026-05-13 00:00:00', '', NULL, '', NULL),
+  (2355, '申请结算审核', 2353, 2, '#', '', NULL, '',
+   1, 0, 'F', '0', '0', 'school:settlementApply:audit', '#',
+   'admin', '2026-05-13 00:00:00', '', NULL, '', NULL)
+ON DUPLICATE KEY UPDATE
+  `MENU_NAME` = VALUES(`MENU_NAME`),
+  `PARENT_ID` = VALUES(`PARENT_ID`),
+  `ORDER_NUM` = VALUES(`ORDER_NUM`),
+  `PATH` = VALUES(`PATH`),
+  `COMPONENT` = VALUES(`COMPONENT`),
+  `QUERY` = VALUES(`QUERY`),
+  `ROUTE_NAME` = VALUES(`ROUTE_NAME`),
+  `IS_FRAME` = VALUES(`IS_FRAME`),
+  `IS_CACHE` = VALUES(`IS_CACHE`),
+  `MENU_TYPE` = VALUES(`MENU_TYPE`),
+  `VISIBLE` = VALUES(`VISIBLE`),
+  `STATUS` = VALUES(`STATUS`),
+  `PERMS` = VALUES(`PERMS`),
+  `ICON` = VALUES(`ICON`),
+  `UPDATE_BY` = VALUES(`UPDATE_BY`),
+  `UPDATE_TIME` = VALUES(`UPDATE_TIME`),
+  `REMARK` = VALUES(`REMARK`),
+  `TYPE` = VALUES(`TYPE`);
+
+-- 学校端结算管理菜单及权限
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+VALUES
+  (2356, '结算管理', 2333, 96, 'settlementManage', 'school/settlementManage/index', NULL, '',
+   1, 0, 'C', '0', '0', 'school:settlementManage:list', 'money',
+   'admin', '2026-05-13 00:00:00', '', NULL, '结算管理菜单', NULL),
+  (2357, '结算管理查询', 2356, 1, '#', '', NULL, '',
+   1, 0, 'F', '0', '0', 'school:settlementManage:query', '#',
+   'admin', '2026-05-13 00:00:00', '', NULL, '', NULL),
+  (2358, '结算管理结算', 2356, 2, '#', '', NULL, '',
+   1, 0, 'F', '0', '0', 'school:settlementManage:settle', '#',
+   'admin', '2026-05-13 00:00:00', '', NULL, '', NULL)
+ON DUPLICATE KEY UPDATE
+  `MENU_NAME` = VALUES(`MENU_NAME`),
+  `PARENT_ID` = VALUES(`PARENT_ID`),
+  `ORDER_NUM` = VALUES(`ORDER_NUM`),
+  `PATH` = VALUES(`PATH`),
+  `COMPONENT` = VALUES(`COMPONENT`),
+  `QUERY` = VALUES(`QUERY`),
+  `ROUTE_NAME` = VALUES(`ROUTE_NAME`),
+  `IS_FRAME` = VALUES(`IS_FRAME`),
+  `IS_CACHE` = VALUES(`IS_CACHE`),
+  `MENU_TYPE` = VALUES(`MENU_TYPE`),
+  `VISIBLE` = VALUES(`VISIBLE`),
+  `STATUS` = VALUES(`STATUS`),
+  `PERMS` = VALUES(`PERMS`),
+  `ICON` = VALUES(`ICON`),
+  `UPDATE_BY` = VALUES(`UPDATE_BY`),
+  `UPDATE_TIME` = VALUES(`UPDATE_TIME`),
+  `REMARK` = VALUES(`REMARK`),
+  `TYPE` = VALUES(`TYPE`);
 
 -- Menu updates for 商品信息导入权限
 SET @goods_menu_id := (
@@ -1674,12 +1746,12 @@ CREATE TABLE `xfpt_comment` (
   `remark` varchar(500) DEFAULT NULL COMMENT '备注',
   `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标记，0正常 1删除',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_xfpt_comment_order_item_user` (`order_item_id`,`user_id`),
   KEY `idx_xfpt_comment_order` (`order_id`),
   KEY `idx_xfpt_comment_goods` (`goods_id`),
   KEY `idx_xfpt_comment_supplier` (`supplier_id`,`status`),
-  KEY `idx_xfpt_comment_user` (`user_id`),
-  KEY `idx_xfpt_comment_order_item_user` (`order_item_id`,`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='商品评价';
+  KEY `idx_xfpt_comment_user` (`user_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='商品评价';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1688,7 +1760,7 @@ CREATE TABLE `xfpt_comment` (
 
 LOCK TABLES `xfpt_comment` WRITE;
 /*!40000 ALTER TABLE `xfpt_comment` DISABLE KEYS */;
-INSERT INTO `xfpt_comment` VALUES (1,4,4,'DEMO-ORDER-20260504185529-2-46-4',4,'校园运动鞋',42,'李蒙莎',8,5,'面料厚实，尺码合适，孩子穿着舒适。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0'),(2,3,3,'DEMO-ORDER-20260504185529-2-42-3',3,'冬季加绒冲锋衣校服',38,'魏鹏远',2,4,'发货速度可以，袖口做工还需要再细一点。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0'),(3,10,9,'TEST-ORDER-20260514181224-COMPLETED',4,'????',2,'????',15,5,'??????','[]',NULL,NULL,'0','????','2026-05-15 13:43:26',NULL,NULL,NULL,'0'),(4,9,8,'TEST-ORDER-20260514181224-SHIPPED',3,'?????????',2,'家长用户',8,5,'好衣服','[]',NULL,NULL,'0','家长用户','2026-05-15 13:50:52',NULL,NULL,NULL,'0'),(17,9,8,'TEST-ORDER-20260514181224-SHIPPED',3,'?????????',2,'家长用户',8,5,'强强强强强强强强','[]',NULL,NULL,'0','家长用户','2026-05-16 18:56:49',NULL,NULL,NULL,'0');
+INSERT INTO `xfpt_comment` VALUES (1,4,4,'DEMO-ORDER-20260504185529-2-46-4',4,'校园运动鞋',42,'李蒙莎',8,5,'面料厚实，尺码合适，孩子穿着舒适。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0'),(2,3,3,'DEMO-ORDER-20260504185529-2-42-3',3,'冬季加绒冲锋衣校服',38,'魏鹏远',2,4,'发货速度可以，袖口做工还需要再细一点。','[\"/profile/upload/demo/comment.jpg\"]','感谢您的评价。','2026-05-04 20:55:30','0','admin','2026-05-04 18:55:30',NULL,NULL,'测试评价','0');
 /*!40000 ALTER TABLE `xfpt_comment` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2081,7 +2153,7 @@ CREATE TABLE `xfpt_group_notice` (
 
 LOCK TABLES `xfpt_group_notice` WRITE;
 /*!40000 ALTER TABLE `xfpt_group_notice` DISABLE KEYS */;
-INSERT INTO `xfpt_group_notice` VALUES (1,237,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
+INSERT INTO `xfpt_group_notice` VALUES (1,165,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
 /*!40000 ALTER TABLE `xfpt_group_notice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3348,7 +3420,7 @@ CREATE TABLE `xfpt_school_supplier_goods_rel` (
   PRIMARY KEY (`id`),
   KEY `idx_xfpt_school_supplier_goods_rel_rel` (`rel_id`),
   KEY `idx_xfpt_school_supplier_goods_rel_goods` (`goods_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作商品';
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作商品';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3357,7 +3429,7 @@ CREATE TABLE `xfpt_school_supplier_goods_rel` (
 
 LOCK TABLES `xfpt_school_supplier_goods_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (1,1,237,1,1,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(2,1,237,1,2,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(3,2,274,2,3,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(4,3,237,8,4,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(5,4,222,1,1,'1','管理员','2026-05-10 23:10:53','管理员','2026-05-10 23:10:53','','0');
+INSERT INTO `xfpt_school_supplier_goods_rel` VALUES (1,1,237,1,1,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(2,1,237,1,2,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(3,2,274,2,3,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0'),(4,3,237,8,4,'1','admin','2026-05-04 18:55:30',NULL,NULL,'测试合作商品','0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_goods_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -3387,7 +3459,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
   PRIMARY KEY (`id`),
   KEY `idx_xfpt_school_supplier_rel_status` (`school_id`,`supplier_id`,`cooperate_status`),
   KEY `idx_xfpt_school_supplier_rel_notice` (`notice_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作关系';
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='学校供应商合作关系';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -3396,7 +3468,7 @@ CREATE TABLE `xfpt_school_supplier_rel` (
 
 LOCK TABLES `xfpt_school_supplier_rel` WRITE;
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` DISABLE KEYS */;
-INSERT INTO `xfpt_school_supplier_rel` VALUES (1,237,'石家庄市第四十七中学',1,'河北超享纺织服装有限公司',1,NULL,'1',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(2,274,'石家庄市第八十一中学',2,'河北春风树服饰有限公司',2,NULL,'4',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(3,237,'石家庄市第四十七中学',8,'河北蓝雁纺织服装有限公司',1,NULL,'3',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(4,222,'石家庄交通运输学校',1,'河北超享纺织服装有限公司',NULL,NULL,'1',NULL,'管理员','2026-05-10 23:10:53',NULL,NULL,NULL,'0');
+INSERT INTO `xfpt_school_supplier_rel` VALUES (1,237,'石家庄市第四十七中学',1,'河北超享纺织服装有限公司',1,NULL,'1',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(2,274,'石家庄市第八十一中学',2,'河北春风树服饰有限公司',2,NULL,'4',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0'),(3,237,'石家庄市第四十七中学',8,'河北蓝雁纺织服装有限公司',1,NULL,'3',NULL,'admin','2026-05-04 18:55:30',NULL,NULL,'测试合作关系','0');
 /*!40000 ALTER TABLE `xfpt_school_supplier_rel` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4134,75 +4206,602 @@ WHERE @school_supplier_rel_id IS NOT NULL
 
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
---
--- Supplemental menu initialization
---
-
--- 账户余额页面菜单初始化脚本
--- 执行前确认“新增功能”目录 MENU_ID = 2333 存在
--- 页面组件路径：school/accountBalance/index
--- 页面复用已有的资金流水、提现申请接口权限，不额外新增按钮权限
-INSERT INTO `sys_menu`
-(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+INSERT INTO `xfpt_order_info` (
+  `order_no`, `order_type`, `notice_id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`,
+  `user_id`, `user_name`, `student_id`, `student_name`, `grade_name`, `class_name`, `address_id`,
+  `receive_type`, `receiver_name`, `receiver_phone`, `receiver_address`, `total_amount`, `pay_amount`,
+  `refund_amount`, `pay_status`, `order_status`, `pay_time`, `cancel_time`, `finish_time`, `dept_id`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
 SELECT
-  2334, '账户余额', 2333, 2, 'accountBalance', 'school/accountBalance/index', NULL, '', 1, 0, 'C', '0', '0', 'school:financeFlow:list', 'money', 'admin', NOW(), 'admin', NOW(), '账户余额菜单', NULL
-FROM dual
+  'DEMO-ORDER-20260504185529-2-222-1', '2', NULL, 222, '石家庄交通运输学校', 1, '河北超享纺织服装有限公司',
+  2194, 'testUser', NULL, NULL, NULL, NULL, NULL,
+  '1', '石家庄交通运输学校', '13000000000', '石家庄交通运输学校收货点', 100.00, 100.00,
+  0.00, '1', '3', '2026-05-02 18:55:30', NULL, NULL, 222,
+  'admin', '2026-05-10 23:10:53', NULL, NULL, '测试订单', '0'
+FROM DUAL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2334 OR (`PARENT_ID` = 2333 AND `PATH` = 'accountBalance')
+  SELECT 1
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-ORDER-20260504185529-2-222-1'
 );
 
--- 平台使用情况页面菜单初始化脚本
--- 执行前确认“新增功能”目录 MENU_ID = 2333 存在
--- 页面组件路径：school/platformUsage/index
-INSERT INTO `sys_menu`
-(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
-SELECT
-  2335, '平台使用情况', 2333, 3, 'platformUsage', 'school/platformUsage/index', NULL, '', 1, 0, 'C', '0', '0', 'school:platformUsage:list', 'pie-chart', 'admin', NOW(), 'admin', NOW(), '平台使用情况菜单', NULL
-FROM dual
-WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2335 OR (`PARENT_ID` = 2333 AND `PATH` = 'platformUsage')
+SET @transport_order_id := (
+  SELECT `id`
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-ORDER-20260504185529-2-222-1'
+  LIMIT 1
 );
 
--- 学校使用情况页面菜单初始化脚本
--- 执行前确认“新增功能”目录 MENU_ID = 2333 存在
-INSERT INTO `sys_menu`
-(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+INSERT INTO `xfpt_order_item` (
+  `order_id`, `goods_id`, `size_id`, `goods_name`, `size_name`, `main_image`,
+  `sale_type`, `unit_price`, `buy_num`, `item_amount`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
 SELECT
-  2336, '学校使用情况', 2333, 4, 'schoolUsage', 'school/schoolUsage/index', NULL, '', 1, 0, 'C', '0', '0', 'school:schoolUsage:list', 'school', 'admin', NOW(), 'admin', NOW(), '学校使用情况菜单', NULL
-FROM dual
-WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2336 OR (`PARENT_ID` = 2333 AND `PATH` = 'schoolUsage')
+  @transport_order_id, 1, 1, '春秋运动校服套装', '155', '/profile/upload/demo/goods_1.jpg',
+  '2', 88.00, 1, 88.00, 222, 'admin',
+  '2026-05-10 23:10:53', NULL, NULL, '测试订单明细', '0'
+FROM DUAL
+WHERE @transport_order_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_order_item`
+    WHERE `order_id` = @transport_order_id
+      AND `goods_id` = 1
+      AND `size_id` = 1
+      AND `del_flag` = '0'
+  );
+
+SET @transport_order_item_id := (
+  SELECT `id`
+  FROM `xfpt_order_item`
+  WHERE `order_id` = @transport_order_id
+    AND `goods_id` = 1
+    AND `size_id` = 1
+    AND `del_flag` = '0'
+  LIMIT 1
 );
 
--- 供应商端“统购管理 / 公告管理”菜单初始化
--- 页面组件路径：supplier/groupNotice/index
--- 当前页面为只读页面，复用学校端统购公告查询权限
-INSERT INTO `sys_menu`
-(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+INSERT INTO `xfpt_delivery_order` (
+  `delivery_no`, `notice_id`, `order_id`, `order_no`, `production_id`, `school_id`, `supplier_id`,
+  `receiver_name`, `receiver_phone`, `receiver_address`, `logistics_company`, `logistics_no`,
+  `delivery_status`, `delivery_time`, `sign_time`, `carriage_fee`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
 SELECT
-  2337, '统购管理', 0, 2, 'supplierGroupManage', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'shopping-cart-full', 'admin', NOW(), 'admin', NOW(), '供应商端统购管理目录', NULL
-FROM dual
-WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2337 OR (`PARENT_ID` = 0 AND `PATH` = 'supplierGroupManage')
+  'DEMO-DELIVERY-20260504185529-222-1', NULL, @transport_order_id, 'DEMO-ORDER-20260504185529-2-222-1', NULL, 222, 1,
+  '石家庄交通运输学校', '13000000000', '石家庄交通运输学校收货点', '中通快递', 'ZT2026050418552903',
+  '1', '2026-05-03 18:55:30', NULL, 12.00, 222, 'admin',
+  '2026-05-10 23:10:53', NULL, NULL, '测试发货单', '0'
+FROM DUAL
+WHERE @transport_order_id IS NOT NULL
+  AND @transport_order_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_delivery_order`
+    WHERE `delivery_no` = 'DEMO-DELIVERY-20260504185529-222-1'
+  );
+
+SET @transport_delivery_id := (
+  SELECT `id`
+  FROM `xfpt_delivery_order`
+  WHERE `delivery_no` = 'DEMO-DELIVERY-20260504185529-222-1'
+  LIMIT 1
 );
 
-INSERT INTO `sys_menu`
-(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
+INSERT INTO `xfpt_delivery_order_item` (
+  `delivery_id`, `order_item_id`, `goods_id`, `size_id`, `goods_name`, `size_name`,
+  `delivery_num`, `sign_num`, `status`, `create_by`, `create_time`, `update_by`,
+  `update_time`, `remark`, `del_flag`
+)
 SELECT
-  2338, '公告管理', 2337, 1, 'groupNotice', 'supplier/groupNotice/index', NULL, '', 1, 0, 'C', '0', '0', 'school:groupNotice:list', 'document', 'admin', NOW(), 'admin', NOW(), '供应商端统购公告菜单', NULL
-FROM dual
+  @transport_delivery_id, @transport_order_item_id, 1, 1, '春秋运动校服套装', '155',
+  1, 0, '1', 'admin', '2026-05-10 23:10:53', NULL,
+  NULL, '测试发货明细', '0'
+FROM DUAL
+WHERE @transport_delivery_id IS NOT NULL
+  AND @transport_order_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_delivery_order_item`
+    WHERE `delivery_id` = @transport_delivery_id
+      AND `order_item_id` = @transport_order_item_id
+      AND `goods_id` = 1
+      AND `size_id` = 1
+      AND `del_flag` = '0'
+  );
+
+-- 学校端评价管理菜单及权限
+-- 说明：挂到“新增功能”目录下，优先按菜单名称动态查找父菜单ID。
+
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `MENU_NAME` = '新增功能'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+SET @OLD_SQL_SAFE_UPDATES := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+SET @evaluation_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:list'
+  LIMIT 1
+);
+SET @evaluation_menu_id := IFNULL(@evaluation_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_menu_id, '评价管理', @new_feature_menu_id, 8, 'evaluation', 'school/evaluation/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:evaluation:list', 'star',
+       'admin', NOW(), '', NULL, '学校端评价管理菜单', NULL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2338 OR (`PARENT_ID` = 2337 AND `COMPONENT` = 'supplier/groupNotice/index')
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:list'
 );
 
-INSERT INTO `sys_menu`
-(`MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`, `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`, `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`)
-SELECT
-  2339, '公告管理查询', 2338, 1, '#', '', NULL, '', 1, 0, 'F', '0', '0', 'school:groupNotice:query', '#', 'admin', NOW(), 'admin', NOW(), '供应商端统购公告查询权限', NULL
-FROM dual
-WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `MENU_ID` = 2339 OR `PERMS` = 'school:groupNotice:query'
+UPDATE `sys_menu`
+SET `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 8,
+    `PATH` = 'evaluation',
+    `COMPONENT` = 'school/evaluation/index',
+    `MENU_TYPE` = 'C',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '学校端评价管理菜单'
+WHERE `MENU_ID` = @evaluation_menu_id;
+
+SET @evaluation_query_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+  LIMIT 1
 );
+
+SET @evaluation_reply_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+  LIMIT 1
+);
+
+SET @evaluation_hide_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+  LIMIT 1
+);
+
+UPDATE `sys_menu`
+SET `PARENT_ID` = @evaluation_menu_id,
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW()
+WHERE `MENU_ID` = IFNULL(@evaluation_query_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_reply_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_hide_existing_id, -1);
+
+SET @evaluation_query_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+  LIMIT 1
+);
+SET @evaluation_query_id := IFNULL(@evaluation_query_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_query_id, '评价管理查询', @evaluation_menu_id, 1, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:evaluation:query', '#',
+       'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+);
+
+SET @evaluation_reply_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+  LIMIT 1
+);
+SET @evaluation_reply_id := IFNULL(@evaluation_reply_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_reply_id, '评价管理回复', @evaluation_menu_id, 2, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:evaluation:reply', '#',
+       'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+);
+
+SET @evaluation_hide_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+  LIMIT 1
+);
+SET @evaluation_hide_id := IFNULL(@evaluation_hide_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @evaluation_hide_id, '评价管理隐藏恢复', @evaluation_menu_id, 3, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:evaluation:hide', '#',
+       'admin', NOW(), '', NULL, '', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+);
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT r.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`PERMS` IN ('school:evaluation:list', 'school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide')
+WHERE r.`ROLE_KEY` IN ('admin', 'xuexiao', 'gly', 'testXiaofu')
+  AND r.`DEL_FLAG` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = r.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT rm_parent.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_role_menu` rm_parent
+JOIN `sys_menu` m
+  ON m.`PERMS` IN ('school:evaluation:list', 'school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide')
+WHERE rm_parent.`MENU_ID` = @new_feature_menu_id
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = rm_parent.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`PERMS` IN ('school:evaluation:list', 'school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide')
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT r.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`MENU_ID` = @new_feature_menu_id
+WHERE r.`ROLE_KEY` IN ('admin', 'xuexiao', 'gly', 'testXiaofu')
+  AND r.`DEL_FLAG` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = r.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`MENU_ID` = @new_feature_menu_id
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+-- 学校端每日入账金额权限：同步给 testUser 当前绑定角色
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`MENU_ID` IN (2350, 2351, 2352)
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+-- 学校端申请结算列表权限：同步给 testUser 当前绑定角色
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`MENU_ID` IN (2353, 2354, 2355)
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+-- 学校端结算管理权限：同步给 testUser 当前绑定角色
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT DISTINCT ur.`ROLE_ID`, m.`MENU_ID`
+FROM `sys_user` u
+JOIN `sys_user_role` ur
+  ON ur.`USER_ID` = u.`USER_ID`
+JOIN `sys_menu` m
+  ON m.`MENU_ID` IN (2356, 2357, 2358)
+WHERE u.`USER_NAME` = 'testUser'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`ROLE_ID` = ur.`ROLE_ID`
+      AND rm.`MENU_ID` = m.`MENU_ID`
+  );
+
+-- 学校端评价管理演示数据
+-- 仅用于本地/测试环境联调；生产环境请不要执行。
+
+INSERT INTO `xfpt_order_info` (
+  `order_no`, `order_type`, `notice_id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`,
+  `user_id`, `user_name`, `student_id`, `student_name`, `grade_name`, `class_name`, `address_id`,
+  `receive_type`, `receiver_name`, `receiver_phone`, `receiver_address`, `total_amount`, `pay_amount`,
+  `refund_amount`, `pay_status`, `order_status`, `pay_time`, `cancel_time`, `finish_time`, `dept_id`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  'DEMO-EVALUATION-ORDER-20260512-GROUP-1', '1', NULL, 222, '石家庄交通运输学校', 1, '河北超享纺织服装有限公司',
+  2194, 'testUser', NULL, NULL, NULL, NULL, NULL,
+  '1', '石家庄交通运输学校', '13000000000', '石家庄交通运输学校收货点', 188.00, 188.00,
+  0.00, '1', '4', '2026-05-10 09:10:00', NULL, '2026-05-11 16:20:00', 222,
+  'admin', NOW(), NULL, NULL, '评价管理演示统购订单', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_order_info` WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-GROUP-1'
+);
+
+SET @evaluation_group_order_id := (
+  SELECT `id`
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-GROUP-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_order_item` (
+  `order_id`, `goods_id`, `size_id`, `goods_name`, `size_name`, `main_image`,
+  `sale_type`, `unit_price`, `buy_num`, `item_amount`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_order_id, 1, 1, '春秋运动校服套装', '155', '/profile/upload/demo/goods_1.jpg',
+  '1', 188.00, 1, 188.00, 222, 'admin',
+  NOW(), NULL, NULL, '评价管理演示统购明细', '0'
+FROM DUAL
+WHERE @evaluation_group_order_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_order_item`
+    WHERE `order_id` = @evaluation_group_order_id
+      AND `goods_id` = 1
+      AND `size_id` = 1
+      AND `del_flag` = '0'
+  );
+
+SET @evaluation_group_item_id := (
+  SELECT `id`
+  FROM `xfpt_order_item`
+  WHERE `order_id` = @evaluation_group_order_id
+    AND `goods_id` = 1
+    AND `size_id` = 1
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_comment` (
+  `order_id`, `order_item_id`, `order_no`, `goods_id`, `goods_name`, `user_id`, `user_name`,
+  `supplier_id`, `score`, `content`, `images_json`, `reply_content`, `reply_time`, `status`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_order_id, @evaluation_group_item_id, 'DEMO-EVALUATION-ORDER-20260512-GROUP-1',
+  1, '春秋运动校服套装', 2194, 'testUser',
+  1, 5, '面料舒适，尺码标准，孩子试穿后很满意。', '["/profile/upload/demo/comment.jpg"]',
+  '感谢您的反馈，我们会继续做好服务。', '2026-05-12 09:35:00', '0',
+  'admin', '2026-05-12 09:30:00', 'admin', '2026-05-12 09:35:00', '评价管理演示数据', '0'
+FROM DUAL
+WHERE @evaluation_group_order_id IS NOT NULL
+  AND @evaluation_group_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment`
+    WHERE `order_item_id` = @evaluation_group_item_id
+      AND `user_id` = 2194
+      AND `del_flag` = '0'
+  );
+
+SET @evaluation_group_comment_id := (
+  SELECT `id`
+  FROM `xfpt_comment`
+  WHERE `order_item_id` = @evaluation_group_item_id
+    AND `user_id` = 2194
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_comment_reply` (
+  `comment_id`, `order_id`, `order_item_id`, `goods_id`, `supplier_id`,
+  `from_user_id`, `from_user_name`, `from_role_type`, `from_role_title`,
+  `to_user_id`, `to_user_name`, `to_role_type`, `to_role_title`,
+  `content`, `status`, `sort_num`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
+  1, '管理员', '4', '平台管理员',
+  2194, 'testUser', '1', '家长',
+  '感谢您的反馈，我们会继续做好服务。', '0', 1, 'admin', '2026-05-12 09:35:00', NULL, NULL, '评价管理演示回复', '0'
+FROM DUAL
+WHERE @evaluation_group_comment_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment_reply`
+    WHERE `comment_id` = @evaluation_group_comment_id
+      AND `content` = '感谢您的反馈，我们会继续做好服务。'
+      AND `del_flag` = '0'
+  );
+
+INSERT INTO `xfpt_comment_reply` (
+  `comment_id`, `order_id`, `order_item_id`, `goods_id`, `supplier_id`,
+  `from_user_id`, `from_user_name`, `from_role_type`, `from_role_title`,
+  `to_user_id`, `to_user_name`, `to_role_type`, `to_role_title`,
+  `content`, `status`, `sort_num`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
+  2194, 'testUser', '1', '家长',
+  1, '管理员', '4', '平台管理员',
+  '收到，会继续观察孩子穿着情况。', '0', 2, 'testUser', '2026-05-12 09:42:00', NULL, NULL, '评价管理演示家长回复', '0'
+FROM DUAL
+WHERE @evaluation_group_comment_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment_reply`
+    WHERE `comment_id` = @evaluation_group_comment_id
+      AND `content` = '收到，会继续观察孩子穿着情况。'
+      AND `del_flag` = '0'
+  );
+
+INSERT INTO `xfpt_comment_reply` (
+  `comment_id`, `order_id`, `order_item_id`, `goods_id`, `supplier_id`,
+  `from_user_id`, `from_user_name`, `from_role_type`, `from_role_title`,
+  `to_user_id`, `to_user_name`, `to_role_type`, `to_role_title`,
+  `content`, `status`, `sort_num`, `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_group_comment_id, @evaluation_group_order_id, @evaluation_group_item_id, 1, 1,
+  NULL, '河北超享客服', '2', '供应商',
+  2194, 'testUser', '1', '家长',
+  '这款面料已经做过预缩处理，如后续尺码不合适可以联系学校登记换码。', '0', 3, '河北超享客服', '2026-05-12 09:48:00', NULL, NULL, '评价管理演示供应商回复', '0'
+FROM DUAL
+WHERE @evaluation_group_comment_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment_reply`
+    WHERE `comment_id` = @evaluation_group_comment_id
+      AND `content` = '这款面料已经做过预缩处理，如后续尺码不合适可以联系学校登记换码。'
+      AND `del_flag` = '0'
+  );
+
+INSERT INTO `xfpt_order_info` (
+  `order_no`, `order_type`, `notice_id`, `school_id`, `school_name`, `supplier_id`, `supplier_name`,
+  `user_id`, `user_name`, `student_id`, `student_name`, `grade_name`, `class_name`, `address_id`,
+  `receive_type`, `receiver_name`, `receiver_phone`, `receiver_address`, `total_amount`, `pay_amount`,
+  `refund_amount`, `pay_status`, `order_status`, `pay_time`, `cancel_time`, `finish_time`, `dept_id`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  'DEMO-EVALUATION-ORDER-20260512-RETAIL-1', '2', NULL, 222, '石家庄交通运输学校', 2, '河北春风树服饰有限公司',
+  2194, 'testUser', NULL, NULL, NULL, NULL, NULL,
+  '2', 'testUser', '13000000000', '石家庄交通运输学校测试收货地址', 99.00, 99.00,
+  0.00, '1', '4', '2026-05-10 10:10:00', NULL, '2026-05-11 17:20:00', 222,
+  'admin', NOW(), NULL, NULL, '评价管理演示零购订单', '0'
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_order_info` WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-RETAIL-1'
+);
+
+SET @evaluation_retail_order_id := (
+  SELECT `id`
+  FROM `xfpt_order_info`
+  WHERE `order_no` = 'DEMO-EVALUATION-ORDER-20260512-RETAIL-1'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_order_item` (
+  `order_id`, `goods_id`, `size_id`, `goods_name`, `size_name`, `main_image`,
+  `sale_type`, `unit_price`, `buy_num`, `item_amount`, `dept_id`, `create_by`,
+  `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_retail_order_id, 3, 3, '冬季加绒冲锋衣校服', '170', '/profile/upload/demo/goods_3.jpg',
+  '2', 99.00, 1, 99.00, 222, 'admin',
+  NOW(), NULL, NULL, '评价管理演示零购明细', '0'
+FROM DUAL
+WHERE @evaluation_retail_order_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_order_item`
+    WHERE `order_id` = @evaluation_retail_order_id
+      AND `goods_id` = 3
+      AND `size_id` = 3
+      AND `del_flag` = '0'
+  );
+
+SET @evaluation_retail_item_id := (
+  SELECT `id`
+  FROM `xfpt_order_item`
+  WHERE `order_id` = @evaluation_retail_order_id
+    AND `goods_id` = 3
+    AND `size_id` = 3
+    AND `del_flag` = '0'
+  LIMIT 1
+);
+
+INSERT INTO `xfpt_comment` (
+  `order_id`, `order_item_id`, `order_no`, `goods_id`, `goods_name`, `user_id`, `user_name`,
+  `supplier_id`, `score`, `content`, `images_json`, `reply_content`, `reply_time`, `status`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `del_flag`
+)
+SELECT
+  @evaluation_retail_order_id, @evaluation_retail_item_id, 'DEMO-EVALUATION-ORDER-20260512-RETAIL-1',
+  3, '冬季加绒冲锋衣校服', 2194, 'testUser',
+  2, 3, '袖口线头略多，希望后续质检再细一些。', '["/profile/upload/demo/comment.jpg"]',
+  NULL, NULL, '1',
+  'admin', '2026-05-12 10:30:00', NULL, NULL, '评价管理演示隐藏数据', '0'
+FROM DUAL
+WHERE @evaluation_retail_order_id IS NOT NULL
+  AND @evaluation_retail_item_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `xfpt_comment`
+    WHERE `order_item_id` = @evaluation_retail_item_id
+      AND `user_id` = 2194
+      AND `del_flag` = '0'
+  );
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
@@ -4210,6 +4809,127 @@ WHERE NOT EXISTS (
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+
+-- ============================================
+-- 追加：新增功能菜单 - 账户余额 / 供应商提现记录
+-- 说明：使用 utf8mb4 十六进制字面量，避免中文编码问题
+-- ============================================
+
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'newFeature'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @new_feature_menu_id := IFNULL(@new_feature_menu_id, 2333);
+
+SET @account_balance_name := CONVERT(0xE8B4A6E688B7E4BD99E9A29D USING utf8mb4);
+SET @account_balance_remark := CONVERT(0xE8B4A6E688B7E4BD99E9A29DE88F9CE58D95 USING utf8mb4);
+SET @supplier_withdraw_record_name := CONVERT(0xE4BE9BE5BA94E59586E68F90E78EB0E8AEB0E5BD95 USING utf8mb4);
+SET @supplier_withdraw_record_remark := CONVERT(0xE4BE9BE5BA94E59586E68F90E78EB0E8AEB0E5BD95E88F9CE58D95 USING utf8mb4);
+SET @OLD_SQL_SAFE_UPDATES := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
+SET @account_balance_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'accountBalance'
+     OR `COMPONENT` = 'school/accountBalance/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @account_balance_menu_id := IFNULL(@account_balance_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @account_balance_menu_id, @account_balance_name, @new_feature_menu_id, 30,
+       'accountBalance', 'school/accountBalance/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:financeFlow:list', 'money',
+       'admin', NOW(), 'admin', NOW(), @account_balance_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'accountBalance'
+     OR `COMPONENT` = 'school/accountBalance/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @account_balance_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 30,
+    `PATH` = 'accountBalance',
+    `COMPONENT` = 'school/accountBalance/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:financeFlow:list',
+    `ICON` = 'money',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @account_balance_remark
+WHERE `MENU_ID` = @account_balance_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @account_balance_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @account_balance_menu_id
+);
+
+SET @supplier_withdraw_record_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierWithdrawRecord'
+     OR `COMPONENT` = 'school/supplierWithdrawRecord/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_withdraw_record_menu_id := IFNULL(@supplier_withdraw_record_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_withdraw_record_menu_id, @supplier_withdraw_record_name, @new_feature_menu_id, 31,
+       'supplierWithdrawRecord', 'school/supplierWithdrawRecord/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:withdrawApply:list', 'money',
+       'admin', NOW(), 'admin', NOW(), @supplier_withdraw_record_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierWithdrawRecord'
+     OR `COMPONENT` = 'school/supplierWithdrawRecord/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @supplier_withdraw_record_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 31,
+    `PATH` = 'supplierWithdrawRecord',
+    `COMPONENT` = 'school/supplierWithdrawRecord/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:withdrawApply:list',
+    `ICON` = 'money',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @supplier_withdraw_record_remark
+WHERE `MENU_ID` = @supplier_withdraw_record_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @supplier_withdraw_record_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @supplier_withdraw_record_menu_id
+);
+SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
 -- Dump completed on 2026-05-04 19:18:33

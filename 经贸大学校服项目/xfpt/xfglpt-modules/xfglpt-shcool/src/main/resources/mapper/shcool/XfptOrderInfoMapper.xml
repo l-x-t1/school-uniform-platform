@@ -9,7 +9,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderNo"    column="order_no"    />
         <result property="orderType"    column="order_type"    />
         <result property="noticeId"    column="notice_id"    />
-        <result property="noticeTitle"    column="notice_title"    />
         <result property="schoolId"    column="school_id"    />
         <result property="schoolName"    column="school_name"    />
         <result property="supplierId"    column="supplier_id"    />
@@ -68,50 +67,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptOrderInfoVo">
-        select oi.id, oi.order_no, oi.order_type, oi.notice_id, gn.title as notice_title, oi.school_id, oi.school_name, oi.supplier_id, oi.supplier_name, oi.user_id, oi.user_name, oi.student_id, oi.student_name, oi.grade_name, oi.class_name, oi.address_id, oi.receive_type, oi.receiver_name, oi.receiver_phone, oi.receiver_address, oi.total_amount, oi.pay_amount, oi.refund_amount, oi.pay_status, oi.order_status, oi.pay_time, oi.cancel_time, oi.finish_time, oi.dept_id, oi.create_by, oi.create_time, oi.update_by, oi.update_time, oi.remark, oi.del_flag
-        from xfpt_order_info oi
-        left join xfpt_group_notice gn on oi.notice_id = gn.id
+        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_order_info
     </sql>
 
     <select id="selectXfptOrderInfoList" parameterType="XfptOrderInfo" resultMap="XfptOrderInfoResult">
         <include refid="selectXfptOrderInfoVo"/>
         <include refid="search"/>
-            <if test="orderNo != null  and orderNo != ''"> and oi.order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderType != null  and orderType != ''"> and oi.order_type = #{orderType}</if>
-            <if test="noticeId != null "> and oi.notice_id = #{noticeId}</if>
-            <if test="schoolId != null "> and oi.school_id = #{schoolId}</if>
-            <if test="schoolName != null  and schoolName != ''"> and oi.school_name like concat('%', #{schoolName}, '%')</if>
-            <if test="supplierId != null "> and oi.supplier_id = #{supplierId}</if>
-            <if test="supplierName != null  and supplierName != ''"> and oi.supplier_name like concat('%', #{supplierName}, '%')</if>
-            <if test="userId != null "> and oi.user_id = #{userId}</if>
-            <if test="userName != null  and userName != ''"> and oi.user_name like concat('%', #{userName}, '%')</if>
-            <if test="studentId != null "> and oi.student_id = #{studentId}</if>
-            <if test="studentName != null  and studentName != ''"> and oi.student_name like concat('%', #{studentName}, '%')</if>
-            <if test="gradeName != null  and gradeName != ''"> and oi.grade_name like concat('%', #{gradeName}, '%')</if>
-            <if test="className != null  and className != ''"> and oi.class_name like concat('%', #{className}, '%')</if>
-            <if test="addressId != null "> and oi.address_id = #{addressId}</if>
-            <if test="receiveType != null  and receiveType != ''"> and oi.receive_type = #{receiveType}</if>
-            <if test="receiverName != null  and receiverName != ''"> and oi.receiver_name like concat('%', #{receiverName}, '%')</if>
-            <if test="receiverPhone != null  and receiverPhone != ''"> and oi.receiver_phone = #{receiverPhone}</if>
-            <if test="receiverAddress != null  and receiverAddress != ''"> and oi.receiver_address = #{receiverAddress}</if>
-            <if test="totalAmount != null "> and oi.total_amount = #{totalAmount}</if>
-            <if test="payAmount != null "> and oi.pay_amount = #{payAmount}</if>
-            <if test="refundAmount != null "> and oi.refund_amount = #{refundAmount}</if>
-            <if test="payStatus != null  and payStatus != ''"> and oi.pay_status = #{payStatus}</if>
-            <if test="orderStatus != null  and orderStatus != ''"> and oi.order_status = #{orderStatus}</if>
+            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="orderType != null  and orderType != ''"> and order_type = #{orderType}</if>
+            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
+            <if test="schoolId != null "> and school_id = #{schoolId}</if>
+            <if test="schoolName != null  and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
+            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
+            <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
+            <if test="userId != null "> and user_id = #{userId}</if>
+            <if test="userName != null  and userName != ''"> and user_name like concat('%', #{userName}, '%')</if>
+            <if test="studentId != null "> and student_id = #{studentId}</if>
+            <if test="studentName != null  and studentName != ''"> and student_name like concat('%', #{studentName}, '%')</if>
+            <if test="gradeName != null  and gradeName != ''"> and grade_name like concat('%', #{gradeName}, '%')</if>
+            <if test="className != null  and className != ''"> and class_name like concat('%', #{className}, '%')</if>
+            <if test="addressId != null "> and address_id = #{addressId}</if>
+            <if test="receiveType != null  and receiveType != ''"> and receive_type = #{receiveType}</if>
+            <if test="receiverName != null  and receiverName != ''"> and receiver_name like concat('%', #{receiverName}, '%')</if>
+            <if test="receiverPhone != null  and receiverPhone != ''"> and receiver_phone = #{receiverPhone}</if>
+            <if test="receiverAddress != null  and receiverAddress != ''"> and receiver_address = #{receiverAddress}</if>
+            <if test="totalAmount != null "> and total_amount = #{totalAmount}</if>
+            <if test="payAmount != null "> and pay_amount = #{payAmount}</if>
+            <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
+            <if test="payStatus != null  and payStatus != ''"> and pay_status = #{payStatus}</if>
+            <if test="orderStatus != null  and orderStatus != ''"> and order_status = #{orderStatus}</if>
             <if test="payTime != null ">
-                and oi.pay_time &gt;= #{payTime}
-                and oi.pay_time &lt; date_add(#{payTime}, interval 1 day)
+                and pay_time &gt;= #{payTime}
+                and pay_time &lt; date_add(#{payTime}, interval 1 day)
             </if>
             <if test="cancelTime != null ">
-                and oi.cancel_time &gt;= #{cancelTime}
-                and oi.cancel_time &lt; date_add(#{cancelTime}, interval 1 day)
+                and cancel_time &gt;= #{cancelTime}
+                and cancel_time &lt; date_add(#{cancelTime}, interval 1 day)
             </if>
             <if test="finishTime != null ">
-                and oi.finish_time &gt;= #{finishTime}
-                and oi.finish_time &lt; date_add(#{finishTime}, interval 1 day)
+                and finish_time &gt;= #{finishTime}
+                and finish_time &lt; date_add(#{finishTime}, interval 1 day)
             </if>
-            <if test="deptId != null "> and oi.dept_id = #{deptId}</if>
+            <if test="deptId != null "> and dept_id = #{deptId}</if>
 
     </select>
 
@@ -131,7 +128,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, order_id, goods_id, size_id, goods_name, size_name, main_image, sale_type, unit_price, buy_num, item_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_order_item
         where order_id = #{order_id}
-          and del_flag = 0
     </select>
 
     <insert id="insertXfptOrderInfo" parameterType="XfptOrderInfo" useGeneratedKeys="true" keyProperty="id">
@@ -277,6 +273,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </insert>
     <sql id="search">
-        where oi.del_flag = 0
+        where del_flag = 0
     </sql>
 </mapper>
