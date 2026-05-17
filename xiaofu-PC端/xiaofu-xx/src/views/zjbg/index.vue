@@ -87,9 +87,10 @@
           <span v-else>-</span>
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="120" align="center">
+      <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">查看</el-button>
+          <el-button size="mini" type="text" icon="el-icon-upload2" @click="handleUpload(scope.row)">上传</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -97,11 +98,27 @@
     <!-- 分页组件 -->
     <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
       @pagination="getList" />
+
+    <!-- 上传质检报告 -->
+    <el-dialog title="上传质检报告" :visible.sync="uploadOpen" width="560px" append-to-body>
+      <el-form ref="uploadForm" :model="uploadForm" :rules="uploadRules" label-width="120px">
+        <el-form-item label="报告标题：" prop="inspectionReportTitle">
+          <el-input v-model="uploadForm.inspectionReportTitle" placeholder="请输入质量检验报告标题" />
+        </el-form-item>
+        <el-form-item label="报告文件：" prop="url">
+          <file-upload v-model="uploadForm.url" :file-type="['pdf']" :limit="1" />
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="cancelUpload">取 消</el-button>
+        <el-button type="primary" @click="submitUpload">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { suppliceInspectionReportList } from '@/api/school/report'
+import { suppliceInspectionReportList, addsuppliceInspectionReportSon } from '@/api/school/report'
 
 export default {
   name: 'ZjbgIndex',
@@ -113,6 +130,23 @@ export default {
       total: 0,
       // 表格数据
       tableData: [],
+      // 上传弹窗
+      uploadOpen: false,
+      // 上传表单
+      uploadForm: {
+        reportId: undefined,
+        inspectionReportTitle: '',
+        url: ''
+      },
+      // 上传校验
+      uploadRules: {
+        inspectionReportTitle: [
+          { required: true, message: '请输入质量检验报告标题', trigger: 'blur' }
+        ],
+        url: [
+          { required: true, message: '请上传报告文件', trigger: 'change' }
+        ]
+      },
       // 查询参数
       queryParams: {
         pageNum: 1,
@@ -169,6 +203,43 @@ export default {
     /** 查看详情 */
     handleView(row) {
       this.$router.push({ path: '/zjbg/detail', query: { id: row.id } });
+    },
+    /** 打开上传弹窗 */
+    handleUpload(row) {
+      this.uploadForm = {
+        reportId: row.id,
+        inspectionReportTitle: row.noticeName ? `${row.noticeName}质检报告` : '',
+        url: ''
+      }
+      this.uploadOpen = true
+      this.$nextTick(() => {
+        if (this.$refs.uploadForm) {
+          this.$refs.uploadForm.clearValidate()
+        }
+      })
+    },
+    /** 取消上传 */
+    cancelUpload() {
+      this.uploadOpen = false
+      this.uploadForm = {
+        reportId: undefined,
+        inspectionReportTitle: '',
+        url: ''
+      }
+    },
+    /** 提交上传 */
+    submitUpload() {
+      this.$refs.uploadForm.validate(valid => {
+        if (!valid) {
+          this.$message.error('请完善表单信息')
+          return
+        }
+        addsuppliceInspectionReportSon(this.uploadForm).then(() => {
+          this.$message.success('上传成功')
+          this.cancelUpload()
+          this.getList()
+        })
+      })
     }
   }
 };
