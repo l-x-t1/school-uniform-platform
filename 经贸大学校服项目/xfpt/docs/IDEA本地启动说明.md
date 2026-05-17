@@ -35,7 +35,7 @@
 | `04-job` | `xfgl-modules-job` | `com.xfgl.job.RuoYiJobApplication` | `9203` |
 | `05-file` | `xfgl-modules-file` | `com.xfgl.file.RuoYiFileApplication` | `9300` |
 | `06-school` | `xfgl-modules-shcool` | `com.xfgl.RuoYiSchoolApplication` | `9204` |
-| `07-supplier` | `xfgl-modules-education` | `com.xfgl.RuoYiSupplierApplication` | `9211` |
+| `07-supplier` | `xfgl-modules-supplier` | `com.xfgl.RuoYiSupplierApplication` | `9211` |
 | `08-app` | `xfgl-modules-app` | `com.xfgl.system.RuoYiAppApplication` | `9206` |
 | `09-monitor` | `xfgl-visual-monitor` | `com.xfgl.modules.monitor.RuoYiMonitorApplication` | `9100` |
 | `10-gateway` | `xfgl-gateway` | `com.xfgl.gateway.RuoYiGatewayApplication` | `8080` |

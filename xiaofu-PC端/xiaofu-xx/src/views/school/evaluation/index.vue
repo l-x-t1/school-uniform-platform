@@ -4,19 +4,50 @@
       <div slot="header" class="evaluation-card__header">
         <div>
           <div class="evaluation-card__title">评价管理</div>
-          <div class="evaluation-card__desc">按统购、零购查看订单评价，处理官方回复与评价状态</div>
         </div>
       </div>
 
-      <el-tabs v-model="activeOrderType" @tab-click="handleTabClick">
+      <el-tabs v-model="activeOrderType" class="evaluation-tabs" @tab-click="handleTabClick">
         <el-tab-pane label="统购评价" name="1" />
         <el-tab-pane label="零购评价" name="2" />
       </el-tabs>
+
+      <el-row :gutter="16" class="summary-row">
+        <el-col :xs="24" :sm="12" :lg="6">
+          <div class="summary-card total">
+            <div class="summary-label">当前页评价</div>
+            <div class="summary-value">{{ pageSummary.totalCount }}</div>
+            <div class="summary-extra">评价记录</div>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="12" :lg="6">
+          <div class="summary-card score">
+            <div class="summary-label">平均评分</div>
+            <div class="summary-value">{{ pageSummary.averageScore }}</div>
+            <div class="summary-extra">当前页评分均值</div>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="12" :lg="6">
+          <div class="summary-card replied">
+            <div class="summary-label">已回复</div>
+            <div class="summary-value">{{ pageSummary.repliedCount }}</div>
+            <div class="summary-extra">官方已处理</div>
+          </div>
+        </el-col>
+        <el-col :xs="24" :sm="12" :lg="6">
+          <div class="summary-card hidden">
+            <div class="summary-label">已隐藏</div>
+            <div class="summary-value">{{ pageSummary.hiddenCount }}</div>
+            <div class="summary-extra">当前页隐藏评价</div>
+          </div>
+        </el-col>
+      </el-row>
 
       <el-form
         v-show="showSearch"
         ref="queryForm"
         :model="queryParams"
+        class="query-form"
         size="small"
         :inline="true"
         label-width="78px"
@@ -80,7 +111,13 @@
         <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
       </el-row>
 
-      <el-table v-loading="loading" :data="evaluationList" empty-text="暂无评价数据，可执行演示数据脚本后联调">
+      <el-table
+        v-loading="loading"
+        :data="evaluationList"
+        border
+        class="goods-table evaluation-table"
+        empty-text="暂无评价数据"
+      >
         <el-table-column label="订单号" align="center" prop="orderNo" min-width="150" show-overflow-tooltip />
         <el-table-column label="学校" align="center" prop="schoolName" min-width="150" show-overflow-tooltip />
         <el-table-column label="商品" align="center" prop="goodsName" min-width="160" show-overflow-tooltip />
@@ -163,25 +200,74 @@
       />
     </el-card>
 
-    <el-dialog title="评价处理详情" :visible.sync="detailOpen" width="820px" append-to-body>
-      <div v-loading="detailLoading" class="evaluation-detail">
-        <el-descriptions :column="2" border size="small">
-          <el-descriptions-item label="订单号">{{ detail.orderNo || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="订单类型">{{ formatOrderType(detail.orderType) }}</el-descriptions-item>
-          <el-descriptions-item label="学校">{{ detail.schoolName || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="商品">{{ detail.goodsName || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="评价人">{{ detail.userName || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="评分">
-            <el-rate class="evaluation-rate" :value="Number(detail.score || 0)" disabled show-score text-color="#ff9900" />
-          </el-descriptions-item>
-          <el-descriptions-item label="评价时间">{{ parseTime(detail.createTime) || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="官方回复">
-            <el-tag :type="hasReply(detail) ? 'success' : 'info'">{{ hasReply(detail) ? '已回复' : '未回复' }}</el-tag>
-          </el-descriptions-item>
-          <el-descriptions-item label="评价状态">
-            <el-tag :type="formatStatusType(detail.status)">{{ formatStatusText(detail.status) }}</el-tag>
-          </el-descriptions-item>
-        </el-descriptions>
+    <el-dialog title="评价详情" :visible.sync="detailOpen" width="920px" append-to-body>
+      <div v-loading="detailLoading" class="dialog-scroll evaluation-detail">
+        <div class="detail-hero">
+          <div class="detail-main">
+            <div class="detail-eyebrow">{{ formatOrderType(detail.orderType) }}评价</div>
+            <div class="detail-title">{{ detail.goodsName || '-' }}</div>
+            <div class="detail-meta">
+              <span class="meta-pill">{{ detail.orderNo || '暂无订单号' }}</span>
+              <el-tag :type="formatStatusType(detail.status)" size="small">
+                {{ formatStatusText(detail.status) }}
+              </el-tag>
+              <el-tag :type="hasReply(detail) ? 'success' : 'info'" size="small">
+                {{ hasReply(detail) ? '已回复' : '未回复' }}
+              </el-tag>
+            </div>
+          </div>
+          <div class="score-block">
+            <div class="score-label">评价评分</div>
+            <div class="score-value">{{ Number(detail.score || 0).toFixed(1) }}</div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-head">
+            <div>
+              <h4>评价信息</h4>
+              <p>订单、学校、商品和评价状态</p>
+            </div>
+          </div>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="detail-label">订单号</span>
+              <span class="detail-value">{{ detail.orderNo || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">订单类型</span>
+              <span class="detail-value">{{ formatOrderType(detail.orderType) }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">学校</span>
+              <span class="detail-value">{{ detail.schoolName || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">商品</span>
+              <span class="detail-value">{{ detail.goodsName || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">评价人</span>
+              <span class="detail-value">{{ detail.userName || '-' }}</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">评价时间</span>
+              <span class="detail-value">{{ parseTime(detail.createTime) || '-' }}</span>
+            </div>
+            <div class="detail-item full">
+              <span class="detail-label">评分</span>
+              <span class="detail-value">
+                <el-rate
+                  class="evaluation-rate"
+                  :value="Number(detail.score || 0)"
+                  disabled
+                  show-score
+                  text-color="#ff9900"
+                />
+              </span>
+            </div>
+          </div>
+        </div>
 
         <div class="comment-thread">
           <div class="comment-thread__header">
@@ -364,6 +450,19 @@ export default {
     }
   },
   computed: {
+    pageSummary() {
+      const rows = this.evaluationList || []
+      const totalScore = rows.reduce((sum, item) => {
+        const score = Number(item.score || 0)
+        return sum + (Number.isNaN(score) ? 0 : score)
+      }, 0)
+      return {
+        totalCount: rows.length,
+        averageScore: rows.length ? (totalScore / rows.length).toFixed(1) : '0.0',
+        repliedCount: rows.filter(item => this.hasReply(item)).length,
+        hiddenCount: rows.filter(item => String(item.status) === '1').length
+      }
+    },
     replyList() {
       return this.detail.xfptCommentReplyList || []
     }
@@ -586,7 +685,7 @@ export default {
 <style lang="scss" scoped>
 .evaluation-page {
   .evaluation-card {
-    border-radius: 10px;
+    border-radius: 8px;
   }
 
   .evaluation-card__header {
@@ -608,8 +707,230 @@ export default {
   }
 }
 
+.evaluation-tabs {
+  margin-bottom: 14px;
+}
+
+.summary-row {
+  margin-bottom: 16px;
+}
+
+.summary-card {
+  min-height: 112px;
+  margin-bottom: 16px;
+  padding: 18px 20px;
+  border-radius: 8px;
+  color: #fff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+}
+
+.summary-card.total {
+  background: linear-gradient(135deg, #2563eb, #0f766e);
+}
+
+.summary-card.score {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+}
+
+.summary-card.replied {
+  background: linear-gradient(135deg, #22c55e, #15803d);
+}
+
+.summary-card.hidden {
+  background: linear-gradient(135deg, #64748b, #334155);
+}
+
+.summary-label {
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.summary-value {
+  margin: 8px 0 4px;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 36px;
+}
+
+.summary-extra {
+  font-size: 13px;
+  opacity: 0.86;
+}
+
+.query-form {
+  margin-bottom: 16px;
+  padding: 18px 18px 4px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.goods-table {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.goods-table ::v-deep .el-table__header th {
+  background: #f8fafc;
+  color: #334155;
+}
+
 .evaluation-detail {
-  min-height: 240px;
+  min-height: 260px;
+}
+
+.dialog-scroll {
+  max-height: calc(88vh - 130px);
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.detail-hero {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  background: #f8fbff;
+}
+
+.detail-main {
+  min-width: 0;
+}
+
+.detail-eyebrow {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.detail-title {
+  margin-top: 6px;
+  color: #0f172a;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 28px;
+  word-break: break-all;
+}
+
+.detail-meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.meta-pill {
+  display: inline-flex;
+  align-items: center;
+  max-width: 100%;
+  min-height: 24px;
+  padding: 0 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 4px;
+  color: #1d4ed8;
+  background: #eff6ff;
+  font-size: 12px;
+  line-height: 22px;
+  word-break: break-all;
+}
+
+.score-block {
+  display: flex;
+  flex: 0 0 150px;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  border-left: 1px solid #dbe7f3;
+  padding-left: 18px;
+}
+
+.score-label {
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.score-value {
+  margin-top: 8px;
+  color: #f59e0b;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 38px;
+}
+
+.detail-section {
+  margin-top: 16px;
+  border: 1px solid #e5edf7;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #fff;
+}
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5edf7;
+  background: #f8fafc;
+}
+
+.section-head h4 {
+  margin: 0;
+  color: #10233f;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 24px;
+}
+
+.section-head p {
+  margin: 2px 0 0;
+  color: #64748b;
+  font-size: 13px;
+  line-height: 20px;
+}
+
+.detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.detail-item {
+  display: grid;
+  grid-template-columns: 92px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 48px;
+  padding: 12px 16px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.detail-item:nth-child(odd) {
+  border-right: 1px solid #edf2f7;
+}
+
+.detail-item.full {
+  grid-column: 1 / -1;
+  border-right: 0;
+}
+
+.detail-item:last-child {
+  border-bottom: 0;
+}
+
+.detail-label {
+  color: #64748b;
+  line-height: 24px;
+}
+
+.detail-value {
+  min-width: 0;
+  color: #1f2937;
+  line-height: 24px;
+  word-break: break-all;
 }
 
 .evaluation-page ::v-deep .evaluation-score-column .cell {
@@ -673,10 +994,10 @@ export default {
 }
 
 .comment-thread {
-  margin-top: 18px;
+  margin-top: 16px;
   padding: 18px;
   border: 1px solid #e4e7ed;
-  border-radius: 12px;
+  border-radius: 8px;
   background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
 }
 
@@ -729,7 +1050,7 @@ export default {
   gap: 12px;
   padding: 16px;
   border: 1px solid #cfe6ff;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #fff;
   box-shadow: 0 6px 18px rgba(64, 158, 255, 0.08);
 }
@@ -772,7 +1093,7 @@ export default {
   line-height: 1.8;
   white-space: pre-wrap;
   border: 1px solid #ebeef5;
-  border-radius: 8px;
+  border-radius: 6px;
   background: #f8fafc;
 }
 
@@ -780,7 +1101,7 @@ export default {
   margin-top: 16px;
   padding: 14px 14px 14px 46px;
   border: 1px solid #ebeef5;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #fff;
 }
 
@@ -881,7 +1202,7 @@ export default {
   color: #909399;
   text-align: center;
   border: 1px dashed #dcdfe6;
-  border-radius: 10px;
+  border-radius: 8px;
   background: #f8fafc;
 }
 
@@ -898,5 +1219,44 @@ export default {
 .empty-text {
   color: #909399;
   font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .detail-hero {
+    flex-direction: column;
+  }
+
+  .score-block {
+    align-items: flex-start;
+    flex-basis: auto;
+    border-left: 0;
+    border-top: 1px solid #dbe7f3;
+    padding-top: 14px;
+    padding-left: 0;
+  }
+
+  .detail-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-item,
+  .detail-item:nth-child(odd),
+  .detail-item.full {
+    border-right: 0;
+    border-bottom: 1px solid #edf2f7;
+  }
+
+  .detail-item:last-child {
+    border-bottom: 0;
+  }
+
+  .parent-comment,
+  .reply-item {
+    flex-direction: column;
+  }
+
+  .reply-thread {
+    padding-left: 14px;
+  }
 }
 </style>

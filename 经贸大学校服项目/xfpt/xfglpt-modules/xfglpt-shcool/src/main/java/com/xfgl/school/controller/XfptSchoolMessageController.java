@@ -3,6 +3,10 @@ package com.xfgl.school.controller;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Collectors;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
@@ -90,7 +94,7 @@ public class XfptSchoolMessageController extends BaseController {
 //    @RequiresPermissions("school:schoolMessage:query")
     @GetMapping(value = "/{deptId}")
     public AjaxResult getInfo(@PathVariable("deptId") Long deptId) {
-        return success(xfptSchoolMessageService.lambdaQuery().eq(XfptSchoolMessage::getDeptId, deptId).one());
+        return success(getLatestSchoolMessageByDeptId(deptId));
     }
     /**
      * 获取学校信息详细信息
@@ -147,7 +151,7 @@ public class XfptSchoolMessageController extends BaseController {
 
     @PostMapping("/isPerfect")
     public AjaxResult export(Long deptId) {
-        XfptSchoolMessage xfptSchoolMessage = xfptSchoolMessageService.lambdaQuery().eq(XfptSchoolMessage::getDeptId, deptId).one();
+        XfptSchoolMessage xfptSchoolMessage = getLatestSchoolMessageByDeptId(deptId);
         if (xfptSchoolMessage == null) {
             return success(false);
         } else {
@@ -196,10 +200,11 @@ public class XfptSchoolMessageController extends BaseController {
         } else {
             list = xfptSchoolMessageService.selectDeptList(dept);
         }
+        Map<Long, XfptSchoolMessage> schoolMessageMap = getLatestSchoolMessageMap(list);
         for (SysDept sysDept : list) {
             String number = xfptSchoolMessageService.selectSchoolNumber(sysDept.getDeptId().toString());
             sysDept.setNumber(number);
-            XfptSchoolMessage xfptSchoolMessage = xfptSchoolMessageService.lambdaQuery().eq(XfptSchoolMessage::getDeptId, sysDept.getDeptId()).one();
+            XfptSchoolMessage xfptSchoolMessage = schoolMessageMap.get(sysDept.getDeptId());
             if (xfptSchoolMessage != null) {
                 sysDept.setSchoolType(xfptSchoolMessage.getSchoolType());
                 sysDept.setSchoolArea(xfptSchoolMessage.getRegionCounty());
@@ -207,5 +212,39 @@ public class XfptSchoolMessageController extends BaseController {
             }
         }
         return getDataTable(list);
+    }
+
+    private XfptSchoolMessage getLatestSchoolMessageByDeptId(Long deptId) {
+        if (deptId == null) {
+            return null;
+        }
+        List<XfptSchoolMessage> list = xfptSchoolMessageService.lambdaQuery()
+                .eq(XfptSchoolMessage::getDeptId, deptId)
+                .orderByDesc(XfptSchoolMessage::getId)
+                .last("limit 1")
+                .list();
+        return list.isEmpty() ? null : list.get(0);
+    }
+
+    private Map<Long, XfptSchoolMessage> getLatestSchoolMessageMap(List<SysDept> deptList) {
+        List<Long> deptIds = deptList.stream()
+                .map(SysDept::getDeptId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .collect(Collectors.toList());
+        if (deptIds.isEmpty()) {
+            return new HashMap<>();
+        }
+        List<XfptSchoolMessage> messageList = xfptSchoolMessageService.lambdaQuery()
+                .in(XfptSchoolMessage::getDeptId, deptIds)
+                .orderByDesc(XfptSchoolMessage::getId)
+                .list();
+        Map<Long, XfptSchoolMessage> messageMap = new HashMap<>();
+        for (XfptSchoolMessage message : messageList) {
+            if (message.getDeptId() != null && !messageMap.containsKey(message.getDeptId())) {
+                messageMap.put(message.getDeptId(), message);
+            }
+        }
+        return messageMap;
     }
 }

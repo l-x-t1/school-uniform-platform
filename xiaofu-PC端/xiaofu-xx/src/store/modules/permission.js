@@ -122,6 +122,65 @@ function ensureSupplierGroupNoticeMenu(routes = []) {
   return routes;
 }
 
+function ensureSupplierWithdrawRecordMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const menuTitle = "供应商提现记录";
+  const menuComponent = "school/withdrawApply/index";
+  const isWithdrawMenu = (item) =>
+    item.path === "supplierWithdrawRecord" ||
+    item.path === "/newFeature/supplierWithdrawRecord" ||
+    item.path === "/school/supplierWithdrawRecord" ||
+    item.component === "school/supplierWithdrawRecord/index" ||
+    item.component === menuComponent ||
+    (item.meta && item.meta.title === menuTitle);
+
+  const normalizeMenu = (item) => {
+    item.name = "SupplierWithdrawRecord";
+    item.path = item.path === "/newFeature/supplierWithdrawRecord" ? item.path : "supplierWithdrawRecord";
+    item.component = menuComponent;
+    item.meta = {
+      ...(item.meta || {}),
+      title: menuTitle,
+      icon: (item.meta && item.meta.icon) || "money",
+    };
+  };
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    const existing = route.children.find(isWithdrawMenu);
+    if (existing) {
+      normalizeMenu(existing);
+      return;
+    }
+    route.children.push({
+      name: "SupplierWithdrawRecord",
+      path: "supplierWithdrawRecord",
+      component: menuComponent,
+      meta: {
+        title: menuTitle,
+        icon: "money",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (isWithdrawMenu(route)) {
+      normalizeMenu(route);
+    }
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierWithdrawRecordMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
 function ensureUsageMenu(routes = []) {
   const exists = (children = []) =>
     children.some(
@@ -198,9 +257,11 @@ const permission = {
 
         getRouters().then((res) => {
           const normalizedRoutes = ensureUsageMenu(
-            ensureSupplierMessageMenu(
-              ensureSupplierGroupNoticeMenu(
-                normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+            ensureSupplierWithdrawRecordMenu(
+              ensureSupplierMessageMenu(
+                ensureSupplierGroupNoticeMenu(
+                  normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+                )
               )
             )
           );
