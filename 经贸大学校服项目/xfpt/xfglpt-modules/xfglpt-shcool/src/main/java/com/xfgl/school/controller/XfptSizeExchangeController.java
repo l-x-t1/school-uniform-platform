@@ -38,7 +38,7 @@ public class XfptSizeExchangeController extends BaseController {
     }
 
     @Operation(summary = "查询尺码调换记录详情")
-    @RequiresPermissions("school:sxjjl:list")
+    @RequiresPermissions("school:sxjjl:query")
     @GetMapping("/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         return success(xfptSizeExchangeService.selectSizeExchangeById(id));

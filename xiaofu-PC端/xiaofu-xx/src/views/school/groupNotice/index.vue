@@ -1,17 +1,5 @@
 <template>
-  <div class="app-container group-notice-query-page">
-    <el-card shadow="never" class="summary-card">
-      <div class="summary-header">
-        <div>
-          <div class="summary-title">统购公告</div>
-          <div class="summary-subtitle">
-            仅用于查询学校发布的统购公告，并查看学校发送公告后确认的生产信息。
-          </div>
-        </div>
-        <el-tag type="info" effect="plain">只读页面</el-tag>
-      </div>
-    </el-card>
-
+  <div class="app-container group-notice-page">
     <el-form
       ref="queryForm"
       :model="queryParams"
@@ -36,20 +24,26 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="学校名称" prop="schoolName">
-        <el-input
-          v-model="queryParams.schoolName"
-          placeholder="请输入学校名称"
+      <el-form-item v-if="isAdmin" label="所属学校" prop="schoolId">
+        <el-select
+          v-model="queryParams.schoolId"
+          placeholder="请选择学校"
           clearable
-          @keyup.enter.native="handleQuery"
-        />
+          filterable
+        >
+          <el-option
+            v-for="school in schoolOptions"
+            :key="school.id"
+            :label="school.schoolName"
+            :value="school.id"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item v-else label="所属学校">
+        <el-input :value="currentSchool.schoolName || '-'" disabled />
       </el-form-item>
       <el-form-item label="公告类型" prop="noticeType">
-        <el-select
-          v-model="queryParams.noticeType"
-          placeholder="请选择公告类型"
-          clearable
-        >
+        <el-select v-model="queryParams.noticeType" placeholder="请选择公告类型" clearable>
           <el-option
             v-for="item in noticeTypeOptions"
             :key="item.value"
@@ -59,11 +53,7 @@
         </el-select>
       </el-form-item>
       <el-form-item label="公告状态" prop="status">
-        <el-select
-          v-model="queryParams.status"
-          placeholder="请选择公告状态"
-          clearable
-        >
+        <el-select v-model="queryParams.status" placeholder="请选择公告状态" clearable>
           <el-option
             v-for="item in statusOptions"
             :key="item.value"
@@ -80,54 +70,54 @@
       </el-form-item>
     </el-form>
 
-    <el-table
-      v-loading="loading"
-      :data="groupNoticeList"
-      border
-      stripe
-      class="notice-table"
-    >
+    <el-row :gutter="10" class="mb8">
+      <el-col :span="1.5">
+        <el-button
+          type="primary"
+          plain
+          icon="el-icon-plus"
+          size="mini"
+          @click="handleAdd"
+          v-hasPermi="['school:groupNotice:add']"
+        >
+          新增公告
+        </el-button>
+      </el-col>
+    </el-row>
+
+    <el-table v-loading="loading" :data="groupNoticeList" border stripe>
       <el-table-column label="公告编号" prop="noticeCode" min-width="140" />
       <el-table-column label="公告标题" prop="title" min-width="220" show-overflow-tooltip />
       <el-table-column label="学校名称" prop="schoolName" min-width="180" show-overflow-tooltip />
       <el-table-column label="公告类型" min-width="110">
         <template slot-scope="scope">
           <el-tag size="mini" :type="scope.row.noticeType === '2' ? 'success' : 'primary'">
-            {{ formatNoticeType(scope.row.noticeType) }}
+            {{ formatOption(noticeTypeOptions, scope.row.noticeType) }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="公告状态" min-width="110">
         <template slot-scope="scope">
           <el-tag size="mini" :type="getStatusTagType(scope.row.status)">
-            {{ formatStatus(scope.row.status) }}
+            {{ formatOption(statusOptions, scope.row.status) }}
           </el-tag>
         </template>
       </el-table-column>
       <el-table-column label="报名状态" min-width="110">
         <template slot-scope="scope">
-          {{ formatApplyStatus(scope.row.applyStatus) }}
+          {{ formatOption(applyStatusOptions, scope.row.applyStatus) }}
         </template>
       </el-table-column>
       <el-table-column label="公告开始时间" min-width="120">
-        <template slot-scope="scope">
-          {{ formatDate(scope.row.startTime) }}
-        </template>
+        <template slot-scope="scope">{{ formatDate(scope.row.startTime) }}</template>
       </el-table-column>
       <el-table-column label="公告截止时间" min-width="120">
-        <template slot-scope="scope">
-          {{ formatDate(scope.row.endTime) }}
-        </template>
+        <template slot-scope="scope">{{ formatDate(scope.row.endTime) }}</template>
       </el-table-column>
-      <el-table-column label="结果发布时间" min-width="120">
-        <template slot-scope="scope">
-          {{ formatDate(scope.row.resultPublishTime) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="操作" align="center" width="120" fixed="right">
+      <el-table-column label="操作" align="center" width="150" fixed="right">
         <template slot-scope="scope">
           <el-button type="text" size="mini" @click="handleView(scope.row)">
-            查看详情
+            详情
           </el-button>
         </template>
       </el-table-column>
@@ -141,84 +131,160 @@
       @pagination="getList"
     />
 
-    <el-dialog
-      title="学校发送公告确定生产信息"
-      :visible.sync="open"
-      width="1080px"
-      append-to-body
-    >
-      <div v-loading="detailLoading" class="detail-wrap">
-        <el-descriptions :column="2" border class="base-info">
-          <el-descriptions-item label="公告标题">
-            {{ form.title || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="公告编号">
-            {{ form.noticeCode || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="学校名称">
-            {{ form.schoolName || "-" }}
-          </el-descriptions-item>
+    <el-dialog :title="dialogTitle" :visible.sync="open" width="920px" append-to-body>
+      <el-form ref="form" :model="form" :rules="rules" label-width="96px">
+        <el-row :gutter="16">
+          <el-col :span="12">
+            <el-form-item label="所属学校" prop="schoolId">
+              <el-select
+                v-if="isAdmin"
+                v-model="form.schoolId"
+                placeholder="请选择学校"
+                filterable
+                clearable
+                @change="handleSchoolChange"
+              >
+                <el-option
+                  v-for="school in schoolOptions"
+                  :key="school.id"
+                  :label="school.schoolName"
+                  :value="school.id"
+                />
+              </el-select>
+              <el-input v-else :value="currentSchool.schoolName || '-'" disabled />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告编号" prop="noticeCode">
+              <el-input v-model="form.noticeCode" placeholder="可自动或手动填写" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告标题" prop="title">
+              <el-input v-model="form.title" placeholder="请输入公告标题" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告类型" prop="noticeType">
+              <el-select v-model="form.noticeType" placeholder="请选择公告类型">
+                <el-option
+                  v-for="item in noticeTypeOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告开始" prop="startTime">
+              <el-date-picker
+                v-model="form.startTime"
+                type="date"
+                value-format="yyyy-MM-dd"
+                placeholder="请选择开始时间"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告截止" prop="endTime">
+              <el-date-picker
+                v-model="form.endTime"
+                type="date"
+                value-format="yyyy-MM-dd"
+                placeholder="请选择截止时间"
+              />
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="公告状态" prop="status">
+              <el-select v-model="form.status" placeholder="请选择公告状态">
+                <el-option
+                  v-for="item in statusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="报名状态" prop="applyStatus">
+              <el-select v-model="form.applyStatus" placeholder="请选择报名状态">
+                <el-option
+                  v-for="item in applyStatusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="适用年级" prop="gradeNames">
+              <el-input v-model="form.gradeNames" placeholder="请输入适用年级" />
+            </el-form-item>
+          </el-col>
+          <el-col :span="24">
+            <el-form-item label="公告正文" prop="content">
+              <el-input
+                v-model="form.content"
+                type="textarea"
+                :rows="5"
+                placeholder="请输入公告正文"
+              />
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="submitForm">确 定</el-button>
+        <el-button @click="open = false">取 消</el-button>
+      </div>
+    </el-dialog>
+
+    <el-dialog title="公告详情" :visible.sync="detailOpen" width="980px" append-to-body>
+      <div v-loading="detailLoading">
+        <el-descriptions :column="2" border>
+          <el-descriptions-item label="公告标题">{{ detail.title || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="公告编号">{{ detail.noticeCode || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="学校名称">{{ detail.schoolName || "-" }}</el-descriptions-item>
           <el-descriptions-item label="公告类型">
-            {{ formatNoticeType(form.noticeType) }}
+            {{ formatOption(noticeTypeOptions, detail.noticeType) }}
           </el-descriptions-item>
           <el-descriptions-item label="公告状态">
-            {{ formatStatus(form.status) }}
+            {{ formatOption(statusOptions, detail.status) }}
           </el-descriptions-item>
           <el-descriptions-item label="报名状态">
-            {{ formatApplyStatus(form.applyStatus) }}
+            {{ formatOption(applyStatusOptions, detail.applyStatus) }}
           </el-descriptions-item>
-          <el-descriptions-item label="公告开始时间">
-            {{ formatDate(form.startTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="公告截止时间">
-            {{ formatDate(form.endTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="发布时间">
-            {{ formatDate(form.publishTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="结果发布时间">
-            {{ formatDate(form.resultPublishTime) }}
-          </el-descriptions-item>
-          <el-descriptions-item label="适用年级">
-            {{ form.gradeNames || "-" }}
-          </el-descriptions-item>
-          <el-descriptions-item label="采购流程ID">
-            {{ form.purchaseProcessId || "-" }}
-          </el-descriptions-item>
+          <el-descriptions-item label="公告开始时间">{{ formatDate(detail.startTime) }}</el-descriptions-item>
+          <el-descriptions-item label="公告截止时间">{{ formatDate(detail.endTime) }}</el-descriptions-item>
+          <el-descriptions-item label="适用年级">{{ detail.gradeNames || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="发布时间">{{ formatDate(detail.publishTime) }}</el-descriptions-item>
         </el-descriptions>
-
         <el-card shadow="never" class="detail-section">
-          <div slot="header" class="section-title">公告正文</div>
-          <div class="notice-content" v-html="form.content || '<p>暂无公告正文</p>'"></div>
-        </el-card>
-
-        <el-card shadow="never" class="detail-section">
-          <div slot="header" class="section-title">生产信息明细</div>
-          <el-table
-            :data="xfptGroupNoticeItemList"
-            border
-            stripe
-            empty-text="暂无生产信息"
-          >
-            <el-table-column label="商品ID" prop="goodsId" min-width="100" />
-            <el-table-column label="商品名称" prop="goodsName" min-width="180" show-overflow-tooltip />
-            <el-table-column label="单位" prop="unitName" min-width="90" />
-            <el-table-column label="采购数量" prop="buyNum" min-width="100" />
-            <el-table-column label="价格说明" prop="priceDesc" min-width="180" show-overflow-tooltip />
-            <el-table-column label="适用年级" prop="gradeNames" min-width="180" show-overflow-tooltip />
-            <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip />
-          </el-table>
+          <div slot="header">公告正文</div>
+          <div class="notice-content">{{ detail.content || "暂无公告正文" }}</div>
         </el-card>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="open = false">关 闭</el-button>
+        <el-button @click="detailOpen = false">关 闭</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listSupplierGroupNotice, getSupplierGroupNotice } from "@/api/school/groupNotice";
+import {
+  listGroupNotice,
+  getGroupNotice,
+  addGroupNotice,
+} from "@/api/school/groupNotice";
+import {
+  listSchoolMessage,
+  getSchoolMessageByDeptId,
+} from "@/api/school/schoolMessage";
 
 export default {
   name: "GroupNotice",
@@ -228,15 +294,35 @@ export default {
       detailLoading: false,
       total: 0,
       groupNoticeList: [],
+      schoolOptions: [],
+      currentSchool: {},
       open: false,
-      form: {},
-      xfptGroupNoticeItemList: [],
+      detailOpen: false,
+      dialogTitle: "添加公告",
+      form: {
+        id: null,
+        schoolId: null,
+        deptId: null,
+        schoolName: null,
+        noticeCode: null,
+        title: null,
+        noticeType: "1",
+        content: null,
+        gradeIds: null,
+        gradeNames: null,
+        startTime: null,
+        endTime: null,
+        status: "0",
+        applyStatus: "0",
+        xfptGroupNoticeItemList: [],
+      },
+      detail: {},
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         title: null,
         noticeCode: null,
-        schoolName: null,
+        schoolId: null,
         noticeType: null,
         status: null,
       },
@@ -255,15 +341,45 @@ export default {
         { label: "报名中", value: "1" },
         { label: "报名结束", value: "2" },
       ],
+      rules: {
+        schoolId: [{ required: true, message: "请选择所属学校", trigger: "change" }],
+        title: [{ required: true, message: "请输入公告标题", trigger: "blur" }],
+        noticeType: [{ required: true, message: "请选择公告类型", trigger: "change" }],
+        status: [{ required: true, message: "请选择公告状态", trigger: "change" }],
+        applyStatus: [{ required: true, message: "请选择报名状态", trigger: "change" }],
+        content: [{ required: true, message: "请输入公告正文", trigger: "blur" }],
+      },
     };
   },
+  computed: {
+    isAdmin() {
+      const roles = this.$store.getters.roles || [];
+      return roles.includes("admin");
+    },
+  },
   created() {
+    this.loadSchoolContext();
     this.getList();
   },
   methods: {
+    loadSchoolContext() {
+      if (this.isAdmin) {
+        listSchoolMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
+          this.schoolOptions = res.rows || [];
+        });
+        return;
+      }
+      const deptId = this.$store.getters.deptId;
+      if (!deptId) {
+        return;
+      }
+      getSchoolMessageByDeptId(deptId).then((res) => {
+        this.currentSchool = res.data || {};
+      });
+    },
     getList() {
       this.loading = true;
-      listSupplierGroupNotice(this.queryParams)
+      listGroupNotice(this.queryParams)
         .then((response) => {
           this.groupNoticeList = response.rows || [];
           this.total = response.total || 0;
@@ -280,33 +396,77 @@ export default {
       this.resetForm("queryForm");
       this.handleQuery();
     },
+    resetFormData() {
+      this.form = {
+        id: null,
+        schoolId: this.isAdmin ? null : this.currentSchool.id,
+        deptId: this.isAdmin ? null : this.currentSchool.deptId,
+        schoolName: this.isAdmin ? null : this.currentSchool.schoolName,
+        noticeCode: null,
+        title: null,
+        noticeType: "1",
+        content: null,
+        gradeIds: null,
+        gradeNames: null,
+        startTime: null,
+        endTime: null,
+        status: "0",
+        applyStatus: "0",
+        xfptGroupNoticeItemList: [],
+      };
+    },
+    handleAdd() {
+      this.resetFormData();
+      this.dialogTitle = "添加公告";
+      this.open = true;
+      this.$nextTick(() => {
+        this.$refs.form && this.$refs.form.clearValidate();
+      });
+    },
+    handleSchoolChange(schoolId) {
+      const school = this.schoolOptions.find((item) => item.id === schoolId);
+      if (!school) {
+        this.form.deptId = null;
+        this.form.schoolName = null;
+        return;
+      }
+      this.form.deptId = school.deptId;
+      this.form.schoolName = school.schoolName;
+    },
+    submitForm() {
+      this.$refs.form.validate((valid) => {
+        if (!valid) {
+          return;
+        }
+        const payload = { ...this.form };
+        if (!this.isAdmin) {
+          payload.schoolId = this.currentSchool.id;
+          payload.deptId = this.currentSchool.deptId;
+          payload.schoolName = this.currentSchool.schoolName;
+        }
+        addGroupNotice(payload).then(() => {
+          this.$modal.msgSuccess("新增成功");
+          this.open = false;
+          this.getList();
+        });
+      });
+    },
     handleView(row) {
-      const noticeId = row.id;
-      if (!noticeId) {
+      if (!row.id) {
         this.$message.error("当前公告缺少主键，无法查看详情");
         return;
       }
+      this.detailOpen = true;
       this.detailLoading = true;
-      this.open = true;
-      getSupplierGroupNotice(noticeId)
+      getGroupNotice(row.id)
         .then((response) => {
-          this.form = response.data || {};
-          this.xfptGroupNoticeItemList = this.form.xfptGroupNoticeItemList || [];
+          this.detail = response.data || {};
         })
         .finally(() => {
           this.detailLoading = false;
         });
     },
-    formatNoticeType(value) {
-      return this.findOptionLabel(this.noticeTypeOptions, value);
-    },
-    formatStatus(value) {
-      return this.findOptionLabel(this.statusOptions, value);
-    },
-    formatApplyStatus(value) {
-      return this.findOptionLabel(this.applyStatusOptions, value);
-    },
-    findOptionLabel(options, value) {
+    formatOption(options, value) {
       const match = options.find((item) => String(item.value) === String(value));
       return match ? match.label : value || "-";
     },
@@ -330,31 +490,7 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.group-notice-query-page {
-  .summary-card {
-    margin-bottom: 16px;
-  }
-
-  .summary-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 16px;
-  }
-
-  .summary-title {
-    font-size: 20px;
-    font-weight: 600;
-    color: #1f2d3d;
-  }
-
-  .summary-subtitle {
-    margin-top: 8px;
-    font-size: 13px;
-    color: #6b7280;
-    line-height: 1.6;
-  }
-
+.group-notice-page {
   .query-form {
     padding: 18px 20px 2px;
     margin-bottom: 16px;
@@ -363,32 +499,15 @@ export default {
     border-radius: 4px;
   }
 
-  .notice-table {
-    margin-bottom: 16px;
-  }
-
-  .detail-wrap {
-    min-height: 240px;
-  }
-
-  .base-info {
-    margin-bottom: 16px;
-  }
-
   .detail-section {
-    margin-bottom: 16px;
-  }
-
-  .section-title {
-    font-size: 15px;
-    font-weight: 600;
-    color: #1f2d3d;
+    margin-top: 16px;
   }
 
   .notice-content {
     min-height: 80px;
     color: #303133;
     line-height: 1.8;
+    white-space: pre-wrap;
     word-break: break-word;
   }
 }
