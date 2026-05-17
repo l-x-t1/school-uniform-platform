@@ -88,7 +88,7 @@ function ensureSupplierGroupNoticeMenu(routes = []) {
       (item) =>
         item.path === "supplierGroupNotice" ||
         item.path === "/newFeature/supplierGroupNotice" ||
-        item.component === "supplier/groupNotice/index"
+        item.component === "school/groupNotice/index"
     );
 
   const appendMenu = (route) => {
@@ -101,7 +101,7 @@ function ensureSupplierGroupNoticeMenu(routes = []) {
     route.children.push({
       name: "SupplierGroupNotice",
       path: "supplierGroupNotice",
-      component: "supplier/groupNotice/index",
+      component: "school/groupNotice/index",
       meta: {
         title: "学校统购公告查询",
         icon: "message",
