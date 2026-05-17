@@ -9,6 +9,8 @@ export function listGroupNotice(query) {
   })
 }
 
+export const listSupplierGroupNotice = listGroupNotice
+
 // 查询统购公告详细
 export function getGroupNotice(id) {
   return request({
@@ -16,6 +18,8 @@ export function getGroupNotice(id) {
     method: 'get'
   })
 }
+
+export const getSupplierGroupNotice = getGroupNotice
 
 // 新增统购公告
 export function addGroupNotice(data) {
