@@ -218,7 +218,7 @@
 </template>
 
 <script>
-import { listGroupNotice, getGroupNotice } from "@/api/school/groupNotice";
+import { listSupplierGroupNotice, getSupplierGroupNotice } from "@/api/school/groupNotice";
 
 export default {
   name: "GroupNotice",
@@ -263,7 +263,7 @@ export default {
   methods: {
     getList() {
       this.loading = true;
-      listGroupNotice(this.queryParams)
+      listSupplierGroupNotice(this.queryParams)
         .then((response) => {
           this.groupNoticeList = response.rows || [];
           this.total = response.total || 0;
@@ -288,7 +288,7 @@ export default {
       }
       this.detailLoading = true;
       this.open = true;
-      getGroupNotice(noticeId)
+      getSupplierGroupNotice(noticeId)
         .then((response) => {
           this.form = response.data || {};
           this.xfptGroupNoticeItemList = this.form.xfptGroupNoticeItemList || [];

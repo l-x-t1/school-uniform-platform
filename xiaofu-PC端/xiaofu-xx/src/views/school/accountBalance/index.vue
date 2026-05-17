@@ -3,65 +3,65 @@
     <el-row :gutter="16" class="summary-row">
       <el-col :xs="24" :sm="12" :lg="6">
         <div class="summary-card blue">
-          <div class="summary-label">Income Amount</div>
+          <div class="summary-label">收入金额</div>
           <div class="summary-value">¥{{ amountText(summary.incomeAmount) }}</div>
-          <div class="summary-extra">Income Count {{ summary.incomeCount }}</div>
+          <div class="summary-extra">收入笔数 {{ summary.incomeCount }}</div>
         </div>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <div class="summary-card green">
-          <div class="summary-label">Outcome Amount</div>
+          <div class="summary-label">支出金额</div>
           <div class="summary-value">¥{{ amountText(summary.outcomeAmount) }}</div>
-          <div class="summary-extra">Outcome Count {{ summary.outcomeCount }}</div>
+          <div class="summary-extra">支出笔数 {{ summary.outcomeCount }}</div>
         </div>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <div class="summary-card orange">
-          <div class="summary-label">Withdrawable Amount</div>
+          <div class="summary-label">可提现金额</div>
           <div class="summary-value">¥{{ amountText(summary.withdrawableAmount) }}</div>
-          <div class="summary-extra">Withdrawable Rows {{ availableFinanceList.length }}</div>
+          <div class="summary-extra">可提现流水 {{ availableFinanceList.length }} 条</div>
         </div>
       </el-col>
       <el-col :xs="24" :sm="12" :lg="6">
         <div class="summary-card red">
-          <div class="summary-label">Pending Withdraw Amount</div>
+          <div class="summary-label">待提现金额</div>
           <div class="summary-value">¥{{ amountText(summary.pendingWithdrawAmount) }}</div>
-          <div class="summary-extra">Pending Rows {{ summary.pendingWithdrawCount }}</div>
+          <div class="summary-extra">待处理记录 {{ summary.pendingWithdrawCount }} 条</div>
         </div>
       </el-col>
     </el-row>
 
     <el-tabs v-model="activeTab" class="account-tabs">
-      <el-tab-pane label="Finance Flow" name="finance">
+      <el-tab-pane label="资金流水" name="finance">
         <el-form ref="financeQueryForm" :model="financeQueryParams" size="small" :inline="true" label-width="90px">
-          <el-form-item label="Flow No" prop="flowNo">
-            <el-input v-model="financeQueryParams.flowNo" placeholder="Input flow no" clearable @keyup.enter.native="handleFinanceQuery" />
+          <el-form-item label="流水单号" prop="flowNo">
+            <el-input v-model="financeQueryParams.flowNo" placeholder="请输入流水单号" clearable @keyup.enter.native="handleFinanceQuery" />
           </el-form-item>
-          <el-form-item label="Supplier ID" prop="supplierId">
-            <el-input v-model="financeQueryParams.supplierId" placeholder="Input supplier id" clearable @keyup.enter.native="handleFinanceQuery" />
+          <el-form-item label="供应商ID" prop="supplierId">
+            <el-input v-model="financeQueryParams.supplierId" placeholder="请输入供应商ID" clearable @keyup.enter.native="handleFinanceQuery" />
           </el-form-item>
-          <el-form-item label="User ID" prop="userId">
-            <el-input v-model="financeQueryParams.userId" placeholder="Input user id" clearable @keyup.enter.native="handleFinanceQuery" />
+          <el-form-item label="用户ID" prop="userId">
+            <el-input v-model="financeQueryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleFinanceQuery" />
           </el-form-item>
-          <el-form-item label="Payee Name" prop="payeeName">
-            <el-input v-model="financeQueryParams.payeeName" placeholder="Input payee name" clearable @keyup.enter.native="handleFinanceQuery" />
+          <el-form-item label="收款方名称" prop="payeeName">
+            <el-input v-model="financeQueryParams.payeeName" placeholder="请输入收款方名称" clearable @keyup.enter.native="handleFinanceQuery" />
           </el-form-item>
-          <el-form-item label="Direction" prop="flowDirection">
-            <el-select v-model="financeQueryParams.flowDirection" placeholder="Select" clearable>
-              <el-option label="Income" value="1" />
-              <el-option label="Outcome" value="2" />
+          <el-form-item label="流水方向" prop="flowDirection">
+            <el-select v-model="financeQueryParams.flowDirection" placeholder="请选择流水方向" clearable>
+              <el-option label="收入" value="1" />
+              <el-option label="支出" value="2" />
             </el-select>
           </el-form-item>
-          <el-form-item label="Status" prop="status">
-            <el-select v-model="financeQueryParams.status" placeholder="Select" clearable>
-              <el-option label="Unpaid" value="0" />
-              <el-option label="Arrived School" value="1" />
-              <el-option label="Arrived Supplier" value="2" />
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="financeQueryParams.status" placeholder="请选择状态" clearable>
+              <el-option label="未支付" value="0" />
+              <el-option label="到账学校" value="1" />
+              <el-option label="到账供应商" value="2" />
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleFinanceQuery">Search</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetFinanceQuery">Reset</el-button>
+            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleFinanceQuery">搜索</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="resetFinanceQuery">重置</el-button>
             <el-button
               v-hasPermi="['school:financeFlow:export']"
               type="warning"
@@ -70,34 +70,34 @@
               size="mini"
               @click="exportFinanceList"
             >
-              Export
+              导出
             </el-button>
           </el-form-item>
         </el-form>
 
         <el-table v-loading="financeLoading" :data="financeFlowList" border>
-          <el-table-column label="Flow No" prop="flowNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="Biz Type" min-width="100">
+          <el-table-column label="流水单号" prop="flowNo" min-width="180" show-overflow-tooltip />
+          <el-table-column label="业务类型" min-width="100">
             <template slot-scope="scope">{{ businessTypeText(scope.row.businessType) }}</template>
           </el-table-column>
-          <el-table-column label="Direction" min-width="90">
+          <el-table-column label="流水方向" min-width="90">
             <template slot-scope="scope">{{ flowDirectionText(scope.row.flowDirection) }}</template>
           </el-table-column>
-          <el-table-column label="Order No" prop="orderNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="Supplier ID" prop="supplierId" width="100" />
-          <el-table-column label="User ID" prop="userId" width="110" />
-          <el-table-column label="Amount" width="110">
+          <el-table-column label="订单编号" prop="orderNo" min-width="180" show-overflow-tooltip />
+          <el-table-column label="供应商ID" prop="supplierId" width="100" />
+          <el-table-column label="用户ID" prop="userId" width="110" />
+          <el-table-column label="金额" width="110">
             <template slot-scope="scope">¥{{ amountText(scope.row.amount) }}</template>
           </el-table-column>
-          <el-table-column label="Pay Channel" prop="payChannel" min-width="120" show-overflow-tooltip />
-          <el-table-column label="Payee" prop="payeeName" min-width="140" show-overflow-tooltip />
-          <el-table-column label="Status" min-width="120">
+          <el-table-column label="支付渠道" prop="payChannel" min-width="120" show-overflow-tooltip />
+          <el-table-column label="收款方" prop="payeeName" min-width="140" show-overflow-tooltip />
+          <el-table-column label="状态" min-width="120">
             <template slot-scope="scope">{{ flowStatusText(scope.row.status) }}</template>
           </el-table-column>
-          <el-table-column label="Trade Time" width="170">
+          <el-table-column label="交易时间" width="170">
             <template slot-scope="scope">{{ parseTime(scope.row.tradeTime, "{y}-{m}-{d} {h}:{i}:{s}") }}</template>
           </el-table-column>
-          <el-table-column label="Remark" prop="remark" min-width="160" show-overflow-tooltip />
+          <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip />
         </el-table>
 
         <pagination
@@ -109,9 +109,9 @@
         />
       </el-tab-pane>
 
-      <el-tab-pane label="Withdrawable" name="withdrawable">
+      <el-tab-pane label="可提现流水" name="withdrawable">
         <div class="toolbar-row">
-          <el-alert title="Only income rows that arrived at supplier account can be withdrawn." type="info" :closable="false" show-icon />
+          <el-alert title="仅支持对已到账供应商账户的收入流水发起提现申请。" type="info" :closable="false" show-icon />
           <div class="toolbar-actions">
             <el-button
               v-hasPermi="['school:withdrawApply:add']"
@@ -120,27 +120,27 @@
               size="mini"
               @click="openWithdrawDialog()"
             >
-              Create Withdraw
+              发起提现
             </el-button>
           </div>
         </div>
 
         <el-table :data="availableFinanceList" border @selection-change="handleAvailableSelectionChange">
           <el-table-column type="selection" width="55" align="center" />
-          <el-table-column label="Flow No" prop="flowNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="Order No" prop="orderNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="Supplier ID" prop="supplierId" width="100" />
-          <el-table-column label="Payee Name" prop="payeeName" min-width="140" show-overflow-tooltip />
-          <el-table-column label="Amount" width="120">
+          <el-table-column label="流水单号" prop="flowNo" min-width="180" show-overflow-tooltip />
+          <el-table-column label="订单编号" prop="orderNo" min-width="180" show-overflow-tooltip />
+          <el-table-column label="供应商ID" prop="supplierId" width="100" />
+          <el-table-column label="收款方名称" prop="payeeName" min-width="140" show-overflow-tooltip />
+          <el-table-column label="金额" width="120">
             <template slot-scope="scope">¥{{ amountText(scope.row.amount) }}</template>
           </el-table-column>
-          <el-table-column label="Status" min-width="120">
+          <el-table-column label="状态" min-width="120">
             <template slot-scope="scope">{{ flowStatusText(scope.row.status) }}</template>
           </el-table-column>
-          <el-table-column label="Trade Time" width="170">
+          <el-table-column label="交易时间" width="170">
             <template slot-scope="scope">{{ parseTime(scope.row.tradeTime, "{y}-{m}-{d} {h}:{i}:{s}") }}</template>
           </el-table-column>
-          <el-table-column label="Action" width="140" align="center">
+          <el-table-column label="操作" width="140" align="center">
             <template slot-scope="scope">
               <el-button
                 v-hasPermi="['school:withdrawApply:add']"
@@ -148,36 +148,36 @@
                 size="mini"
                 @click="openWithdrawDialog(scope.row)"
               >
-                Create Withdraw
+                发起提现
               </el-button>
             </template>
           </el-table-column>
         </el-table>
       </el-tab-pane>
 
-      <el-tab-pane label="Withdraw Records" name="withdrawRecord">
+      <el-tab-pane label="提现记录" name="withdrawRecord">
         <el-form ref="withdrawQueryForm" :model="withdrawQueryParams" size="small" :inline="true" label-width="90px">
-          <el-form-item label="Withdraw No" prop="withdrawNo">
-            <el-input v-model="withdrawQueryParams.withdrawNo" placeholder="Input withdraw no" clearable @keyup.enter.native="handleWithdrawQuery" />
+          <el-form-item label="提现单号" prop="withdrawNo">
+            <el-input v-model="withdrawQueryParams.withdrawNo" placeholder="请输入提现单号" clearable @keyup.enter.native="handleWithdrawQuery" />
           </el-form-item>
-          <el-form-item label="Supplier ID" prop="supplierId">
-            <el-input v-model="withdrawQueryParams.supplierId" placeholder="Input supplier id" clearable @keyup.enter.native="handleWithdrawQuery" />
+          <el-form-item label="供应商ID" prop="supplierId">
+            <el-input v-model="withdrawQueryParams.supplierId" placeholder="请输入供应商ID" clearable @keyup.enter.native="handleWithdrawQuery" />
           </el-form-item>
-          <el-form-item label="Supplier Name" prop="supplierName">
-            <el-input v-model="withdrawQueryParams.supplierName" placeholder="Input supplier name" clearable @keyup.enter.native="handleWithdrawQuery" />
+          <el-form-item label="供应商名称" prop="supplierName">
+            <el-input v-model="withdrawQueryParams.supplierName" placeholder="请输入供应商名称" clearable @keyup.enter.native="handleWithdrawQuery" />
           </el-form-item>
-          <el-form-item label="Status" prop="status">
-            <el-select v-model="withdrawQueryParams.status" placeholder="Select" clearable>
-              <el-option label="Pending" value="0" />
-              <el-option label="Approved" value="1" />
-              <el-option label="Rejected" value="2" />
-              <el-option label="Paid" value="3" />
-              <el-option label="Canceled" value="4" />
+          <el-form-item label="状态" prop="status">
+            <el-select v-model="withdrawQueryParams.status" placeholder="请选择状态" clearable>
+              <el-option label="待审核" value="0" />
+              <el-option label="审核通过" value="1" />
+              <el-option label="已拒绝" value="2" />
+              <el-option label="已打款" value="3" />
+              <el-option label="已取消" value="4" />
             </el-select>
           </el-form-item>
           <el-form-item>
-            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleWithdrawQuery">Search</el-button>
-            <el-button icon="el-icon-refresh" size="mini" @click="resetWithdrawQuery">Reset</el-button>
+            <el-button type="primary" icon="el-icon-search" size="mini" @click="handleWithdrawQuery">搜索</el-button>
+            <el-button icon="el-icon-refresh" size="mini" @click="resetWithdrawQuery">重置</el-button>
             <el-button
               v-hasPermi="['school:withdrawApply:export']"
               type="warning"
@@ -186,27 +186,27 @@
               size="mini"
               @click="exportWithdrawList"
             >
-              Export
+              导出
             </el-button>
           </el-form-item>
         </el-form>
 
         <el-table v-loading="withdrawLoading" :data="withdrawApplyList" border>
-          <el-table-column label="Withdraw No" prop="withdrawNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="Supplier ID" prop="supplierId" width="100" />
-          <el-table-column label="Supplier Name" prop="supplierName" min-width="140" show-overflow-tooltip />
-          <el-table-column label="Apply Amount" width="120">
+          <el-table-column label="提现单号" prop="withdrawNo" min-width="180" show-overflow-tooltip />
+          <el-table-column label="供应商ID" prop="supplierId" width="100" />
+          <el-table-column label="供应商名称" prop="supplierName" min-width="140" show-overflow-tooltip />
+          <el-table-column label="申请金额" width="120">
             <template slot-scope="scope">¥{{ amountText(scope.row.applyAmount) }}</template>
           </el-table-column>
-          <el-table-column label="Status" min-width="100">
+          <el-table-column label="状态" min-width="100">
             <template slot-scope="scope">{{ withdrawStatusText(scope.row.status) }}</template>
           </el-table-column>
-          <el-table-column label="Apply Time" width="120">
+          <el-table-column label="申请时间" width="120">
             <template slot-scope="scope">{{ parseTime(scope.row.applyTime, "{y}-{m}-{d}") }}</template>
           </el-table-column>
-          <el-table-column label="Audit User" prop="auditUserName" min-width="120" />
-          <el-table-column label="Finance Flow ID" prop="financeFlowId" width="120" />
-          <el-table-column label="Audit Remark" prop="auditRemark" min-width="160" show-overflow-tooltip />
+          <el-table-column label="审核人" prop="auditUserName" min-width="120" />
+          <el-table-column label="关联资金流水ID" prop="financeFlowId" width="120" />
+          <el-table-column label="审核备注" prop="auditRemark" min-width="160" show-overflow-tooltip />
         </el-table>
 
         <pagination
@@ -219,38 +219,38 @@
       </el-tab-pane>
     </el-tabs>
 
-    <el-dialog title="Create Withdraw" :visible.sync="withdrawDialogOpen" width="560px" append-to-body>
+    <el-dialog title="发起提现" :visible.sync="withdrawDialogOpen" width="560px" append-to-body>
       <el-form ref="withdrawForm" :model="withdrawForm" :rules="withdrawRules" label-width="110px">
-        <el-form-item label="Withdraw No">
+        <el-form-item label="提现单号">
           <el-input v-model="withdrawForm.withdrawNo" disabled />
         </el-form-item>
-        <el-form-item label="Supplier ID" prop="supplierId">
-          <el-input v-model="withdrawForm.supplierId" placeholder="Input supplier id" />
+        <el-form-item label="供应商ID" prop="supplierId">
+          <el-input v-model="withdrawForm.supplierId" placeholder="请输入供应商ID" />
         </el-form-item>
-        <el-form-item label="Supplier Name" prop="supplierName">
-          <el-input v-model="withdrawForm.supplierName" placeholder="Input supplier name" />
+        <el-form-item label="供应商名称" prop="supplierName">
+          <el-input v-model="withdrawForm.supplierName" placeholder="请输入供应商名称" />
         </el-form-item>
-        <el-form-item label="Apply Amount" prop="applyAmount">
+        <el-form-item label="申请金额" prop="applyAmount">
           <el-input-number v-model="withdrawForm.applyAmount" :min="0.01" :precision="2" :step="100" />
         </el-form-item>
-        <el-form-item label="Finance Flow ID" prop="financeFlowId">
-          <el-input v-model="withdrawForm.financeFlowId" placeholder="Optional" />
+        <el-form-item label="关联资金流水ID" prop="financeFlowId">
+          <el-input v-model="withdrawForm.financeFlowId" placeholder="选填" />
         </el-form-item>
-        <el-form-item label="Bank Info JSON" prop="bankInfoJson">
+        <el-form-item label="银行卡信息JSON" prop="bankInfoJson">
           <el-input
             v-model="withdrawForm.bankInfoJson"
             type="textarea"
             :rows="4"
-            placeholder='JSON like {"accountName":"Zhang","bankName":"CCB","bankNo":"6222..."}'
+            placeholder='请输入如 {"accountName":"张三","bankName":"建设银行","bankNo":"6222..."} 的JSON'
           />
         </el-form-item>
-        <el-form-item label="Remark" prop="remark">
-          <el-input v-model="withdrawForm.remark" type="textarea" :rows="3" placeholder="Input remark" />
+        <el-form-item label="备注" prop="remark">
+          <el-input v-model="withdrawForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="withdrawDialogOpen = false">Cancel</el-button>
-        <el-button type="primary" :loading="withdrawSubmitting" @click="submitWithdraw">Submit</el-button>
+        <el-button @click="withdrawDialogOpen = false">取消</el-button>
+        <el-button type="primary" :loading="withdrawSubmitting" @click="submitWithdraw">提交</el-button>
       </div>
     </el-dialog>
   </div>
@@ -305,9 +305,9 @@ export default {
         remark: "",
       },
       withdrawRules: {
-        supplierId: [{ required: true, message: "Input supplier id", trigger: "blur" }],
-        supplierName: [{ required: true, message: "Input supplier name", trigger: "blur" }],
-        applyAmount: [{ required: true, message: "Input apply amount", trigger: "change" }],
+        supplierId: [{ required: true, message: "请输入供应商ID", trigger: "blur" }],
+        supplierName: [{ required: true, message: "请输入供应商名称", trigger: "blur" }],
+        applyAmount: [{ required: true, message: "请输入申请金额", trigger: "change" }],
       },
     };
   },
@@ -397,7 +397,7 @@ export default {
         applyAmount: rows.length ? this.sumAmount(rows, "amount") : undefined,
         financeFlowId: firstRow.id,
         bankInfoJson: "",
-        remark: rows.length > 1 ? `linked ${rows.length} rows` : "",
+        remark: rows.length > 1 ? `关联 ${rows.length} 条资金流水` : "",
       };
       this.withdrawDialogOpen = true;
       this.$nextTick(() => {
@@ -418,7 +418,7 @@ export default {
         this.withdrawSubmitting = true;
         createAccountBalanceWithdraw(submitData)
           .then(() => {
-            this.$modal.msgSuccess("submit success");
+            this.$modal.msgSuccess("提交成功");
             this.withdrawDialogOpen = false;
             this.getWithdrawList();
           })
@@ -434,19 +434,19 @@ export default {
       return Number(value || 0).toFixed(2);
     },
     businessTypeText(value) {
-      const map = { 1: "Pay", 2: "Refund", 3: "Withdraw", 4: "Settlement" };
+      const map = { 1: "支付", 2: "退款", 3: "提现", 4: "结算" };
       return map[String(value)] || value || "-";
     },
     flowDirectionText(value) {
-      const map = { 1: "Income", 2: "Outcome" };
+      const map = { 1: "收入", 2: "支出" };
       return map[String(value)] || value || "-";
     },
     flowStatusText(value) {
-      const map = { 0: "Unpaid", 1: "Arrived School", 2: "Arrived Supplier" };
+      const map = { 0: "未支付", 1: "到账学校", 2: "到账供应商" };
       return map[String(value)] || value || "-";
     },
     withdrawStatusText(value) {
-      const map = { 0: "Pending", 1: "Approved", 2: "Rejected", 3: "Paid", 4: "Canceled" };
+      const map = { 0: "待审核", 1: "审核通过", 2: "已拒绝", 3: "已打款", 4: "已取消" };
       return map[String(value)] || value || "-";
     },
     generateWithdrawNo() {
