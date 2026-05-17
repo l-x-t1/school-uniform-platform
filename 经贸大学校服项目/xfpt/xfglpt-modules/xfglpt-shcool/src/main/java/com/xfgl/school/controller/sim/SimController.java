@@ -56,6 +56,10 @@ public class SimController {
         add("school:orderInfo:query");
         add("school:orderInfo:add");
         add("school:orderInfo:edit");
+        add("school:afterSale:list");
+        add("school:afterSale:query");
+        add("school:afterSale:add");
+        add("school:afterSale:edit");
     }});
 
     @Value("${sim.ip:}")

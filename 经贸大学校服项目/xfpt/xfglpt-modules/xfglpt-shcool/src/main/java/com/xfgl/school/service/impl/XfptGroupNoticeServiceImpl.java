@@ -53,6 +53,12 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         return xfptGroupNoticeMapper.selectXfptGroupNoticeList(xfptGroupNotice);
     }
 
+    @Override
+    public List<XfptGroupNotice> selectSupplierGroupNoticeList(XfptGroupNotice xfptGroupNotice)
+    {
+        return xfptGroupNoticeMapper.selectSupplierGroupNoticeList(xfptGroupNotice);
+    }
+
     /**
      * 查询统购公告
      *
@@ -64,6 +70,18 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     {
         XfptGroupNotice xfptGroupNotice = xfptGroupNoticeMapper.selectById(id);
         checkNoticeBelongsToCurrentSchool(xfptGroupNotice);
+        List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNoticeMapper.selectXfptGroupNoticeItemById(id);
+        xfptGroupNotice.setXfptGroupNoticeItemList(xfptGroupNoticeItemList);
+        return xfptGroupNotice;
+    }
+
+    @Override
+    public XfptGroupNotice selectSupplierGroupNoticeById(Long id)
+    {
+        XfptGroupNotice xfptGroupNotice = xfptGroupNoticeMapper.selectSupplierGroupNoticeById(id);
+        if (xfptGroupNotice == null) {
+            throw new ServiceException("公告不存在");
+        }
         List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNoticeMapper.selectXfptGroupNoticeItemById(id);
         xfptGroupNotice.setXfptGroupNoticeItemList(xfptGroupNoticeItemList);
         return xfptGroupNotice;

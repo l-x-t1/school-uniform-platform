@@ -51,6 +51,15 @@ public class XfptGroupNoticeController extends BaseController {
         return getDataTable(list);
     }
 
+@Operation(summary = "供应商查询学校发布的统购公告列表")
+@RequiresPermissions("school:groupNotice:list")
+@GetMapping("/supplier/list")
+    public TableDataInfo supplierList(XfptGroupNotice xfptGroupNotice) {
+        startPage();
+        List<XfptGroupNotice> list = xfptGroupNoticeService.selectSupplierGroupNoticeList(xfptGroupNotice);
+        return getDataTable(list);
+    }
+
 @Operation(summary = "查询统购订购进度列表")
 @RequiresPermissions("school:groupNotice:list")
 @GetMapping("/progress/list")
@@ -87,6 +96,13 @@ public class XfptGroupNoticeController extends BaseController {
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptGroupNoticeService.selectXfptGroupNoticeById(id));
+    }
+
+    @Operation(summary = "供应商获取学校发布的统购公告详细信息")
+    @RequiresPermissions("school:groupNotice:query")
+    @GetMapping(value = "/supplier/{id}")
+    public AjaxResult getSupplierInfo(@PathVariable("id") Long id) {
+            return success(xfptGroupNoticeService.selectSupplierGroupNoticeById(id));
     }
 
     /**
