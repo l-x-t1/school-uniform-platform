@@ -90,7 +90,14 @@
       <el-table-column label="操作" width="160" align="center">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">查看</el-button>
-          <el-button size="mini" type="text" icon="el-icon-upload2" @click="handleUpload(scope.row)">上传</el-button>
+          <el-button
+            v-if="isSupplierReportPage"
+            v-hasPermi="['school:zjbg:upload']"
+            size="mini"
+            type="text"
+            icon="el-icon-upload2"
+            @click="handleUpload(scope.row)"
+          >上传</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -160,6 +167,11 @@ export default {
         noticeStatus: ''
       }
     };
+  },
+  computed: {
+    isSupplierReportPage() {
+      return this.$route.matched.some(route => route.meta && route.meta.title === '供应商质检报告管理')
+    }
   },
   created() {
     this.getList();
