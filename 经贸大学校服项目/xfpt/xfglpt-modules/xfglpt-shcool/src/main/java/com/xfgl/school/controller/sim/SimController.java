@@ -56,6 +56,7 @@ public class SimController {
         add("school:orderInfo:query");
         add("school:orderInfo:add");
         add("school:orderInfo:edit");
+        add("school:orderInfo:remove");
         add("school:afterSale:list");
         add("school:afterSale:query");
         add("school:afterSale:add");
@@ -248,3 +249,7 @@ public class SimController {
                 .one();
     }
 }
+
+
+
+

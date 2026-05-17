@@ -27,4 +27,7 @@ export function clearLoginState() {
   uni.removeStorageSync('simId')
   uni.removeStorageSync('isImprove')
   uni.removeStorageSync('phone')
+  uni.removeStorageSync('devOrders')
+  uni.removeStorageSync('pendingCommentOrder')
+  uni.removeStorageSync('selectedOrder')
 }

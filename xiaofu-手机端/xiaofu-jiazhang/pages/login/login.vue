@@ -144,6 +144,10 @@ export default {
     },
 
     completeLogin(payload = {}) {
+      uni.removeStorageSync('devOrders');
+      uni.removeStorageSync('pendingCommentOrder');
+      uni.removeStorageSync('selectedOrder');
+
       if (payload.token) {
         setToken(payload.token);
       }

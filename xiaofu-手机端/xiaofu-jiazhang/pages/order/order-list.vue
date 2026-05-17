@@ -14,56 +14,94 @@
     </scroll-view>
     
     <!-- 订单列表 -->
-    <scroll-view 
-      scroll-y 
+    <scroll-view
+      scroll-y
       class="order-list"
       @scrolltolower="loadMore"
       refresher-enabled
       :refresher-triggered="isRefreshing"
       @refresherrefresh="onRefresh"
     >
-      <!-- 订单项 -->
-      <view 
-        class="order-item" 
-        v-for="(order, index) in orderList" 
+      <view
+        class="order-item"
+        v-for="(order, index) in orderList"
         :key="index"
         @click="goToOrderDetail(order.id)"
       >
+        <view class="order-strip"></view>
         <view class="order-header">
           <view class="order-number">
-            <text>订单号：{{order.orderNo}}</text>
+            <view class="order-number-top">
+              <text class="order-no">订单号：{{ order.orderNo }}</text>
+              <text class="order-time" v-if="order.createTime">{{ order.createTime }}</text>
+            </view>
+            <view class="order-tags">
+              <text class="tag">{{ order.orderTypeText }}</text>
+              <text class="tag soft" v-if="order.schoolName">{{ order.schoolName }}</text>
+              <text class="tag soft" v-if="order.supplierName">{{ order.supplierName }}</text>
+            </view>
           </view>
           <view class="order-status">
-            <text :class="getStatusClass(order.status)">{{getStatusText(order.status)}}</text>
+            <text :class="getStatusClass(order.status)">{{ getStatusText(order.status) }}</text>
           </view>
         </view>
-        
+
         <view class="order-content">
-          <view class="product-list">
-            <view class="product-item" v-for="(product, pIndex) in order.products" :key="pIndex">
-              <image class="product-image" :src="product.image" mode="aspectFill"></image>
+          <view class="goods-head">
+            <text class="goods-title">商品信息</text>
+            <view class="goods-stats">
+              <text class="goods-count">共{{ getTotalProducts(order.products) }}件</text>
+              <text class="goods-count muted" v-if="order.products && order.products.length">共{{ order.products.length }}种</text>
+            </view>
+          </view>
+
+          <view class="product-panel" v-if="order.products && order.products.length">
+            <view class="product-main">
+              <image class="product-image" :src="getPrimaryProduct(order).image" mode="aspectFill"></image>
               <view class="product-info">
-                <text class="product-name">{{product.name}}</text>
-                <text class="product-spec">{{product.size}} | {{product.color}}</text>
+                <text class="product-name">{{ getPrimaryProduct(order).name }}</text>
+                <text class="product-spec">
+                  {{ getPrimaryProduct(order).size }}
+                  <text v-if="getPrimaryProduct(order).color !== '-'"> | {{ getPrimaryProduct(order).color }}</text>
+                </text>
+                <view class="product-badges">
+                  <text class="mini-badge" v-if="getPrimaryProduct(order).supplierName">{{ getPrimaryProduct(order).supplierName }}</text>
+                  <text class="mini-badge light" v-if="order.studentName">{{ order.studentName }}</text>
+                </view>
               </view>
               <view class="product-price">
-                <text class="price">¥{{product.price}}</text>
-                <text class="quantity">x{{product.quantity}}</text>
+                <text class="price">¥{{ getPrimaryProduct(order).price }}</text>
+                <text class="quantity">x{{ getPrimaryProduct(order).quantity }}</text>
+              </view>
+            </view>
+
+            <view class="preview-row" v-if="order.products.length > 1">
+              <view class="preview-item" v-for="(product, pIndex) in getPreviewProducts(order)" :key="pIndex">
+                <image class="preview-image" :src="product.image" mode="aspectFill"></image>
+              </view>
+              <view class="preview-more" v-if="order.products.length > 3">
+                还有{{ order.products.length - 3 }}件
               </view>
             </view>
           </view>
+          <view class="product-empty" v-else>
+            <text>商品明细加载中...</text>
+          </view>
         </view>
-        
+
         <view class="order-footer">
           <view class="order-total">
-            <text>共{{getTotalProducts(order.products)}}件商品</text>
+            <view class="order-total-left">
+              <text class="total-label">{{ order.schoolName || '-' }}</text>
+              <text class="total-sub">供应商：{{ order.supplierName || '-' }}</text>
+            </view>
             <view class="total-price">
               <text>合计：</text>
-              <text class="price">¥{{order.totalAmount}}</text>
+              <text class="price">¥{{ order.totalAmount }}</text>
             </view>
           </view>
           <view class="order-actions">
-            <button 
+            <button
               class="action-btn outline"
               v-if="canCancel(order.status)"
               @click.stop="cancelOrder(order.id)"
@@ -80,9 +118,19 @@
             >确认收货</button>
             <button
               class="action-btn outline"
-              v-if="canReturn(order.status)"
+              v-if="canReturn(order.status, order)"
               @click.stop="applyReturn(order)"
             >申请退换</button>
+            <button
+              class="action-btn outline"
+              v-if="canViewAfterSale(order)"
+              @click.stop="viewAfterSale(order)"
+            >查看售后</button>
+            <button
+              class="action-btn outline danger"
+              v-if="canDelete(order.status)"
+              @click.stop="deleteCancelledOrder(order.id)"
+            >删除订单</button>
             <button
               class="action-btn primary"
               v-if="canComment(order)"
@@ -110,7 +158,8 @@
 
 <script>
 import config from '@/config'
-import { listOrders, cancelOrder as cancelOrderApi, confirmOrder } from '@/api/order'
+import { listOrders, getOrder, cancelOrder as cancelOrderApi, confirmOrder, deleteOrder as deleteOrderApi } from '@/api/order'
+import { listAfterSale } from '@/api/afterSale'
 
 export default {
   data() {
@@ -126,8 +175,9 @@ export default {
         { status: 'all', name: '全部' },
         { status: 'unpaid', name: '待付款' },
         { status: 'unshipped', name: '待发货' },
-        { status: 'shipped', name: '已发货' },
+        { status: 'shipped', name: '待收货' },
         { status: 'completed', name: '已完成' },
+        { status: 'afterSale', name: '退换货' },
         { status: 'cancelled', name: '已取消' }
       ]
     }
@@ -140,26 +190,73 @@ export default {
   },
   methods: {
     normalizeOrder(item) {
-      const products = item.products || item.items || item.orderItems || [];
+      const products = item.products || item.items || item.orderItems || item.xfptOrderItemList || [];
       return {
         id: item.id || item.orderId,
         orderNo: item.orderNo || item.orderSn || item.orderCode,
         status: this.normalizeStatus(item.status),
         createTime: item.createTime,
+        studentName: item.studentName || '',
+        schoolName: item.schoolName || '',
+        supplierName: item.supplierName || '',
+        orderType: String(item.orderType || '2'),
+        orderTypeText: String(item.orderType || '2') === '2' ? '零售购买' : '统购购买',
         totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
+        afterSaleInfo: item.afterSaleInfo || null,
         products: products.map((product) => ({
           id: product.id || product.productId || product.uniformId,
           orderItemId: product.orderItemId || product.id,
           goodsId: product.goodsId || product.productId || product.uniformId || product.id,
-          name: product.name || product.productName || product.uniformName || '校服',
-          image: product.image || product.productImage || product.coverImage || '/static/qjxf.png',
-          price: product.price || product.salePrice || product.unitPrice || '0.00',
-          quantity: product.quantity || product.num || 1,
+          name: product.name || product.goodsName || product.productName || product.uniformName || '校服',
+          image: product.image || product.mainImage || product.productImage || product.coverImage || '/static/qjxf.png',
+          price: product.price || product.unitPrice || product.salePrice || '0.00',
+          quantity: product.quantity || product.buyNum || product.num || 1,
           size: product.size || product.sizeName || '-',
-          color: product.color || product.colorName || '-',
-          supplierId: product.supplierId
+          color: product.color || product.colorName || product.spec || '-',
+          supplierId: product.supplierId,
+          supplierName: product.supplierName || ''
         }))
       };
+    },
+
+    async enrichOrderProducts(list) {
+      const tasks = list.map(async (order) => {
+        if (order.products && order.products.length) {
+          return order;
+        }
+        try {
+          const res = await getOrder(order.id);
+          return this.normalizeOrder(res.data || res || order);
+        } catch (error) {
+          return order;
+        }
+      });
+      return Promise.all(tasks);
+    },
+
+    async enrichAfterSaleStatus(list) {
+      const tasks = list.map(async (order) => {
+        try {
+          const res = await listAfterSale({
+            orderId: order.id,
+            pageNum: 1,
+            pageSize: 20
+          });
+          const rows = res.rows || [];
+          if (rows.length) {
+            const latest = rows.sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')))[0];
+            return {
+              ...order,
+              status: ['0', '1', '3'].includes(String(latest.status || '0')) ? 'afterSale' : order.status,
+              afterSaleInfo: latest
+            };
+          }
+          return order;
+        } catch (error) {
+          return order;
+        }
+      });
+      return Promise.all(tasks);
     },
 
     getLocalOrders() {
@@ -188,6 +285,14 @@ export default {
         if (status === 'completed') {
           localOrders[orderId].completeTime = this.getCurrentTime();
         }
+        uni.setStorageSync('devOrders', localOrders);
+      }
+    },
+
+    removeLocalOrder(orderId) {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      if (localOrders[orderId]) {
+        delete localOrders[orderId];
         uni.setStorageSync('devOrders', localOrders);
       }
     },
@@ -237,9 +342,12 @@ export default {
       if (!this.hasMore || this.isLoading) return;
       this.isLoading = true;
       listOrders(this.getQueryParams())
-        .then((res) => {
+        .then(async (res) => {
           const rows = res.rows || res.data || res.list || [];
-          const list = rows.map((item) => this.normalizeOrder(item));
+          let list = rows.map((item) => this.normalizeOrder(item));
+          list = await this.enrichOrderProducts(list);
+          list = await this.enrichAfterSaleStatus(list);
+          list = this.filterOrdersByStatus(list, this.currentStatus);
           const displayList = this.page === 1 ? this.mergeLocalOrders(list) : list;
           this.orderList = this.page === 1 ? displayList : [...this.orderList, ...displayList];
           this.hasMore = res.total ? this.orderList.length < res.total : list.length >= 10;
@@ -377,13 +485,22 @@ export default {
     
     // 申请退换
     applyReturn(order) {
-      const query = [
-        `id=${order.id}`,
-        `orderNo=${encodeURIComponent(order.orderNo || '')}`,
-        `amount=${encodeURIComponent(order.payAmount || order.totalAmount || '0.00')}`
-      ].join('&')
-      uni.navigateTo({
-        url: `/pages/order/return-apply?${query}`
+      const options = ['退货退款', '换货', '仅退款'];
+      const typeMap = ['2', '3', '1'];
+      uni.showActionSheet({
+        itemList: options,
+        success: (res) => {
+          const applyType = typeMap[res.tapIndex] || '2';
+          const query = [
+            `id=${order.id}`,
+            `orderNo=${encodeURIComponent(order.orderNo || '')}`,
+            `amount=${encodeURIComponent(order.payAmount || order.totalAmount || '0.00')}`,
+            `applyType=${applyType}`
+          ].join('&');
+          uni.navigateTo({
+            url: `/pages/order/return-apply?${query}`
+          });
+        }
       });
     },
     
@@ -540,8 +657,9 @@ export default {
       const statusMap = {
         'unpaid': '待付款',
         'unshipped': '待发货',
-        'shipped': '已发货',
+        'shipped': '待收货',
         'completed': '已完成',
+        'afterSale': '售后中',
         'cancelled': '已取消'
       };
       return statusMap[status] || '未知状态';
@@ -554,6 +672,7 @@ export default {
         'unshipped': 'status-primary',
         'shipped': 'status-info',
         'completed': 'status-success',
+        'afterSale': 'status-warning',
         'cancelled': 'status-default'
       };
       return statusClassMap[status] || '';
@@ -561,7 +680,23 @@ export default {
     
     // 计算订单总商品数量
     getTotalProducts(products) {
-      return products.reduce((total, product) => total + product.quantity, 0);
+      return (products || []).reduce((total, product) => total + Number(product.quantity || 0), 0);
+    },
+
+    getPrimaryProduct(order) {
+      return (order.products && order.products[0]) || {
+        name: '校服商品',
+        image: '/static/qjxf.png',
+        price: '0.00',
+        quantity: 0,
+        size: '-',
+        color: '-',
+        supplierName: ''
+      };
+    },
+
+    getPreviewProducts(order) {
+      return (order.products || []).slice(0, 3);
     },
 
     getCurrentTime() {
@@ -572,7 +707,7 @@ export default {
     
     // 是否可以取消订单
     canCancel(status) {
-      return ['unpaid', 'unshipped'].includes(status);
+      return status === 'unpaid';
     },
     
     // 是否可以支付
@@ -587,11 +722,59 @@ export default {
     
     // 是否可以申请退换
     canReturn(status) {
-      return ['unshipped', 'shipped', 'completed'].includes(status);
+      const order = arguments[1];
+      return ['unshipped', 'shipped', 'completed'].includes(status) && !(order && order.afterSaleInfo && order.afterSaleInfo.id);
     },
 
     canComment(order) {
       return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
+
+    canViewAfterSale(order) {
+      return !!(order && order.afterSaleInfo && order.afterSaleInfo.id);
+    },
+
+    canDelete(status) {
+      return status === 'cancelled';
+    },
+
+    deleteCancelledOrder(orderId) {
+      uni.showModal({
+        title: '删除订单',
+        content: '删除后无法恢复，确定删除这个已取消订单吗？',
+        success: (res) => {
+          if (!res.confirm) return;
+          uni.showLoading({ title: '删除中' });
+          deleteOrderApi(orderId)
+            .then(() => {
+              uni.hideLoading();
+              this.removeLocalOrder(orderId);
+              uni.showToast({ title: '已删除', icon: 'success' });
+              this.page = 1;
+              this.hasMore = true;
+              this.orderList = [];
+              this.loadOrders();
+            })
+            .catch((error) => {
+              uni.hideLoading();
+              uni.showToast({
+                title: error.message || '删除失败',
+                icon: 'none'
+              });
+            });
+        }
+      });
+    },
+
+    viewAfterSale(order) {
+      const query = [
+        `id=${order.id}`,
+        `afterSaleId=${order.afterSaleInfo.id}`,
+        `afterSaleNo=${encodeURIComponent(order.afterSaleInfo.afterSaleNo || '')}`
+      ].join('&');
+      uni.navigateTo({
+        url: `/pages/order/after-sale-detail?${query}`
+      });
     },
 
     commentOrder(order) {
@@ -660,24 +843,78 @@ export default {
   box-sizing: border-box;
   .order-item {
     background-color: #fff;
-    border-radius: 12rpx;
+    border-radius: 24rpx;
     margin-bottom: 20rpx;
     overflow: hidden;
+    box-shadow: 0 10rpx 32rpx rgba(59, 122, 255, 0.06);
+    position: relative;
+
+    .order-strip {
+      height: 8rpx;
+      background: linear-gradient(90deg, #3B7AFF 0%, #67d0ff 100%);
+    }
     
     .order-header {
       display: flex;
       justify-content: space-between;
-      align-items: center;
-      padding: 20rpx 30rpx;
+      align-items: flex-start;
+      padding: 24rpx 30rpx 16rpx;
       border-bottom: 1rpx solid #f5f5f5;
       
       .order-number {
-        font-size: 26rpx;
-        color: #666;
+        flex: 1;
+
+        .order-number-top {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16rpx;
+          margin-bottom: 16rpx;
+        }
+
+        .order-no {
+          font-size: 26rpx;
+          color: #444;
+          font-weight: 500;
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .order-time {
+          font-size: 22rpx;
+          color: #999;
+          white-space: nowrap;
+        }
+
+        .order-tags {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 12rpx;
+
+          .tag {
+            display: inline-flex;
+            align-items: center;
+            height: 40rpx;
+            padding: 0 16rpx;
+            border-radius: 20rpx;
+            font-size: 22rpx;
+            color: #3B7AFF;
+            background: rgba(59, 122, 255, 0.1);
+          }
+
+          .tag.soft {
+            color: #666;
+            background: #f6f8fb;
+          }
+        }
       }
       
       .order-status {
         font-size: 26rpx;
+        margin-left: 20rpx;
+        padding-top: 2rpx;
         
         .status-warning {
           color: #ff9800;
@@ -702,68 +939,158 @@ export default {
     }
     
     .order-content {
-      padding: 0 30rpx;
-      
-      .product-list {
-        .product-item {
+      padding: 22rpx 30rpx 16rpx;
+
+      .goods-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16rpx;
+
+        .goods-title {
+          font-size: 28rpx;
+          color: #222;
+          font-weight: 600;
+        }
+
+        .goods-stats {
           display: flex;
+          gap: 12rpx;
           align-items: center;
-          padding: 20rpx 0;
-          border-bottom: 1rpx solid #f5f5f5;
-          
-          &:last-child {
-            border-bottom: none;
-          }
-          
-          .product-image {
-            width: 120rpx;
-            height: 120rpx;
-            border-radius: 8rpx;
-            margin-right: 20rpx;
-          }
-          
-          .product-info {
-            flex: 1;
+        }
+
+        .goods-count {
+          font-size: 22rpx;
+          color: #3B7AFF;
+          background: rgba(59, 122, 255, 0.08);
+          padding: 6rpx 12rpx;
+          border-radius: 999rpx;
+        }
+
+        .goods-count.muted {
+          color: #999;
+          background: #f6f8fb;
+        }
+      }
+
+      .product-panel {
+        border-radius: 20rpx;
+        background: linear-gradient(180deg, #fbfdff 0%, #f7faff 100%);
+        padding: 18rpx;
+        border: 1rpx solid #edf3ff;
+      }
+
+      .product-main {
+        display: flex;
+        align-items: center;
+        gap: 18rpx;
+      
+        .product-image {
+          width: 128rpx;
+          height: 128rpx;
+          border-radius: 18rpx;
+          background: #eef4ff;
+          flex-shrink: 0;
+        }
+
+        .product-info {
+          flex: 1;
+          min-width: 0;
+
+          .product-name {
+            display: block;
+            font-size: 28rpx;
+            color: #222;
+            font-weight: 600;
+            line-height: 1.4;
+            margin-bottom: 12rpx;
             overflow: hidden;
-            
-            .product-name {
-              font-size: 28rpx;
-              color: #333;
-              margin-bottom: 10rpx;
-              overflow: hidden;
-              text-overflow: ellipsis;
-              white-space: nowrap;
-            }
-            
-            .product-spec {
-              font-size: 24rpx;
-              color: #999;
-            }
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
-          
-          .product-price {
+
+          .product-spec {
+            display: block;
+            font-size: 22rpx;
+            color: #888;
+            margin-bottom: 12rpx;
+          }
+
+          .product-badges {
             display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            
-            .price {
-              font-size: 28rpx;
-              color: #333;
-              font-weight: 500;
-            }
-            
-            .quantity {
-              font-size: 24rpx;
-              color: #999;
-              margin-top: 8rpx;
-            }
+            flex-wrap: wrap;
+            gap: 10rpx;
+          }
+
+          .mini-badge {
+            font-size: 20rpx;
+            color: #3B7AFF;
+            background: rgba(59, 122, 255, 0.1);
+            padding: 6rpx 12rpx;
+            border-radius: 999rpx;
+          }
+
+          .mini-badge.light {
+            color: #666;
+            background: #f3f6fa;
           }
         }
+
+        .product-price {
+          display: flex;
+          flex-direction: column;
+          align-items: flex-end;
+          flex-shrink: 0;
+          
+          .price {
+            font-size: 30rpx;
+            color: #f44;
+            font-weight: 600;
+          }
+          
+          .quantity {
+            font-size: 22rpx;
+            color: #999;
+            margin-top: 8rpx;
+          }
+        }
+      }
+
+      .preview-row {
+        display: flex;
+        align-items: center;
+        gap: 12rpx;
+        margin-top: 18rpx;
+
+        .preview-item {
+          width: 72rpx;
+          height: 72rpx;
+          border-radius: 14rpx;
+          overflow: hidden;
+          border: 1rpx solid #edf3ff;
+          background: #fff;
+
+          .preview-image {
+            width: 100%;
+            height: 100%;
+          }
+        }
+
+        .preview-more {
+          font-size: 22rpx;
+          color: #999;
+        }
+      }
+
+      .product-empty {
+        font-size: 24rpx;
+        color: #999;
+        padding: 10rpx 0;
       }
     }
     
     .order-footer {
-      padding: 20rpx 30rpx;
+      padding: 18rpx 30rpx 24rpx;
       border-top: 1rpx solid #f0f0f0;
       
       .order-total {
@@ -773,6 +1100,30 @@ export default {
         margin-bottom: 20rpx;
         font-size: 26rpx;
         color: #666;
+
+        .order-total-left {
+          display: flex;
+          flex-direction: column;
+          gap: 6rpx;
+          max-width: 60%;
+
+          .total-label {
+            font-size: 26rpx;
+            color: #444;
+            font-weight: 500;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+
+          .total-sub {
+            font-size: 22rpx;
+            color: #999;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+          }
+        }
         
         .total-price {
           display: flex;
@@ -813,6 +1164,16 @@ export default {
             background-color: #3B7AFF;
             color: #fff;
             
+            &::after {
+              border: none;
+            }
+          }
+
+          &.danger {
+            background-color: #fff5f5;
+            color: #f04438;
+            border: 1rpx solid #ffd6d6;
+
             &::after {
               border: none;
             }

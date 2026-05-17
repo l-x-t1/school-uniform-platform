@@ -48,6 +48,9 @@ export default {
           if(res.data.code == 200){ 
             uni.hideLoading();
             this.data = res.data.data;
+            uni.removeStorageSync('devOrders');
+            uni.removeStorageSync('pendingCommentOrder');
+            uni.removeStorageSync('selectedOrder');
             uni.setStorageSync('token', res.data.data.access_token);
             uni.setStorageSync('simId', res.data.data.user.id);
             uni.setStorageSync('isImprove', res.data.data.is_improve);
@@ -101,6 +104,9 @@ export default {
           uni.hideLoading();
           if (res.data.code === 200) {
             this.data = res.data.data;
+            uni.removeStorageSync('devOrders');
+            uni.removeStorageSync('pendingCommentOrder');
+            uni.removeStorageSync('selectedOrder');
             uni.setStorageSync('token', res.data.data.access_token);
             uni.setStorageSync('simId', res.data.data.user.id);
             uni.setStorageSync('isImprove', res.data.data.is_improve);

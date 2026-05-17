@@ -253,3 +253,10 @@ export async function payOrder(id) {
     })
   })
 }
+
+export async function deleteOrder(id) {
+  return request({
+    url: `/school/orderInfo/${id}`,
+    method: 'DELETE'
+  })
+}

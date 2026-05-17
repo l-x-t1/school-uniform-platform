@@ -20,14 +20,20 @@
     </view>
 
     <view class="form-card">
-      <view class="form-item">
+      <view class="form-item column no-border">
         <text class="form-label">申请类型</text>
-        <picker :range="applyTypeOptions" range-key="label" @change="onApplyTypeChange">
-          <view class="picker-value">
-            <text>{{ currentApplyType.label }}</text>
-            <uni-icons type="right" size="16" color="#999"></uni-icons>
+        <view class="type-grid">
+          <view
+            v-for="item in applyTypeOptions"
+            :key="item.value"
+            class="type-card"
+            :class="{ active: form.applyType === item.value }"
+            @click="selectApplyType(item.value)"
+          >
+            <text class="type-name">{{ item.label }}</text>
+            <text class="type-desc">{{ item.desc }}</text>
           </view>
-        </picker>
+        </view>
       </view>
 
       <view class="form-item" v-if="form.applyType === '3'">
@@ -40,9 +46,9 @@
         <input class="input" type="number" v-model="form.applyNum" placeholder="请输入数量" />
       </view>
 
-      <view class="form-item">
+      <view class="form-item" v-if="form.applyType !== '3'">
         <text class="form-label">申请金额</text>
-        <input class="input" type="digit" v-model="form.applyAmount" placeholder="请输入金额" />
+        <input class="input" type="digit" v-model="form.applyAmount" :placeholder="form.applyType === '1' ? '请输入退款金额' : '请输入退货退款金额'" />
       </view>
 
       <view class="form-item column">
@@ -74,9 +80,9 @@ export default {
       submitting: false,
       order: {},
       applyTypeOptions: [
-        { label: '仅退款', value: '1' },
-        { label: '退货退款', value: '2' },
-        { label: '换货', value: '3' }
+        { label: '仅退款', value: '1', desc: '无需退回商品，直接申请退款' },
+        { label: '退货退款', value: '2', desc: '退回商品后按审核结果退款' },
+        { label: '换货', value: '3', desc: '商品不合适时申请更换尺码' }
       ],
       form: {
         applyType: '2',
@@ -84,7 +90,8 @@ export default {
         applyNum: 1,
         applyAmount: '',
         reason: ''
-      }
+      },
+      createdAfterSaleId: null
     }
   },
   computed: {
@@ -98,6 +105,7 @@ export default {
   },
   onLoad(options) {
     this.orderId = options.id || options.orderId || ''
+    this.form.applyType = options.applyType || '2'
     this.order = {
       id: this.orderId,
       orderNo: options.orderNo ? decodeURIComponent(options.orderNo) : '',
@@ -138,9 +146,8 @@ export default {
           })
         })
     },
-    onApplyTypeChange(event) {
-      const index = Number(event.detail.value)
-      this.form.applyType = this.applyTypeOptions[index].value
+    selectApplyType(value) {
+      this.form.applyType = value
     },
     validateForm() {
       if (!this.orderId) {
@@ -190,11 +197,20 @@ export default {
       this.submitting = true
       uni.showLoading({ title: '提交中' })
       createAfterSale(this.buildPayload())
-        .then(() => {
+        .then((res) => {
+          const data = res.data || res || {}
+          this.createdAfterSaleId = data.id || data.afterSaleId || data.after_sale_id || null
           uni.hideLoading()
           uni.showToast({ title: '申请已提交', icon: 'success' })
           setTimeout(() => {
-            uni.navigateBack()
+            const query = [
+              `id=${this.orderId}`,
+              `afterSaleId=${this.createdAfterSaleId || ''}`,
+              `afterSaleNo=${encodeURIComponent(data.afterSaleNo || data.after_sale_no || '')}`
+            ].join('&')
+            uni.redirectTo({
+              url: `/pages/order/after-sale-detail?${query}`
+            })
           }, 800)
         })
         .catch((error) => {
@@ -321,6 +337,46 @@ export default {
   align-items: flex-start;
   flex-direction: column;
   padding: 22rpx 0;
+}
+
+.no-border {
+  border-bottom: none;
+}
+
+.type-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.type-card {
+  padding: 20rpx 16rpx;
+  border-radius: 16rpx;
+  border: 2rpx solid #e8edf5;
+  background: #f8fafc;
+}
+
+.type-card.active {
+  border-color: #3B7AFF;
+  background: rgba(59, 122, 255, 0.08);
+  box-shadow: 0 8rpx 20rpx rgba(59, 122, 255, 0.08);
+}
+
+.type-name {
+  display: block;
+  font-size: 28rpx;
+  color: #222;
+  font-weight: 600;
+}
+
+.type-desc {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 22rpx;
+  color: #778196;
+  line-height: 1.5;
 }
 
 .textarea {
