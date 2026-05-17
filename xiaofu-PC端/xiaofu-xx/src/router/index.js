@@ -134,7 +134,7 @@ export const constantRoutes = [
     children: [
       {
         path: "index",
-        component: () => import("@/views/school/withdrawApply/index"),
+        component: () => import("@/views/school/supplierWithdrawRecord/index"),
         name: "SupplierWithdrawRecord",
         meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
       },
@@ -160,7 +160,7 @@ export const constantRoutes = [
     children: [
       {
         path: "index",
-        component: () => import("@/views/supplier/groupNotice/index"),
+        component: () => import("@/views/school/groupNotice/index"),
         name: "SupplierGroupNotice",
         meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
       },
