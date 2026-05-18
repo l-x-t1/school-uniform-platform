@@ -13,8 +13,11 @@ import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptCommentReply;
+import com.xfgl.school.domain.XfptOrderInfo;
+import com.xfgl.school.domain.XfptOrderItem;
 import com.xfgl.school.mapper.XfptCommentMapper;
 import com.xfgl.school.mapper.XfptCommentReplyMapper;
+import com.xfgl.school.mapper.XfptOrderInfoMapper;
 import com.xfgl.school.domain.XfptComment;
 import com.xfgl.school.service.IXfptCommentService;
 import com.xfgl.system.api.domain.SysUser;
@@ -45,6 +48,9 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
 
     @Autowired
     private XfptCommentReplyMapper xfptCommentReplyMapper;
+
+    @Autowired
+    private XfptOrderInfoMapper xfptOrderInfoMapper;
 
     /**
      * 查询商品评价列表
@@ -193,6 +199,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         @Override
         public int insertXfptComment(XfptComment xfptComment)
         {
+            fillCommentSnapshotAndValidate(xfptComment);
             int rows = xfptCommentMapper.insert(xfptComment);
             insertXfptCommentReply(xfptComment);
             return rows;
@@ -280,6 +287,84 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         private boolean hasRole(LoginUser loginUser, String roleKey)
         {
             return loginUser != null && loginUser.getRoles() != null && loginUser.getRoles().contains(roleKey);
+        }
+
+        private void fillCommentSnapshotAndValidate(XfptComment xfptComment)
+        {
+            if (xfptComment == null) {
+                throw new ServiceException("评价信息不能为空");
+            }
+            if (xfptComment.getOrderId() == null || xfptComment.getOrderItemId() == null) {
+                throw new ServiceException("订单信息不完整");
+            }
+            Long currentUserId = SecurityUtils.getUserId();
+            if (currentUserId == null) {
+                throw new ServiceException("请先登录后再评价");
+            }
+
+            XfptOrderInfo orderInfo = xfptOrderInfoMapper.selectById(xfptComment.getOrderId());
+            if (orderInfo == null || !"0".equals(orderInfo.getDelFlag())) {
+                throw new ServiceException("订单不存在");
+            }
+            if (!"4".equals(orderInfo.getOrderStatus())) {
+                throw new ServiceException("订单完成后才可评价");
+            }
+
+            List<XfptOrderItem> orderItems = xfptOrderInfoMapper.selectXfptOrderItemList(xfptComment.getOrderId());
+            XfptOrderItem currentOrderItem = null;
+            if (orderItems != null) {
+                for (XfptOrderItem orderItem : orderItems) {
+                    if (orderItem != null && xfptComment.getOrderItemId().equals(orderItem.getId())) {
+                        currentOrderItem = orderItem;
+                        break;
+                    }
+                }
+            }
+            if (currentOrderItem == null) {
+                throw new ServiceException("订单商品不存在");
+            }
+
+            Long goodsId = xfptComment.getGoodsId() != null ? xfptComment.getGoodsId() : currentOrderItem.getGoodsId();
+            if (goodsId != null && currentOrderItem.getGoodsId() != null && !goodsId.equals(currentOrderItem.getGoodsId())) {
+                throw new ServiceException("评价商品与订单明细不匹配");
+            }
+
+            Long existedCount = this.lambdaQuery()
+                    .eq(XfptComment::getOrderId, xfptComment.getOrderId())
+                    .eq(XfptComment::getOrderItemId, xfptComment.getOrderItemId())
+                    .eq(XfptComment::getUserId, currentUserId)
+                    .count();
+            if (existedCount != null && existedCount > 0) {
+                throw new ServiceException("该商品已评价，请勿重复提交");
+            }
+
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            SysUser currentUser = loginUser == null ? null : loginUser.getSysUser();
+            String userName = currentUser == null ? SecurityUtils.getUsername() : currentUser.getUserName();
+            String nickName = currentUser == null ? "" : currentUser.getNickName();
+            String displayName = StringUtils.isNotEmpty(nickName) ? nickName : userName;
+
+            String content = xfptComment.getContent() == null ? "" : xfptComment.getContent().trim();
+            if (StringUtils.isEmpty(content)) {
+                throw new ServiceException("评价内容不能为空");
+            }
+
+            Integer score = xfptComment.getScore();
+            if (score == null || score < 1 || score > 5) {
+                throw new ServiceException("评分必须在1到5分之间");
+            }
+
+            xfptComment.setOrderNo(orderInfo.getOrderNo());
+            xfptComment.setGoodsId(currentOrderItem.getGoodsId());
+            xfptComment.setGoodsName(StringUtils.isNotEmpty(currentOrderItem.getGoodsName()) ? currentOrderItem.getGoodsName() : xfptComment.getGoodsName());
+            xfptComment.setUserId(currentUserId);
+            xfptComment.setUserName(displayName);
+            xfptComment.setSupplierId(orderInfo.getSupplierId());
+            xfptComment.setContent(content);
+            xfptComment.setStatus(StringUtils.isEmpty(xfptComment.getStatus()) ? "0" : xfptComment.getStatus());
+            xfptComment.setDelFlag(StringUtils.isEmpty(xfptComment.getDelFlag()) ? "0" : xfptComment.getDelFlag());
+            xfptComment.setCreateBy(displayName);
+            xfptComment.setUpdateBy(displayName);
         }
 
 }
