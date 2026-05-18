@@ -5140,4 +5140,956 @@ WHERE NOT EXISTS (
   ) exists_menu
 );
 
+-- ============================================
+-- Merged on 2026-05-18 from:
+-- 1. xfpt/sql/20260517_fix_apply_tonggou_menu_tree_ascii.sql
+-- 2. xfpt/sql/20260518_supplier_zjbg_menu.sql
+-- 3. xfpt/sql/20260517_edu_settlement_manage.sql
+-- 说明：
+-- 1. 20260517_tonggou_menu_under_new_feature.sql 已由 ASCII 修复版覆盖，避免重复执行。
+-- 2. rollback 脚本保留为独立回滚用途，不在全量导入时正向执行，避免把新增内容再次撤回。
+
+SET NAMES utf8mb4;
+
+-- ============================================
+-- Merged from xfpt/sql/20260517_fix_apply_tonggou_menu_tree_ascii.sql
+-- 统一整理“新增功能 -> 统购管理”菜单树，并补齐统购相关菜单与权限
+
+START TRANSACTION;
+
+SET @name_new_feature := '新增功能';
+SET @name_tonggou := '统购管理';
+SET @name_notice := '公告管理';
+SET @name_progress := '统购订单进度管理';
+SET @name_quality := '质检报告管理';
+SET @name_size := '尺码调换记录';
+SET @name_delivery := '发货单统计';
+SET @name_list := '列表';
+SET @name_add_notice := '添加公告';
+SET @name_detail := '详情';
+SET @name_size_list := '列表（待受理、已通过、已退回、已更换）';
+
+SET @remark_progress := '查看统购订单进度';
+SET @remark_size := '按状态查看尺码调换记录';
+SET @remark_delivery := '统计统购发货单';
+SET @remark_notice_list := '查看统购公告列表';
+SET @remark_progress_list := '查看统购订单进度列表';
+SET @remark_progress_detail := '查看统购订单进度详情';
+SET @remark_size_list := '按状态查看尺码调换记录列表';
+SET @remark_size_detail := '查看尺码调换记录详情';
+SET @remark_delivery_list := '查看发货单统计列表';
+
+SET @new_feature_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = @name_new_feature
+    AND menu_type = 'M'
+  ORDER BY parent_id, order_num, menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_new_feature, 0, 99, 'newFeature', NULL, NULL, '',
+       1, 0, 'M', '0', '0', '', 'tree',
+       'admin', NOW(), '', NULL, '新增功能目录'
+WHERE @new_feature_id IS NULL;
+
+SET @new_feature_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = @name_new_feature
+    AND menu_type = 'M'
+  ORDER BY parent_id, order_num, menu_id
+  LIMIT 1
+);
+
+SET @tonggou_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = @name_tonggou
+    AND menu_type = 'M'
+  ORDER BY parent_id, order_num, menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_tonggou, @new_feature_id, 2, '/tonggou', NULL, NULL, '',
+       1, 0, 'M', '0', '0', '', 'shopping',
+       'admin', NOW(), '', NULL, '统购管理目录'
+WHERE @tonggou_id IS NULL
+  AND @new_feature_id IS NOT NULL;
+
+SET @tonggou_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = @name_tonggou
+    AND menu_type = 'M'
+  ORDER BY parent_id, order_num, menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET parent_id = @new_feature_id,
+    path = '/tonggou',
+    order_num = 2,
+    icon = 'shopping',
+    update_by = 'admin',
+    update_time = NOW()
+WHERE menu_id = @tonggou_id
+  AND menu_name = @name_tonggou
+  AND menu_type = 'M';
+
+SET @notice_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:groupNotice:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET menu_name = @name_notice,
+    parent_id = @tonggou_id,
+    order_num = 1,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE menu_id = @notice_id
+  AND menu_type = 'C'
+  AND perms = 'school:groupNotice:list';
+
+SET @progress_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:tgjd:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_progress, @tonggou_id, 2, 'tgjd', 'tgjd/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:tgjd:list', 'chart',
+       'admin', NOW(), '', NULL, @remark_progress
+WHERE @progress_id IS NULL
+  AND @tonggou_id IS NOT NULL;
+
+SET @progress_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:tgjd:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET menu_name = @name_progress,
+    parent_id = @tonggou_id,
+    order_num = 2,
+    path = 'tgjd',
+    component = 'tgjd/index',
+    icon = 'chart',
+    update_by = 'admin',
+    update_time = NOW(),
+    remark = @remark_progress
+WHERE menu_id = @progress_id
+  AND menu_type = 'C'
+  AND perms = 'school:tgjd:list';
+
+SET @quality_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:zjbg:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET menu_name = @name_quality,
+    parent_id = @tonggou_id,
+    order_num = 3,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE menu_id = @quality_id
+  AND menu_type = 'C'
+  AND perms = 'school:zjbg:list';
+
+SET @size_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:sxjjl:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_size, @tonggou_id, 4, 'sxjjl', 'sxjjl/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:sxjjl:list', 'size',
+       'admin', NOW(), '', NULL, @remark_size
+WHERE @size_id IS NULL
+  AND @tonggou_id IS NOT NULL;
+
+SET @size_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:sxjjl:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET menu_name = @name_size,
+    parent_id = @tonggou_id,
+    order_num = 4,
+    path = 'sxjjl',
+    component = 'sxjjl/index',
+    icon = 'size',
+    update_by = 'admin',
+    update_time = NOW(),
+    remark = @remark_size
+WHERE menu_id = @size_id
+  AND menu_type = 'C'
+  AND perms = 'school:sxjjl:list';
+
+SET @delivery_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:tgfh:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_delivery, @tonggou_id, 5, 'tgfh', 'tgfh/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:tgfh:list', 'excel',
+       'admin', NOW(), '', NULL, @remark_delivery
+WHERE @delivery_id IS NULL
+  AND @tonggou_id IS NOT NULL;
+
+SET @delivery_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_type = 'C'
+    AND perms = 'school:tgfh:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET menu_name = @name_delivery,
+    parent_id = @tonggou_id,
+    order_num = 5,
+    path = 'tgfh',
+    component = 'tgfh/index',
+    icon = 'excel',
+    update_by = 'admin',
+    update_time = NOW(),
+    remark = @remark_delivery
+WHERE menu_id = @delivery_id
+  AND menu_type = 'C'
+  AND perms = 'school:tgfh:list';
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_list, @notice_id, 1, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:groupNotice:list', '#',
+       'admin', NOW(), '', NULL, @remark_notice_list
+WHERE @notice_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @notice_id
+      AND menu_type = 'F'
+      AND perms = 'school:groupNotice:list'
+  );
+
+UPDATE sys_menu
+SET menu_name = @name_add_notice,
+    parent_id = @notice_id,
+    order_num = 2,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE @notice_id IS NOT NULL
+  AND menu_type = 'F'
+  AND perms = 'school:groupNotice:add';
+
+UPDATE sys_menu
+SET menu_name = @name_detail,
+    parent_id = @notice_id,
+    order_num = 3,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE @notice_id IS NOT NULL
+  AND menu_type = 'F'
+  AND perms = 'school:groupNotice:query';
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_list, @progress_id, 1, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:tgjd:list', '#',
+       'admin', NOW(), '', NULL, @remark_progress_list
+WHERE @progress_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @progress_id
+      AND menu_type = 'F'
+      AND perms = 'school:tgjd:list'
+  );
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_detail, @progress_id, 2, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:tgjd:query', '#',
+       'admin', NOW(), '', NULL, @remark_progress_detail
+WHERE @progress_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @progress_id
+      AND menu_type = 'F'
+      AND perms = 'school:tgjd:query'
+  );
+
+UPDATE sys_menu
+SET menu_name = @name_list,
+    parent_id = @quality_id,
+    order_num = 1,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE @quality_id IS NOT NULL
+  AND menu_type = 'F'
+  AND perms = 'school:zjbg:list';
+
+UPDATE sys_menu
+SET menu_name = @name_detail,
+    parent_id = @quality_id,
+    order_num = 2,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE @quality_id IS NOT NULL
+  AND menu_type = 'F'
+  AND perms = 'school:zjbg:query';
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_size_list, @size_id, 1, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:sxjjl:list', '#',
+       'admin', NOW(), '', NULL, @remark_size_list
+WHERE @size_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @size_id
+      AND menu_type = 'F'
+      AND perms = 'school:sxjjl:list'
+  );
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_detail, @size_id, 2, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:sxjjl:query', '#',
+       'admin', NOW(), '', NULL, @remark_size_detail
+WHERE @size_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @size_id
+      AND menu_type = 'F'
+      AND perms = 'school:sxjjl:query'
+  );
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT @name_list, @delivery_id, 1, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:tgfh:list', '#',
+       'admin', NOW(), '', NULL, @remark_delivery_list
+WHERE @delivery_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @delivery_id
+      AND menu_type = 'F'
+      AND perms = 'school:tgfh:list'
+  );
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT DISTINCT roles.role_id, menus.menu_id
+FROM (
+  SELECT DISTINCT rm.role_id
+  FROM sys_role_menu rm
+  JOIN sys_menu m
+    ON m.menu_id = rm.menu_id
+  WHERE rm.role_id <> 0
+    AND (
+      m.menu_id IN (@tonggou_id, @notice_id, @quality_id)
+      OR m.parent_id IN (@notice_id, @quality_id)
+      OR m.perms IN (
+        'school:groupNotice:list', 'school:groupNotice:add', 'school:groupNotice:query',
+        'school:tgjd:list', 'school:tgjd:query',
+        'school:zjbg:list', 'school:zjbg:query',
+        'school:sxjjl:list', 'school:sxjjl:query',
+        'school:tgfh:list'
+      )
+    )
+) roles
+CROSS JOIN (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_id IN (@new_feature_id, @tonggou_id, @notice_id, @progress_id, @quality_id, @size_id, @delivery_id)
+     OR parent_id IN (@notice_id, @progress_id, @quality_id, @size_id, @delivery_id)
+) menus
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM sys_role_menu exists_rm
+  WHERE exists_rm.role_id = roles.role_id
+    AND exists_rm.menu_id = menus.menu_id
+);
+
+COMMIT;
+
+-- ============================================
+-- Merged from xfpt/sql/20260518_supplier_zjbg_menu.sql
+-- 学校端“质检报告管理”归入“统购管理”，同时新增供应商端“质检报告管理”
+
+START TRANSACTION;
+
+SET @new_feature_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = '新增功能'
+    AND menu_type = 'M'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+SET @tonggou_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = '统购管理'
+    AND menu_type = 'M'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+SET @school_zjbg_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = '质检报告管理'
+    AND menu_type = 'C'
+    AND perms = 'school:zjbg:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT
+  '质检报告管理', @tonggou_menu_id, 3, 'zjbg', 'zjbg/index', NULL, '',
+  1, 0, 'C', '0', '0', 'school:zjbg:list', 'pdf',
+  'admin', NOW(), '', NULL, '学校端质检报告管理'
+WHERE @school_zjbg_menu_id IS NULL
+  AND @tonggou_menu_id IS NOT NULL;
+
+SET @school_zjbg_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = '质检报告管理'
+    AND menu_type = 'C'
+    AND perms = 'school:zjbg:list'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET parent_id = @tonggou_menu_id,
+    order_num = 3,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE menu_id = @school_zjbg_menu_id
+  AND @tonggou_menu_id IS NOT NULL;
+
+SET @zjbg_path := NULL;
+SET @zjbg_component := NULL;
+SET @zjbg_perms := NULL;
+SET @zjbg_icon := NULL;
+
+SELECT path, component, perms, icon
+INTO @zjbg_path, @zjbg_component, @zjbg_perms, @zjbg_icon
+FROM sys_menu
+WHERE menu_id = @school_zjbg_menu_id
+LIMIT 1;
+
+SET @supplier_zjbg_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = '供应商质检报告管理'
+    AND menu_type = 'C'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT
+  '供应商质检报告管理', @new_feature_menu_id, 30, @zjbg_path, @zjbg_component, NULL, '',
+  1, 0, 'C', '0', '0', @zjbg_perms, @zjbg_icon,
+  'admin', NOW(), '', NULL, '供应商质检报告管理'
+WHERE @supplier_zjbg_menu_id IS NULL
+  AND @new_feature_menu_id IS NOT NULL
+  AND @school_zjbg_menu_id IS NOT NULL;
+
+SET @supplier_zjbg_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE menu_name = '供应商质检报告管理'
+    AND menu_type = 'C'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET parent_id = @new_feature_menu_id,
+    order_num = 30,
+    path = @zjbg_path,
+    component = @zjbg_component,
+    perms = @zjbg_perms,
+    icon = @zjbg_icon,
+    update_by = 'admin',
+    update_time = NOW()
+WHERE menu_id = @supplier_zjbg_menu_id;
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT
+  '列表', @supplier_zjbg_menu_id, 1, '', NULL, NULL, '',
+  1, 0, 'F', '0', '0', 'school:zjbg:list', '#',
+  'admin', NOW(), '', NULL, '供应商质检报告列表'
+WHERE @supplier_zjbg_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @supplier_zjbg_menu_id
+      AND menu_type = 'F'
+      AND perms = 'school:zjbg:list'
+  );
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT
+  '详情', @supplier_zjbg_menu_id, 2, '', NULL, NULL, '',
+  1, 0, 'F', '0', '0', 'school:zjbg:query', '#',
+  'admin', NOW(), '', NULL, '供应商质检报告详情'
+WHERE @supplier_zjbg_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @supplier_zjbg_menu_id
+      AND menu_type = 'F'
+      AND perms = 'school:zjbg:query'
+  );
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT
+  '新增', @supplier_zjbg_menu_id, 3, '', NULL, NULL, '',
+  1, 0, 'F', '0', '0', 'school:zjbg:add', '#',
+  'admin', NOW(), '', NULL, '供应商质检报告新增'
+WHERE @supplier_zjbg_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @supplier_zjbg_menu_id
+      AND menu_type = 'F'
+      AND perms = 'school:zjbg:add'
+  );
+
+INSERT INTO sys_menu (
+  menu_name, parent_id, order_num, path, component, query, route_name,
+  is_frame, is_cache, menu_type, visible, status, perms, icon,
+  create_by, create_time, update_by, update_time, remark
+)
+SELECT
+  '上传', @supplier_zjbg_menu_id, 4, '', NULL, NULL, '',
+  1, 0, 'F', '0', '0', 'school:zjbg:upload', '#',
+  'admin', NOW(), '', NULL, '供应商质检报告上传'
+WHERE @supplier_zjbg_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM sys_menu
+    WHERE parent_id = @supplier_zjbg_menu_id
+      AND menu_type = 'F'
+      AND perms = 'school:zjbg:upload'
+  );
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, m.menu_id
+FROM sys_role r
+JOIN sys_menu m
+  ON m.menu_id = @new_feature_menu_id
+  OR m.menu_id = @supplier_zjbg_menu_id
+  OR m.parent_id = @supplier_zjbg_menu_id
+WHERE r.role_key IN ('admin', 'changshang')
+  AND r.del_flag = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_role_menu rm
+    WHERE rm.role_id = r.role_id
+      AND rm.menu_id = m.menu_id
+  );
+
+COMMIT;
+
+-- ============================================
+-- Merged from xfpt/sql/20260517_edu_settlement_manage.sql
+-- 教育局结算管理：独立业务表、初始化数据、菜单与角色授权
+
+CREATE TABLE IF NOT EXISTS `xfpt_edu_settlement` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `unit_name` varchar(200) NOT NULL COMMENT '结算单位',
+  `project_name` varchar(200) NOT NULL COMMENT '项目名称',
+  `settlement_cycle` varchar(20) NOT NULL COMMENT '结算周期，格式yyyy-MM',
+  `status` char(1) NOT NULL DEFAULT '0' COMMENT '结算状态，0待结算 1部分结算 2已结算',
+  `settlement_amount` decimal(18,2) NOT NULL DEFAULT 0.00 COMMENT '结算金额',
+  `tax_amount` decimal(18,2) NOT NULL DEFAULT 0.00 COMMENT '税额',
+  `paid_amount` decimal(18,2) NOT NULL DEFAULT 0.00 COMMENT '已付金额',
+  `unpaid_amount` decimal(18,2) NOT NULL DEFAULT 0.00 COMMENT '未付金额',
+  `dept_id` bigint DEFAULT NULL COMMENT '当前归属部门/教育局',
+  `create_by` varchar(64) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标记，0正常 1删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_xfpt_edu_settlement_unit` (`unit_name`),
+  KEY `idx_xfpt_edu_settlement_cycle` (`settlement_cycle`),
+  KEY `idx_xfpt_edu_settlement_status` (`status`),
+  KEY `idx_xfpt_edu_settlement_dept` (`dept_id`),
+  KEY `idx_xfpt_edu_settlement_del` (`del_flag`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='教育局结算管理';
+
+INSERT INTO `xfpt_edu_settlement` (
+  `unit_name`, `project_name`, `settlement_cycle`, `status`,
+  `settlement_amount`, `tax_amount`, `paid_amount`, `unpaid_amount`,
+  `dept_id`, `create_by`, `create_time`, `remark`, `del_flag`
+)
+SELECT '石家庄市教育局', '2026年春季校服统购项目', '2026-05', '0',
+       128600.00, 7716.00, 0.00, 128600.00,
+       NULL, 'admin', NOW(), '按市级统购项目汇总结算，当前等待财务确认付款。', '0'
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_edu_settlement`
+  WHERE `unit_name` = '石家庄市教育局'
+    AND `project_name` = '2026年春季校服统购项目'
+    AND `settlement_cycle` = '2026-05'
+    AND `del_flag` = '0'
+);
+
+INSERT INTO `xfpt_edu_settlement` (
+  `unit_name`, `project_name`, `settlement_cycle`, `status`,
+  `settlement_amount`, `tax_amount`, `paid_amount`, `unpaid_amount`,
+  `dept_id`, `create_by`, `create_time`, `remark`, `del_flag`
+)
+SELECT '长安区教育局', '小学夏季校服采购项目', '2026-05', '1',
+       86520.00, 5191.20, 40000.00, 46520.00,
+       NULL, 'admin', NOW(), '已完成首批付款，剩余金额待到货验收后结算。', '0'
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_edu_settlement`
+  WHERE `unit_name` = '长安区教育局'
+    AND `project_name` = '小学夏季校服采购项目'
+    AND `settlement_cycle` = '2026-05'
+    AND `del_flag` = '0'
+);
+
+INSERT INTO `xfpt_edu_settlement` (
+  `unit_name`, `project_name`, `settlement_cycle`, `status`,
+  `settlement_amount`, `tax_amount`, `paid_amount`, `unpaid_amount`,
+  `dept_id`, `create_by`, `create_time`, `remark`, `del_flag`
+)
+SELECT '桥西区教育局', '中学校服补充采购项目', '2026-04', '2',
+       73280.00, 4396.80, 73280.00, 0.00,
+       NULL, 'admin', NOW(), '项目已完成结算，资金流水和付款凭证已归档。', '0'
+WHERE NOT EXISTS (
+  SELECT 1 FROM `xfpt_edu_settlement`
+  WHERE `unit_name` = '桥西区教育局'
+    AND `project_name` = '中学校服补充采购项目'
+    AND `settlement_cycle` = '2026-04'
+    AND `del_flag` = '0'
+);
+
+SET @new_feature_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_name` = '新增功能'
+    AND `menu_type` = 'M'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+SET @edu_settlement_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `perms` = 'school:eduSettlementManage:list'
+     OR (`parent_id` = @new_feature_menu_id AND `path` = 'eduSettlementManage')
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT '教育局结算管理', @new_feature_menu_id, 95,
+       'eduSettlementManage', 'school/eduSettlementManage/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:eduSettlementManage:list', 'money',
+       'admin', NOW(), '', NULL, '教育局校服交易管理-结算管理'
+WHERE @edu_settlement_menu_id IS NULL
+  AND @new_feature_menu_id IS NOT NULL;
+
+SET @edu_settlement_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `perms` = 'school:eduSettlementManage:list'
+     OR (`parent_id` = @new_feature_menu_id AND `path` = 'eduSettlementManage')
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '教育局结算管理',
+    `parent_id` = @new_feature_menu_id,
+    `order_num` = 95,
+    `path` = 'eduSettlementManage',
+    `component` = 'school/eduSettlementManage/index',
+    `menu_type` = 'C',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'school:eduSettlementManage:list',
+    `icon` = 'money',
+    `update_by` = 'admin',
+    `update_time` = NOW(),
+    `remark` = '教育局校服交易管理-结算管理'
+WHERE `menu_id` = @edu_settlement_menu_id;
+
+SET @edu_settlement_query_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `perms` = 'school:eduSettlementManage:query'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT '教育局结算管理详情', @edu_settlement_menu_id, 1, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:eduSettlementManage:query', '#',
+       'admin', NOW(), '', NULL, ''
+WHERE @edu_settlement_query_id IS NULL
+  AND @edu_settlement_menu_id IS NOT NULL;
+
+SET @edu_settlement_statistics_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `perms` = 'school:eduSettlementManage:statistics'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT '教育局结算管理统计', @edu_settlement_menu_id, 2, '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:eduSettlementManage:statistics', '#',
+       'admin', NOW(), '', NULL, ''
+WHERE @edu_settlement_statistics_id IS NULL
+  AND @edu_settlement_menu_id IS NOT NULL;
+
+UPDATE `sys_menu`
+SET `parent_id` = @edu_settlement_menu_id,
+    `update_by` = 'admin',
+    `update_time` = NOW()
+WHERE `perms` IN ('school:eduSettlementManage:query', 'school:eduSettlementManage:statistics');
+
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`)
+SELECT r.`role_id`, m.`menu_id`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`perms` IN (
+    'school:eduSettlementManage:list',
+    'school:eduSettlementManage:query',
+    'school:eduSettlementManage:statistics'
+  )
+WHERE r.`role_key` IN ('admin', 'gly')
+  AND r.`del_flag` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`role_id` = r.`role_id`
+      AND rm.`menu_id` = m.`menu_id`
+  );
+
+-- ============================================
+-- Merged from xfpt/sql/20260518_admin_group_notice_query_menu.sql
+-- 管理员新增功能菜单：学校统购公告查询（只读）
+
+SET @new_feature_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_name` = '新增功能'
+    AND `menu_type` = 'M'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+SET @admin_group_notice_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `path` = 'adminGroupNoticeQuery'
+     OR `component` = 'school/groupNoticeReadonly/index'
+     OR (`menu_name` = '学校统购公告查询' AND `menu_type` = 'C')
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT '学校统购公告查询', @new_feature_menu_id, 31,
+       'adminGroupNoticeQuery', 'school/groupNoticeReadonly/index', NULL, 'AdminGroupNoticeQuery',
+       1, 0, 'C', '0', '0', 'school:groupNotice:list', 'message',
+       'admin', NOW(), '', NULL, '管理员只读统购公告查询菜单'
+WHERE @admin_group_notice_menu_id IS NULL
+  AND @new_feature_menu_id IS NOT NULL;
+
+SET @admin_group_notice_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `path` = 'adminGroupNoticeQuery'
+     OR `component` = 'school/groupNoticeReadonly/index'
+     OR (`menu_name` = '学校统购公告查询' AND `menu_type` = 'C')
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '学校统购公告查询',
+    `parent_id` = @new_feature_menu_id,
+    `order_num` = 31,
+    `path` = 'adminGroupNoticeQuery',
+    `component` = 'school/groupNoticeReadonly/index',
+    `route_name` = 'AdminGroupNoticeQuery',
+    `menu_type` = 'C',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'school:groupNotice:list',
+    `icon` = 'message',
+    `update_by` = 'admin',
+    `update_time` = NOW(),
+    `remark` = '管理员只读统购公告查询菜单'
+WHERE `menu_id` = @admin_group_notice_menu_id;
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT '列表', @admin_group_notice_menu_id, 1, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:groupNotice:list', '#',
+       'admin', NOW(), '', NULL, '查看统购公告列表'
+WHERE @admin_group_notice_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM `sys_menu`
+    WHERE `parent_id` = @admin_group_notice_menu_id
+      AND `menu_type` = 'F'
+      AND `perms` = 'school:groupNotice:list'
+  );
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT '详情', @admin_group_notice_menu_id, 2, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'school:groupNotice:query', '#',
+       'admin', NOW(), '', NULL, '查看统购公告详情'
+WHERE @admin_group_notice_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM `sys_menu`
+    WHERE `parent_id` = @admin_group_notice_menu_id
+      AND `menu_type` = 'F'
+      AND `perms` = 'school:groupNotice:query'
+  );
+
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`)
+SELECT r.`role_id`, m.`menu_id`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`menu_id` = @new_feature_menu_id
+  OR m.`menu_id` = @admin_group_notice_menu_id
+  OR m.`parent_id` = @admin_group_notice_menu_id
+WHERE r.`role_key` IN ('admin')
+  AND r.`del_flag` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`role_id` = r.`role_id`
+      AND rm.`menu_id` = m.`menu_id`
+  );
+
 -- Dump completed on 2026-05-04 19:18:33
