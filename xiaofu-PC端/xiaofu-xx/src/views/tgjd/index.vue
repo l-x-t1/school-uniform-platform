@@ -3,24 +3,38 @@
     <!-- 查询表单 -->
     <el-form :inline="true" :model="queryParams" label-width="150px">
       <el-form-item label="付款截止日期：">
-        <el-select v-model="queryParams.dateType" placeholder="请选择" style="width: 120px;"
-          :disabled="queryParams.enableDateRange">
-          <el-option label="全部" value=""></el-option>
-          <el-option label="近一周" value="week"></el-option>
-          <el-option label="近一月" value="month"></el-option>
-          <el-option label="近三月" value="quarter"></el-option>
+        <el-select
+          v-model="queryParams.dateType"
+          placeholder="请选择"
+          style="width: 120px;"
+          :disabled="queryParams.enableDateRange"
+        >
+          <el-option label="全部" value="" />
+          <el-option label="近一周" value="week" />
+          <el-option label="近一月" value="month" />
+          <el-option label="近三月" value="quarter" />
         </el-select>
       </el-form-item>
       <el-form-item label="">
         <el-checkbox v-model="queryParams.enableDateRange">统购结束</el-checkbox>
       </el-form-item>
       <el-form-item label="" class="date-range">
-        <el-date-picker v-model="queryParams.startTime" type="datetime" placeholder="开始日期" style="width: 200px;"
-          value-format="yyyy-MM-dd HH:mm:ss" :disabled="!queryParams.enableDateRange">
-        </el-date-picker>
-        <el-date-picker v-model="queryParams.endTime" type="datetime" placeholder="结束日期" style="width: 200px;"
-          value-format="yyyy-MM-dd HH:mm:ss" :disabled="!queryParams.enableDateRange">
-        </el-date-picker>
+        <el-date-picker
+          v-model="queryParams.startTime"
+          type="datetime"
+          placeholder="开始日期"
+          style="width: 200px;"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          :disabled="!queryParams.enableDateRange"
+        />
+        <el-date-picker
+          v-model="queryParams.endTime"
+          type="datetime"
+          placeholder="结束日期"
+          style="width: 200px;"
+          value-format="yyyy-MM-dd HH:mm:ss"
+          :disabled="!queryParams.enableDateRange"
+        />
       </el-form-item>
 
       <el-form-item label="订购率区间：">
@@ -38,7 +52,7 @@
       </el-form-item>
       <br>
       <el-form-item label="厂商名称：">
-        <el-input v-model="queryParams.manufacturerName" placeholder="请输入厂商名称" style="width: 200px;"></el-input>
+        <el-input v-model="queryParams.manufacturerName" placeholder="请输入厂商名称" style="width: 200px;" />
       </el-form-item>
       <el-form-item>
         <el-button size="small" type="primary" @click="handleQuery">查询</el-button>
@@ -48,18 +62,18 @@
 
     <!-- 数据表格 -->
     <el-table v-loading="loading" :data="tableData" style="width: 100%;">
-      <el-table-column label="公告名称" prop="noticeName" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column label="厂商名称" prop="manufacturerName" :show-overflow-tooltip="true"></el-table-column>
-      <el-table-column label="推广总人数" prop="promotionCount" align="center" width="120"></el-table-column>
-      <el-table-column label="预计销售人数" prop="expectedSalesCount" align="center" width="120"></el-table-column>
-      <el-table-column label="已订购人数" prop="orderCount" align="center" width="120"></el-table-column>
+      <el-table-column label="公告名称" prop="noticeName" :show-overflow-tooltip="true" />
+      <el-table-column label="厂商名称" prop="manufacturerName" :show-overflow-tooltip="true" />
+      <el-table-column label="推广总人数" prop="promotionCount" align="center" width="120" />
+      <el-table-column label="预计销售人数" prop="expectedSalesCount" align="center" width="120" />
+      <el-table-column label="已订购人数" prop="orderCount" align="center" width="120" />
       <el-table-column label="订购率" prop="orderRate" align="center" width="120">
         <template slot-scope="scope">
           <span>{{ scope.row.orderRate }}%</span>
         </template>
       </el-table-column>
-      <el-table-column label="统购时间区间" prop="timeRange" align="center" width="180"></el-table-column>
-      <el-table-column label="剩余时间" prop="remainTime" align="center" width="120"></el-table-column>
+      <el-table-column label="统购时间区间" prop="timeRange" align="center" width="180" />
+      <el-table-column label="剩余时间" prop="remainTime" align="center" width="120" />
       <el-table-column label="操作" align="center" width="120">
         <template slot-scope="scope">
           <el-button size="mini" type="text" @click="handleView(scope.row)">查看</el-button>
@@ -68,8 +82,13 @@
     </el-table>
 
     <!-- 分页组件 -->
-    <pagination v-show="total > 0" :total="total" :page.sync="queryParams.pageNum" :limit.sync="queryParams.pageSize"
-      @pagination="getList"></pagination>
+    <pagination
+      v-show="total > 0"
+      :total="total"
+      :page.sync="queryParams.pageNum"
+      :limit.sync="queryParams.pageSize"
+      @pagination="getList"
+    />
 
     <!-- 查看详情弹窗 -->
     <el-dialog title="订购详情" :visible.sync="dialogVisible" width="900px" append-to-body>
@@ -104,11 +123,11 @@
         <div class="form-section-title">订购明细</div>
 
         <el-table :data="detailInfo.orderList" border style="width: 100%">
-          <el-table-column label="商品名称" prop="productName" :show-overflow-tooltip="true"></el-table-column>
-          <el-table-column label="商品单价" prop="price" width="120" align="center"></el-table-column>
-          <el-table-column label="订购数量" prop="quantity" width="120" align="center"></el-table-column>
-          <el-table-column label="订购人" prop="orderPerson" width="120" align="center"></el-table-column>
-          <el-table-column label="订购时间" prop="orderTime" width="180" align="center"></el-table-column>
+          <el-table-column label="商品名称" prop="productName" :show-overflow-tooltip="true" />
+          <el-table-column label="商品单价" prop="price" width="120" align="center" />
+          <el-table-column label="订购数量" prop="quantity" width="120" align="center" />
+          <el-table-column label="订购人" prop="orderPerson" width="120" align="center" />
+          <el-table-column label="订购时间" prop="orderTime" width="180" align="center" />
         </el-table>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -156,39 +175,39 @@ export default {
         orderRate: 0,
         orderList: []
       }
-    };
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
     /** 查询列表 */
     getList() {
-      this.loading = true;
+      this.loading = true
       listGroupNoticeProgress(this.queryParams).then(response => {
-        this.tableData = response.rows || [];
-        this.total = response.total || 0;
+        this.tableData = response.rows || []
+        this.total = response.total || 0
       }).finally(() => {
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
 
     /** 查询按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
 
     /** 数据导出操作 */
     handleExport() {
       this.$modal.confirm('是否确认导出所有统购进度数据？').then(() => {
-        this.$modal.msgSuccess("导出成功");
-      }).catch(() => { });
+        this.$modal.msgSuccess('导出成功')
+      }).catch(() => { })
     },
 
     /** 查看详情按钮操作 */
     handleView(row) {
-      this.dialogVisible = true;
+      this.dialogVisible = true
       this.detailInfo = {
         noticeName: row.noticeName,
         manufacturerName: row.manufacturerName,
@@ -197,19 +216,19 @@ export default {
         orderCount: row.orderCount,
         orderRate: row.orderRate,
         orderList: []
-      };
+      }
       getGroupNoticeProgressDetail(row.noticeId || row.id, row.supplierId).then(response => {
-        this.detailInfo.orderList = response.data || [];
-      });
+        this.detailInfo.orderList = response.data || []
+      })
     },
 
     /** 导出明细操作 */
     handleExportDetail() {
-      this.$modal.msgSuccess("明细导出成功");
-      this.dialogVisible = false;
+      this.$modal.msgSuccess('明细导出成功')
+      this.dialogVisible = false
     }
   }
-};
+}
 </script>
 
 <style scoped>

@@ -11,6 +11,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderId" column="order_id" />
         <result property="orderItemId" column="order_item_id" />
         <result property="orderNo" column="order_no" />
+        <result property="userName" column="user_name" />
+        <result property="studentName" column="student_name" />
         <result property="goodsId" column="goods_id" />
         <result property="productName" column="product_name" />
         <result property="productCode" column="product_code" />
@@ -24,6 +26,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="sizeName" column="size_name" />
         <result property="targetSizeName" column="target_size_name" />
         <result property="applyNum" column="apply_num" />
+        <result property="reason" column="reason" />
+        <result property="imagesJson" column="images_json" />
+        <result property="auditBy" column="audit_by" />
+        <result property="auditTime" column="audit_time" />
+        <result property="handleResult" column="handle_result" />
+        <result property="handleRemark" column="handle_remark" />
+        <result property="finishTime" column="finish_time" />
+        <result property="createTime" column="create_time" />
         <result property="deptId" column="dept_id" />
     </resultMap>
 
@@ -35,6 +45,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             a.order_id,
             a.order_item_id,
             a.order_no,
+            a.user_name,
+            a.student_name,
             item.goods_id,
             coalesce(g.goods_name, item.goods_name) as product_name,
             g.goods_code as product_code,
@@ -48,6 +60,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             item.size_name,
             a.target_size_name,
             a.apply_num,
+            a.reason,
+            a.images_json,
+            a.audit_by,
+            a.audit_time,
+            a.handle_result,
+            a.handle_remark,
+            a.finish_time,
+            a.create_time,
             a.dept_id
         from xfpt_after_sale a
         left join xfpt_order_info oi on a.order_id = oi.id and oi.del_flag = '0'
@@ -111,6 +131,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             a.order_id,
             a.order_item_id,
             a.order_no,
+            a.user_name,
+            a.student_name,
             item.goods_id,
             coalesce(g.goods_name, item.goods_name) as product_name,
             g.goods_code as product_code,
@@ -124,6 +146,14 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             item.size_name,
             a.target_size_name,
             a.apply_num,
+            a.reason,
+            a.images_json,
+            a.audit_by,
+            a.audit_time,
+            a.handle_result,
+            a.handle_remark,
+            a.finish_time,
+            a.create_time,
             a.dept_id
         from xfpt_after_sale a
         left join xfpt_order_info oi on a.order_id = oi.id and oi.del_flag = '0'

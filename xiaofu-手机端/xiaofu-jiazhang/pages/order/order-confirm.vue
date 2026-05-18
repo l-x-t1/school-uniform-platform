@@ -336,6 +336,9 @@ export default {
         .then(async (res) => {
           const data = res.data || res;
           const orderId = data.id || data.orderId;
+          if (!orderId) {
+            throw new Error('订单创建成功，但未获取到订单编号，请稍后在订单列表中查看');
+          }
           const localOrder = {
             id: orderId,
             orderNo: data.orderNo || `XF${Date.now()}`,

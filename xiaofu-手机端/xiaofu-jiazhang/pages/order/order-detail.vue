@@ -135,6 +135,11 @@
         @click="cancelOrder"
       >取消订单</button>
       <button
+        class="footer-btn outline danger"
+        v-if="canDelete(order.status)"
+        @click="deleteOrder"
+      >删除订单</button>
+      <button
         class="footer-btn primary"
         v-if="canPay(order.status)"
         @click="payOrder"
@@ -150,10 +155,20 @@
         @click="applyReturn"
       >申请退换</button>
       <button
+        class="footer-btn outline"
+        v-if="canViewAfterSale()"
+        @click="viewAfterSale"
+      >查看售后</button>
+      <button
         class="footer-btn primary"
         v-if="canComment(order)"
         @click="commentOrder"
       >评价</button>
+      <button
+        class="footer-btn outline"
+        v-if="canViewComment(order)"
+        @click="viewComment"
+      >查看评价</button>
       <button
         class="footer-btn outline"
         v-if="canReorder(order.status)"
@@ -166,6 +181,7 @@
 <script>
 import config from '@/config'
 import { getOrder, cancelOrder as cancelOrderApi, confirmOrder } from '@/api/order'
+import { listAfterSale } from '@/api/afterSale'
 
 export default {
   data() {
@@ -195,7 +211,8 @@ export default {
       logistics: {
         status: '暂无物流信息',
         updateTime: ''
-      }
+      },
+      afterSaleInfo: null
     }
   },
   computed: {
@@ -205,7 +222,9 @@ export default {
              this.canPay(this.order.status) || 
              this.canConfirm(this.order.status) || 
              this.canReturn(this.order.status) ||
+             this.canViewAfterSale() ||
              this.canComment(this.order) ||
+             this.canViewComment(this.order) ||
              this.canReorder(this.order.status);
     },
     
@@ -221,9 +240,15 @@ export default {
     }
   },
   methods: {
+    isLocalOnlyOrder(orderId = this.id) {
+      return String(orderId || '').startsWith('DEV');
+    },
+
     normalizeOrder(data = {}) {
-      const products = data.products || data.items || data.orderItems || [];
+      const products = data.products || data.items || data.orderItems || data.xfptOrderItemList || [];
       const address = data.address || {};
+      const commentedOrders = uni.getStorageSync('commentedOrders') || {};
+      const localCommented = !!commentedOrders[data.id || data.orderId || this.id]?.commented;
       const fullAddress =
         address.fullAddress ||
         data.fullAddress ||
@@ -233,10 +258,12 @@ export default {
         id: data.id || data.orderId || this.id,
         orderNo: data.orderNo || data.orderSn || data.orderCode || this.id,
         status: this.normalizeStatus(data.status),
+        commented: !!(data.commented || data.commentFlag || localCommented),
+        commentFlag: !!(data.commentFlag || localCommented),
         createTime: data.createTime || '',
         payTime: data.payTime || '',
         shipTime: data.shipTime || data.deliveryTime || '',
-        completeTime: data.completeTime || null,
+        completeTime: data.completeTime || data.finishTime || null,
         productsAmount: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
         shippingFee: data.shippingFee || data.freightAmount || '0.00',
         discount: data.discount || '0.00',
@@ -249,15 +276,15 @@ export default {
           fullAddress: fullAddress || '暂无收货地址'
         },
         products: products.map((item) => ({
-          id: item.id || item.uniformId,
+          id: item.id || item.goodsId || item.uniformId,
           orderItemId: item.orderItemId || item.id,
-          goodsId: item.goodsId || item.uniformId || item.id,
-          name: item.name || item.uniformName || item.productName || '校服',
-          image: item.image || item.productImage || item.coverImage || '/static/qjxf.png',
-          price: item.price || item.salePrice || '0.00',
+          goodsId: item.goodsId || item.uniformId || item.productId || item.id,
+          name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
+          image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png',
+          price: item.price || item.unitPrice || item.salePrice || '0.00',
           size: item.size || item.sizeName || '-',
-          color: item.color || item.spec || '默认款',
-          quantity: item.quantity || item.count || 1,
+          color: item.color || item.colorName || item.spec || '默认款',
+          quantity: item.quantity || item.buyNum || item.count || 1,
           supplierId: item.supplierId
         }))
       };
@@ -270,11 +297,13 @@ export default {
         2: 'shipped',
         3: 'completed',
         4: 'cancelled',
+        6: 'afterSale',
         unpaid: 'unpaid',
         unshipped: 'unshipped',
         shipped: 'shipped',
         completed: 'completed',
-        cancelled: 'cancelled'
+        cancelled: 'cancelled',
+        afterSale: 'afterSale'
       };
       return map[status] || status || 'unpaid';
     },
@@ -287,13 +316,15 @@ export default {
     // 获取订单详情数据
     fetchOrderDetail() {
       const localOrder = this.getLocalOrder();
-      if (config.enableMockFallback && localOrder) {
+      if (config.enableMockFallback && this.isLocalOnlyOrder() && localOrder) {
         this.order = this.normalizeOrder(localOrder);
+        this.loadAfterSaleInfo();
         return;
       }
       getOrder(this.id)
         .then((res) => {
           this.order = this.normalizeOrder(res.data || res);
+          this.loadAfterSaleInfo();
         })
         .catch((error) => {
           uni.showToast({
@@ -309,6 +340,7 @@ export default {
         'unpaid': 'wallet',
         'unshipped': 'box',
         'shipped': 'car',
+        'afterSale': 'reload',
         'completed': 'checkmarkempty',
         'cancelled': 'closeempty',
         'refunding': 'refresh',
@@ -323,6 +355,7 @@ export default {
         'unpaid': '待付款',
         'unshipped': '待发货',
         'shipped': '运输中',
+        'afterSale': '售后中',
         'completed': '已完成',
         'cancelled': '已取消',
         'refunding': '退款中',
@@ -337,6 +370,7 @@ export default {
         'unpaid': '请在24小时内完成支付',
         'unshipped': '商家正在处理您的订单',
         'shipped': '校服已发出，请注意查收',
+        'afterSale': '售后申请已提交，请查看售后处理进度',
         'completed': '感谢您的购买，欢迎再次选购',
         'cancelled': '订单已取消',
         'refunding': '退款申请处理中',
@@ -380,7 +414,7 @@ export default {
     
     // 是否可以取消订单
     canCancel(status) {
-      return ['unpaid', 'unshipped'].includes(status);
+      return status === 'unpaid';
     },
     
     // 是否可以支付
@@ -395,7 +429,15 @@ export default {
     
     // 是否可以申请退换
     canReturn(status) {
-      return ['unshipped', 'shipped', 'completed'].includes(status);
+      return ['unshipped', 'shipped', 'completed'].includes(status) && !this.afterSaleInfo;
+    },
+
+    canViewAfterSale() {
+      return !!(this.afterSaleInfo && this.afterSaleInfo.id);
+    },
+
+    canDelete(status) {
+      return status === 'cancelled';
     },
     
     // 是否可以再次购买
@@ -405,6 +447,10 @@ export default {
 
     canComment(order) {
       return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
+
+    canViewComment(order) {
+      return order.status === 'completed' && !!(order.commentFlag || order.commented);
     },
     
     // 取消订单
@@ -483,13 +529,56 @@ export default {
     
     // 申请退换
     applyReturn() {
+      const options = ['退货退款', '换货', '仅退款'];
+      const typeMap = ['2', '3', '1'];
+      uni.showActionSheet({
+        itemList: options,
+        success: (res) => {
+          const applyType = typeMap[res.tapIndex] || '2';
+          const query = [
+            `id=${this.id}`,
+            `orderNo=${encodeURIComponent(this.order.orderNo || '')}`,
+            `amount=${encodeURIComponent(this.order.payAmount || this.order.totalAmount || '0.00')}`,
+            `applyType=${applyType}`
+          ].join('&');
+          uni.navigateTo({
+            url: `/pages/order/return-apply?${query}`
+          });
+        }
+      });
+    },
+
+    async loadAfterSaleInfo() {
+      try {
+        const res = await listAfterSale({
+          orderId: this.id,
+          pageNum: 1,
+          pageSize: 20
+        });
+        const rows = res.rows || [];
+        if (!rows.length) {
+          this.afterSaleInfo = null;
+          return;
+        }
+        const latest = rows.sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')))[0];
+        this.afterSaleInfo = latest;
+        if (['0', '1', '3'].includes(String(latest.status || '0'))) {
+          this.order.status = 'afterSale';
+        }
+      } catch (error) {
+        this.afterSaleInfo = null;
+      }
+    },
+
+    viewAfterSale() {
+      if (!this.afterSaleInfo || !this.afterSaleInfo.id) return;
       const query = [
         `id=${this.id}`,
-        `orderNo=${encodeURIComponent(this.order.orderNo || '')}`,
-        `amount=${encodeURIComponent(this.order.payAmount || this.order.totalAmount || '0.00')}`
-      ].join('&')
+        `afterSaleId=${this.afterSaleInfo.id}`,
+        `afterSaleNo=${encodeURIComponent(this.afterSaleInfo.afterSaleNo || '')}`
+      ].join('&');
       uni.navigateTo({
-        url: `/pages/order/return-apply?${query}`
+        url: `/pages/order/after-sale-detail?${query}`
       });
     },
 
@@ -497,6 +586,12 @@ export default {
       uni.setStorageSync('pendingCommentOrder', this.order);
       uni.navigateTo({
         url: `/pages/order/comment-apply?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
+      });
+    },
+
+    viewComment() {
+      uni.navigateTo({
+        url: `/pages/order/comment-detail?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
       });
     },
     
@@ -520,10 +615,47 @@ export default {
 
     saveLocalOrder() {
       const localOrders = uni.getStorageSync('devOrders') || {};
-      if (localOrders[this.id]) {
+      if (this.isLocalOnlyOrder() && localOrders[this.id]) {
         localOrders[this.id] = this.order;
         uni.setStorageSync('devOrders', localOrders);
       }
+    },
+
+    removeLocalOrder() {
+      const localOrders = uni.getStorageSync('devOrders') || {};
+      if (this.isLocalOnlyOrder() && localOrders[this.id]) {
+        delete localOrders[this.id];
+        uni.setStorageSync('devOrders', localOrders);
+      }
+    },
+
+    deleteOrder() {
+      uni.showModal({
+        title: '删除订单',
+        content: '删除后无法恢复，确定删除这个已取消订单吗？',
+        success: (res) => {
+          if (!res.confirm) return;
+          uni.showLoading({ title: '删除中' });
+          import('@/api/order').then(({ deleteOrder: deleteOrderApi }) => {
+            deleteOrderApi(this.id)
+              .then(() => {
+                uni.hideLoading();
+                this.removeLocalOrder();
+                uni.showToast({ title: '已删除', icon: 'success' });
+                setTimeout(() => {
+                  uni.navigateBack();
+                }, 500);
+              })
+              .catch((error) => {
+                uni.hideLoading();
+                uni.showToast({
+                  title: error.message || '删除失败',
+                  icon: 'none'
+                });
+              });
+          });
+        }
+      });
     }
   }
 }
@@ -847,6 +979,16 @@ export default {
       background-color: #3B7AFF;
       color: #fff;
       
+      &::after {
+        border: none;
+      }
+    }
+
+    &.danger {
+      background-color: #fff5f5;
+      color: #f04438;
+      border: 1rpx solid #ffd6d6;
+
       &::after {
         border: none;
       }

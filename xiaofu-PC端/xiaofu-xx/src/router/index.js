@@ -167,6 +167,19 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/school/groupNoticeReadonly",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/groupNoticeReadonly/index"),
+        name: "AdminGroupNoticeQuery",
+        meta: { title: "学校统购公告查询", activeMenu: "/newFeature/adminGroupNoticeQuery" },
+      },
+    ],
+  },
+  {
     path: "/school/schoolUsage",
     component: Layout,
     hidden: true,

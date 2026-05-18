@@ -133,6 +133,7 @@ public class SysRoleController extends BaseController
     {
         roleService.checkRoleAllowed(role);
         roleService.checkRoleDataScope(role.getRoleId());
+        role.setUpdateBy(SecurityUtils.getUsername());
         return toAjax(roleService.authDataScope(role));
     }
 

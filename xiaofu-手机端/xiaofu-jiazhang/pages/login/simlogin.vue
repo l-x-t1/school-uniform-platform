@@ -8,6 +8,8 @@
 </template>
 
 <script>
+import { setToken, setUserInfo } from '@/utils/auth'
+
 export default {
   data() {
     return {
@@ -48,10 +50,20 @@ export default {
           if(res.data.code == 200){ 
             uni.hideLoading();
             this.data = res.data.data;
-            uni.setStorageSync('token', res.data.data.access_token);
+            uni.removeStorageSync('devOrders');
+            uni.removeStorageSync('pendingCommentOrder');
+            uni.removeStorageSync('selectedOrder');
+            setToken(res.data.data.access_token);
             uni.setStorageSync('simId', res.data.data.user.id);
             uni.setStorageSync('isImprove', res.data.data.is_improve);
             uni.setStorageSync('phone', res.data.data.user.parm1);
+            setUserInfo({
+              ...(res.data.data.user || {}),
+              id: res.data.data.user.id,
+              userId: res.data.data.user.id,
+              phone: res.data.data.user.parm1,
+              userType: 'parent'
+            });
             if(res.data.data.is_improve == 0){
               uni.redirectTo({
                 url: '/pages/user/student-info'
@@ -101,10 +113,20 @@ export default {
           uni.hideLoading();
           if (res.data.code === 200) {
             this.data = res.data.data;
-            uni.setStorageSync('token', res.data.data.access_token);
+            uni.removeStorageSync('devOrders');
+            uni.removeStorageSync('pendingCommentOrder');
+            uni.removeStorageSync('selectedOrder');
+            setToken(res.data.data.access_token);
             uni.setStorageSync('simId', res.data.data.user.id);
             uni.setStorageSync('isImprove', res.data.data.is_improve);
             uni.setStorageSync('phone', res.data.data.user.parm1);
+            setUserInfo({
+              ...(res.data.data.user || {}),
+              id: res.data.data.user.id,
+              userId: res.data.data.user.id,
+              phone: res.data.data.user.parm1,
+              userType: 'parent'
+            });
             uni.redirectTo({
               url: res.data.data.is_improve == 0 ? '/pages/user/student-info' : '/pages/index/index'
             });

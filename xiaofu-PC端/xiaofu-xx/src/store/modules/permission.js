@@ -87,8 +87,12 @@ function ensureSupplierGroupNoticeMenu(routes = []) {
     children.some(
       (item) =>
         item.path === "supplierGroupNotice" ||
+        item.path === "adminGroupNoticeQuery" ||
         item.path === "/newFeature/supplierGroupNotice" ||
-        item.component === "school/groupNotice/index"
+        item.path === "/newFeature/adminGroupNoticeQuery" ||
+        item.component === "school/groupNotice/index" ||
+        item.component === "school/groupNoticeReadonly/index" ||
+        (item.meta && item.meta.title === "学校统购公告查询")
     );
 
   const appendMenu = (route) => {

@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.xfgl.school.mapper.XfptEduSettlementMapper">
+
+    <resultMap type="XfptEduSettlement" id="XfptEduSettlementResult">
+        <result property="id" column="id" />
+        <result property="unitName" column="unit_name" />
+        <result property="projectName" column="project_name" />
+        <result property="settlementCycle" column="settlement_cycle" />
+        <result property="status" column="status" />
+        <result property="settlementAmount" column="settlement_amount" />
+        <result property="taxAmount" column="tax_amount" />
+        <result property="paidAmount" column="paid_amount" />
+        <result property="unpaidAmount" column="unpaid_amount" />
+        <result property="deptId" column="dept_id" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
+    </resultMap>
+
+    <resultMap type="com.xfgl.school.domain.vo.EduSettlementStatisticsVO" id="EduSettlementStatisticsResult">
+        <result property="settlementAmount" column="settlement_amount" />
+        <result property="taxAmount" column="tax_amount" />
+        <result property="paidAmount" column="paid_amount" />
+        <result property="unpaidAmount" column="unpaid_amount" />
+        <result property="totalCount" column="total_count" />
+        <result property="pendingCount" column="pending_count" />
+        <result property="partialCount" column="partial_count" />
+        <result property="settledCount" column="settled_count" />
+    </resultMap>
+
+    <sql id="selectXfptEduSettlementVo">
+        select id, unit_name, project_name, settlement_cycle, status, settlement_amount, tax_amount,
+               paid_amount, unpaid_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_edu_settlement
+    </sql>
+
+    <sql id="search">
+        <where>
+            del_flag = '0'
+            <if test="unitName != null and unitName != ''"> and unit_name like concat('%', #{unitName}, '%')</if>
+            <if test="projectName != null and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
+            <if test="settlementCycle != null and settlementCycle != ''"> and settlement_cycle = #{settlementCycle}</if>
+            <if test="status != null and status != ''"> and status = #{status}</if>
+            <if test="deptId != null"> and dept_id = #{deptId}</if>
+        </where>
+    </sql>
+
+    <select id="selectXfptEduSettlementList" parameterType="XfptEduSettlement" resultMap="XfptEduSettlementResult">
+        <include refid="selectXfptEduSettlementVo"/>
+        <include refid="search"/>
+        order by settlement_cycle desc, id desc
+    </select>
+
+    <select id="selectXfptEduSettlementStatistics" parameterType="XfptEduSettlement" resultMap="EduSettlementStatisticsResult">
+        select
+            coalesce(sum(settlement_amount), 0) as settlement_amount,
+            coalesce(sum(tax_amount), 0) as tax_amount,
+            coalesce(sum(paid_amount), 0) as paid_amount,
+            coalesce(sum(unpaid_amount), 0) as unpaid_amount,
+            count(1) as total_count,
+            sum(case when status = '0' then 1 else 0 end) as pending_count,
+            sum(case when status = '1' then 1 else 0 end) as partial_count,
+            sum(case when status = '2' then 1 else 0 end) as settled_count
+        from xfpt_edu_settlement
+        <include refid="search"/>
+    </select>
+</mapper>

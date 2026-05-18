@@ -11,10 +11,10 @@
     <el-form :inline="true" :model="queryParams">
       <el-form-item label="发货状态：">
         <el-select v-model="queryParams.deliveryStatus" placeholder="请选择" clearable style="width: 180px;">
-          <el-option label="全部" value=""></el-option>
-          <el-option label="待发货" value="0"></el-option>
-          <el-option label="已发货" value="1"></el-option>
-          <el-option label="已签收" value="2"></el-option>
+          <el-option label="全部" value="" />
+          <el-option label="待发货" value="0" />
+          <el-option label="已发货" value="1" />
+          <el-option label="已签收" value="2" />
         </el-select>
       </el-form-item>
       <el-form-item label="厂商名称：">
@@ -76,46 +76,46 @@ export default {
         deliveryStatus: '',
         supplierName: ''
       }
-    };
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
     getList() {
-      this.loading = true;
+      this.loading = true
       listDeliveryStatistics(this.queryParams).then(response => {
-        this.tableData = response.rows || [];
-        this.total = response.total || 0;
+        this.tableData = response.rows || []
+        this.total = response.total || 0
       }).catch(() => {
-        this.tableData = [];
-        this.total = 0;
+        this.tableData = []
+        this.total = 0
       }).finally(() => {
-        this.loading = false;
-      });
+        this.loading = false
+      })
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
     statusText(status) {
       const textMap = {
         '0': '待发货',
         '1': '已发货',
         '2': '已签收'
-      };
-      return textMap[status] || '-';
+      }
+      return textMap[status] || '-'
     },
     statusTagType(status) {
       const typeMap = {
         '0': 'info',
         '1': 'warning',
         '2': 'success'
-      };
-      return typeMap[status] || 'info';
+      }
+      return typeMap[status] || 'info'
     }
   }
-};
+}
 </script>
 
 <style scoped>

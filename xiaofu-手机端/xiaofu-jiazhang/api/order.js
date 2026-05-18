@@ -49,6 +49,12 @@ function getOrderTypeText(orderType) {
   return String(orderType || '1') === '2' ? '零售购买' : '统购购买'
 }
 
+function getCurrentTime() {
+  const now = new Date()
+  const pad = (value) => String(value).padStart(2, '0')
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`
+}
+
 function normalizeOrderItem(item = {}) {
   const price = item.unitPrice || item.price || item.salePrice || '0.00'
   const quantity = Number(item.buyNum || item.quantity || item.num || 1)
@@ -74,28 +80,6 @@ function normalizeOrderItem(item = {}) {
   }
 }
 
-function buildOrderItemPayload(item = {}, orderType = '2', createBy = getCurrentUserName()) {
-  const quantity = Number(item.quantity || item.buyNum || 1)
-  const unitPrice = Number(item.price || item.unitPrice || 0)
-
-  return {
-    id: item.id,
-    goodsId: Number(item.goodsId || item.uniformId || item.id || 0),
-    sizeId: item.sizeId ? Number(item.sizeId) : null,
-    goodsName: item.name || item.goodsName || '校服',
-    sizeName: item.size || item.sizeName || '',
-    mainImage: item.image || item.mainImage || '/static/qjxf.png',
-    saleType: item.saleType || orderType,
-    unitPrice,
-    buyNum: quantity,
-    itemAmount: Number((unitPrice * quantity).toFixed(2)),
-    deptId: item.deptId || 1,
-    createBy,
-    remark: item.remark || '',
-    delFlag: item.delFlag || '0'
-  }
-}
-
 function normalizeOrder(order = {}) {
   const items = order.xfptOrderItemList || order.orderItems || order.items || []
   return {
@@ -113,6 +97,49 @@ function normalizeOrder(order = {}) {
   }
 }
 
+function resolveOrderItemId(item = {}) {
+  const goodsId = item.goodsId || item.uniformId || item.productId || item.id
+  const rawId = item.id
+  if (item.orderItemId) {
+    return item.orderItemId
+  }
+  if (rawId && String(rawId) !== String(goodsId)) {
+    return rawId
+  }
+  return null
+}
+
+function buildOrderItemsPayload(items = [], options = {}) {
+  const {
+    orderType = '1',
+    deptId,
+    operatorName = getCurrentUserName()
+  } = options
+
+  return items.map((item) => {
+    const price = item.unitPrice || item.price || item.salePrice || '0.00'
+    const quantity = Number(item.buyNum || item.quantity || item.num || 1)
+    return {
+      id: resolveOrderItemId(item),
+      orderId: item.orderId || null,
+      goodsId: item.goodsId || item.uniformId || item.productId || item.id,
+      sizeId: item.sizeId || item.skuId || null,
+      goodsName: item.goodsName || item.name || item.productName || item.uniformName || '校服',
+      sizeName: item.sizeName || item.size || '-',
+      mainImage: item.mainImage || item.image || item.productImage || item.coverImage || '/static/qjxf.png',
+      saleType: String(item.saleType || item.orderType || orderType || '1'),
+      unitPrice: price,
+      buyNum: quantity,
+      itemAmount: formatPrice(item.itemAmount || Number(price || 0) * quantity),
+      deptId: item.deptId || item.schoolId || deptId || 1,
+      createBy: item.createBy || operatorName,
+      updateBy: operatorName,
+      remark: item.remark || '',
+      delFlag: item.delFlag || '0'
+    }
+  })
+}
+
 function buildOrderPayload(data = {}) {
   const userId = getCurrentUserId()
   const userName = getCurrentUserName()
@@ -124,23 +151,21 @@ function buildOrderPayload(data = {}) {
     {}
   const selectedAddress = uni.getStorageSync('selectedAddress') || {}
   const items = Array.isArray(data.items) ? data.items : []
-  const orderType = '2'
-  const orderItems = items.map((item) => buildOrderItemPayload(item, orderType, userName))
-  const totalAmount = items.reduce((sum, item) => {
-    return sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1)
-  }, 0)
+  const totalAmount = items.reduce((sum, item) => sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1), 0)
 
+  const orderType = String(data.orderType || items[0]?.orderType || items[0]?.saleType || '2')
+  const deptId = Number(selectedStudent.deptId || selectedStudent.schoolId || 1)
   return {
     orderNo: `APP${Date.now()}`,
     orderType,
     noticeId: 1,
-    schoolId: Number(selectedStudent.schoolId || selectedStudent.shcoolId || 1),
+    schoolId: Number(selectedStudent.schoolId || 1),
     schoolName: selectedStudent.school || selectedStudent.schoolName || '测试学校',
     supplierId: Number(items[0]?.supplierId || 1),
     supplierName: items[0]?.supplierName || '测试供应商',
     userId,
     userName,
-    studentId: Number(data.studentId || selectedStudent.id || selectedStudent.studentId || 1),
+    studentId: Number(data.studentId || selectedStudent.id || 1),
     studentName: selectedStudent.name || selectedStudent.studentName || '测试学生',
     gradeName: selectedStudent.grade || selectedStudent.gradeName || '',
     className: selectedStudent.className || '',
@@ -154,15 +179,20 @@ function buildOrderPayload(data = {}) {
     refundAmount: 0,
     payStatus: '0',
     orderStatus: '0',
-    deptId: 1,
+    deptId,
     createBy: userName,
     remark: data.remark || '',
     delFlag: '0',
-    xfptOrderItemList: orderItems
+    xfptOrderItemList: buildOrderItemsPayload(items, {
+      orderType,
+      deptId,
+      operatorName: userName
+    })
   }
 }
 
 function buildOrderUpdate(order = {}, patch = {}) {
+  const orderItems = order.xfptOrderItemList || order.orderItems || order.items || []
   return {
     id: order.id,
     orderNo: order.orderNo,
@@ -188,11 +218,18 @@ function buildOrderUpdate(order = {}, patch = {}) {
     refundAmount: order.refundAmount || 0,
     payStatus: order.payStatus || '0',
     orderStatus: order.orderStatus || '0',
+    payTime: order.payTime,
+    cancelTime: order.cancelTime,
+    finishTime: order.finishTime,
     deptId: order.deptId || 1,
     updateBy: getCurrentUserName(),
     remark: order.remark || '',
     delFlag: order.delFlag || '0',
-    xfptOrderItemList: order.xfptOrderItemList || order.orderItems || order.items || [],
+    xfptOrderItemList: buildOrderItemsPayload(orderItems, {
+      orderType: order.orderType || '2',
+      deptId: order.deptId || order.schoolId || 1,
+      operatorName: getCurrentUserName()
+    }),
     ...patch
   }
 }
@@ -203,6 +240,24 @@ async function fetchBackendOrder(id) {
     method: 'GET'
   })
   return res.data || res
+}
+
+async function findOrderByOrderNo(orderNo) {
+  if (!orderNo) {
+    return null
+  }
+  const res = await request({
+    url: '/school/orderInfo/list',
+    method: 'GET',
+    params: {
+      userId: getCurrentUserId(),
+      orderNo,
+      pageNum: 1,
+      pageSize: 10
+    }
+  })
+  const rows = res.rows || []
+  return rows.find((item) => String(item.orderNo || '') === String(orderNo)) || rows[0] || null
 }
 
 export function listOrders(params = {}) {
@@ -237,13 +292,29 @@ export function createOrder(data) {
     url: '/school/orderInfo',
     method: 'POST',
     data: payload
-  }).then((res) => ({
-    ...res,
-    data: {
-      ...(res.data || {}),
-      orderNo: payload.orderNo
+  }).then(async (res) => {
+    const responseData = res.data || {}
+    let orderData = {
+      ...responseData,
+      orderNo: responseData.orderNo || payload.orderNo
     }
-  }))
+
+    if (!orderData.id && !orderData.orderId) {
+      const createdOrder = await findOrderByOrderNo(payload.orderNo)
+      if (createdOrder) {
+        orderData = {
+          ...createdOrder,
+          orderId: createdOrder.id || createdOrder.orderId,
+          orderNo: createdOrder.orderNo || payload.orderNo
+        }
+      }
+    }
+
+    return {
+      ...res,
+      data: orderData
+    }
+  })
 }
 
 export async function cancelOrder(id) {
@@ -253,7 +324,8 @@ export async function cancelOrder(id) {
     method: 'PUT',
     data: buildOrderUpdate(order, {
       payStatus: order.payStatus || '0',
-      orderStatus: '5'
+      orderStatus: '5',
+      cancelTime: getCurrentTime()
     })
   })
 }
@@ -265,7 +337,9 @@ export async function confirmOrder(id) {
     method: 'PUT',
     data: buildOrderUpdate(order, {
       payStatus: '1',
-      orderStatus: '4'
+      orderStatus: '4',
+      payTime: order.payTime || getCurrentTime(),
+      finishTime: getCurrentTime()
     })
   })
 }
@@ -277,7 +351,15 @@ export async function payOrder(id) {
     method: 'PUT',
     data: buildOrderUpdate(order, {
       payStatus: '1',
-      orderStatus: '2'
+      orderStatus: '2',
+      payTime: getCurrentTime()
     })
+  })
+}
+
+export async function deleteOrder(id) {
+  return request({
+    url: `/school/orderInfo/${id}`,
+    method: 'DELETE'
   })
 }

@@ -81,7 +81,11 @@ public class XfptOrderInfoController extends BaseController {
     @Log(title = "订单信息" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptOrderInfo xfptOrderInfo) {
-            return toAjax(xfptOrderInfoService.insertXfptOrderInfo(xfptOrderInfo));
+            int rows = xfptOrderInfoService.insertXfptOrderInfo(xfptOrderInfo);
+            if (rows <= 0) {
+                return error("新增订单失败");
+            }
+            return success(xfptOrderInfo);
     }
 
     /**
