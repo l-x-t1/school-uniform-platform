@@ -70,6 +70,10 @@ export default {
     }
   },
   methods: {
+    isLocalOnlyOrder(orderId = this.orderId) {
+      return String(orderId || '').startsWith('DEV')
+    },
+
     loadOrder() {
       getOrder(this.orderId)
         .then((res) => {
@@ -77,7 +81,7 @@ export default {
         })
         .catch((error) => {
           const localOrders = uni.getStorageSync('devOrders') || {}
-          if (config.enableMockFallback && localOrders[this.orderId]) {
+          if (config.enableMockFallback && this.isLocalOnlyOrder() && localOrders[this.orderId]) {
             this.initOrder(localOrders[this.orderId])
             return
           }
@@ -138,12 +142,15 @@ export default {
       this.submitting = true
       uni.showLoading({ title: '提交中...' })
       Promise.all(this.commentItems.map((item) => createComment(this.buildPayload(item))))
-        .then(() => {
+        .then((responses) => {
           this.markLocalOrderCommented()
+          this.saveCommentDetailSnapshot(responses)
           uni.hideLoading()
           uni.showToast({ title: '评价已提交', icon: 'success' })
           setTimeout(() => {
-            uni.navigateBack()
+            uni.redirectTo({
+              url: `/pages/order/comment-detail?id=${this.orderId}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
+            })
           }, 800)
         })
         .catch((error) => {
@@ -159,11 +166,44 @@ export default {
     },
 
     markLocalOrderCommented() {
+      const commentedOrders = uni.getStorageSync('commentedOrders') || {}
+      commentedOrders[this.orderId] = {
+        commented: true,
+        commentedAt: Date.now()
+      }
+      uni.setStorageSync('commentedOrders', commentedOrders)
+
       const localOrders = uni.getStorageSync('devOrders') || {}
-      if (localOrders[this.orderId]) {
+      if (this.isLocalOnlyOrder() && localOrders[this.orderId]) {
         localOrders[this.orderId].commented = true
         uni.setStorageSync('devOrders', localOrders)
       }
+    },
+
+    saveCommentDetailSnapshot() {
+      const commentDetails = uni.getStorageSync('commentedOrderDetails') || {}
+      const submittedAt = new Date()
+      const pad = (num) => String(num).padStart(2, '0')
+      const createTime = `${submittedAt.getFullYear()}-${pad(submittedAt.getMonth() + 1)}-${pad(submittedAt.getDate())} ${pad(submittedAt.getHours())}:${pad(submittedAt.getMinutes())}:${pad(submittedAt.getSeconds())}`
+
+      commentDetails[this.orderId] = {
+        orderId: this.orderId,
+        orderNo: this.order.orderNo || '',
+        createTime,
+        items: this.commentItems.map((item) => ({
+          orderItemId: item.orderItemId || item.id,
+          goodsId: item.goodsId || item.uniformId || item.id,
+          goodsName: item.name || item.goodsName || '校服',
+          image: item.image || item.mainImage || '/static/qjxf.png',
+          size: item.size || item.sizeName || '-',
+          quantity: item.quantity || item.buyNum || 1,
+          score: Number(item.score || 5),
+          content: (item.content || '').trim(),
+          replyContent: item.replyContent || '',
+          createTime
+        }))
+      }
+      uni.setStorageSync('commentedOrderDetails', commentDetails)
     }
   }
 }

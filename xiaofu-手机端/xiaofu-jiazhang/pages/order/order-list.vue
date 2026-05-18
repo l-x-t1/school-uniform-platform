@@ -136,6 +136,11 @@
               v-if="canComment(order)"
               @click.stop="commentOrder(order)"
             >评价</button>
+            <button
+              class="action-btn outline"
+              v-if="canViewComment(order)"
+              @click.stop="viewComment(order)"
+            >查看评价</button>
           </view>
         </view>
       </view>
@@ -189,6 +194,10 @@ export default {
     this.loadOrders();
   },
   methods: {
+    isLocalOnlyOrder(orderId) {
+      return String(orderId || '').startsWith('DEV');
+    },
+
     normalizeOrder(item) {
       const products = item.products || item.items || item.orderItems || item.xfptOrderItemList || [];
       return {
@@ -199,6 +208,8 @@ export default {
         studentName: item.studentName || '',
         schoolName: item.schoolName || '',
         supplierName: item.supplierName || '',
+        commented: !!item.commented,
+        commentFlag: !!item.commentFlag,
         orderType: String(item.orderType || '2'),
         orderTypeText: String(item.orderType || '2') === '2' ? '零售购买' : '统购购买',
         totalAmount: item.totalAmount || item.payAmount || item.amount || '0.00',
@@ -262,25 +273,32 @@ export default {
     getLocalOrders() {
       const localOrders = uni.getStorageSync('devOrders') || {};
       return Object.keys(localOrders)
+        .filter((key) => this.isLocalOnlyOrder(key))
         .map((key) => this.normalizeOrder(localOrders[key]))
         .filter((order) => order.id)
         .sort((a, b) => String(b.createTime || '').localeCompare(String(a.createTime || '')));
     },
 
     mergeLocalOrders(list) {
-      if (!config.enableMockFallback) return list;
+      const commentedOrders = uni.getStorageSync('commentedOrders') || {};
+      const patchedOrders = list.map((item) => ({
+        ...item,
+        commented: !!(item.commented || item.commentFlag || commentedOrders[item.id]?.commented),
+        commentFlag: !!(item.commentFlag || commentedOrders[item.id]?.commented)
+      }));
+      if (!config.enableMockFallback) return patchedOrders;
       const localOrders = this.filterOrdersByStatus(this.getLocalOrders(), this.currentStatus);
-      const existedIds = list.map((item) => String(item.id));
+      const existedIds = patchedOrders.map((item) => String(item.id));
       const merged = [
         ...localOrders.filter((item) => !existedIds.includes(String(item.id))),
-        ...list
+        ...patchedOrders
       ];
       return merged;
     },
 
     saveLocalOrderStatus(orderId, status) {
       const localOrders = uni.getStorageSync('devOrders') || {};
-      if (localOrders[orderId]) {
+      if (this.isLocalOnlyOrder(orderId) && localOrders[orderId]) {
         localOrders[orderId].status = status;
         if (status === 'completed') {
           localOrders[orderId].completeTime = this.getCurrentTime();
@@ -291,7 +309,7 @@ export default {
 
     removeLocalOrder(orderId) {
       const localOrders = uni.getStorageSync('devOrders') || {};
-      if (localOrders[orderId]) {
+      if (this.isLocalOnlyOrder(orderId) && localOrders[orderId]) {
         delete localOrders[orderId];
         uni.setStorageSync('devOrders', localOrders);
       }
@@ -730,6 +748,10 @@ export default {
       return order.status === 'completed' && !order.commentFlag && !order.commented;
     },
 
+    canViewComment(order) {
+      return order.status === 'completed' && !!(order.commentFlag || order.commented);
+    },
+
     canViewAfterSale(order) {
       return !!(order && order.afterSaleInfo && order.afterSaleInfo.id);
     },
@@ -781,6 +803,12 @@ export default {
       uni.setStorageSync('pendingCommentOrder', order);
       uni.navigateTo({
         url: `/pages/order/comment-apply?id=${order.id}&orderNo=${encodeURIComponent(order.orderNo || '')}`
+      });
+    },
+
+    viewComment(order) {
+      uni.navigateTo({
+        url: `/pages/order/comment-detail?id=${order.id}&orderNo=${encodeURIComponent(order.orderNo || '')}`
       });
     }
   }

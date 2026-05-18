@@ -166,6 +166,11 @@
       >评价</button>
       <button
         class="footer-btn outline"
+        v-if="canViewComment(order)"
+        @click="viewComment"
+      >查看评价</button>
+      <button
+        class="footer-btn outline"
         v-if="canReorder(order.status)"
         @click="reorder"
       >再次购买</button>
@@ -219,6 +224,7 @@ export default {
              this.canReturn(this.order.status) ||
              this.canViewAfterSale() ||
              this.canComment(this.order) ||
+             this.canViewComment(this.order) ||
              this.canReorder(this.order.status);
     },
     
@@ -234,9 +240,15 @@ export default {
     }
   },
   methods: {
+    isLocalOnlyOrder(orderId = this.id) {
+      return String(orderId || '').startsWith('DEV');
+    },
+
     normalizeOrder(data = {}) {
-      const products = data.products || data.items || data.orderItems || [];
+      const products = data.products || data.items || data.orderItems || data.xfptOrderItemList || [];
       const address = data.address || {};
+      const commentedOrders = uni.getStorageSync('commentedOrders') || {};
+      const localCommented = !!commentedOrders[data.id || data.orderId || this.id]?.commented;
       const fullAddress =
         address.fullAddress ||
         data.fullAddress ||
@@ -246,10 +258,12 @@ export default {
         id: data.id || data.orderId || this.id,
         orderNo: data.orderNo || data.orderSn || data.orderCode || this.id,
         status: this.normalizeStatus(data.status),
+        commented: !!(data.commented || data.commentFlag || localCommented),
+        commentFlag: !!(data.commentFlag || localCommented),
         createTime: data.createTime || '',
         payTime: data.payTime || '',
         shipTime: data.shipTime || data.deliveryTime || '',
-        completeTime: data.completeTime || null,
+        completeTime: data.completeTime || data.finishTime || null,
         productsAmount: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
         shippingFee: data.shippingFee || data.freightAmount || '0.00',
         discount: data.discount || '0.00',
@@ -262,15 +276,15 @@ export default {
           fullAddress: fullAddress || '暂无收货地址'
         },
         products: products.map((item) => ({
-          id: item.id || item.uniformId,
+          id: item.id || item.goodsId || item.uniformId,
           orderItemId: item.orderItemId || item.id,
-          goodsId: item.goodsId || item.uniformId || item.id,
-          name: item.name || item.uniformName || item.productName || '校服',
-          image: item.image || item.productImage || item.coverImage || '/static/qjxf.png',
-          price: item.price || item.salePrice || '0.00',
+          goodsId: item.goodsId || item.uniformId || item.productId || item.id,
+          name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
+          image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png',
+          price: item.price || item.unitPrice || item.salePrice || '0.00',
           size: item.size || item.sizeName || '-',
-          color: item.color || item.spec || '默认款',
-          quantity: item.quantity || item.count || 1,
+          color: item.color || item.colorName || item.spec || '默认款',
+          quantity: item.quantity || item.buyNum || item.count || 1,
           supplierId: item.supplierId
         }))
       };
@@ -302,7 +316,7 @@ export default {
     // 获取订单详情数据
     fetchOrderDetail() {
       const localOrder = this.getLocalOrder();
-      if (config.enableMockFallback && localOrder) {
+      if (config.enableMockFallback && this.isLocalOnlyOrder() && localOrder) {
         this.order = this.normalizeOrder(localOrder);
         this.loadAfterSaleInfo();
         return;
@@ -433,6 +447,10 @@ export default {
 
     canComment(order) {
       return order.status === 'completed' && !order.commentFlag && !order.commented;
+    },
+
+    canViewComment(order) {
+      return order.status === 'completed' && !!(order.commentFlag || order.commented);
     },
     
     // 取消订单
@@ -570,6 +588,12 @@ export default {
         url: `/pages/order/comment-apply?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
       });
     },
+
+    viewComment() {
+      uni.navigateTo({
+        url: `/pages/order/comment-detail?id=${this.id}&orderNo=${encodeURIComponent(this.order.orderNo || '')}`
+      });
+    },
     
     // 再次购买
     reorder() {
@@ -591,7 +615,7 @@ export default {
 
     saveLocalOrder() {
       const localOrders = uni.getStorageSync('devOrders') || {};
-      if (localOrders[this.id]) {
+      if (this.isLocalOnlyOrder() && localOrders[this.id]) {
         localOrders[this.id] = this.order;
         uni.setStorageSync('devOrders', localOrders);
       }
@@ -599,7 +623,7 @@ export default {
 
     removeLocalOrder() {
       const localOrders = uni.getStorageSync('devOrders') || {};
-      if (localOrders[this.id]) {
+      if (this.isLocalOnlyOrder() && localOrders[this.id]) {
         delete localOrders[this.id];
         uni.setStorageSync('devOrders', localOrders);
       }

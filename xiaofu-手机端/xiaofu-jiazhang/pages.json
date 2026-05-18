@@ -301,6 +301,13 @@
                                 }
                   },
                   {
+                      "path":  "pages/order/comment-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "评价详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
                       "path":  "pages/order/order-confirm",
                       "style":  {
                                     "navigationBarTitleText":  "确认订单",
