@@ -4929,6 +4929,109 @@ FROM DUAL
 WHERE NOT EXISTS (
   SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @supplier_withdraw_record_menu_id
 );
+
+SET @supplier_message_name := CONVERT(0xE4BE9BE5BA94E59586E4BFA1E681AF USING utf8mb4);
+SET @supplier_message_remark := CONVERT(0xE4BE9BE5BA94E59586E4BFA1E681AFE88F9CE58D95 USING utf8mb4);
+SET @usage_name := CONVERT(0xE4BDBFE794A8E68385E586B5 USING utf8mb4);
+SET @usage_remark := CONVERT(0xE5B9B3E58FB0E4BDBFE794A8E68385E586B5E88F9CE58D95 USING utf8mb4);
+
+SET @supplier_message_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierMessage'
+     OR `COMPONENT` = 'school/supplierMessage/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_message_menu_id := IFNULL(@supplier_message_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_message_menu_id, @supplier_message_name, @new_feature_menu_id, 120,
+       'supplierMessage', 'school/supplierMessage/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:supplierMessage:list', 'tree-table',
+       'admin', NOW(), 'admin', NOW(), @supplier_message_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierMessage'
+     OR `COMPONENT` = 'school/supplierMessage/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @supplier_message_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 120,
+    `PATH` = 'supplierMessage',
+    `COMPONENT` = 'school/supplierMessage/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:supplierMessage:list',
+    `ICON` = 'tree-table',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @supplier_message_remark
+WHERE `MENU_ID` = @supplier_message_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @supplier_message_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @supplier_message_menu_id
+);
+
+SET @usage_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'platformUsage'
+     OR `COMPONENT` = 'school/platformUsage/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @usage_menu_id := IFNULL(@usage_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @usage_menu_id, @usage_name, @new_feature_menu_id, 121,
+       'platformUsage', 'school/platformUsage/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:platformUsage:list', 'chart',
+       'admin', NOW(), 'admin', NOW(), @usage_remark, NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `PATH` = 'platformUsage'
+     OR `COMPONENT` = 'school/platformUsage/index'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @usage_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 121,
+    `PATH` = 'platformUsage',
+    `COMPONENT` = 'school/platformUsage/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:platformUsage:list',
+    `ICON` = 'chart',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @usage_remark
+WHERE `MENU_ID` = @usage_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @usage_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @usage_menu_id
+);
 SET SQL_SAFE_UPDATES = @OLD_SQL_SAFE_UPDATES;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
@@ -6091,5 +6194,123 @@ WHERE r.`role_key` IN ('admin')
     WHERE rm.`role_id` = r.`role_id`
       AND rm.`menu_id` = m.`menu_id`
   );
+
+-- ============================================
+-- Merged from xfpt/sql/20260518_fix_new_feature_supplier_usage_menu.sql
+-- 修复：将“供应商信息”“使用情况”补充为新增功能下的正式菜单
+
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'newFeature'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+
+SET @supplier_message_name := CONVERT(0xE4BE9BE5BA94E59586E4BFA1E681AF USING utf8mb4);
+SET @supplier_message_remark := CONVERT(0xE4BE9BE5BA94E59586E4BFA1E681AFE88F9CE58D95 USING utf8mb4);
+SET @usage_name := CONVERT(0xE4BDBFE794A8E68385E586B5 USING utf8mb4);
+SET @usage_remark := CONVERT(0xE5B9B3E58FB0E4BDBFE794A8E68385E586B5E88F9CE58D95 USING utf8mb4);
+
+SET @supplier_message_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierMessage'
+     OR `COMPONENT` = 'school/supplierMessage/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_message_menu_id := IFNULL(@supplier_message_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_message_menu_id, @supplier_message_name, @new_feature_menu_id, 100,
+       'supplierMessage', 'school/supplierMessage/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:supplierMessage:list', 'tree-table',
+       'admin', NOW(), 'admin', NOW(), @supplier_message_remark, NULL
+WHERE @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PATH` = 'supplierMessage'
+       OR `COMPONENT` = 'school/supplierMessage/index'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @supplier_message_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 100,
+    `PATH` = 'supplierMessage',
+    `COMPONENT` = 'school/supplierMessage/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:supplierMessage:list',
+    `ICON` = 'tree-table',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @supplier_message_remark
+WHERE `MENU_ID` = @supplier_message_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @supplier_message_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @supplier_message_menu_id
+);
+
+SET @usage_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'platformUsage'
+     OR `COMPONENT` = 'school/platformUsage/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @usage_menu_id := IFNULL(@usage_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @usage_menu_id, @usage_name, @new_feature_menu_id, 101,
+       'platformUsage', 'school/platformUsage/index', NULL, '',
+       1, 0, 'C', '0', '0', 'school:platformUsage:list', 'chart',
+       'admin', NOW(), 'admin', NOW(), @usage_remark, NULL
+WHERE @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PATH` = 'platformUsage'
+       OR `COMPONENT` = 'school/platformUsage/index'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = @usage_name,
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 101,
+    `PATH` = 'platformUsage',
+    `COMPONENT` = 'school/platformUsage/index',
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:platformUsage:list',
+    `ICON` = 'chart',
+    `UPDATE_BY` = 'admin',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = @usage_remark
+WHERE `MENU_ID` = @usage_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT 1, @usage_menu_id
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 1 AND `MENU_ID` = @usage_menu_id
+);
 
 -- Dump completed on 2026-05-04 19:18:33
