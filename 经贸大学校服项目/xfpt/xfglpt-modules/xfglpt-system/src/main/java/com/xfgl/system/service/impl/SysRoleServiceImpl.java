@@ -135,27 +135,8 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     public SysRole selectRoleById(Long roleId) {
         SysRole role = roleMapper.selectRoleById(roleId);
-        if (StrUtil.isNotEmpty(role.getIntegrity())) {
-            //验证完整性
-            List<Long> list = roleMapper.mpRoleByUserId(roleId).stream().sorted().collect(Collectors.toList());
-            String text = "";
-            if (StrUtil.isNotEmpty(role.getRoleName())) {
-                text = text + role.getRoleName();
-            }
-
-            if (StrUtil.isNotEmpty(role.getRoleKey())) {
-                text = text + role.getRoleKey();
-            }
-            if (StrUtil.isNotEmpty(role.getDataScope())) {
-                text = text + role.getDataScope();
-            }
-            if (list.size() != 0) {
-                list = list.stream().sorted().collect(Collectors.toList());
-                if (list.size() != 0) {
-                    text = text + JSON.toJSONString(list);
-                }
-            }
-            String mac = mpUtil.mac(text, mpUtil.getToken());
+        if (role != null && StrUtil.isNotEmpty(role.getIntegrity())) {
+            String mac = getMac(role.getRoleName(), role.getRoleKey(), role.getDataScope(), getSortedMenuIds(roleId));
             if(!mac.equals(role.getIntegrity())){
                 throw new ServiceException("数据被篡改，完整性校验失败");
             }
@@ -256,23 +237,51 @@ public class SysRoleServiceImpl implements ISysRoleService {
     }
 
     private String getMac(SysRole role) {
+        return getMac(role.getRoleName(), role.getRoleKey(), role.getDataScope(), normalizeMenuIds(role.getMenuIds()));
+    }
+
+    private String getMac(String roleName, String roleKey, String dataScope, List<Long> menuIds) {
         String text = "";
-        if (StrUtil.isNotEmpty(role.getRoleName())) {
-            text = text + role.getRoleName();
+        if (StrUtil.isNotEmpty(roleName)) {
+            text = text + roleName;
         }
 
-        if (StrUtil.isNotEmpty(role.getRoleKey())) {
-            text = text + role.getRoleKey();
+        if (StrUtil.isNotEmpty(roleKey)) {
+            text = text + roleKey;
         }
-        if (StrUtil.isNotEmpty(role.getDataScope())) {
-            text = text + role.getDataScope();
+        if (StrUtil.isNotEmpty(dataScope)) {
+            text = text + dataScope;
         }
-        if (role.getMenuIds().length != 0) {
-            List<Long> list = Arrays.asList(role.getMenuIds()).stream().sorted().collect(Collectors.toList());
-            text = text + JSON.toJSONString(list);
+        if (!menuIds.isEmpty()) {
+            text = text + JSON.toJSONString(menuIds);
         }
         String mac = mpUtil.mac(text, mpUtil.getToken());
         return mac;
+    }
+
+    private List<Long> normalizeMenuIds(Long[] menuIds) {
+        if (menuIds == null || menuIds.length == 0) {
+            return new ArrayList<Long>();
+        }
+        return Arrays.stream(menuIds).sorted().collect(Collectors.toList());
+    }
+
+    private List<Long> getSortedMenuIds(Long roleId) {
+        return roleMapper.mpRoleByUserId(roleId).stream().sorted().collect(Collectors.toList());
+    }
+
+    private void refreshIntegrityForDataScope(SysRole role) {
+        SysRole dbRole = roleMapper.selectRoleById(role.getRoleId());
+        if (dbRole == null) {
+            throw new ServiceException("角色不存在");
+        }
+        role.setRoleName(dbRole.getRoleName());
+        role.setRoleKey(dbRole.getRoleKey());
+        if (StrUtil.isEmpty(role.getDataScope())) {
+            role.setDataScope(dbRole.getDataScope());
+        }
+        role.setMenuIds(getSortedMenuIds(role.getRoleId()).toArray(new Long[0]));
+        role.setIntegrity(getMac(role));
     }
 
     /**
@@ -314,6 +323,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int authDataScope(SysRole role) {
+        refreshIntegrityForDataScope(role);
         // 修改角色信息
         roleMapper.updateRole(role);
         // 删除角色与部门关联
@@ -329,6 +339,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     public int insertRoleMenu(SysRole role) {
         int rows = 1;
+        if (role.getMenuIds() == null || role.getMenuIds().length == 0) {
+            return rows;
+        }
         // 新增用户与角色管理
         List<SysRoleMenu> list = new ArrayList<SysRoleMenu>();
         for (Long menuId : role.getMenuIds()) {
@@ -350,6 +363,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
      */
     public int insertRoleDept(SysRole role) {
         int rows = 1;
+        if (role.getDeptIds() == null || role.getDeptIds().length == 0) {
+            return rows;
+        }
         // 新增角色与部门（数据权限）管理
         List<SysRoleDept> list = new ArrayList<SysRoleDept>();
         for (Long deptId : role.getDeptIds()) {
