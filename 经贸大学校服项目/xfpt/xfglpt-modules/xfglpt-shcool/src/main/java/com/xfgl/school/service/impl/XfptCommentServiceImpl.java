@@ -1,12 +1,9 @@
 package com.xfgl.school.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.Arrays;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
@@ -16,7 +13,6 @@ import com.xfgl.school.domain.XfptCommentReply;
 import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.XfptOrderItem;
 import com.xfgl.school.mapper.XfptCommentMapper;
-import com.xfgl.school.mapper.XfptCommentReplyMapper;
 import com.xfgl.school.mapper.XfptOrderInfoMapper;
 import com.xfgl.school.domain.XfptComment;
 import com.xfgl.school.service.IXfptCommentService;
@@ -47,9 +43,6 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
     private XfptCommentMapper xfptCommentMapper;
 
     @Autowired
-    private XfptCommentReplyMapper xfptCommentReplyMapper;
-
-    @Autowired
     private XfptOrderInfoMapper xfptOrderInfoMapper;
 
     /**
@@ -70,12 +63,6 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
          * @param xfptComment 商品评价
          * @return 评价管理集合
          */
-        @Override
-        public List<XfptComment> selectEvaluationCommentList(XfptComment xfptComment)
-        {
-            return xfptCommentMapper.selectEvaluationCommentList(xfptComment);
-        }
-
         /**
          * 查询评价管理详情
          *
@@ -83,12 +70,6 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
          * @param scopeSchoolId 学校数据范围
          * @return 评价管理详情
          */
-        @Override
-        public XfptComment selectEvaluationCommentById(Long id, Long scopeSchoolId)
-        {
-            return xfptCommentMapper.selectEvaluationCommentById(id, scopeSchoolId);
-        }
-
         /**
          * 回复评价
          *
@@ -97,6 +78,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
          * @param scopeSchoolId 学校数据范围
          * @return 结果
          */
+        /*
         @Transactional
         @Override
         public int replyEvaluationComment(Long id, XfptCommentReply xfptCommentReply, Long scopeSchoolId)
@@ -143,6 +125,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             xfptCommentMapper.updateById(updateComment);
             return rows;
         }
+        */
 
         /**
          * 更新评价管理状态
@@ -152,6 +135,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
          * @param scopeSchoolId 学校数据范围
          * @return 结果
          */
+        /*
         @Override
         public int updateEvaluationCommentStatus(Long id, String status, Long scopeSchoolId)
         {
@@ -173,6 +157,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             updateComment.setUpdateTime(new Date());
             return xfptCommentMapper.updateById(updateComment);
         }
+        */
 
         /**
          * 查询商品评价
@@ -266,27 +251,6 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
                 }
                     xfptCommentMapper.batchInsertXfptCommentReply(xfptCommentReplyList);
             }
-        }
-
-        private String resolveReplyRoleType(LoginUser loginUser)
-        {
-            if (SecurityUtils.isAdmin(SecurityUtils.getUserId()) || hasRole(loginUser, "admin") || hasRole(loginUser, "gly")) {
-                return REPLY_ROLE_ADMIN;
-            }
-            return REPLY_ROLE_SCHOOL;
-        }
-
-        private String resolveReplyRoleTitle(LoginUser loginUser)
-        {
-            if (SecurityUtils.isAdmin(SecurityUtils.getUserId()) || hasRole(loginUser, "admin") || hasRole(loginUser, "gly")) {
-                return REPLY_ROLE_TITLE_ADMIN;
-            }
-            return REPLY_ROLE_TITLE_SCHOOL;
-        }
-
-        private boolean hasRole(LoginUser loginUser, String roleKey)
-        {
-            return loginUser != null && loginUser.getRoles() != null && loginUser.getRoles().contains(roleKey);
         }
 
         private void fillCommentSnapshotAndValidate(XfptComment xfptComment)
