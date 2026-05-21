@@ -224,6 +224,53 @@ function ensureUsageMenu(routes = []) {
   return routes;
 }
 
+function isNewFeatureRoute(route = {}) {
+  const title = route.meta && route.meta.title ? route.meta.title : route.name;
+  return (
+    route.path === "newFeature" ||
+    route.path === "/newFeature" ||
+    title === "新增功能"
+  );
+}
+
+function buildPromotedSidebarRoute(route = {}, parentPath = "") {
+  const routePath = route.path || "";
+  const fullPath = routePath.startsWith("/")
+    ? routePath
+    : `${parentPath}/${routePath}`.replace(/\/{2,}/g, "/");
+  const promotedChild = {
+    ...route,
+    path: fullPath,
+  };
+
+  return {
+    path: fullPath,
+    hidden: route.hidden,
+    children: [promotedChild],
+  };
+}
+
+function promoteSchoolSidebarMenus(routes = []) {
+  const promotedRoutes = [];
+
+  routes.forEach((route) => {
+    if (!isNewFeatureRoute(route)) {
+      promotedRoutes.push(route);
+      return;
+    }
+
+    const directChildren = Array.isArray(route.children) ? route.children : [];
+    directChildren.forEach((child) => {
+      if (!child || child.hidden) {
+        return;
+      }
+      promotedRoutes.push(buildPromotedSidebarRoute(child, "/newFeature"));
+    });
+  });
+
+  return promotedRoutes;
+}
+
 const permission = {
   state: {
     routes: [],
@@ -281,7 +328,10 @@ const permission = {
           router.addRoutes(asyncRoutes);
           commit("SET_ROUTES", rewriteRoutes);
 
-          const sidebarRoutesWithHome = [homeRoute].concat(sidebarRoutes);
+          const schoolSidebarRoutes = hasXuexiaoRole
+            ? promoteSchoolSidebarMenus(sidebarRoutes)
+            : sidebarRoutes;
+          const sidebarRoutesWithHome = [homeRoute].concat(schoolSidebarRoutes);
           commit(
             "SET_SIDEBAR_ROUTERS",
             constantRoutes.concat(sidebarRoutesWithHome)
