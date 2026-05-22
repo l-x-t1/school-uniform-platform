@@ -38,6 +38,8 @@ import com.xfgl.system.service.ISysRoleService;
  */
 @Service
 public class SysRoleServiceImpl implements ISysRoleService {
+    private static final String DEFAULT_ROLE_DATA_SCOPE = "1";
+
     @Autowired
     private SysRoleMapper roleMapper;
 
@@ -136,8 +138,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
     public SysRole selectRoleById(Long roleId) {
         SysRole role = roleMapper.selectRoleById(roleId);
         if (role != null && StrUtil.isNotEmpty(role.getIntegrity())) {
-            String mac = getMac(role.getRoleName(), role.getRoleKey(), role.getDataScope(), getSortedMenuIds(roleId));
-            if(!mac.equals(role.getIntegrity())){
+            List<Long> menuIds = getSortedMenuIds(roleId);
+            String mac = getMac(role.getRoleName(), role.getRoleKey(), role.getDataScope(), menuIds);
+            if (!mac.equals(role.getIntegrity()) && !isLegacyIntegrityMatch(role, menuIds)) {
                 throw new ServiceException("数据被篡改，完整性校验失败");
             }
 
@@ -228,6 +231,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int insertRole(SysRole role) {
+        ensureDefaultDataScope(role);
         //完整性
         String mac = getMac(role);
         role.setIntegrity(mac);
@@ -241,6 +245,26 @@ public class SysRoleServiceImpl implements ISysRoleService {
     }
 
     private String getMac(String roleName, String roleKey, String dataScope, List<Long> menuIds) {
+        String text = "";
+        if (StrUtil.isNotEmpty(roleName)) {
+            text = text + roleName;
+        }
+
+        if (StrUtil.isNotEmpty(roleKey)) {
+            text = text + roleKey;
+        }
+        String normalizedDataScope = normalizeDataScope(dataScope);
+        if (StrUtil.isNotEmpty(normalizedDataScope)) {
+            text = text + normalizedDataScope;
+        }
+        if (!menuIds.isEmpty()) {
+            text = text + JSON.toJSONString(menuIds);
+        }
+        String mac = mpUtil.mac(text, mpUtil.getToken());
+        return mac;
+    }
+
+    private String getLegacyMac(String roleName, String roleKey, String dataScope, List<Long> menuIds) {
         String text = "";
         if (StrUtil.isNotEmpty(roleName)) {
             text = text + roleName;
@@ -270,6 +294,19 @@ public class SysRoleServiceImpl implements ISysRoleService {
         return roleMapper.mpRoleByUserId(roleId).stream().sorted().collect(Collectors.toList());
     }
 
+    private String normalizeDataScope(String dataScope) {
+        return StrUtil.isEmpty(dataScope) ? DEFAULT_ROLE_DATA_SCOPE : dataScope;
+    }
+
+    private void ensureDefaultDataScope(SysRole role) {
+        role.setDataScope(normalizeDataScope(role.getDataScope()));
+    }
+
+    private boolean isLegacyIntegrityMatch(SysRole role, List<Long> menuIds) {
+        return DEFAULT_ROLE_DATA_SCOPE.equals(role.getDataScope())
+                && getLegacyMac(role.getRoleName(), role.getRoleKey(), null, menuIds).equals(role.getIntegrity());
+    }
+
     private void refreshIntegrityForDataScope(SysRole role) {
         SysRole dbRole = roleMapper.selectRoleById(role.getRoleId());
         if (dbRole == null) {
@@ -293,6 +330,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int updateRole(SysRole role) {
+        ensureDefaultDataScope(role);
         String mac = getMac(role);
         role.setIntegrity(mac);
         // 修改角色信息
