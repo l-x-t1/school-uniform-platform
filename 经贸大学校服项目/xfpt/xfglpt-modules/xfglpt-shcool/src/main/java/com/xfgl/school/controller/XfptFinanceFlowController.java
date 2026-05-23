@@ -12,17 +12,22 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
+import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.XfptFinanceFlow;
 import com.xfgl.school.service.IXfptFinanceFlowService;
+import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.utils.poi.ExcelUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
+import com.xfgl.system.api.domain.SysUser;
+import com.xfgl.system.api.model.LoginUser;
 
 /**
  * 资金流水Controller
@@ -36,6 +41,8 @@ import com.xfgl.common.core.web.page.TableDataInfo;
 public class XfptFinanceFlowController extends BaseController {
     @Autowired
     private IXfptFinanceFlowService xfptFinanceFlowService;
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
 
 /**
  * 查询资金流水列表
@@ -45,6 +52,7 @@ public class XfptFinanceFlowController extends BaseController {
 @RequiresPermissions("school:financeFlow:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptFinanceFlow xfptFinanceFlow) {
+        xfptFinanceFlow = applySupplierScope(xfptFinanceFlow);
         startPage();
         List<XfptFinanceFlow> list = xfptFinanceFlowService.selectXfptFinanceFlowList(xfptFinanceFlow);
         return getDataTable(list);
@@ -58,6 +66,7 @@ public class XfptFinanceFlowController extends BaseController {
     @Log(title = "资金流水" , businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptFinanceFlow xfptFinanceFlow) {
+        xfptFinanceFlow = applySupplierScope(xfptFinanceFlow);
         List<XfptFinanceFlow> list = xfptFinanceFlowService.selectXfptFinanceFlowList(xfptFinanceFlow);
         ExcelUtil<XfptFinanceFlow> util = new ExcelUtil<XfptFinanceFlow>(XfptFinanceFlow. class);
         util.exportExcel(response, list, "资金流水数据");
@@ -70,7 +79,11 @@ public class XfptFinanceFlowController extends BaseController {
     @RequiresPermissions("school:financeFlow:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-            return success(xfptFinanceFlowService.getById(id));
+            XfptFinanceFlow financeFlow = xfptFinanceFlowService.getById(id);
+            if (financeFlow != null && !canAccessSupplierRecord(financeFlow.getSupplierId())) {
+                return error("当前操作没有权限");
+            }
+            return success(financeFlow);
     }
 
     /**
@@ -105,4 +118,38 @@ public class XfptFinanceFlowController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptFinanceFlowService.removeByIds(Arrays.asList(ids)));
     }
+
+    private XfptFinanceFlow applySupplierScope(XfptFinanceFlow xfptFinanceFlow) {
+        if (xfptFinanceFlow == null) {
+            xfptFinanceFlow = new XfptFinanceFlow();
+        }
+        Long supplierId = resolveCurrentSupplierId();
+        if (supplierId != null) {
+            xfptFinanceFlow.setSupplierId(supplierId);
+        }
+        return xfptFinanceFlow;
+    }
+
+    private boolean canAccessSupplierRecord(Long supplierId) {
+        Long currentSupplierId = resolveCurrentSupplierId();
+        return currentSupplierId == null || currentSupplierId.equals(supplierId);
+    }
+
+    private Long resolveCurrentSupplierId() {
+        SysUser sysUser = getCurrentUser();
+        if (!supplierAccessSupport.isSupplierUser(sysUser)) {
+            return null;
+        }
+        Long supplierId = supplierAccessSupport.resolveSupplierId(sysUser);
+        if (supplierId == null) {
+            throw new ServiceException("当前供应商账号未绑定供应商信息");
+        }
+        return supplierId;
+    }
+
+    private SysUser getCurrentUser() {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        return loginUser == null ? null : loginUser.getSysUser();
+    }
+
 }

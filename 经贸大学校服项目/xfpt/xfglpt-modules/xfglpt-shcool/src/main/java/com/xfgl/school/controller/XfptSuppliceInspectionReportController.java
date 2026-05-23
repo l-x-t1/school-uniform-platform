@@ -3,6 +3,7 @@ package com.xfgl.school.controller;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import com.xfgl.common.core.constant.ProceConstants;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.core.utils.poi.ExcelUtil;
 import com.xfgl.common.core.web.controller.BaseController;
@@ -10,10 +11,14 @@ import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.web.page.TableDataInfo;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
+import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.*;
 import com.xfgl.school.service.*;
+import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysDept;
+import com.xfgl.system.api.domain.SysUser;
+import com.xfgl.system.api.model.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,17 +46,19 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     private ITeamMeetingService teamMeetingService;
     @Autowired
     private ISupplierMessageService iSupplierMessageService;
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
 
     /**
      * 查询学校与供应商检验报告关联列表
      */
 
     @Operation(summary = "查询学校与供应商检验报告关联列表")
-//@RequiresPermissions("system:report:list")
+    @RequiresPermissions("school:zjbg:list")
     @GetMapping("/list")
     public TableDataInfo list(XfptSuppliceInspectionReport xfptSuppliceInspectionReport) {
+        xfptSuppliceInspectionReport = applyAccessScope(xfptSuppliceInspectionReport);
         startPage();
-        xfptSuppliceInspectionReport.setDeptId(String.valueOf(SecurityUtils.getLoginUser().getSysUser().getDeptId()));
         List<XfptSuppliceInspectionReport> list = xfptSuppliceInspectionReportService.selectXfptSuppliceInspectionReportList(xfptSuppliceInspectionReport);
         for (XfptSuppliceInspectionReport suppliceInspectionReport : list) {
             SupplierMessage supplierMessage = iSupplierMessageService.getById(suppliceInspectionReport.getSupplierId());
@@ -76,10 +83,11 @@ public class XfptSuppliceInspectionReportController extends BaseController {
      * 导出学校与供应商检验报告关联列表
      */
     @Operation(summary = "导出学校与供应商检验报告关联列表")
-//    @RequiresPermissions("system:report:export")
+    @RequiresPermissions("school:zjbg:list")
     @Log(title = "学校与供应商检验报告关联", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptSuppliceInspectionReport xfptSuppliceInspectionReport) {
+        xfptSuppliceInspectionReport = applyAccessScope(xfptSuppliceInspectionReport);
         List<XfptSuppliceInspectionReport> list = xfptSuppliceInspectionReportService.selectXfptSuppliceInspectionReportList(xfptSuppliceInspectionReport);
         ExcelUtil<XfptSuppliceInspectionReport> util = new ExcelUtil<XfptSuppliceInspectionReport>(XfptSuppliceInspectionReport.class);
         util.exportExcel(response, list, "学校与供应商检验报告关联数据");
@@ -89,10 +97,16 @@ public class XfptSuppliceInspectionReportController extends BaseController {
      * 获取学校与供应商检验报告关联详细信息
      */
     @Operation(summary = "获取学校与供应商检验报告关联详细信息")
-//    @RequiresPermissions("system:report:query")
+    @RequiresPermissions("school:zjbg:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         XfptSuppliceInspectionReport byId = xfptSuppliceInspectionReportService.getById(id);
+        if (byId == null) {
+            return success(null);
+        }
+        if (byId != null && !canAccessReport(byId)) {
+            return error("当前操作没有权限");
+        }
         List<XfptAnnoResults> list2 = iXfptAnnoResultsService.lambdaQuery().eq(XfptAnnoResults::getTeamId, byId.getTeamMeetingId()).list();
         if(CollUtil.isNotEmpty(list2)){
             byId.setGgTitle(list2.get(0).getNoticeTitle());
@@ -109,7 +123,6 @@ public class XfptSuppliceInspectionReportController extends BaseController {
     @PostMapping
     public AjaxResult add(@RequestBody XfptSuppliceInspectionReport xfptSuppliceInspectionReport) {
         SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
-        Long deptId = dept.getDeptId();
         String ancestors = dept.getAncestors();
 
         List<XfptSuppliceInspectionReport> lists = xfptSuppliceInspectionReportService.lambdaQuery()
@@ -185,5 +198,44 @@ public class XfptSuppliceInspectionReportController extends BaseController {
         List<XfptSuppliceInspectionReportSon> list = iXfptSuppliceInspectionReportSonService.lambdaQuery()
                 .eq(XfptSuppliceInspectionReportSon::getReportId, id).orderByDesc(XfptSuppliceInspectionReportSon::getCreateTime).list();
         return AjaxResult.success(list);
+    }
+
+    private XfptSuppliceInspectionReport applyAccessScope(XfptSuppliceInspectionReport report) {
+        if (report == null) {
+            report = new XfptSuppliceInspectionReport();
+        }
+        SysUser currentUser = getCurrentUser();
+        if (supplierAccessSupport.isSupplierUser(currentUser)) {
+            Long supplierId = resolveCurrentSupplierId(currentUser);
+            report.setSupplierId(String.valueOf(supplierId));
+            report.setDeptId(null);
+            return report;
+        }
+        if (currentUser != null && currentUser.getDeptId() != null) {
+            report.setDeptId(String.valueOf(currentUser.getDeptId()));
+        }
+        return report;
+    }
+
+    private boolean canAccessReport(XfptSuppliceInspectionReport report) {
+        SysUser currentUser = getCurrentUser();
+        if (!supplierAccessSupport.isSupplierUser(currentUser)) {
+            return true;
+        }
+        Long supplierId = resolveCurrentSupplierId(currentUser);
+        return report != null && StringUtils.equals(String.valueOf(supplierId), report.getSupplierId());
+    }
+
+    private Long resolveCurrentSupplierId(SysUser currentUser) {
+        Long supplierId = supplierAccessSupport.resolveSupplierId(currentUser);
+        if (supplierId == null) {
+            throw new ServiceException("当前供应商账号未绑定供应商信息");
+        }
+        return supplierId;
+    }
+
+    private SysUser getCurrentUser() {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        return loginUser == null ? null : loginUser.getSysUser();
     }
 }

@@ -39,11 +39,12 @@ public class XfptRetailGoodsServiceImpl implements IXfptRetailGoodsService {
      *
      * @param id 学校商品关联主键
      * @param schoolId 学校ID
+     * @param supplierId 供应商ID
      * @return 零售商品详情
      */
     @Override
-    public XfptRetailGoodsVo selectXfptRetailGoodsById(Long id, Long schoolId) {
-        XfptRetailGoodsVo retailGoods = xfptRetailGoodsMapper.selectXfptRetailGoodsById(id, schoolId);
+    public XfptRetailGoodsVo selectXfptRetailGoodsById(Long id, Long schoolId, Long supplierId) {
+        XfptRetailGoodsVo retailGoods = xfptRetailGoodsMapper.selectXfptRetailGoodsById(id, schoolId, supplierId);
         if (retailGoods == null) {
             return null;
         }
@@ -58,15 +59,16 @@ public class XfptRetailGoodsServiceImpl implements IXfptRetailGoodsService {
      *
      * @param id 学校商品关联主键
      * @param schoolId 学校ID
+     * @param supplierId 供应商ID
      * @param status 上下架状态
      * @param updateBy 操作人
      * @return 影响行数
      */
     @Override
-    public int updateXfptRetailGoodsStatus(Long id, Long schoolId, String status, String updateBy) {
+    public int updateXfptRetailGoodsStatus(Long id, Long schoolId, Long supplierId, String status, String updateBy) {
         if (!"0".equals(status) && !"1".equals(status)) {
             throw new ServiceException("上下架状态只能为0或1");
         }
-        return xfptRetailGoodsMapper.updateXfptRetailGoodsStatus(id, schoolId, status, updateBy);
+        return xfptRetailGoodsMapper.updateXfptRetailGoodsStatus(id, schoolId, supplierId, status, updateBy);
     }
 }

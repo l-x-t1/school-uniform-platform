@@ -155,7 +155,7 @@
         </el-table>
       </el-tab-pane>
 
-      <el-tab-pane label="提现记录" name="withdrawRecord">
+      <el-tab-pane v-if="canViewWithdrawList" label="提现记录" name="withdrawRecord">
         <el-form ref="withdrawQueryForm" :model="withdrawQueryParams" size="small" :inline="true" label-width="90px">
           <el-form-item label="提现单号" prop="withdrawNo">
             <el-input v-model="withdrawQueryParams.withdrawNo" placeholder="请输入提现单号" clearable @keyup.enter.native="handleWithdrawQuery" />
@@ -257,6 +257,7 @@
 </template>
 
 <script>
+import auth from "@/plugins/auth";
 import {
   createAccountBalanceWithdraw,
   listAccountBalanceFinance,
@@ -312,6 +313,12 @@ export default {
     };
   },
   computed: {
+    canViewWithdrawList() {
+      return auth.hasPermi("school:withdrawApply:list");
+    },
+    canCreateWithdraw() {
+      return auth.hasPermi("school:withdrawApply:add");
+    },
     availableFinanceList() {
       return this.financeFlowList.filter(this.isWithdrawableFlow);
     },
@@ -334,7 +341,9 @@ export default {
   },
   created() {
     this.getFinanceList();
-    this.getWithdrawList();
+    if (this.canViewWithdrawList) {
+      this.getWithdrawList();
+    }
   },
   methods: {
     getFinanceList() {
@@ -349,6 +358,11 @@ export default {
         });
     },
     getWithdrawList() {
+      if (!this.canViewWithdrawList) {
+        this.withdrawApplyList = [];
+        this.withdrawTotal = 0;
+        return;
+      }
       this.withdrawLoading = true;
       listAccountBalanceWithdraw(this.withdrawQueryParams)
         .then((response) => {
@@ -364,6 +378,9 @@ export default {
       this.getFinanceList();
     },
     handleWithdrawQuery() {
+      if (!this.canViewWithdrawList) {
+        return;
+      }
       this.withdrawQueryParams.pageNum = 1;
       this.getWithdrawList();
     },
@@ -372,6 +389,9 @@ export default {
       this.handleFinanceQuery();
     },
     resetWithdrawQuery() {
+      if (!this.canViewWithdrawList) {
+        return;
+      }
       this.resetForm("withdrawQueryForm");
       this.handleWithdrawQuery();
     },
@@ -379,6 +399,9 @@ export default {
       this.download("school/financeFlow/export", { ...this.financeQueryParams }, `financeFlow_${new Date().getTime()}.xlsx`);
     },
     exportWithdrawList() {
+      if (!this.canViewWithdrawList) {
+        return;
+      }
       this.download("school/withdrawApply/export", { ...this.withdrawQueryParams }, `withdrawApply_${new Date().getTime()}.xlsx`);
     },
     handleAvailableSelectionChange(selection) {
@@ -388,6 +411,9 @@ export default {
       return String(row.flowDirection) === "1" && String(row.status) === "2" && (String(row.payeeType) === "2" || !!row.supplierId);
     },
     openWithdrawDialog(row) {
+      if (!this.canCreateWithdraw) {
+        return;
+      }
       const rows = row ? [row] : this.selectedAvailableRows;
       const firstRow = rows[0] || {};
       this.withdrawForm = {
@@ -407,6 +433,9 @@ export default {
       });
     },
     submitWithdraw() {
+      if (!this.canCreateWithdraw) {
+        return;
+      }
       this.$refs.withdrawForm.validate((valid) => {
         if (!valid) return;
         const submitData = {

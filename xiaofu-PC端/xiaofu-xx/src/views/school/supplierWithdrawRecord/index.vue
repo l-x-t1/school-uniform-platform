@@ -116,7 +116,7 @@
           </template>
         </el-table-column>
         <el-table-column label="关联流水" prop="financeFlowId" width="100" align="center" />
-        <el-table-column label="详情" width="100" align="center" fixed="right">
+        <el-table-column v-if="canQueryWithdrawDetail" label="详情" width="100" align="center" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openDetail(scope.row)">
               查看
@@ -165,6 +165,7 @@
 </template>
 
 <script>
+import auth from "@/plugins/auth";
 import { getWithdrawApply, listWithdrawApply } from "@/api/school/withdrawApply";
 
 export default {
@@ -187,6 +188,12 @@ export default {
     };
   },
   computed: {
+    canViewWithdrawList() {
+      return auth.hasPermi("school:withdrawApply:list");
+    },
+    canQueryWithdrawDetail() {
+      return auth.hasPermi("school:withdrawApply:query");
+    },
     pageSummary() {
       const rows = this.withdrawApplyList || [];
       const pendingRows = rows.filter((item) => String(item.status) === "0");
@@ -203,10 +210,17 @@ export default {
     },
   },
   created() {
-    this.getList();
+    if (this.canViewWithdrawList) {
+      this.getList();
+    }
   },
   methods: {
     getList() {
+      if (!this.canViewWithdrawList) {
+        this.withdrawApplyList = [];
+        this.total = 0;
+        return;
+      }
       this.loading = true;
       listWithdrawApply(this.queryParams)
         .then((response) => {
@@ -226,6 +240,9 @@ export default {
       this.handleQuery();
     },
     openDetail(row) {
+      if (!this.canQueryWithdrawDetail) {
+        return;
+      }
       getWithdrawApply(row.id).then((response) => {
         this.detail = response.data || {};
         this.detailOpen = true;

@@ -132,27 +132,29 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" align="center" fixed="right">
+        <el-table-column label="操作" width="280" align="center" fixed="right">
           <template slot-scope="scope">
-            <el-button type="text" icon="el-icon-view" @click="handleView(scope.row)">查看详情</el-button>
-            <el-button
-              v-if="isPendingRow(scope.row)"
-              v-hasPermi="['school:afterSale:edit']"
-              type="text"
-              icon="el-icon-check"
-              @click="handleAudit(scope.row, 'approve')"
-            >
-              通过
-            </el-button>
-            <el-button
-              v-if="isPendingRow(scope.row)"
-              v-hasPermi="['school:afterSale:edit']"
-              type="text"
-              icon="el-icon-close"
-              @click="handleAudit(scope.row, 'reject')"
-            >
-              退回
-            </el-button>
+            <div class="action-buttons">
+              <el-button type="text" icon="el-icon-view" @click="handleView(scope.row)">查看详情</el-button>
+              <el-button
+                v-if="isPendingRow(scope.row)"
+                v-hasPermi="['school:afterSale:edit']"
+                type="text"
+                icon="el-icon-check"
+                @click="handleAudit(scope.row, 'approve')"
+              >
+                通过
+              </el-button>
+              <el-button
+                v-if="isPendingRow(scope.row)"
+                v-hasPermi="['school:afterSale:edit']"
+                type="text"
+                icon="el-icon-close"
+                @click="handleAudit(scope.row, 'reject')"
+              >
+                退回
+              </el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -629,6 +631,19 @@ export default {
   margin-top: 6px;
   font-size: 13px;
   color: #909399;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.action-buttons :deep(.el-button) {
+  margin-left: 0;
 }
 
 .detail-wrap {

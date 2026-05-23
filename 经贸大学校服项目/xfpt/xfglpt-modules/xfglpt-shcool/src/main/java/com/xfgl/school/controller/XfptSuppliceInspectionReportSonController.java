@@ -6,10 +6,16 @@ import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.web.page.TableDataInfo;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
+import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.school.domain.XfptSuppliceInspectionReport;
 import com.xfgl.school.domain.XfptSuppliceContractSon;
 import com.xfgl.school.domain.XfptSuppliceInspectionReportSon;
+import com.xfgl.school.service.IXfptSuppliceInspectionReportService;
 import com.xfgl.school.service.IXfptSuppliceInspectionReportSonService;
+import com.xfgl.school.support.SupplierAccessSupport;
+import com.xfgl.system.api.domain.SysUser;
+import com.xfgl.system.api.model.LoginUser;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.apache.commons.io.IOUtils;
@@ -41,6 +47,10 @@ import java.util.zip.ZipOutputStream;
 public class XfptSuppliceInspectionReportSonController extends BaseController {
     @Autowired
     private IXfptSuppliceInspectionReportSonService xfptSuppliceInspectionReportSonService;
+    @Autowired
+    private IXfptSuppliceInspectionReportService xfptSuppliceInspectionReportService;
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
     @Value("${fileUrl:}")
     public String fileUrl;
     /**
@@ -48,9 +58,10 @@ public class XfptSuppliceInspectionReportSonController extends BaseController {
      */
 
     @Operation(summary = "查询学校与供应商检验报告从列表")
-//@RequiresPermissions("system:son:list")
+    @RequiresPermissions("school:zjbg:query")
     @GetMapping("/list")
     public TableDataInfo list(XfptSuppliceInspectionReportSon xfptSuppliceInspectionReportSon) {
+        ensureReportAccessible(xfptSuppliceInspectionReportSon == null ? null : xfptSuppliceInspectionReportSon.getReportId());
         startPage();
         List<XfptSuppliceInspectionReportSon> list = xfptSuppliceInspectionReportSonService.selectXfptSuppliceInspectionReportSonList(xfptSuppliceInspectionReportSon);
         return getDataTable(list);
@@ -60,10 +71,11 @@ public class XfptSuppliceInspectionReportSonController extends BaseController {
      * 导出学校与供应商检验报告从列表
      */
     @Operation(summary = "导出学校与供应商检验报告从列表")
-//    @RequiresPermissions("system:son:export")
+    @RequiresPermissions("school:zjbg:query")
     @Log(title = "学校与供应商检验报告从", businessType = BusinessType.EXPORT)
     @PostMapping("/export")
     public void export(HttpServletResponse response, XfptSuppliceInspectionReportSon xfptSuppliceInspectionReportSon) {
+        ensureReportAccessible(xfptSuppliceInspectionReportSon == null ? null : xfptSuppliceInspectionReportSon.getReportId());
         List<XfptSuppliceInspectionReportSon> list = xfptSuppliceInspectionReportSonService.selectXfptSuppliceInspectionReportSonList(xfptSuppliceInspectionReportSon);
         ExcelUtil<XfptSuppliceInspectionReportSon> util = new ExcelUtil<XfptSuppliceInspectionReportSon>(XfptSuppliceInspectionReportSon.class);
         util.exportExcel(response, list, "学校与供应商检验报告从数据");
@@ -73,20 +85,23 @@ public class XfptSuppliceInspectionReportSonController extends BaseController {
      * 获取学校与供应商检验报告从详细信息
      */
     @Operation(summary = "获取学校与供应商检验报告从详细信息")
-//    @RequiresPermissions("system:son:query")
+    @RequiresPermissions("school:zjbg:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        return success(xfptSuppliceInspectionReportSonService.getById(id));
+        XfptSuppliceInspectionReportSon reportSon = xfptSuppliceInspectionReportSonService.getById(id);
+        ensureReportAccessible(reportSon == null ? null : reportSon.getReportId());
+        return success(reportSon);
     }
 
     /**
      * 新增学校与供应商检验报告从
      */
     @Operation(summary = "新增学校与供应商检验报告从")
-//    @RequiresPermissions("system:son:add")
+    @RequiresPermissions("school:zjbg:upload")
     @Log(title = "学校与供应商检验报告从", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSuppliceInspectionReportSon xfptSuppliceInspectionReportSon) {
+        ensureReportAccessible(xfptSuppliceInspectionReportSon == null ? null : xfptSuppliceInspectionReportSon.getReportId());
         //查询是否有数据
         Long count = xfptSuppliceInspectionReportSonService.lambdaQuery().eq(XfptSuppliceInspectionReportSon::getReportId
                 , xfptSuppliceInspectionReportSon.getReportId()).count();
@@ -98,10 +113,16 @@ public class XfptSuppliceInspectionReportSonController extends BaseController {
      * 修改学校与供应商检验报告从
      */
     @Operation(summary = "修改学校与供应商检验报告从")
-//    @RequiresPermissions("system:son:edit")
+    @RequiresPermissions("school:zjbg:upload")
     @Log(title = "学校与供应商检验报告从", businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptSuppliceInspectionReportSon xfptSuppliceInspectionReportSon) {
+        String reportId = xfptSuppliceInspectionReportSon == null ? null : xfptSuppliceInspectionReportSon.getReportId();
+        if (reportId == null && xfptSuppliceInspectionReportSon != null && xfptSuppliceInspectionReportSon.getId() != null) {
+            XfptSuppliceInspectionReportSon existing = xfptSuppliceInspectionReportSonService.getById(xfptSuppliceInspectionReportSon.getId());
+            reportId = existing == null ? null : existing.getReportId();
+        }
+        ensureReportAccessible(reportId);
         return toAjax(xfptSuppliceInspectionReportSonService.updateById(xfptSuppliceInspectionReportSon));
     }
 
@@ -182,6 +203,26 @@ public class XfptSuppliceInspectionReportSonController extends BaseController {
             System.err.println("Error creating zip file");
             e.printStackTrace();
         }
+    }
+
+    private void ensureReportAccessible(String reportId) {
+        SysUser currentUser = getCurrentUser();
+        if (!supplierAccessSupport.isSupplierUser(currentUser)) {
+            return;
+        }
+        if (reportId == null) {
+            throw new com.xfgl.common.core.exception.ServiceException("当前操作没有权限");
+        }
+        XfptSuppliceInspectionReport parentReport = xfptSuppliceInspectionReportService.getById(reportId);
+        Long supplierId = supplierAccessSupport.resolveSupplierId(currentUser);
+        if (supplierId == null || parentReport == null || !String.valueOf(supplierId).equals(parentReport.getSupplierId())) {
+            throw new com.xfgl.common.core.exception.ServiceException("当前操作没有权限");
+        }
+    }
+
+    private SysUser getCurrentUser() {
+        LoginUser loginUser = SecurityUtils.getLoginUser();
+        return loginUser == null ? null : loginUser.getSysUser();
     }
 
 

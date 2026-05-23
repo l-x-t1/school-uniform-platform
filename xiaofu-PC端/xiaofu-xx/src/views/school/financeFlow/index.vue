@@ -160,10 +160,22 @@
     <el-table v-loading="loading" :data="financeFlowList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="流水单号" align="center" prop="flowNo" />
-      <el-table-column label="业务类型，1支付 2退款 3提现 4结算" align="center" prop="businessType" />
-      <el-table-column label="收支方向，1收入 2支出" align="center" prop="flowDirection" />
+      <el-table-column label="业务类型" align="center" prop="businessType">
+        <template slot-scope="scope">
+          {{ businessTypeText(scope.row.businessType) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="收支方向" align="center" prop="flowDirection">
+        <template slot-scope="scope">
+          {{ flowDirectionText(scope.row.flowDirection) }}
+        </template>
+      </el-table-column>
       <el-table-column label="订单编号" align="center" prop="orderNo" />
-      <el-table-column label="订单类型，1统购 2零售" align="center" prop="orderType" />
+      <el-table-column label="订单类型" align="center" prop="orderType">
+        <template slot-scope="scope">
+          {{ orderTypeText(scope.row.orderType) }}
+        </template>
+      </el-table-column>
       <el-table-column label="售后单号" align="center" prop="afterSaleNo" />
       <el-table-column label="学校名称" align="center" prop="schoolName" />
       <el-table-column label="供应商名称" align="center" prop="supplierName" />
@@ -171,11 +183,19 @@
       <el-table-column label="流水金额" align="center" prop="amount" />
       <el-table-column label="支付渠道" align="center" prop="payChannel" />
       <el-table-column label="交易单号" align="center" prop="tradeNo" />
-      <el-table-column label="收款方类型，1学校 2供应商；统购收学校，零售收供应商" align="center" prop="payeeType" />
+      <el-table-column label="收款方类型" align="center" prop="payeeType">
+        <template slot-scope="scope">
+          {{ payeeTypeText(scope.row.payeeType) }}
+        </template>
+      </el-table-column>
       <el-table-column label="收款方名称" align="center" prop="payeeName" />
       <el-table-column label="收款账户户名" align="center" prop="payeeAccountName" />
       <el-table-column label="收款银行" align="center" prop="payeeBankName" />
-      <el-table-column label="流水状态，0未支付 1已到达学校账号 2已到达供应商账号" align="center" prop="status" />
+      <el-table-column label="流水状态" align="center" prop="status">
+        <template slot-scope="scope">
+          {{ flowStatusText(scope.row.status) }}
+        </template>
+      </el-table-column>
       <el-table-column label="交易发生时间" align="center" prop="tradeTime" width="180">
         <template slot-scope="scope">
           <span>{{ parseTime(scope.row.tradeTime, '{y}-{m}-{d}') }}</span>
@@ -213,7 +233,7 @@
 
     <!-- 添加或修改资金流水对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
+      <el-form ref="form" :model="form" :rules="rules" label-width="110px">
         <el-form-item label="流水单号" prop="flowNo">
           <el-input v-model="form.flowNo" placeholder="请输入流水单号" />
         </el-form-item>
@@ -225,11 +245,47 @@
             <el-option label="结算" value="4" />
           </el-select>
         </el-form-item>
-        <el-form-item label="收支方向，1收入 2支出" prop="flowDirection">
+        <el-form-item label="收支方向" prop="flowDirection">
           <el-select v-model="form.flowDirection" placeholder="请选择收支方向" clearable>
             <el-option label="收入" value="1" />
             <el-option label="支出" value="2" />
           </el-select>
+        </el-form-item>
+        <el-form-item label="关联订单ID" prop="orderId">
+          <el-input v-model="form.orderId" placeholder="请输入关联订单ID" />
+        </el-form-item>
+        <el-form-item label="订单编号" prop="orderNo">
+          <el-input v-model="form.orderNo" placeholder="请输入订单编号" />
+        </el-form-item>
+        <el-form-item label="订单类型" prop="orderType">
+          <el-select v-model="form.orderType" placeholder="请选择订单类型" clearable>
+            <el-option label="统购" value="1" />
+            <el-option label="零售" value="2" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="关联售后单ID" prop="afterSaleId">
+          <el-input v-model="form.afterSaleId" placeholder="请输入关联售后单ID" />
+        </el-form-item>
+        <el-form-item label="售后单号" prop="afterSaleNo">
+          <el-input v-model="form.afterSaleNo" placeholder="售后单号" disabled />
+        </el-form-item>
+        <el-form-item label="学校ID" prop="schoolId">
+          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
+        </el-form-item>
+        <el-form-item label="学校名称" prop="schoolName">
+          <el-input v-model="form.schoolName" placeholder="学校名称" disabled />
+        </el-form-item>
+        <el-form-item label="供应商ID" prop="supplierId">
+          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
+        </el-form-item>
+        <el-form-item label="供应商名称" prop="supplierName">
+          <el-input v-model="form.supplierName" placeholder="供应商名称" disabled />
+        </el-form-item>
+        <el-form-item label="用户ID" prop="userId">
+          <el-input v-model="form.userId" placeholder="请输入用户ID" />
+        </el-form-item>
+        <el-form-item label="用户名称" prop="userName">
+          <el-input v-model="form.userName" placeholder="用户名称" disabled />
         </el-form-item>
         <el-form-item label="流水金额" prop="amount">
           <el-input v-model="form.amount" placeholder="请输入流水金额" />
@@ -264,6 +320,13 @@
         <el-form-item label="收款码快照；统购展示学校收款码，零售展示供应商收款码" prop="receiptQrCode">
           <image-upload v-model="form.receiptQrCode"/>
         </el-form-item>
+        <el-form-item label="流水状态" prop="status">
+          <el-select v-model="form.status" placeholder="请选择流水状态" clearable>
+            <el-option label="未支付" value="0" />
+            <el-option label="已到达学校账号" value="1" />
+            <el-option label="已到达供应商账号" value="2" />
+          </el-select>
+        </el-form-item>
         <el-form-item label="交易发生时间" prop="tradeTime">
           <el-date-picker clearable
             v-model="form.tradeTime"
@@ -271,6 +334,9 @@
             value-format="yyyy-MM-dd"
             placeholder="请选择交易发生时间">
           </el-date-picker>
+        </el-form-item>
+        <el-form-item label="当前归属部门/学校" prop="deptId">
+          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
@@ -346,16 +412,16 @@ export default {
           { required: true, message: "流水单号不能为空", trigger: "blur" }
         ],
         businessType: [
-          { required: true, message: "业务类型，1支付 2退款 3提现 4结算不能为空", trigger: "change" }
+          { required: true, message: "业务类型不能为空", trigger: "change" }
         ],
         flowDirection: [
-          { required: true, message: "收支方向，1收入 2支出不能为空", trigger: "change" }
+          { required: true, message: "收支方向不能为空", trigger: "change" }
         ],
         amount: [
           { required: true, message: "流水金额不能为空", trigger: "blur" }
         ],
         payeeType: [
-          { required: true, message: "收款方类型，1学校 2供应商；统购收学校，零售收供应商不能为空", trigger: "change" }
+          { required: true, message: "收款方类型不能为空", trigger: "change" }
         ],
         payeeId: [
           { required: true, message: "收款方ID不能为空", trigger: "blur" }
@@ -364,7 +430,7 @@ export default {
           { required: true, message: "收款方名称快照不能为空", trigger: "blur" }
         ],
         status: [
-          { required: true, message: "流水状态，0未支付 1已到达学校账号 2已到达供应商账号不能为空", trigger: "change" }
+          { required: true, message: "流水状态不能为空", trigger: "change" }
         ]
       }
     };
@@ -398,9 +464,13 @@ export default {
         orderNo: null,
         orderType: null,
         afterSaleId: null,
+        afterSaleNo: null,
         schoolId: null,
+        schoolName: null,
         supplierId: null,
+        supplierName: null,
         userId: null,
+        userName: null,
         amount: null,
         payChannel: null,
         tradeNo: null,
@@ -484,6 +554,26 @@ export default {
         this.getList();
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
+    },
+    businessTypeText(value) {
+      const map = { 1: "支付", 2: "退款", 3: "提现", 4: "结算" };
+      return map[String(value)] || value || "-";
+    },
+    flowDirectionText(value) {
+      const map = { 1: "收入", 2: "支出" };
+      return map[String(value)] || value || "-";
+    },
+    orderTypeText(value) {
+      const map = { 1: "统购", 2: "零售" };
+      return map[String(value)] || value || "-";
+    },
+    payeeTypeText(value) {
+      const map = { 1: "学校", 2: "供应商" };
+      return map[String(value)] || value || "-";
+    },
+    flowStatusText(value) {
+      const map = { 0: "未支付", 1: "已到达学校账号", 2: "已到达供应商账号" };
+      return map[String(value)] || value || "-";
     },
     /** 导出按钮操作 */
     handleExport() {

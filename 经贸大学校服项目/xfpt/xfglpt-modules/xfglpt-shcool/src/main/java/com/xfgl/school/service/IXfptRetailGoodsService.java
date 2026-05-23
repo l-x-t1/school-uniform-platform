@@ -22,18 +22,20 @@ public interface IXfptRetailGoodsService {
      *
      * @param id 学校商品关联主键
      * @param schoolId 学校ID
+     * @param supplierId 供应商ID
      * @return 零售商品详情
      */
-    XfptRetailGoodsVo selectXfptRetailGoodsById(Long id, Long schoolId);
+    XfptRetailGoodsVo selectXfptRetailGoodsById(Long id, Long schoolId, Long supplierId);
 
     /**
      * 更新学校端零售商品上下架状态
      *
      * @param id 学校商品关联主键
      * @param schoolId 学校ID
+     * @param supplierId 供应商ID
      * @param status 上下架状态
      * @param updateBy 操作人
      * @return 影响行数
      */
-    int updateXfptRetailGoodsStatus(Long id, Long schoolId, String status, String updateBy);
+    int updateXfptRetailGoodsStatus(Long id, Long schoolId, Long supplierId, String status, String updateBy);
 }
