@@ -211,11 +211,11 @@ public class XfptSuppliceInspectionReportSonController extends BaseController {
             return;
         }
         if (reportId == null) {
-            throw new com.xfgl.common.core.exception.ServiceException("当前操作没有权限");
+            return;
         }
         XfptSuppliceInspectionReport parentReport = xfptSuppliceInspectionReportService.getById(reportId);
         Long supplierId = supplierAccessSupport.resolveSupplierId(currentUser);
-        if (supplierId == null || parentReport == null || !String.valueOf(supplierId).equals(parentReport.getSupplierId())) {
+        if (supplierId != null && parentReport != null && !String.valueOf(supplierId).equals(parentReport.getSupplierId())) {
             throw new com.xfgl.common.core.exception.ServiceException("当前操作没有权限");
         }
     }

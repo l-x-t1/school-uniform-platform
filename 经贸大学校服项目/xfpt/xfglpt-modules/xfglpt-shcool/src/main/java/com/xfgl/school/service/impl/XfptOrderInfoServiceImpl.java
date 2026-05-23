@@ -125,6 +125,8 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
             Long id = xfptOrderInfo.getId();
             if (StringUtils.isNotNull(xfptOrderItemList)) {
                 for (XfptOrderItem xfptOrderItem : xfptOrderItemList) {
+                    // 订单明细主键由数据库自增生成，避免把购物车/商品ID误当成明细ID插入
+                    xfptOrderItem.setId(null);
                     xfptOrderItem.setOrderId(id);
                     fillOrderItemDefaults(xfptOrderItem, xfptOrderInfo.getOrderType());
                 }

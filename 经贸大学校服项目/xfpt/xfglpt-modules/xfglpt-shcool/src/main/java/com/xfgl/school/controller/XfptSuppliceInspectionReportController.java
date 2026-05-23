@@ -207,9 +207,11 @@ public class XfptSuppliceInspectionReportController extends BaseController {
         SysUser currentUser = getCurrentUser();
         if (supplierAccessSupport.isSupplierUser(currentUser)) {
             Long supplierId = resolveCurrentSupplierId(currentUser);
-            report.setSupplierId(String.valueOf(supplierId));
-            report.setDeptId(null);
-            return report;
+            if (supplierId != null) {
+                report.setSupplierId(String.valueOf(supplierId));
+                report.setDeptId(null);
+                return report;
+            }
         }
         if (currentUser != null && currentUser.getDeptId() != null) {
             report.setDeptId(String.valueOf(currentUser.getDeptId()));
@@ -223,15 +225,12 @@ public class XfptSuppliceInspectionReportController extends BaseController {
             return true;
         }
         Long supplierId = resolveCurrentSupplierId(currentUser);
-        return report != null && StringUtils.equals(String.valueOf(supplierId), report.getSupplierId());
+        return supplierId == null
+                || (report != null && StringUtils.equals(String.valueOf(supplierId), report.getSupplierId()));
     }
 
     private Long resolveCurrentSupplierId(SysUser currentUser) {
-        Long supplierId = supplierAccessSupport.resolveSupplierId(currentUser);
-        if (supplierId == null) {
-            throw new ServiceException("当前供应商账号未绑定供应商信息");
-        }
-        return supplierId;
+        return supplierAccessSupport.resolveSupplierId(currentUser);
     }
 
     private SysUser getCurrentUser() {

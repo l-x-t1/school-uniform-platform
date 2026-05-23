@@ -46,12 +46,6 @@ function normalizeUsageMenus(routes = []) {
 }
 
 function ensureSupplierMessageMenu(routes = []) {
-  routes.forEach((route) => {
-    if (route.children && route.children.length) {
-      ensureSupplierMessageMenu(route.children);
-    }
-  });
-  return routes;
   const targetTitle = "新增功能";
   const exists = (children = []) =>
     children.some((item) => item.path === "supplierMessage" || item.path === "/newFeature/supplierMessage");
@@ -88,47 +82,64 @@ function ensureSupplierMessageMenu(routes = []) {
 }
 
 function ensureSupplierGroupNoticeMenu(routes = []) {
-  routes.forEach((route) => {
-    if (route.children && route.children.length) {
-      ensureSupplierGroupNoticeMenu(route.children);
-    }
-  });
-  return routes;
-  const targetTitle = "新增功能";
-  const exists = (children = []) =>
-    children.some(
-      (item) =>
-        item.path === "supplierGroupNotice" ||
-        item.path === "adminGroupNoticeQuery" ||
-        item.path === "/newFeature/supplierGroupNotice" ||
-        item.path === "/newFeature/adminGroupNoticeQuery" ||
-        item.component === "school/groupNotice/index" ||
-        item.component === "school/groupNoticeReadonly/index" ||
-        (item.meta && item.meta.title === "学校统购公告查询")
+  const manageMenuTitle = "统购公告管理";
+  const queryMenuTitle = "学校统购公告查询";
+  const manageMenuComponent = "school/groupNotice/index";
+  const queryMenuComponent = "school/groupNoticeReadonly/index";
+  const getTitle = (item) => (item.meta && item.meta.title) || item.name || "";
+  const isManageMenu = (item) => {
+    const title = getTitle(item);
+    return (
+      item.path === "groupNotice" ||
+      item.path === "/newFeature/groupNotice" ||
+      item.component === manageMenuComponent ||
+      title === "公告管理" ||
+      title === "统购公告"
     );
+  };
+  const isQueryMenu = (item) => {
+    const title = getTitle(item);
+    return (
+      item.path === "supplierGroupNotice" ||
+      item.path === "adminGroupNoticeQuery" ||
+      item.path === "/newFeature/supplierGroupNotice" ||
+      item.path === "/newFeature/adminGroupNoticeQuery" ||
+      item.component === queryMenuComponent ||
+      title === queryMenuTitle
+    );
+  };
 
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "SupplierGroupNotice",
-      path: "supplierGroupNotice",
-      component: "school/groupNotice/index",
-      meta: {
-        title: "学校统购公告查询",
-        icon: "message",
-      },
-    });
+  const normalizeManageMenu = (item) => {
+    item.name = "GroupNoticeManage";
+    item.path = item.path === "/newFeature/groupNotice" ? item.path : "groupNotice";
+    item.component = manageMenuComponent;
+    item.meta = {
+      ...(item.meta || {}),
+      title: manageMenuTitle,
+      icon: (item.meta && item.meta.icon) || "documentation",
+    };
+  };
+
+  const normalizeQueryMenu = (item) => {
+    item.name = "AdminGroupNoticeQuery";
+    item.path =
+      item.path === "/newFeature/adminGroupNoticeQuery"
+        ? item.path
+        : "adminGroupNoticeQuery";
+    item.component = queryMenuComponent;
+    item.meta = {
+      ...(item.meta || {}),
+      title: queryMenuTitle,
+      icon: (item.meta && item.meta.icon) || "message",
+    };
   };
 
   routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
-      appendMenu(route);
+    if (isManageMenu(route)) {
+      normalizeManageMenu(route);
+    }
+    if (isQueryMenu(route)) {
+      normalizeQueryMenu(route);
     }
     if (route.children && route.children.length) {
       ensureSupplierGroupNoticeMenu(route.children);
@@ -139,15 +150,8 @@ function ensureSupplierGroupNoticeMenu(routes = []) {
 }
 
 function ensureSupplierWithdrawRecordMenu(routes = []) {
-  routes.forEach((route) => {
-    if (route.children && route.children.length) {
-      ensureSupplierWithdrawRecordMenu(route.children);
-    }
-  });
-  return routes;
-  const targetTitle = "新增功能";
   const menuTitle = "供应商提现记录";
-  const menuComponent = "school/withdrawApply/index";
+  const menuComponent = "school/supplierWithdrawRecord/index";
   const isWithdrawMenu = (item) =>
     item.path === "supplierWithdrawRecord" ||
     item.path === "/newFeature/supplierWithdrawRecord" ||
@@ -167,33 +171,9 @@ function ensureSupplierWithdrawRecordMenu(routes = []) {
     };
   };
 
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    const existing = route.children.find(isWithdrawMenu);
-    if (existing) {
-      normalizeMenu(existing);
-      return;
-    }
-    route.children.push({
-      name: "SupplierWithdrawRecord",
-      path: "supplierWithdrawRecord",
-      component: menuComponent,
-      meta: {
-        title: menuTitle,
-        icon: "money",
-      },
-    });
-  };
-
   routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
     if (isWithdrawMenu(route)) {
       normalizeMenu(route);
-    }
-    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
-      appendMenu(route);
     }
     if (route.children && route.children.length) {
       ensureSupplierWithdrawRecordMenu(route.children);
@@ -204,12 +184,6 @@ function ensureSupplierWithdrawRecordMenu(routes = []) {
 }
 
 function ensureUsageMenu(routes = []) {
-  routes.forEach((route) => {
-    if (route.children && route.children.length) {
-      ensureUsageMenu(route.children);
-    }
-  });
-  return routes;
   const exists = (children = []) =>
     children.some(
       (item) =>
@@ -248,6 +222,173 @@ function ensureUsageMenu(routes = []) {
   return routes;
 }
 
+function hasSupplierRole(userRoles = []) {
+  return userRoles.some((role) => {
+    const roleKey = (role || "").toLowerCase();
+    return roleKey.includes("gys") || roleKey.includes("changshang");
+  });
+}
+
+function hasCityEducationRole(userRoles = []) {
+  return userRoles.some((role) => (role || "").toLowerCase().includes("sjyj"));
+}
+
+function routeTreeSome(routes = [], predicate) {
+  return routes.some((route) => {
+    if (predicate(route)) {
+      return true;
+    }
+    return route.children && route.children.length
+      ? routeTreeSome(route.children, predicate)
+      : false;
+  });
+}
+
+function isAccountBalanceMenu(route = {}) {
+  return (
+    route.path === "accountBalance" ||
+    route.path === "/newFeature/accountBalance" ||
+    route.component === "school/accountBalance/index" ||
+    (route.meta && route.meta.title === "账户余额")
+  );
+}
+
+function isSupplierMessageMenu(route = {}) {
+  return (
+    route.path === "supplierMessage" ||
+    route.path === "/newFeature/supplierMessage" ||
+    route.component === "school/supplierMessage/index" ||
+    (route.meta && route.meta.title === "供应商信息")
+  );
+}
+
+function isUsageMenu(route = {}) {
+  return (
+    route.path === "platformUsage" ||
+    route.path === "/newFeature/platformUsage" ||
+    route.component === "school/platformUsage/index" ||
+    (route.meta && route.meta.title === "使用情况")
+  );
+}
+
+function isSupplierWithdrawRecordMenu(route = {}) {
+  return (
+    route.path === "supplierWithdrawRecord" ||
+    route.path === "/newFeature/supplierWithdrawRecord" ||
+    route.path === "/school/supplierWithdrawRecord" ||
+    route.component === "school/supplierWithdrawRecord/index" ||
+    (route.meta && route.meta.title === "供应商提现记录")
+  );
+}
+
+function isFinanceFlowMenu(route = {}) {
+  return (
+    route.path === "financeFlow" ||
+    route.path === "/newFeature/financeFlow" ||
+    route.component === "school/financeFlow/index" ||
+    (route.meta && route.meta.title === "资金流水")
+  );
+}
+
+function isWithdrawApplyMenu(route = {}) {
+  return (
+    route.path === "withdrawApply" ||
+    route.path === "/newFeature/withdrawApply" ||
+    route.component === "school/withdrawApply/index" ||
+    (route.meta && route.meta.title === "供应商提现申请")
+  );
+}
+
+function isGroupNoticeManageMenu(route = {}) {
+  const title = route.meta && route.meta.title ? route.meta.title : "";
+  return (
+    route.path === "groupNotice" ||
+    route.path === "/newFeature/groupNotice" ||
+    route.component === "school/groupNotice/index" ||
+    title === "统购公告" ||
+    title === "公告管理" ||
+    title === "统购公告管理"
+  );
+}
+
+function isCommentMenu(route = {}) {
+  return (
+    route.path === "comment" ||
+    route.path === "/newFeature/comment" ||
+    route.component === "school/comment/index" ||
+    (route.meta && route.meta.title === "商品评价")
+  );
+}
+
+function sanitizeSupplierMenus(routes = []) {
+  const hasAccountBalance = routeTreeSome(routes, isAccountBalanceMenu);
+  const hasWithdrawRecord = routeTreeSome(routes, isSupplierWithdrawRecordMenu);
+
+  const normalize = (list = []) =>
+    list.reduce((result, route) => {
+      const current = { ...route };
+      if (isCommentMenu(current)) {
+        return result;
+      }
+
+      if (current.children && current.children.length) {
+        current.children = normalize(current.children);
+      }
+
+      if (hasAccountBalance && isFinanceFlowMenu(current)) {
+        current.hidden = true;
+      }
+
+      if (isSupplierMessageMenu(current) || isUsageMenu(current)) {
+        current.hidden = true;
+      }
+
+      if (hasWithdrawRecord && isWithdrawApplyMenu(current)) {
+        current.hidden = true;
+      }
+
+      if (isGroupNoticeManageMenu(current)) {
+        current.hidden = true;
+      }
+
+      result.push(current);
+      return result;
+    }, []);
+
+  return normalize(routes);
+}
+
+function isSupplierGroupNoticeQueryMenu(route = {}) {
+  return (
+    route.path === "supplierGroupNotice" ||
+    route.path === "adminGroupNoticeQuery" ||
+    route.path === "/newFeature/supplierGroupNotice" ||
+    route.path === "/newFeature/adminGroupNoticeQuery" ||
+    route.component === "school/groupNoticeReadonly/index" ||
+    (route.meta && route.meta.title === "学校统购公告查询")
+  );
+}
+
+function sanitizeCityEducationMenus(routes = []) {
+  return routes.reduce((result, route) => {
+    const current = { ...route };
+
+    if (
+      isSupplierGroupNoticeQueryMenu(current) ||
+      isSupplierWithdrawRecordMenu(current)
+    ) {
+      return result;
+    }
+
+    if (current.children && current.children.length) {
+      current.children = sanitizeCityEducationMenus(current.children);
+    }
+
+    result.push(current);
+    return result;
+  }, []);
+}
+
 function isNewFeatureRoute(route = {}) {
   const title = route.meta && route.meta.title ? route.meta.title : route.name;
   return (
@@ -276,6 +417,16 @@ function buildPromotedSidebarRoute(route = {}, parentPath = "") {
 
 function promoteSchoolSidebarMenus(routes = []) {
   return collectFlattenedSchoolSidebarMenus(routes);
+}
+
+function cloneSidebarRoute(route = {}) {
+  const current = { ...route };
+
+  if (route.children && route.children.length) {
+    current.children = route.children.map((child) => cloneSidebarRoute(child));
+  }
+
+  return current;
 }
 
 function resolveSchoolSidebarPath(routePath = "", parentPath = "") {
@@ -356,6 +507,46 @@ function collectFlattenedSchoolSidebarMenus(
   return flattenedRoutes;
 }
 
+function projectSchoolSidebarRoutes(routes = []) {
+  const projectedRoutes = [];
+
+  routes.forEach((route) => {
+    if (!route) {
+      return;
+    }
+
+    if (!isNewFeatureRoute(route)) {
+      projectedRoutes.push(cloneSidebarRoute(route));
+      return;
+    }
+
+    const parentPath = route.path || "";
+    const parentIcon = route.meta && route.meta.icon ? route.meta.icon : "";
+    const directChildren = route.children || [];
+
+    if (!directChildren.length) {
+      projectedRoutes.push(cloneSidebarRoute(route));
+      return;
+    }
+
+    directChildren.forEach((child) => {
+      const projectedChild = cloneSidebarRoute(child);
+      projectedChild.path = resolveSchoolSidebarPath(
+        child.path || "",
+        parentPath
+      );
+      projectedChild.meta = {
+        ...(projectedChild.meta || {}),
+        icon:
+          (projectedChild.meta && projectedChild.meta.icon) || parentIcon,
+      };
+      projectedRoutes.push(projectedChild);
+    });
+  });
+
+  return projectedRoutes;
+}
+
 const permission = {
   state: {
     routes: [],
@@ -386,21 +577,31 @@ const permission = {
         const hasXuexiaoRole = userRoles.some((role) =>
           role.includes("xuexiao")
         );
+        const isSupplierUser = hasSupplierRole(userRoles);
+        const isCityEducationUser = hasCityEducationRole(userRoles);
 
         const homeRoute = hasXuexiaoRole
           ? homeRoutes.schoolHome
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = ensureUsageMenu(
-            ensureSupplierWithdrawRecordMenu(
-              ensureSupplierMessageMenu(
-                ensureSupplierGroupNoticeMenu(
-                  normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
-                )
-              )
-            )
+          let normalizedBaseRoutes = normalizeUsageMenus(
+            JSON.parse(JSON.stringify(res.data || []))
           );
+          normalizedBaseRoutes = ensureSupplierGroupNoticeMenu(
+            normalizedBaseRoutes
+          );
+          normalizedBaseRoutes = ensureSupplierWithdrawRecordMenu(
+            normalizedBaseRoutes
+          );
+          if (isCityEducationUser) {
+            normalizedBaseRoutes = sanitizeCityEducationMenus(
+              normalizedBaseRoutes
+            );
+          }
+          const normalizedRoutes = isSupplierUser
+            ? sanitizeSupplierMenus(normalizedBaseRoutes)
+            : normalizedBaseRoutes;
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);
@@ -414,8 +615,10 @@ const permission = {
           commit("SET_ROUTES", rewriteRoutes);
 
           const schoolSidebarRoutes = hasXuexiaoRole
-            ? promoteSchoolSidebarMenus(sidebarRoutes)
-            : sidebarRoutes;
+            ? projectSchoolSidebarRoutes(sidebarRoutes)
+            : isSupplierUser
+              ? promoteSchoolSidebarMenus(sidebarRoutes)
+              : sidebarRoutes;
           const sidebarRoutesWithHome = [homeRoute].concat(schoolSidebarRoutes);
           commit(
             "SET_SIDEBAR_ROUTERS",

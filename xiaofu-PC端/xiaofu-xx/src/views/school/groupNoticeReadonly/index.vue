@@ -149,7 +149,12 @@
 </template>
 
 <script>
-import { listGroupNotice, getGroupNotice } from "@/api/school/groupNotice";
+import {
+  listGroupNotice,
+  getGroupNotice,
+  listSupplierGroupNotice,
+  getSupplierGroupNotice,
+} from "@/api/school/groupNotice";
 import {
   listSchoolMessage,
   getSchoolMessageByDeptId,
@@ -198,6 +203,13 @@ export default {
       const roles = this.$store.getters.roles || [];
       return roles.includes("admin");
     },
+    isSupplier() {
+      const roles = this.$store.getters.roles || [];
+      return roles.some((role) => {
+        const roleKey = (role || "").toLowerCase();
+        return roleKey.includes("gys") || roleKey.includes("changshang");
+      });
+    },
   },
   created() {
     this.loadSchoolContext();
@@ -209,6 +221,11 @@ export default {
         listSchoolMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
           this.schoolOptions = res.rows || [];
         });
+        return;
+      }
+      if (this.isSupplier) {
+        this.currentSchool = {};
+        this.queryParams.schoolId = null;
         return;
       }
       const deptId = this.$store.getters.deptId;
@@ -224,7 +241,10 @@ export default {
     },
     getList() {
       this.loading = true;
-      listGroupNotice(this.queryParams)
+      const request = this.isSupplier
+        ? listSupplierGroupNotice(this.queryParams)
+        : listGroupNotice(this.queryParams);
+      request
         .then((response) => {
           this.groupNoticeList = response.rows || [];
           this.total = response.total || 0;
@@ -239,7 +259,7 @@ export default {
     },
     resetQuery() {
       this.resetForm("queryForm");
-      if (!this.isAdmin && this.currentSchool && this.currentSchool.id) {
+      if (!this.isAdmin && !this.isSupplier && this.currentSchool && this.currentSchool.id) {
         this.queryParams.schoolId = this.currentSchool.id;
       }
       this.handleQuery();
@@ -251,7 +271,10 @@ export default {
       }
       this.detailOpen = true;
       this.detailLoading = true;
-      getGroupNotice(row.id)
+      const request = this.isSupplier
+        ? getSupplierGroupNotice(row.id)
+        : getGroupNotice(row.id);
+      request
         .then((response) => {
           this.detail = response.data || {};
         })

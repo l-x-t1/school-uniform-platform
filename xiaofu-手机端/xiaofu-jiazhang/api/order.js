@@ -98,13 +98,8 @@ function normalizeOrder(order = {}) {
 }
 
 function resolveOrderItemId(item = {}) {
-  const goodsId = item.goodsId || item.uniformId || item.productId || item.id
-  const rawId = item.id
   if (item.orderItemId) {
     return item.orderItemId
-  }
-  if (rawId && String(rawId) !== String(goodsId)) {
-    return rawId
   }
   return null
 }

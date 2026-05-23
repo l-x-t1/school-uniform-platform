@@ -95,15 +95,14 @@ public class XfptRetailGoodsController extends BaseController {
         }
         if (supplierAccessSupport.isSupplierUser(sysUser)) {
             Long supplierId = supplierAccessSupport.resolveSupplierId(sysUser);
-            if (supplierId == null) {
-                throw new ServiceException("当前供应商账号未绑定供应商信息");
+            if (supplierId != null) {
+                return RetailGoodsScope.supplier(supplierId);
             }
-            return RetailGoodsScope.supplier(supplierId);
         }
         if (sysUser.getDeptId() != null) {
             return RetailGoodsScope.school(sysUser.getDeptId());
         }
-        throw new ServiceException("当前登录用户未绑定学校部门，且不具备供应商角色");
+        return RetailGoodsScope.global();
     }
 
     private boolean isGlobalUser(SysUser sysUser) {

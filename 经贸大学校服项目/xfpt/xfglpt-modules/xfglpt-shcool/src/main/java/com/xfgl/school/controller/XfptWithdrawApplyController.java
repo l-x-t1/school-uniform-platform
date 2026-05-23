@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
@@ -162,11 +161,7 @@ public class XfptWithdrawApplyController extends BaseController {
             if (!supplierAccessSupport.isSupplierUser(sysUser)) {
                     return null;
             }
-            Long supplierId = supplierAccessSupport.resolveSupplierId(sysUser);
-            if (supplierId == null) {
-                    throw new ServiceException("当前供应商账号未绑定供应商信息");
-            }
-            return supplierId;
+            return supplierAccessSupport.resolveSupplierId(sysUser);
     }
 
     private SysUser getCurrentUser() {

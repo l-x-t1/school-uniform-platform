@@ -114,10 +114,31 @@
       <el-table-column label="公告截止时间" min-width="120">
         <template slot-scope="scope">{{ formatDate(scope.row.endTime) }}</template>
       </el-table-column>
-      <el-table-column label="操作" align="center" width="150" fixed="right">
+      <el-table-column label="操作" align="center" width="220" fixed="right">
         <template slot-scope="scope">
-          <el-button type="text" size="mini" @click="handleView(scope.row)">
+          <el-button
+            v-hasPermi="['school:groupNotice:query']"
+            type="text"
+            size="mini"
+            @click="handleView(scope.row)"
+          >
             详情
+          </el-button>
+          <el-button
+            v-hasPermi="['school:groupNotice:edit']"
+            type="text"
+            size="mini"
+            @click="handleUpdate(scope.row)"
+          >
+            修改
+          </el-button>
+          <el-button
+            v-hasPermi="['school:groupNotice:remove']"
+            type="text"
+            size="mini"
+            @click="handleDelete(scope.row)"
+          >
+            删除
           </el-button>
         </template>
       </el-table-column>
@@ -280,11 +301,31 @@ import {
   listGroupNotice,
   getGroupNotice,
   addGroupNotice,
+  updateGroupNotice,
+  delGroupNotice,
 } from "@/api/school/groupNotice";
 import {
   listSchoolMessage,
   getSchoolMessageByDeptId,
 } from "@/api/school/schoolMessage";
+
+const getDefaultForm = () => ({
+  id: null,
+  schoolId: null,
+  deptId: null,
+  schoolName: null,
+  noticeCode: null,
+  title: null,
+  noticeType: "1",
+  content: null,
+  gradeIds: null,
+  gradeNames: null,
+  startTime: null,
+  endTime: null,
+  status: "0",
+  applyStatus: "0",
+  xfptGroupNoticeItemList: [],
+});
 
 export default {
   name: "GroupNotice",
@@ -299,23 +340,7 @@ export default {
       open: false,
       detailOpen: false,
       dialogTitle: "添加公告",
-      form: {
-        id: null,
-        schoolId: null,
-        deptId: null,
-        schoolName: null,
-        noticeCode: null,
-        title: null,
-        noticeType: "1",
-        content: null,
-        gradeIds: null,
-        gradeNames: null,
-        startTime: null,
-        endTime: null,
-        status: "0",
-        applyStatus: "0",
-        xfptGroupNoticeItemList: [],
-      },
+      form: getDefaultForm(),
       detail: {},
       queryParams: {
         pageNum: 1,
@@ -398,22 +423,13 @@ export default {
     },
     resetFormData() {
       this.form = {
+        ...getDefaultForm(),
         id: null,
         schoolId: this.isAdmin ? null : this.currentSchool.id,
         deptId: this.isAdmin ? null : this.currentSchool.deptId,
         schoolName: this.isAdmin ? null : this.currentSchool.schoolName,
-        noticeCode: null,
-        title: null,
-        noticeType: "1",
-        content: null,
-        gradeIds: null,
-        gradeNames: null,
-        startTime: null,
-        endTime: null,
-        status: "0",
-        applyStatus: "0",
-        xfptGroupNoticeItemList: [],
       };
+      this.$refs.form && this.$refs.form.clearValidate();
     },
     handleAdd() {
       this.resetFormData();
@@ -421,6 +437,18 @@ export default {
       this.open = true;
       this.$nextTick(() => {
         this.$refs.form && this.$refs.form.clearValidate();
+      });
+    },
+    handleUpdate(row) {
+      if (!row.id) {
+        this.$message.error("当前公告缺少主键，无法修改");
+        return;
+      }
+      this.resetFormData();
+      getGroupNotice(row.id).then((response) => {
+        this.form = this.normalizeFormData(response.data || {});
+        this.dialogTitle = "修改公告";
+        this.open = true;
       });
     },
     handleSchoolChange(schoolId) {
@@ -444,12 +472,27 @@ export default {
           payload.deptId = this.currentSchool.deptId;
           payload.schoolName = this.currentSchool.schoolName;
         }
-        addGroupNotice(payload).then(() => {
-          this.$modal.msgSuccess("新增成功");
+        const request = payload.id ? updateGroupNotice(payload) : addGroupNotice(payload);
+        request.then(() => {
+          this.$modal.msgSuccess(payload.id ? "修改成功" : "新增成功");
           this.open = false;
           this.getList();
         });
       });
+    },
+    handleDelete(row) {
+      if (!row.id) {
+        this.$message.error("当前公告缺少主键，无法删除");
+        return;
+      }
+      this.$modal
+        .confirm(`是否确认删除公告编号为“${row.noticeCode || row.id}”的数据项？`)
+        .then(() => delGroupNotice(row.id))
+        .then(() => {
+          this.getList();
+          this.$modal.msgSuccess("删除成功");
+        })
+        .catch(() => {});
     },
     handleView(row) {
       if (!row.id) {
@@ -465,6 +508,24 @@ export default {
         .finally(() => {
           this.detailLoading = false;
         });
+    },
+    normalizeFormData(data) {
+      const form = {
+        ...getDefaultForm(),
+        ...data,
+      };
+      form.startTime = this.normalizeDateValue(form.startTime);
+      form.endTime = this.normalizeDateValue(form.endTime);
+      form.noticeType = form.noticeType ? String(form.noticeType) : "1";
+      form.status = form.status ? String(form.status) : "0";
+      form.applyStatus = form.applyStatus ? String(form.applyStatus) : "0";
+      return form;
+    },
+    normalizeDateValue(value) {
+      if (!value) {
+        return null;
+      }
+      return String(value).slice(0, 10);
     },
     formatOption(options, value) {
       const match = options.find((item) => String(item.value) === String(value));
