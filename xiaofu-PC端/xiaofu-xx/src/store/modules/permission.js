@@ -46,6 +46,12 @@ function normalizeUsageMenus(routes = []) {
 }
 
 function ensureSupplierMessageMenu(routes = []) {
+  routes.forEach((route) => {
+    if (route.children && route.children.length) {
+      ensureSupplierMessageMenu(route.children);
+    }
+  });
+  return routes;
   const targetTitle = "新增功能";
   const exists = (children = []) =>
     children.some((item) => item.path === "supplierMessage" || item.path === "/newFeature/supplierMessage");
@@ -82,6 +88,12 @@ function ensureSupplierMessageMenu(routes = []) {
 }
 
 function ensureSupplierGroupNoticeMenu(routes = []) {
+  routes.forEach((route) => {
+    if (route.children && route.children.length) {
+      ensureSupplierGroupNoticeMenu(route.children);
+    }
+  });
+  return routes;
   const targetTitle = "新增功能";
   const exists = (children = []) =>
     children.some(
@@ -127,6 +139,12 @@ function ensureSupplierGroupNoticeMenu(routes = []) {
 }
 
 function ensureSupplierWithdrawRecordMenu(routes = []) {
+  routes.forEach((route) => {
+    if (route.children && route.children.length) {
+      ensureSupplierWithdrawRecordMenu(route.children);
+    }
+  });
+  return routes;
   const targetTitle = "新增功能";
   const menuTitle = "供应商提现记录";
   const menuComponent = "school/withdrawApply/index";
@@ -186,6 +204,12 @@ function ensureSupplierWithdrawRecordMenu(routes = []) {
 }
 
 function ensureUsageMenu(routes = []) {
+  routes.forEach((route) => {
+    if (route.children && route.children.length) {
+      ensureUsageMenu(route.children);
+    }
+  });
+  return routes;
   const exists = (children = []) =>
     children.some(
       (item) =>
@@ -222,6 +246,114 @@ function ensureUsageMenu(routes = []) {
   });
 
   return routes;
+}
+
+function isNewFeatureRoute(route = {}) {
+  const title = route.meta && route.meta.title ? route.meta.title : route.name;
+  return (
+    route.path === "newFeature" ||
+    route.path === "/newFeature" ||
+    title === "新增功能"
+  );
+}
+
+function buildPromotedSidebarRoute(route = {}, parentPath = "") {
+  const routePath = route.path || "";
+  const fullPath = routePath.startsWith("/")
+    ? routePath
+    : `${parentPath}/${routePath}`.replace(/\/{2,}/g, "/");
+  const promotedChild = {
+    ...route,
+    path: fullPath,
+  };
+
+  return {
+    path: fullPath,
+    hidden: route.hidden,
+    children: [promotedChild],
+  };
+}
+
+function promoteSchoolSidebarMenus(routes = []) {
+  return collectFlattenedSchoolSidebarMenus(routes);
+}
+
+function resolveSchoolSidebarPath(routePath = "", parentPath = "") {
+  if (!routePath) {
+    return parentPath || "/";
+  }
+  if (routePath.startsWith("/")) {
+    return routePath;
+  }
+  return `${parentPath}/${routePath}`.replace(/\/{2,}/g, "/");
+}
+
+function isSchoolSidebarMenuEntry(route = {}) {
+  return (
+    !!route.component &&
+    route.component !== Layout &&
+    route.component !== ParentView
+  );
+}
+
+function buildFlattenedSchoolSidebarRoute(
+  route = {},
+  fullPath = "",
+  fallbackIcon = ""
+) {
+  const promotedChild = {
+    ...route,
+    path: fullPath,
+    meta: {
+      ...(route.meta || {}),
+      icon: (route.meta && route.meta.icon) || fallbackIcon,
+    },
+  };
+
+  delete promotedChild.children;
+  delete promotedChild.redirect;
+
+  return {
+    path: fullPath,
+    hidden: route.hidden,
+    children: [promotedChild],
+  };
+}
+
+function collectFlattenedSchoolSidebarMenus(
+  routes = [],
+  parentPath = "",
+  parentIcon = ""
+) {
+  const flattenedRoutes = [];
+
+  routes.forEach((route) => {
+    if (!route || route.hidden) {
+      return;
+    }
+
+    const fullPath = resolveSchoolSidebarPath(route.path || "", parentPath);
+    const currentIcon =
+      route.meta && route.meta.icon ? route.meta.icon : parentIcon;
+
+    if (isSchoolSidebarMenuEntry(route)) {
+      flattenedRoutes.push(
+        buildFlattenedSchoolSidebarRoute(route, fullPath, parentIcon)
+      );
+    }
+
+    if (route.children && route.children.length) {
+      flattenedRoutes.push(
+        ...collectFlattenedSchoolSidebarMenus(
+          route.children,
+          fullPath,
+          currentIcon
+        )
+      );
+    }
+  });
+
+  return flattenedRoutes;
 }
 
 const permission = {
@@ -281,7 +413,10 @@ const permission = {
           router.addRoutes(asyncRoutes);
           commit("SET_ROUTES", rewriteRoutes);
 
-          const sidebarRoutesWithHome = [homeRoute].concat(sidebarRoutes);
+          const schoolSidebarRoutes = hasXuexiaoRole
+            ? promoteSchoolSidebarMenus(sidebarRoutes)
+            : sidebarRoutes;
+          const sidebarRoutesWithHome = [homeRoute].concat(schoolSidebarRoutes);
           commit(
             "SET_SIDEBAR_ROUTERS",
             constantRoutes.concat(sidebarRoutesWithHome)
