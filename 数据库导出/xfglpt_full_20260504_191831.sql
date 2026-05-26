@@ -1354,6 +1354,42 @@ INSERT IGNORE INTO `sys_user` VALUES (2195,NULL,'TestGYS','TestGYS','00','','','
 /*!40000 ALTER TABLE `sys_user` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- SchoolTest 学校端测试账号
+INSERT INTO `sys_user` (
+  `USER_ID`, `DEPT_ID`, `USER_NAME`, `NICK_NAME`, `USER_TYPE`, `EMAIL`, `PHONENUMBER`, `SEX`,
+  `AVATAR`, `PASSWORD`, `STATUS`, `DEL_FLAG`, `LOGIN_IP`, `LOGIN_DATE`, `CREATE_BY`, `CREATE_TIME`,
+  `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `pwdtime`, `phone`, `integrity`, `caid`
+)
+VALUES (
+  2195, 442, 'SchoolTest', 'SchoolTest', '00', '', '', '0',
+  '', 'm6+RJdF/I7npVj6wf3CwMPjnhyxfqAWpBh9gM6jFm+akqkbd9V4+TjA7HNcuakl8Y+Hygh95k2tLejlFFRRpyA==',
+  '0', '0', '127.0.0.1', '2026-05-21 20:17:51', 'admin', '2026-05-21 20:16:58',
+  NULL, NULL, '学校端测试账号', '2026-05-21 20:18:15', 'vky0E+i8IklUw+7/JzUZvA==', '1Xjy117iBmQhsp8lCOCxUg==', NULL
+)
+ON DUPLICATE KEY UPDATE
+  `DEPT_ID` = VALUES(`DEPT_ID`),
+  `USER_NAME` = VALUES(`USER_NAME`),
+  `NICK_NAME` = VALUES(`NICK_NAME`),
+  `USER_TYPE` = VALUES(`USER_TYPE`),
+  `EMAIL` = VALUES(`EMAIL`),
+  `PHONENUMBER` = VALUES(`PHONENUMBER`),
+  `SEX` = VALUES(`SEX`),
+  `AVATAR` = VALUES(`AVATAR`),
+  `PASSWORD` = VALUES(`PASSWORD`),
+  `STATUS` = VALUES(`STATUS`),
+  `DEL_FLAG` = VALUES(`DEL_FLAG`),
+  `LOGIN_IP` = VALUES(`LOGIN_IP`),
+  `LOGIN_DATE` = VALUES(`LOGIN_DATE`),
+  `CREATE_BY` = VALUES(`CREATE_BY`),
+  `CREATE_TIME` = VALUES(`CREATE_TIME`),
+  `UPDATE_BY` = VALUES(`UPDATE_BY`),
+  `UPDATE_TIME` = VALUES(`UPDATE_TIME`),
+  `REMARK` = VALUES(`REMARK`),
+  `pwdtime` = VALUES(`pwdtime`),
+  `phone` = VALUES(`phone`),
+  `integrity` = VALUES(`integrity`),
+  `caid` = VALUES(`caid`);
+
 --
 -- Table structure for table `sys_user_post`
 --
@@ -1404,6 +1440,17 @@ INSERT INTO `sys_user_role` VALUES (2194,101);
 INSERT IGNORE INTO `sys_user_role` VALUES (2195,115);
 /*!40000 ALTER TABLE `sys_user_role` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- SchoolTest 默认绑定学校角色
+INSERT INTO `sys_user_role` (`USER_ID`, `ROLE_ID`)
+SELECT 2195, 101
+FROM DUAL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_user_role`
+  WHERE `USER_ID` = 2195
+    AND `ROLE_ID` = 101
+);
 
 --
 -- Table structure for table `undo_log`
@@ -6507,5 +6554,25 @@ SELECT `USER_ID`, `ROLE_ID`
 FROM `_tmp_testuser_user_role`;
 
 DROP TEMPORARY TABLE IF EXISTS `_tmp_testuser_user_role`;
+
+-- 同步学校角色 xuexiao 当前菜单权限（与当前数据库保持一致）
+DELETE FROM `sys_role_menu`
+WHERE `ROLE_ID` = 101;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES
+  (101,2021),(101,2096),(101,2118),(101,2129),(101,2130),(101,2131),(101,2132),(101,2133),
+  (101,2134),(101,2135),(101,2136),(101,2137),(101,2138),(101,2139),(101,2140),(101,2141),
+  (101,2142),(101,2143),(101,2144),(101,2145),(101,2146),(101,2147),(101,2148),(101,2149),
+  (101,2150),(101,2151),(101,2152),(101,2153),(101,2154),(101,2155),(101,2156),(101,2157),
+  (101,2158),(101,2159),(101,2160),(101,2161),(101,2162),(101,2163),(101,2164),(101,2165),
+  (101,2166),(101,2167),(101,2168),(101,2169),(101,2170),(101,2171),(101,2172),(101,2173),
+  (101,2176),(101,2177),(101,2185),(101,2187),(101,2188),(101,2189),(101,2190),(101,2191),
+  (101,2192),(101,2193),(101,2194),(101,2208),(101,2209),(101,2210),(101,2211),(101,2212),
+  (101,2231),(101,2232),(101,2233),(101,2234),(101,2235),(101,2236),(101,2237),(101,2238),
+  (101,2239),(101,2240),(101,2241),(101,2242),(101,2333),(101,2350),(101,2351),(101,2352),
+  (101,2353),(101,2354),(101,2355),(101,2356),(101,2357),(101,2358),(101,2360),(101,2361),
+  (101,2362),(101,2363),(101,2364),(101,2365),(101,2366),(101,2367),(101,2368),(101,3003),
+  (101,3030),(101,3031),(101,3033),(101,3034),(101,3035),(101,3036),(101,3037),(101,3038),
+  (101,3039),(101,3040),(101,3041),(101,3042);
 
 -- Dump completed on 2026-05-04 19:18:33
