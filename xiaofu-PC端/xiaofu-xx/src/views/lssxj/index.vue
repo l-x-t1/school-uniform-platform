@@ -94,7 +94,6 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="学校名称" prop="schoolName" min-width="180" show-overflow-tooltip />
       <el-table-column label="厂商名称" prop="supplierName" min-width="180" show-overflow-tooltip />
       <el-table-column label="销售类型" width="120" align="center">
         <template slot-scope="scope">

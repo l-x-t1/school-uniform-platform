@@ -17,6 +17,23 @@ export function getGroupNotice(id) {
   })
 }
 
+// 供应商查询学校发布的统购公告列表
+export function listSupplierGroupNotice(query) {
+  return request({
+    url: '/school/groupNotice/supplier/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 供应商查询学校发布的统购公告详情
+export function getSupplierGroupNotice(id) {
+  return request({
+    url: '/school/groupNotice/supplier/' + id,
+    method: 'get'
+  })
+}
+
 // 新增统购公告
 export function addGroupNotice(data) {
   return request({

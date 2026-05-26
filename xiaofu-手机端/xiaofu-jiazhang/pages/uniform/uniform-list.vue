@@ -47,12 +47,15 @@
           :key="index"
           @click="goToDetail(item.id)"
         >
-          <image class="uniform-image" :src="item.image" mode="aspectFill"></image>
+          <image class="uniform-image" :src="item.image" mode="aspectFill" @error="handleImageError(index)"></image>
           <view class="uniform-info">
             <text class="uniform-name">{{item.name}}</text>
+            <text class="uniform-meta" v-if="item.categoryName || item.brandName">
+              {{item.categoryName}}{{item.categoryName && item.brandName ? ' / ' : ''}}{{item.brandName}}
+            </text>
             <view class="uniform-price-row">
-              <text class="uniform-price">¥{{item.price}}</text>
-              <text class="sales-count">{{item.salesCount}}人已购买</text>
+              <text class="uniform-price">{{item.saleTypeText}}</text>
+              <text class="sales-count">{{item.supplierName || '暂无供应商信息'}}</text>
             </view>
           </view>
         </view>
@@ -139,6 +142,8 @@
 import config from '@/config'
 import { listUniforms } from '@/api/uniform'
 
+const DEFAULT_IMAGE = '/static/qjxf.png';
+
 export default {
   data() {
     return {
@@ -150,6 +155,7 @@ export default {
       page: 1,
       hasMore: true,
       showFilterDrawer: false,
+      baseUrl: getApp().globalData.baseUrl,
       uniformList: [],
       categories: [
         { id: 'all', name: '全部' },
@@ -182,14 +188,72 @@ export default {
     this.fetchUniformList();
   },
   methods: {
+    resolveImage(url) {
+      if (!url) {
+        return DEFAULT_IMAGE;
+      }
+      if (/^https?:\/\//i.test(url)) {
+        return url;
+      }
+      if (url.indexOf('/profile/upload/') === 0) {
+        return url.replace('/profile/upload/', 'http://127.0.0.1:9300/filestatics/upload/');
+      }
+      const baseUrl = (this.baseUrl || config.baseUrl || '').replace(/\/$/, '');
+      return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+    },
+
+    getSaleTypeText(saleType) {
+      const map = {
+        '1': '统购商品',
+        '2': '零售商品',
+        '3': '统购零售'
+      };
+      return map[String(saleType || '')] || '商品信息';
+    },
+
+    matchCategory(item) {
+      if (this.currentCategory === 'all') {
+        return true;
+      }
+      if (this.currentCategory === 'new') {
+        return true;
+      }
+      const text = [
+        item.name,
+        item.categoryName,
+        item.brandName
+      ].filter(Boolean).join(' ');
+
+      const rules = {
+        daily: ['春秋', '日常'],
+        sport: ['运动'],
+        winter: ['冬'],
+        summer: ['夏']
+      };
+      const keywords = rules[this.currentCategory] || [];
+      return keywords.some((keyword) => text.includes(keyword));
+    },
+
     normalizeUniform(item, index) {
       return {
         id: item.id || item.uniformId || item.productId,
         name: item.name || item.uniformName || item.productName || '校服',
-        price: item.price || item.salePrice || item.minPrice || 0,
-        salesCount: item.salesCount || item.saleCount || item.buyCount || 0,
-        image: item.image || item.coverImage || item.mainImage || item.imgUrl || (index % 2 === 0 ? '/static/nanxf.png' : '/static/nvxf.png')
+        image: this.resolveImage(item.image || item.coverImage || item.mainImage || item.imgUrl),
+        categoryName: item.categoryName || '',
+        brandName: item.brandName || '',
+        supplierName: item.supplierName || '',
+        saleType: item.saleType || '',
+        saleTypeText: this.getSaleTypeText(item.saleType),
+        publishTime: item.publishTime || '',
+        sortNum: Number(item.sortNum || 0),
+        index
       };
+    },
+
+    handleImageError(index) {
+      if (this.uniformList[index]) {
+        this.$set(this.uniformList[index], 'image', DEFAULT_IMAGE);
+      }
     },
 
     getQueryParams() {
@@ -205,24 +269,10 @@ export default {
       };
     },
 
-    getMockUniforms() {
-      const all = [
-        { id: 1, category: 'summer', name: '夏季短袖校服套装（男）', price: 128, salesCount: 236, image: '/static/nanxf.png' },
-        { id: 2, category: 'summer', name: '夏季短袖校服套装（女）', price: 128, salesCount: 218, image: '/static/nvxf.png' },
-        { id: 3, category: 'daily', name: '秋季校服三件套（男）', price: 268, salesCount: 168, image: '/static/qjxf.png' },
-        { id: 4, category: 'daily', name: '秋季校服三件套（女）', price: 268, salesCount: 152, image: '/static/xf1.png' },
-        { id: 5, category: 'sport', name: '运动校服套装', price: 198, salesCount: 96, image: '/static/xf2.png' },
-        { id: 6, category: 'winter', name: '冬季加绒校服外套', price: 328, salesCount: 84, image: '/static/qjxf.png' }
-      ];
-      const categoryList = this.currentCategory === 'all' || this.currentCategory === 'new'
-        ? all
-        : all.filter((item) => item.category === this.currentCategory);
-      const keyword = this.searchKeyword.trim();
-      return keyword ? categoryList.filter((item) => item.name.includes(keyword)) : categoryList;
-    },
-
     applyUniformResult(rows, total) {
-      const list = rows.map(this.normalizeUniform);
+      const list = rows
+        .map(this.normalizeUniform)
+        .filter((item) => this.matchCategory(item));
       this.uniformList = this.page === 1 ? list : [...this.uniformList, ...list];
       this.hasMore = total ? this.uniformList.length < total : list.length >= 10;
       if (this.hasMore) this.page += 1;
@@ -248,23 +298,10 @@ export default {
       listUniforms(this.getQueryParams())
         .then((res) => {
           const rows = res.rows || res.data || res.list || [];
-          if (!rows.length && config.enableMockFallback) {
-            this.uniformList = this.getMockUniforms();
-            this.hasMore = false;
-          } else {
-            this.applyUniformResult(rows, res.total);
-          }
+          this.applyUniformResult(rows, res.total);
           this.finishLoading();
         })
         .catch((error) => {
-          if (config.enableMockFallback) {
-            const mockData = this.getMockUniforms();
-            this.uniformList = this.page === 1 ? mockData : [...this.uniformList, ...mockData];
-            this.hasMore = false;
-            this.finishLoading();
-            return;
-          }
-
           this.finishLoading();
           uni.showToast({
             title: error.message || '校服列表加载失败',
@@ -454,27 +491,44 @@ export default {
         .uniform-name {
           font-size: 28rpx;
           color: #333;
-          margin-bottom: 16rpx;
+          margin-bottom: 10rpx;
           display: -webkit-box;
           -webkit-box-orient: vertical;
           -webkit-line-clamp: 2;
           overflow: hidden;
         }
+
+        .uniform-meta {
+          display: block;
+          font-size: 22rpx;
+          color: #8a94a6;
+          margin-bottom: 14rpx;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
         
         .uniform-price-row {
           display: flex;
           justify-content: space-between;
-          align-items: center;
+          align-items: flex-start;
+          column-gap: 16rpx;
           
           .uniform-price {
-            font-size: 32rpx;
+            font-size: 24rpx;
             font-weight: 500;
-            color: #f44;
+            color: #3B7AFF;
+            flex-shrink: 0;
           }
           
           .sales-count {
             font-size: 22rpx;
             color: #999;
+            text-align: right;
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
           }
         }
       }

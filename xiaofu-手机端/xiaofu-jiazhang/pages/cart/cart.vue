@@ -19,9 +19,18 @@
 					<image :src="item.image" mode="aspectFill" class="item-image"></image>
 					<view class="item-info">
 						<view class="item-name">{{item.name}}</view>
+						<view class="item-remove" @click.stop="removeItem(index)">
+							<uni-icons type="trash" size="16" color="#ff6b6b"></uni-icons>
+							<text>取消</text>
+						</view>
 						<view class="item-spec">
-							<text class="spec-tag">{{item.spec}}</text>
-							<text class="spec-tag">{{item.size}}</text>
+							<text class="spec-tag">{{item.orderTypeText}}</text>
+							<text class="spec-tag" v-if="item.spec">{{item.spec}}</text>
+							<text class="spec-tag" v-if="item.size">{{item.size}}</text>
+						</view>
+						<view class="item-meta">
+							<text class="meta-text" v-if="item.studentName">{{item.studentName}}</text>
+							<text class="meta-text" v-if="item.goodsCode">{{item.goodsCode}}</text>
 						</view>
 						<view class="item-bottom">
 							<text class="price">¥<text class="price-num">{{item.price}}</text></text>
@@ -127,15 +136,29 @@
 			normalizeCartItem(item) {
 				return {
 					id: item.id || item.cartId || item.uniformId,
-					uniformId: item.uniformId || item.productId || item.id,
-					skuId: item.skuId,
-					name: item.name || item.uniformName || item.productName || '校服',
-					spec: item.spec || item.color || '默认款',
+					userId: item.userId,
+					studentId: item.studentId,
+					uniformId: item.uniformId || item.goodsId || item.productId || item.id,
+					goodsId: item.goodsId || item.uniformId || item.id,
+					skuId: item.skuId || item.sizeId,
+					sizeId: item.sizeId || item.skuId,
+					name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
+					spec: item.spec || item.color || '',
 					size: item.size || item.sizeName || '-',
+					sizeName: item.sizeName || item.size || '-',
 					price: item.price || item.salePrice || item.unitPrice || '0.00',
-					quantity: Number(item.quantity || item.num || 1),
-					selected: item.selected !== undefined ? item.selected : true,
-					image: item.image || item.productImage || item.coverImage || '/static/nanxf.png'
+					unitPrice: item.unitPrice || item.price || '0.00',
+					quantity: Number(item.quantity || item.buyNum || item.num || 1),
+					buyNum: Number(item.buyNum || item.quantity || item.num || 1),
+					selected: item.selected !== undefined ? item.selected : String(item.checkedFlag || '1') === '1',
+					checkedFlag: item.checkedFlag || (item.selected === false ? '0' : '1'),
+					orderType: String(item.orderType || item.saleType || '1'),
+					orderTypeText: String(item.orderType || item.saleType || '1') === '2' ? '零售购买' : '统购购买',
+					noticeId: item.noticeId || null,
+					image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png',
+					mainImage: item.mainImage || item.image || item.productImage || item.coverImage || '/static/qjxf.png',
+					studentName: item.studentName || '',
+					goodsCode: item.goodsCode || ''
 				};
 			},
 			loadCart() {
@@ -148,12 +171,12 @@
 							return;
 						}
 						const localCart = uni.getStorageSync('cartList') || [];
-						this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : this.getDemoCart();
+						this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : [];
 					})
 					.catch((error) => {
 						if (config.enableMockFallback) {
 							const localCart = uni.getStorageSync('cartList') || [];
-							this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : this.getDemoCart();
+							this.cartList = localCart.length ? localCart.map(this.normalizeCartItem) : [];
 							return;
 						}
 						uni.showToast({
@@ -161,29 +184,6 @@
 							icon: 'none'
 						});
 					});
-			},
-			getDemoCart() {
-				return [{
-					id: 1,
-					uniformId: 1,
-					name: '夏季短袖校服套装（男）',
-					spec: '男生款',
-					size: 'L',
-					price: '128.00',
-					quantity: 1,
-					selected: true,
-					image: '/static/nanxf.png'
-				}, {
-					id: 2,
-					uniformId: 2,
-					name: '夏季短袖校服套装（女）',
-					spec: '女生款',
-					size: 'M',
-					price: '128.00',
-					quantity: 1,
-					selected: true,
-					image: '/static/nvxf.png'
-				}];
 			},
 			saveLocalCart() {
 				uni.setStorageSync('cartList', this.cartList);
@@ -199,7 +199,17 @@
 			},
 			exitEditMode() {
 				this.isEdit = false;
-				this.cartList.forEach(item => item.selected = true);
+				this.cartList.forEach(item => {
+					item.selected = true;
+					item.checkedFlag = '1';
+				});
+				Promise.allSettled(this.cartList.map((item) => updateCart({
+					id: item.id,
+					selected: true,
+					checkedFlag: '1'
+				}))).catch(() => {
+					if (config.enableMockFallback) this.saveLocalCart();
+				});
 				this.saveLocalCart();
 			},
 			handleItemClick(index) {
@@ -212,27 +222,82 @@
 			},
 			toggleSelect(index) {
 				this.cartList[index].selected = !this.cartList[index].selected;
+				this.cartList[index].checkedFlag = this.cartList[index].selected ? '1' : '0';
+				const item = this.cartList[index];
+				updateCart({
+					id: item.id,
+					selected: item.selected,
+					checkedFlag: item.checkedFlag
+				}).catch(() => {
+					if (config.enableMockFallback) this.saveLocalCart();
+				});
 				this.saveLocalCart();
 			},
 			toggleSelectAll() {
 				const newStatus = !this.isAllSelected;
-				this.cartList.forEach(item => item.selected = newStatus);
+				this.cartList.forEach(item => {
+					item.selected = newStatus;
+					item.checkedFlag = newStatus ? '1' : '0';
+				});
+				Promise.allSettled(this.cartList.map((item) => updateCart({
+					id: item.id,
+					selected: item.selected,
+					checkedFlag: item.checkedFlag
+				}))).catch(() => {
+					if (config.enableMockFallback) this.saveLocalCart();
+				});
 				this.saveLocalCart();
 			},
 			updateQuantity(index, delta) {
 				const newQuantity = this.cartList[index].quantity + delta;
 				if (newQuantity > 0 && newQuantity <= 99) {
 					this.cartList[index].quantity = newQuantity;
+					this.cartList[index].buyNum = newQuantity;
 					const item = this.cartList[index];
 					updateCart({
 						id: item.id,
-						cartId: item.id,
-						quantity: item.quantity
+						quantity: item.quantity,
+						buyNum: item.quantity,
+						uniformId: item.uniformId,
+						goodsId: item.goodsId,
+						skuId: item.skuId,
+						sizeId: item.sizeId,
+						name: item.name,
+						sizeName: item.sizeName,
+						image: item.image,
+						price: item.price,
+						orderType: item.orderType,
+						selected: item.selected,
+						checkedFlag: item.checkedFlag,
+						studentId: item.studentId,
+						noticeId: item.noticeId
 					}).catch(() => {
 						if (config.enableMockFallback) this.saveLocalCart();
 					});
 					this.saveLocalCart();
 				}
+			},
+			removeItem(index) {
+				const item = this.cartList[index];
+				uni.showModal({
+					title: '移除商品',
+					content: `确定将“${item.name}”从购物车中移除吗？`,
+					success: ({ confirm }) => {
+						if (!confirm) return;
+						this.cartList.splice(index, 1);
+						this.saveLocalCart();
+						deleteCart(item.id).catch(() => {
+							if (config.enableMockFallback) this.saveLocalCart();
+						});
+						uni.showToast({
+							title: '已移除',
+							icon: 'success'
+						});
+						if (this.cartList.length === 0) {
+							this.isEdit = false;
+						}
+					}
+				});
 			},
 			handleSubmit() {
 				if (this.isEdit) {
@@ -260,7 +325,15 @@
 						});
 						return;
 					}
-					uni.setStorageSync('confirmOrderItems', this.cartList.filter(item => item.selected));
+					uni.setStorageSync('confirmOrderItems', this.cartList.filter(item => item.selected).map((item) => ({
+						...item,
+						price: item.price,
+						unitPrice: item.unitPrice || item.price,
+						quantity: Number(item.quantity || 1),
+						buyNum: Number(item.quantity || 1),
+						orderType: item.orderType || '1',
+						saleType: item.orderType || '1'
+					})));
 					uni.navigateTo({
 						url: '/pages/order/order-confirm?source=cart'
 					});
@@ -350,12 +423,28 @@
 				.item-name {
 					font-size: 30rpx;
 					color: #333333;
-					margin-bottom: 16rpx;
+					margin-bottom: 12rpx;
 					font-weight: 500;
+					padding-right: 120rpx;
+				}
+
+				.item-remove {
+					display: inline-flex;
+					align-items: center;
+					padding: 6rpx 16rpx;
+					border-radius: 999rpx;
+					background: rgba(255, 107, 107, 0.08);
+					margin-bottom: 16rpx;
+
+					text {
+						font-size: 22rpx;
+						color: #ff6b6b;
+						margin-left: 6rpx;
+					}
 				}
 				
 				.item-spec {
-					margin-bottom: 24rpx;
+					margin-bottom: 12rpx;
 					
 					.spec-tag {
 						display: inline-block;
@@ -365,6 +454,18 @@
 						font-size: 24rpx;
 						border-radius: 8rpx;
 						margin-right: 16rpx;
+					}
+				}
+
+				.item-meta {
+					display: flex;
+					flex-wrap: wrap;
+					gap: 12rpx;
+					margin-bottom: 20rpx;
+
+					.meta-text {
+						font-size: 22rpx;
+						color: #97a0af;
 					}
 				}
 				

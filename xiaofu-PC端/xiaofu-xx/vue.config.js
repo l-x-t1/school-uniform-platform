@@ -44,6 +44,13 @@ module.exports = {
           ["^" + process.env.VUE_APP_BASE_API]: "",
         },
       },
+      "/stats-api": {
+        target: "http://127.0.0.1:9204",
+        changeOrigin: true,
+        pathRewrite: {
+          "^/stats-api": "",
+        },
+      },
     },
     disableHostCheck: true,
   },

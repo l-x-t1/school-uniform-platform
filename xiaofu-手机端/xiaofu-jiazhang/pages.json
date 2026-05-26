@@ -1,508 +1,530 @@
 {
-  "pages": [
-    {
-      "path": "pages/index/index",
-      "style": {
-        "navigationBarTitleText": "首页",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/meeting-minutes",
-      "style": {
-        "navigationBarTitleText": "班子会议纪要报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/meeting-detail",
-      "style": {
-        "navigationBarTitleText": "详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/opinion-list",
-      "style": {
-        "navigationBarTitleText": "家长购买意向征集管理",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/opinion-detail",
-      "style": {
-        "navigationBarTitleText": "详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/org-list",
-      "style": {
-        "navigationBarTitleText": "选用组织名单报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/org-detail",
-      "style": {
-        "navigationBarTitleText": "查看选用组织名单",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/mode-list",
-      "style": {
-        "navigationBarTitleText": "选用组织确定选购模式报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/mode-detail",
-      "style": {
-        "navigationBarTitleText": "查看详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/notice-pub-list",
-      "style": {
-        "navigationBarTitleText": "发布公告",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/notice-pub-detail",
-      "style": {
-        "navigationBarTitleText": "查看选购信息",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/pdxz-vote-list",
-      "style": {
-        "navigationBarTitleText": "组建评定小组投票确定厂商",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/pdxz-vote-detail",
-      "style": {
-        "navigationBarTitleText": "查看投票详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/proc-result-list",
-      "style": {
-        "navigationBarTitleText": "选用组织选购结果公示报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/proc-result-detail",
-      "style": {
-        "navigationBarTitleText": "详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/contract-vendor-list",
-      "style": {
-        "navigationBarTitleText": "学校采购合同报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/contract-vendor-detail",
-      "style": {
-        "navigationBarTitleText": "厂商详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/proc-contract-list",
-      "style": {
-        "navigationBarTitleText": "采购合同报备",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/quality-vendor-list",
-      "style": {
-        "navigationBarTitleText": "产品质量检验报告报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/quality-report-list",
-      "style": {
-        "navigationBarTitleText": "质量检测报告",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/quality-report-detail",
-      "style": {
-        "navigationBarTitleText": "质量检测报告",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/quality-vendor-detail",
-      "style": {
-        "navigationBarTitleText": "厂商详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/satisfaction-list",
-      "style": {
-        "navigationBarTitleText": "选用组织家长满意度总结报告报备与公开",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/satisfaction-detail",
-      "style": {
-        "navigationBarTitleText": "详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/proc-info-list",
-      "style": {
-        "navigationBarTitleText": "采购信息报备",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/proc-info-detail",
-      "style": {
-        "navigationBarTitleText": "详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/stats/proc-work-summary-list",
-      "style": {
-        "navigationBarTitleText": "学校校服采购工作总结",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/stats/proc-work-summary-detail",
-      "style": {
-        "navigationBarTitleText": "查看学校校服采购工作总结",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/login/simlogin",
-      "style": {
-        "navigationBarTitleText": "登录",
-        "navigationStyle": "custom"
-      }
-    },
-    {
-      "path": "pages/login/login",
-      "style": {
-        "navigationBarTitleText": "登录",
-        "navigationStyle": "custom"
-      }
-    },
-    {
-      "path": "pages/login/register",
-      "style": {
-        "navigationBarTitleText": "注册",
-        "navigationStyle": "custom"
-      }
-    },
-    {
-      "path": "pages/stats/stats",
-      "style": {
-        "navigationBarTitleText": "校服采购流程",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/uniform/uniform-list",
-      "style": {
-        "navigationBarTitleText": "校服列表",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/order/order-list",
-      "style": {
-        "navigationBarTitleText": "订单列表",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/privacy/privacy",
-      "style": {
-        "navigationBarTitleText": "隐私政策"
-      }
-    },
-    {
-      "path": "pages/uniform/uniform-detail",
-      "style": {
-        "navigationBarTitleText": "校服详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/notice/notice-list",
-      "style": {
-        "navigationBarTitleText": "公告列表",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/notice/notice-detail",
-      "style": {
-        "navigationBarTitleText": "公告详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/user/user",
-      "style": {
-        "navigationBarTitleText": "我的",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/order/order-detail",
-      "style": {
-        "navigationBarTitleText": "订单详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/order/order-confirm",
-      "style": {
-        "navigationBarTitleText": "确认订单",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/user/student-info",
-      "style": {
-        "navigationBarTitleText": "学生信息",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/user/profile-edit",
-      "style": {
-        "navigationBarTitleText": "编辑资料",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/user/student-edit",
-      "style": {
-        "navigationBarTitleText": "编辑学生",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/payment/payment",
-      "style": {
-        "navigationBarTitleText": "订单支付",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/logistics/logistics-detail",
-      "style": {
-        "navigationBarTitleText": "物流详情",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/feedback/feedback",
-      "style": {
-        "navigationBarTitleText": "问题反馈",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/feedback/feedback-list",
-      "style": {
-        "navigationBarTitleText": "反馈记录",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/feedback/feedback-detail",
-      "style": {
-        "navigationBarTitleText": "反馈详情",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/user/address-list",
-      "style": {
-        "navigationBarTitleText": "收货地址",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/user/address-edit",
-      "style": {
-        "navigationBarTitleText": "编辑地址",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/uniform/quality-report",
-      "style": {
-        "navigationBarTitleText": "质量检验报告",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/survey/survey-list",
-      "style": {
-        "navigationBarTitleText": "问卷调查",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/survey/survey-detail",
-      "style": {
-        "navigationBarTitleText": "问卷详情",
-        "enablePullDownRefresh": false,
-        "navigationStyle": "custom"
-      }
-    },
-    {
-      "path": "pages/survey/survey-result",
-      "style": {
-        "navigationBarTitleText": "调查结果",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/uniform/size-guide",
-      "style": {
-        "navigationBarTitleText": "尺码测量指南",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/process/process-detail",
-      "style": {
-        "navigationBarTitleText": "详情"
-      }
-    },
-    {
-      "path": "pages/process/process-list",
-      "style": {
-        "navigationBarTitleText": "学校班子会议纪要公布"
-      }
-    },
-    {
-      "path": "pages/uniform/uniform-purchase",
-      "style": {
-        "navigationBarTitleText": "商品统购",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-      "path": "pages/cart/cart",
-      "style": {
-        "navigationBarTitleText": "购物车",
-        "enablePullDownRefresh": true
-      }
-    },
-    {
-      "path": "pages/user/bind-student",
-      "style": {
-        "navigationBarTitleText": "绑定学生信息",
-        "enablePullDownRefresh": false
-      }
-    },
-    {
-    	"path" : "pages/zjbg/zjbg",
-    	"style" : 
-    	{
-    		"navigationBarTitleText" : "质检报告",
-        "enablePullDownRefresh": false
-
-    	}
-    },
-    {
-    	"path" : "pages/wdsc/wdsc",
-    	"style" : 
-    	{
-    		"navigationBarTitleText" : "我的收藏",
-        "enablePullDownRefresh": false
-    	}
-    },
-    {
-    	"path" : "pages/xfhs/xfhs",
-    	"style" : 
-    	{
-    		"navigationBarTitleText" : "校服回收列表",
-        "enablePullDownRefresh": false
-    	}
-    },
-    {
-    	"path" : "pages/xfhs/form",
-    	"style" : 
-    	{
-    		"navigationBarTitleText" : "校服回收申报",
-        "enablePullDownRefresh": false
-    	}
-    },
-    {
-    	"path" : "pages/xfhs/detial",
-    	"style" : 
-    	{
-    		"navigationBarTitleText" : "校服回收详情",
-        "enablePullDownRefresh": false
-    	}
-    }
-  ],
-  "globalStyle": {
-    "navigationBarTextStyle": "white",
-    "navigationBarTitleText": "校服管理平台",
-    "navigationBarBackgroundColor": "#30A3FF",
-    "backgroundColor": "#30A3FF"
-  },
-  "tabBar": {
-    "color": "#999999",
-    "selectedColor": "#30A3FF",
-    "backgroundColor": "#FFFFFF",
-    "borderStyle": "black",
-    "list": [
-      {
-        "pagePath": "pages/index/index",
-        "text": "首页",
-        "iconPath": "static/sy.png",
-        "selectedIconPath": "static/sy1.png"
-      },
-      {
-        "pagePath": "pages/notice/notice-list",
-        "text": "公告",
-        "iconPath": "static/dp.png",
-        "selectedIconPath": "static/dp1.png"
-      },
-      {
-        "pagePath": "pages/survey/survey-list",
-        "text": "问卷",
-        "iconPath": "static/dd.png",
-        "selectedIconPath": "static/dd1.png"
-      },
-      {
-        "pagePath": "pages/user/user",
-        "text": "我的",
-        "iconPath": "static/wd.png",
-        "selectedIconPath": "static/wd1.png"
-      }
-    ]
-  }
+    "pages":  [
+                  {
+                      "path":  "pages/index/index",
+                      "style":  {
+                                    "navigationBarTitleText":  "首页",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/meeting-minutes",
+                      "style":  {
+                                    "navigationBarTitleText":  "班子会议纪要报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/meeting-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/opinion-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "家长购买意向征集管理",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/opinion-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/org-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "选用组织名单报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/org-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "查看选用组织名单",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/mode-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "选用组织确定选购模式报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/mode-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "查看详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/notice-pub-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "发布公告",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/notice-pub-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "查看选购信息",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/pdxz-vote-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "组建评定小组投票确定厂商",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/pdxz-vote-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "查看投票详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-result-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "选用组织选购结果公示报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-result-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/contract-vendor-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "学校采购合同报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/contract-vendor-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "厂商详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-contract-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "采购合同报备",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/quality-vendor-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "产品质量检验报告报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/quality-report-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "质量检测报告",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/quality-report-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "质量检测报告",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/quality-vendor-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "厂商详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/satisfaction-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "选用组织家长满意度总结报告报备与公开",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/satisfaction-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-info-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "采购信息报备",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-info-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-work-summary-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "学校校服采购工作总结",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/proc-work-summary-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "查看学校校服采购工作总结",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/login/simlogin",
+                      "style":  {
+                                    "navigationBarTitleText":  "登录",
+                                    "navigationStyle":  "custom"
+                                }
+                  },
+                  {
+                      "path":  "pages/login/login",
+                      "style":  {
+                                    "navigationBarTitleText":  "登录",
+                                    "navigationStyle":  "custom"
+                                }
+                  },
+                  {
+                      "path":  "pages/login/register",
+                      "style":  {
+                                    "navigationBarTitleText":  "注册",
+                                    "navigationStyle":  "custom"
+                                }
+                  },
+                  {
+                      "path":  "pages/stats/stats",
+                      "style":  {
+                                    "navigationBarTitleText":  "校服采购流程",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/uniform/uniform-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "校服列表",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/order/order-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "订单列表",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/privacy/privacy",
+                      "style":  {
+                                    "navigationBarTitleText":  "隐私政策"
+                                }
+                  },
+                  {
+                      "path":  "pages/uniform/uniform-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "校服详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/notice/notice-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "公告列表",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/notice/notice-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "公告详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/user/user",
+                      "style":  {
+                                    "navigationBarTitleText":  "我的",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/order-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "订单详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/return-apply",
+                      "style":  {
+                                    "navigationBarTitleText":  "申请退换",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/after-sale-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "售后详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/comment-apply",
+                      "style":  {
+                                    "navigationBarTitleText":  "订单评价",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/comment-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "评价详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/order-confirm",
+                      "style":  {
+                                    "navigationBarTitleText":  "确认订单",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/user/student-info",
+                      "style":  {
+                                    "navigationBarTitleText":  "学生信息",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/user/profile-edit",
+                      "style":  {
+                                    "navigationBarTitleText":  "编辑资料",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/user/student-edit",
+                      "style":  {
+                                    "navigationBarTitleText":  "编辑学生",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/payment/payment",
+                      "style":  {
+                                    "navigationBarTitleText":  "订单支付",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/logistics/logistics-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "物流详情",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/feedback/feedback",
+                      "style":  {
+                                    "navigationBarTitleText":  "问题反馈",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/feedback/feedback-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "反馈记录",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/feedback/feedback-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "反馈详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/user/address-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "收货地址",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/user/address-edit",
+                      "style":  {
+                                    "navigationBarTitleText":  "编辑地址",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/uniform/quality-report",
+                      "style":  {
+                                    "navigationBarTitleText":  "质量检测报告",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/survey/survey-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "问卷调查",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/survey/survey-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "问卷详情",
+                                    "enablePullDownRefresh":  false,
+                                    "navigationStyle":  "custom"
+                                }
+                  },
+                  {
+                      "path":  "pages/survey/survey-result",
+                      "style":  {
+                                    "navigationBarTitleText":  "调查结果",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/uniform/size-guide",
+                      "style":  {
+                                    "navigationBarTitleText":  "尺码测量指南",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/process/process-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "详情"
+                                }
+                  },
+                  {
+                      "path":  "pages/process/process-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "学校班子会议纪要公布"
+                                }
+                  },
+                  {
+                      "path":  "pages/uniform/uniform-purchase",
+                      "style":  {
+                                    "navigationBarTitleText":  "商品统购",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/cart/cart",
+                      "style":  {
+                                    "navigationBarTitleText":  "购物车",
+                                    "enablePullDownRefresh":  true
+                                }
+                  },
+                  {
+                      "path":  "pages/user/bind-student",
+                      "style":  {
+                                    "navigationBarTitleText":  "绑定学生信息",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/zjbg/zjbg",
+                      "style":  {
+                                    "navigationBarTitleText":  "质检报告",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/wdsc/wdsc",
+                      "style":  {
+                                    "navigationBarTitleText":  "我的收藏",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/xfhs/xfhs",
+                      "style":  {
+                                    "navigationBarTitleText":  "校服回收列表",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/xfhs/form",
+                      "style":  {
+                                    "navigationBarTitleText":  "校服回收申报",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/xfhs/detial",
+                      "style":  {
+                                    "navigationBarTitleText":  "校服回收详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  }
+              ],
+    "globalStyle":  {
+                        "navigationBarTextStyle":  "white",
+                        "navigationBarTitleText":  "校服管理平台",
+                        "navigationBarBackgroundColor":  "#30A3FF",
+                        "backgroundColor":  "#30A3FF"
+                    },
+    "tabBar":  {
+                   "color":  "#999999",
+                   "selectedColor":  "#30A3FF",
+                   "backgroundColor":  "#FFFFFF",
+                   "borderStyle":  "black",
+                   "list":  [
+                                {
+                                    "pagePath":  "pages/index/index",
+                                    "text":  "首页",
+                                    "iconPath":  "static/sy.png",
+                                    "selectedIconPath":  "static/sy1.png"
+                                },
+                                {
+                                    "pagePath":  "pages/notice/notice-list",
+                                    "text":  "公告",
+                                    "iconPath":  "static/dp.png",
+                                    "selectedIconPath":  "static/dp1.png"
+                                },
+                                {
+                                    "pagePath":  "pages/survey/survey-list",
+                                    "text":  "问卷",
+                                    "iconPath":  "static/dd.png",
+                                    "selectedIconPath":  "static/dd1.png"
+                                },
+                                {
+                                    "pagePath":  "pages/user/user",
+                                    "text":  "我的",
+                                    "iconPath":  "static/wd.png",
+                                    "selectedIconPath":  "static/wd1.png"
+                                }
+                            ]
+               }
 }

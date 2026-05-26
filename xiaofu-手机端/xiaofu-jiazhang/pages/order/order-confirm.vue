@@ -24,7 +24,7 @@
         <image class="goods-image" :src="item.image" mode="aspectFill"></image>
         <view class="goods-info">
           <text class="goods-name">{{ item.name }}</text>
-          <text class="goods-spec">{{ item.spec || item.color }} {{ item.size }}</text>
+          <text class="goods-spec">{{ currentOrderTypeText }} {{ item.spec || item.color }} {{ item.size }}</text>
         </view>
         <view class="goods-price">
           <text class="price">¥{{ item.price }}</text>
@@ -65,6 +65,7 @@
 
 <script>
 import config from '@/config'
+import { deleteCart } from '@/api/cart'
 import { createOrder } from '@/api/order'
 import { getDefaultStudent } from '@/api/student'
 import { listAddress } from '@/api/address'
@@ -97,18 +98,29 @@ export default {
   computed: {
     goodsAmount() {
       return this.items
-        .reduce((sum, item) => sum + Number(item.price || 0) * Number(item.quantity || 1), 0)
+        .reduce((sum, item) => sum + Number(item.unitPrice || item.price || 0) * Number(item.quantity || 1), 0)
         .toFixed(2);
     },
     payAmount() {
       return (Number(this.goodsAmount) + Number(this.freightAmount)).toFixed(2);
+    },
+    currentOrderType() {
+      return this.items[0]?.orderType || this.items[0]?.saleType || '1';
+    },
+    currentOrderTypeText() {
+      return String(this.currentOrderType) === '2' ? '零售购买' : '统购购买';
     }
   },
   onLoad(options) {
     this.source = options.source || '';
     this.items = (uni.getStorageSync('confirmOrderItems') || []).map((item) => ({
       ...item,
-      quantity: Number(item.quantity || 1)
+      quantity: Number(item.quantity || 1),
+      unitPrice: item.unitPrice || item.price || '0.00',
+      price: item.price || item.unitPrice || '0.00',
+      buyNum: Number(item.buyNum || item.quantity || 1),
+      orderType: item.orderType || item.saleType || '1',
+      saleType: item.orderType || item.saleType || '1'
     }));
     this.loadDefaultStudent();
     this.loadDefaultAddress();
@@ -141,6 +153,8 @@ export default {
           this.student = {
             id: data.id || data.studentId,
             name: data.name || data.studentName || this.student.name,
+            schoolId: data.schoolId || data.deptId || data.sysDepts?.deptId || '',
+            deptId: data.deptId || data.schoolId || data.sysDepts?.deptId || '',
             school: data.school || data.schoolName || this.student.school,
             grade: data.grade || data.gradeName || '',
             className: data.className || data.class || '',
@@ -160,6 +174,8 @@ export default {
         this.student = {
           id: localStudent.id || localStudent.studentId,
           name: localStudent.name || localStudent.studentName || '',
+          schoolId: localStudent.schoolId || localStudent.deptId || '',
+          deptId: localStudent.deptId || localStudent.schoolId || '',
           school: localStudent.school || localStudent.schoolName || '',
           grade: localStudent.grade || localStudent.gradeName || '',
           className: localStudent.className || localStudent.class || '',
@@ -240,6 +256,33 @@ export default {
         return;
       }
 
+      const orderTypes = [...new Set(this.items.map((item) => String(item.orderType || item.saleType || '1')))];
+      if (orderTypes.length > 1) {
+        uni.showToast({
+          title: '统购和零售商品请分开提交订单',
+          icon: 'none'
+        });
+        return;
+      }
+
+      const schoolIds = [...new Set(this.items.map((item) => String(item.schoolId || item.deptId || '')))];
+      if (schoolIds.length > 1) {
+        uni.showToast({
+          title: '不同学校商品请分开提交订单',
+          icon: 'none'
+        });
+        return;
+      }
+
+      const supplierIds = [...new Set(this.items.map((item) => String(item.supplierId || '')))];
+      if (supplierIds.length > 1) {
+        uni.showToast({
+          title: '不同供应商商品请分开提交订单',
+          icon: 'none'
+        });
+        return;
+      }
+
       this.submitting = true;
       uni.showLoading({ title: '提交中...' });
 
@@ -247,12 +290,35 @@ export default {
         source: this.source,
         studentId: this.student.id,
         addressId: this.address.id,
+        receiveType: '2',
+        freightAmount: this.freightAmount,
         remark: this.remark,
+        orderType: this.currentOrderType,
         items: this.items.map((item) => ({
-          uniformId: item.uniformId || item.id,
-          skuId: item.skuId,
+          id: item.id,
+          uniformId: item.uniformId || item.goodsId || item.id,
+          goodsId: item.goodsId || item.uniformId || item.id,
+          goodsCode: item.goodsCode || '',
+          skuId: item.skuId || item.sizeId,
+          sizeId: item.sizeId || item.skuId,
           size: item.size,
-          quantity: item.quantity
+          sizeName: item.sizeName || item.size,
+          quantity: Number(item.quantity || 1),
+          buyNum: Number(item.quantity || 1),
+          price: item.price || item.unitPrice || '0.00',
+          unitPrice: item.unitPrice || item.price || '0.00',
+          image: item.image || item.mainImage || '',
+          mainImage: item.mainImage || item.image || '',
+          name: item.name,
+          goodsName: item.name || item.goodsName,
+          supplierId: item.supplierId || 1,
+          supplierName: item.supplierName || '测试供应商',
+          schoolId: item.schoolId || 1,
+          schoolName: item.schoolName || this.student.school,
+          deptId: item.deptId || item.schoolId || 1,
+          noticeId: item.noticeId || null,
+          orderType: item.orderType || item.saleType || '1',
+          saleType: item.orderType || item.saleType || '1'
         }))
       };
 
@@ -267,18 +333,40 @@ export default {
             }
           };
         })
-        .then((res) => {
+        .then(async (res) => {
           const data = res.data || res;
           const orderId = data.id || data.orderId;
+          if (!orderId) {
+            throw new Error('订单创建成功，但未获取到订单编号，请稍后在订单列表中查看');
+          }
           const localOrder = {
             id: orderId,
             orderNo: data.orderNo || `XF${Date.now()}`,
             status: 'unpaid',
             createTime: this.getCurrentTime(),
+            orderType: this.currentOrderType,
+            orderTypeText: this.currentOrderTypeText,
+            payStatus: '0',
+            orderStatus: '0',
+            schoolId: payload.items[0]?.schoolId || 1,
+            schoolName: payload.items[0]?.schoolName || this.student.school,
+            supplierId: payload.items[0]?.supplierId || 1,
+            supplierName: payload.items[0]?.supplierName || '测试供应商',
+            studentId: this.student.id,
+            studentName: this.student.name,
+            gradeName: this.student.grade,
+            className: this.student.className,
+            addressId: this.address.id,
+            receiveType: '2',
+            receiverName: this.address.receiver,
+            receiverPhone: this.address.phone,
+            receiverAddress: this.address.fullAddress,
             productsAmount: this.goodsAmount,
             shippingFee: this.freightAmount,
             discount: '0.00',
             totalAmount: this.payAmount,
+            payAmount: this.payAmount,
+            refundAmount: '0.00',
             remark: this.remark,
             student: this.student,
             address: {
@@ -288,23 +376,51 @@ export default {
               fullAddress: this.address.fullAddress
             },
             products: this.items.map((item) => ({
-              id: item.uniformId || item.id,
+              id: item.id,
+              uniformId: item.uniformId || item.goodsId || item.id,
+              goodsId: item.goodsId || item.uniformId || item.id,
+              skuId: item.skuId || item.sizeId,
+              sizeId: item.sizeId || item.skuId,
               name: item.name,
-              image: item.image,
-              price: item.price,
+              goodsName: item.name || item.goodsName,
+              image: item.image || item.mainImage,
+              mainImage: item.mainImage || item.image,
+              price: item.price || item.unitPrice,
+              unitPrice: item.unitPrice || item.price,
               size: item.size,
+              sizeName: item.sizeName || item.size,
               color: item.color || item.spec || '默认款',
-              quantity: item.quantity
+              quantity: Number(item.quantity || 1),
+              buyNum: Number(item.quantity || 1),
+              orderType: item.orderType || item.saleType || '1',
+              saleType: item.orderType || item.saleType || '1',
+              itemAmount: (Number(item.unitPrice || item.price || 0) * Number(item.quantity || 1)).toFixed(2)
             }))
           };
+          localOrder.items = localOrder.products;
+          localOrder.orderItems = localOrder.products;
+          localOrder.xfptOrderItemList = localOrder.products;
           const localOrders = uni.getStorageSync('devOrders') || {};
           localOrders[orderId] = localOrder;
           uni.setStorageSync('devOrders', localOrders);
           uni.hideLoading();
           if (this.source === 'cart') {
             const localCart = uni.getStorageSync('cartList') || [];
-            const orderedKeys = this.items.map((item) => `${item.uniformId || item.id}-${item.size}`);
-            uni.setStorageSync('cartList', localCart.filter((item) => !orderedKeys.includes(`${item.uniformId || item.id}-${item.size}`)));
+            const orderedCartIds = [...new Set(this.items.map((item) => item.id).filter((id) => id !== undefined && id !== null && id !== ''))];
+            const orderedKeys = this.items.map((item) => `${item.uniformId || item.id}-${item.size}-${item.orderType || item.saleType || '1'}`);
+            if (orderedCartIds.length) {
+              try {
+                await deleteCart(orderedCartIds.join(','));
+              } catch (error) {
+                console.warn('delete cart after order failed', error);
+              }
+            }
+            uni.setStorageSync('cartList', localCart.filter((item) => {
+              if (orderedCartIds.length && orderedCartIds.includes(item.id)) {
+                return false;
+              }
+              return !orderedKeys.includes(`${item.uniformId || item.id}-${item.size}-${item.orderType || item.saleType || '1'}`);
+            }));
           }
           uni.removeStorageSync('confirmOrderItems');
           uni.showToast({

@@ -38,6 +38,8 @@ public class SimController {
     private static final Set<String> PARENT_APP_PERMISSIONS = Collections.unmodifiableSet(new LinkedHashSet<String>() {{
         add("system:xfptnotice:list");
         add("system:xfptnotice:query");
+        add("school:groupNotice:list");
+        add("school:groupNotice:query");
         add("school:goods:list");
         add("school:goods:query");
         add("school:cartItem:list");
@@ -54,6 +56,14 @@ public class SimController {
         add("school:orderInfo:query");
         add("school:orderInfo:add");
         add("school:orderInfo:edit");
+        add("school:orderInfo:remove");
+        add("school:afterSale:list");
+        add("school:afterSale:query");
+        add("school:afterSale:add");
+        add("school:afterSale:edit");
+        add("school:comment:list");
+        add("school:comment:query");
+        add("school:comment:add");
     }});
 
     @Value("${sim.ip:}")
@@ -242,3 +252,7 @@ public class SimController {
                 .one();
     }
 }
+
+
+
+

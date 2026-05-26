@@ -154,6 +154,32 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/supplier/groupNotice",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/groupNotice/index"),
+        name: "SupplierGroupNotice",
+        meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
+      },
+    ],
+  },
+  {
+    path: "/school/groupNoticeReadonly",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/groupNoticeReadonly/index"),
+        name: "AdminGroupNoticeQuery",
+        meta: { title: "学校统购公告查询", activeMenu: "/newFeature/adminGroupNoticeQuery" },
+      },
+    ],
+  },
+  {
     path: "/school/schoolUsage",
     component: Layout,
     hidden: true,

@@ -34,29 +34,5 @@ public class XfptFinanceFlowServiceImpl extends ServiceImpl<XfptFinanceFlowMappe
         return xfptFinanceFlowMapper.selectXfptFinanceFlowList(xfptFinanceFlow);
     }
 
-    /**
-     * 查询每日入账金额列表
-     *
-     * @param xfptFinanceFlow 资金流水筛选条件
-     * @return 每日入账金额集合
-     */
-    @Override
-    public List<Map<String, Object>> selectDailyIncomeList(XfptFinanceFlow xfptFinanceFlow)
-    {
-        return xfptFinanceFlowMapper.selectDailyIncomeList(xfptFinanceFlow);
-    }
-
-    /**
-     * 查询每日入账金额详情
-     *
-     * @param xfptFinanceFlow 资金流水筛选条件
-     * @return 资金流水集合
-     */
-    @Override
-    public List<XfptFinanceFlow> selectDailyIncomeDetail(XfptFinanceFlow xfptFinanceFlow)
-    {
-        return xfptFinanceFlowMapper.selectDailyIncomeDetail(xfptFinanceFlow);
-    }
-
 
 }

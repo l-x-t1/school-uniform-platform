@@ -87,7 +87,10 @@ export default {
       return value || '-'
     },
     openFile(url) {
-      window.open(url, '_blank')
+      const fileUrl = /^https?:\/\//i.test(url)
+        ? url
+        : `${process.env.VUE_APP_IMAGE_BASE_API || ''}${url}`
+      window.open(fileUrl, '_blank')
     },
     goBack() {
       this.$router.back()

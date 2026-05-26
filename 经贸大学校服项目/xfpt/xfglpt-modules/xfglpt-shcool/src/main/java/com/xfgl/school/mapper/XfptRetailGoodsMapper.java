@@ -23,19 +23,22 @@ public interface XfptRetailGoodsMapper {
      *
      * @param id 学校商品关联主键
      * @param schoolId 学校ID
+     * @param supplierId 供应商ID
      * @return 零售商品详情
      */
-    XfptRetailGoodsVo selectXfptRetailGoodsById(@Param("id") Long id, @Param("schoolId") Long schoolId);
+    XfptRetailGoodsVo selectXfptRetailGoodsById(@Param("id") Long id, @Param("schoolId") Long schoolId,
+            @Param("supplierId") Long supplierId);
 
     /**
      * 更新当前学校零售商品上下架状态
      *
      * @param id 学校商品关联主键
      * @param schoolId 学校ID
+     * @param supplierId 供应商ID
      * @param status 上下架状态
      * @param updateBy 操作人
      * @return 影响行数
      */
     int updateXfptRetailGoodsStatus(@Param("id") Long id, @Param("schoolId") Long schoolId,
-            @Param("status") String status, @Param("updateBy") String updateBy);
+            @Param("supplierId") Long supplierId, @Param("status") String status, @Param("updateBy") String updateBy);
 }

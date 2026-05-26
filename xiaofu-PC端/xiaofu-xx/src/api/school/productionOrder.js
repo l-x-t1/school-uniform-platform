@@ -1,6 +1,6 @@
 import request from '@/utils/request'
 
-// 查询生产单列表
+// query production order list
 export function listProductionOrder(query) {
   return request({
     url: '/school/productionOrder/list',
@@ -9,7 +9,7 @@ export function listProductionOrder(query) {
   })
 }
 
-// 查询生产单详细
+// query production order detail
 export function getProductionOrder(id) {
   return request({
     url: '/school/productionOrder/' + id,
@@ -17,7 +17,7 @@ export function getProductionOrder(id) {
   })
 }
 
-// 新增生产单
+// add production order
 export function addProductionOrder(data) {
   return request({
     url: '/school/productionOrder',
@@ -26,7 +26,7 @@ export function addProductionOrder(data) {
   })
 }
 
-// 修改生产单
+// update production order
 export function updateProductionOrder(data) {
   return request({
     url: '/school/productionOrder',
@@ -35,7 +35,7 @@ export function updateProductionOrder(data) {
   })
 }
 
-// 删除生产单
+// delete production order
 export function delProductionOrder(id) {
   return request({
     url: '/school/productionOrder/' + id,
@@ -43,7 +43,7 @@ export function delProductionOrder(id) {
   })
 }
 
-// 生产完成
+// finish production order
 export function finishProductionOrder(id) {
   return request({
     url: '/school/productionOrder/finish/' + id,
@@ -51,7 +51,7 @@ export function finishProductionOrder(id) {
   })
 }
 
-// 生成发货单
+// generate delivery order
 export function generateDeliveryOrder(id) {
   return request({
     url: '/school/productionOrder/generateDelivery/' + id,

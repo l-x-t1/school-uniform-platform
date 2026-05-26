@@ -112,6 +112,7 @@
           <el-option label="待生产" value="0" />
           <el-option label="生产中" value="1" />
           <el-option label="生产完成" value="2" />
+          <el-option label="已生成发货单" value="3" />
         </el-select>
       </el-form-item>
       <el-form-item label="计划完成时间" prop="plannedFinishTime">
@@ -150,6 +151,7 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
+          v-if="activeOrderType === '1'"
           type="primary"
           plain
           icon="el-icon-plus"
@@ -176,7 +178,7 @@
           plain
           icon="el-icon-check"
           size="mini"
-          :disabled="single"
+          :disabled="single || !selectedCanFinish"
           @click="handleFinishSelected"
           v-hasPermi="['school:productionOrder:edit']"
         >生产完成</el-button>
@@ -187,7 +189,7 @@
           plain
           icon="el-icon-truck"
           size="mini"
-          :disabled="single"
+          :disabled="single || !selectedCanGenerateDelivery"
           @click="handleGenerateDeliverySelected"
           v-hasPermi="['school:productionOrder:edit']"
         >生成发货单</el-button>
@@ -275,7 +277,7 @@
             size="mini"
             type="text"
             icon="el-icon-check"
-            :disabled="String(scope.row.status) === '2'"
+            :disabled="String(scope.row.status) === '2' || String(scope.row.status) === '3'"
             @click="handleFinish(scope.row)"
             v-hasPermi="['school:productionOrder:edit']"
           >生产完成</el-button>
@@ -472,6 +474,14 @@ import { listProductionOrder, getProductionOrder, delProductionOrder, addProduct
 
 export default {
   name: "ProductionOrder",
+  computed: {
+    selectedCanFinish() {
+      return this.selectedRow && !["2", "3"].includes(String(this.selectedRow.status));
+    },
+    selectedCanGenerateDelivery() {
+      return this.selectedRow && String(this.selectedRow.status) === "2";
+    }
+  },
   data() {
     return {
       // 遮罩层
@@ -484,6 +494,7 @@ export default {
       single: true,
       // 非多个禁用
       multiple: true,
+      selectedRow: null,
       // 显示搜索条件
       showSearch: true,
       // 总条数
@@ -566,7 +577,7 @@ export default {
         noticeId: null,
         orderId: null,
         orderNo: null,
-        orderType: this.activeOrderType,
+        orderType: "1",
         schoolId: null,
         supplierId: null,
         status: null,
@@ -617,12 +628,14 @@ export default {
       if (String(value) === "0") return "待生产";
       if (String(value) === "1") return "生产中";
       if (String(value) === "2") return "生产完成";
+      if (String(value) === "3") return "已生成发货单";
       return "-";
     },
     getStatusTagType(value) {
       if (String(value) === "0") return "info";
       if (String(value) === "1") return "warning";
       if (String(value) === "2") return "success";
+      if (String(value) === "3") return "primary";
       return "";
     },
     // 多选框选中数据
@@ -630,12 +643,19 @@ export default {
       this.ids = selection.map(item => item.id)
       this.single = selection.length!==1
       this.multiple = !selection.length
+      this.selectedRow = selection.length === 1 ? selection[0] : null
     },
     /** 新增按钮操作 */
     handleAdd() {
+      if (this.activeOrderType !== "1") {
+        this.$modal.msgError("零售生产单不支持手动新增");
+        return;
+      }
       this.reset();
+      this.form.orderType = "1";
+      this.form.status = "0";
       this.open = true;
-      this.title = "添加生产单";
+      this.title = "添加统购生产单";
     },
     handleFinishSelected() {
       this.handleFinish({ id: this.ids[0] });
