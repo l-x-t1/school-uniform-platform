@@ -19,6 +19,18 @@
       </view>
     </view>
 
+    <view class="supplier-card">
+      <view class="card-title">供应商退换货信息</view>
+      <view class="info-row">
+        <text class="label">供应商手机号</text>
+        <text class="value">{{ supplierInfo.supplierPhone || '-' }}</text>
+      </view>
+      <view class="info-row">
+        <text class="label">收货地址</text>
+        <text class="value">{{ supplierInfo.supplierAddress || '-' }}</text>
+      </view>
+    </view>
+
     <view class="form-card">
       <view class="form-item column no-border">
         <text class="form-label">申请类型</text>
@@ -72,6 +84,7 @@
 import config from '@/config'
 import { getOrder } from '@/api/order'
 import { createAfterSale } from '@/api/afterSale'
+import { getSupplierMessage } from '@/api/supplier'
 
 export default {
   data() {
@@ -79,6 +92,7 @@ export default {
       orderId: '',
       submitting: false,
       order: {},
+      supplierInfo: {},
       applyTypeOptions: [
         { label: '仅退款', value: '1', desc: '无需退回商品，直接申请退款' },
         { label: '退货退款', value: '2', desc: '退回商品后按审核结果退款' },
@@ -132,18 +146,38 @@ export default {
           if (!this.form.applyAmount) {
             this.form.applyAmount = this.order.payAmount || this.order.totalAmount || '0.00'
           }
+          this.loadSupplierInfo()
         })
         .catch((error) => {
           const localOrders = uni.getStorageSync('devOrders') || {}
           if (config.enableMockFallback && localOrders[this.orderId]) {
             this.order = localOrders[this.orderId]
             this.form.applyAmount = this.order.payAmount || this.order.totalAmount || '0.00'
+            this.loadSupplierInfo()
             return
           }
           uni.showToast({
             title: error.message || '订单加载失败',
             icon: 'none'
           })
+        })
+    },
+    loadSupplierInfo() {
+      const supplierId = this.order.supplierId || this.firstProduct.supplierId
+      if (!supplierId) {
+        this.supplierInfo = {}
+        return
+      }
+      getSupplierMessage(supplierId)
+        .then((res) => {
+          const data = res.data || res || {}
+          this.supplierInfo = {
+            supplierPhone: data.supplierPhone || data.supplier_phone || '',
+            supplierAddress: data.supplierAddress || data.supplier_address || ''
+          }
+        })
+        .catch(() => {
+          this.supplierInfo = {}
         })
     },
     selectApplyType(value) {
@@ -237,6 +271,7 @@ export default {
 }
 
 .order-card,
+.supplier-card,
 .form-card {
   background: #fff;
   border-radius: 12rpx;
