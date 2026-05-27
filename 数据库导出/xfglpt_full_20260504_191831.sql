@@ -2153,7 +2153,7 @@ CREATE TABLE `xfpt_group_notice` (
 
 LOCK TABLES `xfpt_group_notice` WRITE;
 /*!40000 ALTER TABLE `xfpt_group_notice` DISABLE KEYS */;
-INSERT INTO `xfpt_group_notice` VALUES (1,237,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
+INSERT INTO `xfpt_group_notice` VALUES (1,165,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
 /*!40000 ALTER TABLE `xfpt_group_notice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -4358,13 +4358,36 @@ SET `PARENT_ID` = @new_feature_menu_id,
     `UPDATE_BY` = 'admin',
     `UPDATE_TIME` = NOW(),
     `REMARK` = '学校端评价管理菜单'
-WHERE `PERMS` = 'school:evaluation:list';
+WHERE `MENU_ID` = @evaluation_menu_id;
+
+SET @evaluation_query_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:query'
+  LIMIT 1
+);
+
+SET @evaluation_reply_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:reply'
+  LIMIT 1
+);
+
+SET @evaluation_hide_existing_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:evaluation:hide'
+  LIMIT 1
+);
 
 UPDATE `sys_menu`
 SET `PARENT_ID` = @evaluation_menu_id,
     `UPDATE_BY` = 'admin',
     `UPDATE_TIME` = NOW()
-WHERE `PERMS` IN ('school:evaluation:query', 'school:evaluation:reply', 'school:evaluation:hide');
+WHERE `MENU_ID` = IFNULL(@evaluation_query_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_reply_existing_id, -1)
+   OR `MENU_ID` = IFNULL(@evaluation_hide_existing_id, -1);
 
 SET @evaluation_query_id := (
   SELECT `MENU_ID`

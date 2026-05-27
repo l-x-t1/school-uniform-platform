@@ -38,6 +38,8 @@ public class SimController {
     private static final Set<String> PARENT_APP_PERMISSIONS = Collections.unmodifiableSet(new LinkedHashSet<String>() {{
         add("system:xfptnotice:list");
         add("system:xfptnotice:query");
+        add("school:groupNotice:list");
+        add("school:groupNotice:query");
         add("school:goods:list");
         add("school:goods:query");
         add("school:cartItem:list");

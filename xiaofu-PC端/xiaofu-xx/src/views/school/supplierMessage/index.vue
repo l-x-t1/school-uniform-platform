@@ -137,7 +137,8 @@
 
         <div class="section-block">
           <div class="section-title">信用评级</div>
-          <FileUpload v-model="detailForm.xypj" :disabled="true" :limit="1" />
+          <FileUpload v-if="detailForm.xypj" v-model="detailForm.xypj" :disabled="true" :limit="1" />
+          <div v-else class="empty-tip">暂无信用评级</div>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
@@ -426,5 +427,11 @@ export default {
   background: #fafafa;
   color: #606266;
   line-height: 1.8;
+}
+
+.empty-tip {
+  padding: 12px 0;
+  color: #909399;
+  font-size: 14px;
 }
 </style>

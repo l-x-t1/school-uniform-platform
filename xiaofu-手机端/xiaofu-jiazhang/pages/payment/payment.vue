@@ -10,13 +10,17 @@
           <text class="label">订单编号</text>
           <text class="value">{{orderInfo.orderNo}}</text>
         </view>
-        <view class="order-school">
+      <view class="order-school">
           <text class="label">所属学校</text>
-          <text class="value">{{orderInfo.school}}</text>
+          <text class="value">{{orderInfo.schoolName}}</text>
         </view>
         <view class="order-student">
           <text class="label">学生信息</text>
-          <text class="value">{{orderInfo.studentName}} {{orderInfo.studentClass}}</text>
+          <text class="value">{{orderInfo.studentName}} {{orderInfo.className}}</text>
+        </view>
+        <view class="order-student">
+          <text class="label">订单类型</text>
+          <text class="value">{{orderInfo.orderTypeText}}</text>
         </view>
       </view>
     </view>
@@ -36,11 +40,11 @@
           <text class="goods-name">{{item.name}}</text>
           <view class="goods-spec">
             <text class="spec-text">{{item.size}}</text>
-            <text class="spec-text">{{item.color}}</text>
+            <text class="spec-text">{{item.orderTypeText}}</text>
           </view>
           <view class="goods-price-row">
             <text class="goods-price">¥{{item.price}}</text>
-            <text class="goods-count">x{{item.count}}</text>
+            <text class="goods-count">x{{item.quantity}}</text>
           </view>
         </view>
       </view>
@@ -127,9 +131,11 @@ export default {
       selectedMethod: 'wxpay',
       orderInfo: {
         orderNo: '',
-        school: '',
+        schoolName: '',
         studentName: '',
-        studentClass: '',
+        className: '',
+        orderType: '1',
+        orderTypeText: '统购订单',
         totalGoodsPrice: '0.00',
         shippingFee: '0.00',
         discount: '0.00',
@@ -162,25 +168,28 @@ export default {
   },
   methods: {
     normalizeOrder(data = {}) {
-      const products = data.products || data.items || data.orderItems || [];
+      const products = data.products || data.items || data.orderItems || data.xfptOrderItemList || [];
       const student = data.student || {};
       return {
         orderNo: data.orderNo || data.orderSn || data.orderCode || this.orderId,
-        school: data.school || data.schoolName || student.school || student.schoolName || '石家庄市示例学校',
+        schoolName: data.schoolName || data.school || student.school || student.schoolName || '石家庄市示例学校',
         studentName: data.studentName || student.name || student.studentName || '学生',
-        studentClass: data.studentClass || student.className || student.grade || '',
+        className: data.className || data.studentClass || student.className || student.grade || '',
+        orderType: data.orderType || '1',
+        orderTypeText: String(data.orderType || '1') === '2' ? '零售订单' : '统购订单',
         totalGoodsPrice: data.productsAmount || data.totalGoodsPrice || data.goodsAmount || data.totalAmount || '0.00',
         shippingFee: data.shippingFee || data.freightAmount || '0.00',
         discount: data.discount || '0.00',
         totalAmount: data.totalAmount || data.payAmount || '0.00',
         items: products.map((item) => ({
-          id: item.id || item.uniformId,
-          name: item.name || item.uniformName || item.productName || '校服',
+          id: item.id || item.uniformId || item.goodsId,
+          name: item.name || item.goodsName || item.uniformName || item.productName || '校服',
           size: item.size || item.sizeName || '-',
-          color: item.color || item.spec || '默认款',
-          price: item.price || item.salePrice || '0.00',
-          count: item.count || item.quantity || 1,
-          image: item.image || item.productImage || item.coverImage || '/static/qjxf.png'
+          orderTypeText: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          color: String(item.saleType || item.orderType || data.orderType || '1') === '2' ? '零售购买' : '统购购买',
+          price: item.price || item.unitPrice || item.salePrice || '0.00',
+          quantity: item.quantity || item.buyNum || item.count || 1,
+          image: item.image || item.mainImage || item.productImage || item.coverImage || '/static/qjxf.png'
         }))
       };
     },
@@ -247,10 +256,13 @@ export default {
         id: this.orderId,
         orderNo: this.orderInfo.orderNo || this.orderId,
         status: 'unpaid',
+        orderType: this.orderInfo.orderType || '1',
+        orderTypeText: this.orderInfo.orderTypeText || '统购订单',
         productsAmount: this.orderInfo.totalGoodsPrice,
         shippingFee: this.orderInfo.shippingFee,
         discount: this.orderInfo.discount,
         totalAmount: this.orderInfo.totalAmount,
+        payAmount: this.orderInfo.totalAmount,
         products: this.orderInfo.items.map((item) => ({
           id: item.id,
           name: item.name,
@@ -258,11 +270,15 @@ export default {
           price: item.price,
           size: item.size,
           color: item.color,
-          quantity: item.count
+          quantity: item.quantity,
+          orderType: this.orderInfo.orderType || '1',
+          saleType: this.orderInfo.orderType || '1'
         }))
       };
       currentOrder.status = 'unshipped';
       currentOrder.payTime = this.getCurrentTime();
+      currentOrder.payStatus = '1';
+      currentOrder.orderStatus = '2';
       localOrders[this.orderId] = currentOrder;
       uni.setStorageSync('devOrders', localOrders);
 
