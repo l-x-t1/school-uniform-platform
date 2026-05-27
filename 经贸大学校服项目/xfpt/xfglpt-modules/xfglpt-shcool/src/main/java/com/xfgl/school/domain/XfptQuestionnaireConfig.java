@@ -129,4 +129,13 @@ public class XfptQuestionnaireConfig extends BaseEntity {
     @TableField(exist = false)
     private List<String> deptIds;
 
+    @TableField(exist = false)
+    private Long viewerDeptId;
+
+    @TableField(exist = false)
+    private String viewerAncestors;
+
+    @TableField(exist = false)
+    private String viewerIsSchool;
+
 }
