@@ -15,6 +15,12 @@ function buildAfterSaleNo() {
   return `AS${Date.now()}`
 }
 
+function getCurrentDateTime() {
+  const pad = (value) => String(value).padStart(2, '0')
+  const date = new Date()
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+}
+
 function normalizeAfterSale(item = {}) {
   return {
     ...item,
@@ -32,6 +38,7 @@ function normalizeAfterSale(item = {}) {
     applyType: String(item.applyType || item.apply_type || '2'),
     targetSizeId: item.targetSizeId || item.target_size_id,
     targetSizeName: item.targetSizeName || item.target_size_name || '',
+    returnTrackingNo: item.returnTrackingNo || item.return_tracking_no || '',
     reason: item.reason || '',
     imagesJson: item.imagesJson || item.images_json || '[]',
     applyNum: Number(item.applyNum || item.apply_num || 1),
@@ -67,13 +74,18 @@ export function createAfterSale(data = {}) {
       applyType: String(data.applyType || '2'),
       targetSizeId: data.targetSizeId,
       targetSizeName: data.targetSizeName || '',
+      returnTrackingNo: data.returnTrackingNo || '',
       reason: data.reason || '',
       imagesJson: data.imagesJson || '[]',
       applyNum: Number(data.applyNum || 1),
       applyAmount: Number(data.applyAmount || 0),
       actualRefundAmount: 0,
       refundStatus: '0',
-      status: '0',
+      status: '1',
+      auditBy: '系统自动通过',
+      auditTime: getCurrentDateTime(),
+      handleResult: '家长端提交后自动通过售后申请',
+      handleRemark: data.handleRemark || '',
       deptId: data.deptId,
       delFlag: '0'
     }

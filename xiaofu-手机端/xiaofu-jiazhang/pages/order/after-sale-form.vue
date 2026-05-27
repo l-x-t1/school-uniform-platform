@@ -75,7 +75,6 @@ export default {
       products: [],
       selectedProductId: null,
       applyTypeOptions: [
-        { value: '1', label: '仅退款' },
         { value: '2', label: '退货退款' },
         { value: '3', label: '换货' }
       ],

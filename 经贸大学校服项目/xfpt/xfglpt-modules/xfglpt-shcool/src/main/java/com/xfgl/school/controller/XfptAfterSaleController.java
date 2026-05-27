@@ -1,6 +1,7 @@
 package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Date;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -81,7 +82,31 @@ public class XfptAfterSaleController extends BaseController {
     @Log(title = "售后主" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptAfterSale xfptAfterSale) {
+            autoApproveParentApply(xfptAfterSale);
             return toAjax(xfptAfterSaleService.save(xfptAfterSale));
+    }
+
+    private void autoApproveParentApply(XfptAfterSale xfptAfterSale) {
+        if (xfptAfterSale == null) {
+            return;
+        }
+        xfptAfterSale.setStatus("1");
+        if (isBlank(xfptAfterSale.getAuditBy())) {
+            xfptAfterSale.setAuditBy("系统自动通过");
+        }
+        if (xfptAfterSale.getAuditTime() == null) {
+            xfptAfterSale.setAuditTime(new Date());
+        }
+        if (isBlank(xfptAfterSale.getHandleResult())) {
+            xfptAfterSale.setHandleResult("家长端提交后自动通过售后申请");
+        }
+        if (isBlank(xfptAfterSale.getRefundStatus())) {
+            xfptAfterSale.setRefundStatus("0");
+        }
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.trim().isEmpty();
     }
 
     /**

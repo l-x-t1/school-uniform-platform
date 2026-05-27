@@ -63,6 +63,11 @@
         <input class="input" type="digit" v-model="form.applyAmount" :placeholder="form.applyType === '1' ? '请输入退款金额' : '请输入退货退款金额'" />
       </view>
 
+      <view class="form-item" v-if="form.applyType !== '1'">
+        <text class="form-label">退货物流单号</text>
+        <input class="input" v-model="form.returnTrackingNo" maxlength="100" placeholder="请填写退货物流单号" />
+      </view>
+
       <view class="form-item column">
         <text class="form-label">申请原因</text>
         <textarea class="textarea" v-model="form.reason" maxlength="200" placeholder="请填写退换原因" />
@@ -94,13 +99,13 @@ export default {
       order: {},
       supplierInfo: {},
       applyTypeOptions: [
-        { label: '仅退款', value: '1', desc: '无需退回商品，直接申请退款' },
         { label: '退货退款', value: '2', desc: '退回商品后按审核结果退款' },
         { label: '换货', value: '3', desc: '商品不合适时申请更换尺码' }
       ],
       form: {
         applyType: '2',
         targetSizeName: '',
+        returnTrackingNo: '',
         applyNum: 1,
         applyAmount: '',
         reason: ''
@@ -110,7 +115,7 @@ export default {
   },
   computed: {
     currentApplyType() {
-      return this.applyTypeOptions.find((item) => item.value === this.form.applyType) || this.applyTypeOptions[1]
+      return this.applyTypeOptions.find((item) => item.value === this.form.applyType) || this.applyTypeOptions[0]
     },
     firstProduct() {
       const products = this.order.products || this.order.items || this.order.orderItems || []
@@ -119,7 +124,7 @@ export default {
   },
   onLoad(options) {
     this.orderId = options.id || options.orderId || ''
-    this.form.applyType = options.applyType || '2'
+    this.form.applyType = options.applyType === '3' ? '3' : '2'
     this.order = {
       id: this.orderId,
       orderNo: options.orderNo ? decodeURIComponent(options.orderNo) : '',
@@ -215,6 +220,7 @@ export default {
         studentName: this.order.studentName,
         applyType: this.form.applyType,
         targetSizeName: this.form.applyType === '3' ? this.form.targetSizeName.trim() : '',
+        returnTrackingNo: this.form.applyType === '1' ? '' : this.form.returnTrackingNo.trim(),
         reason: this.form.reason.trim(),
         applyNum: Number(this.form.applyNum),
         applyAmount: this.form.applyType === '3' ? 0 : Number(this.form.applyAmount || 0),
