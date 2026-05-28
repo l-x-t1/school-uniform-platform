@@ -9,60 +9,18 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="订单类型" prop="orderType">
-        <el-select v-model="queryParams.orderType" placeholder="请选择订单类型" clearable>
-          <el-option
-            v-for="item in orderTypeOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="统购公告ID" prop="noticeId">
-        <el-input
-          v-model="queryParams.noticeId"
-          placeholder="请输入统购公告ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校名称快照" prop="schoolName">
+      <el-form-item label="学校名称" prop="schoolName">
         <el-input
           v-model="queryParams.schoolName"
-          placeholder="请输入学校名称快照"
+          placeholder="请输入学校名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商名称快照" prop="supplierName">
+      <el-form-item label="供应商名称" prop="supplierName">
         <el-input
           v-model="queryParams.supplierName"
-          placeholder="请输入供应商名称快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="下单用户ID" prop="userId">
-        <el-input
-          v-model="queryParams.userId"
-          placeholder="请输入下单用户ID"
+          placeholder="请输入供应商名称"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -71,14 +29,6 @@
         <el-input
           v-model="queryParams.userName"
           placeholder="请输入下单用户名称"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学生ID" prop="studentId">
-        <el-input
-          v-model="queryParams.studentId"
-          placeholder="请输入学生ID"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -107,26 +57,18 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收货地址ID" prop="addressId">
-        <el-input
-          v-model="queryParams.addressId"
-          placeholder="请输入收货地址ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="收货人姓名快照" prop="receiverName">
+      <el-form-item label="收货人姓名" prop="receiverName">
         <el-input
           v-model="queryParams.receiverName"
-          placeholder="请输入收货人姓名快照"
+          placeholder="请输入收货人姓名"
           clearable
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收货人电话快照" prop="receiverPhone">
+      <el-form-item label="收货人电话" prop="receiverPhone">
         <el-input
           v-model="queryParams.receiverPhone"
-          placeholder="请输入收货人电话快照"
+          placeholder="请输入收货人电话"
           clearable
           @keyup.enter.native="handleQuery"
         />
@@ -178,14 +120,6 @@
           value-format="yyyy-MM-dd"
           placeholder="请选择完成时间">
         </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -241,44 +175,38 @@
 
     <el-table v-loading="loading" :data="orderInfoList" @selection-change="handleSelectionChange">
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="主键" align="center" prop="id" />
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="订单类型" align="center" prop="orderType">
         <template slot-scope="scope">
-          <span>{{ getOptionLabel(orderTypeOptions, scope.row.orderType) }}</span>
+          <span>{{ formatOrderType(scope.row.orderType) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="统购公告ID" align="center" prop="noticeId" />
-      <el-table-column label="学校ID" align="center" prop="schoolId" />
-      <el-table-column label="学校名称快照" align="center" prop="schoolName" />
-      <el-table-column label="供应商ID" align="center" prop="supplierId" />
-      <el-table-column label="供应商名称快照" align="center" prop="supplierName" />
-      <el-table-column label="下单用户ID" align="center" prop="userId" />
+      <el-table-column label="公告标题" align="center" prop="noticeTitle" />
+      <el-table-column label="学校名称" align="center" prop="schoolName" />
+      <el-table-column label="供应商名称" align="center" prop="supplierName" />
       <el-table-column label="下单用户名称" align="center" prop="userName" />
-      <el-table-column label="学生ID" align="center" prop="studentId" />
       <el-table-column label="学生姓名" align="center" prop="studentName" />
       <el-table-column label="年级名称" align="center" prop="gradeName" />
       <el-table-column label="班级名称" align="center" prop="className" />
-      <el-table-column label="收货地址ID" align="center" prop="addressId" />
       <el-table-column label="收货类型" align="center" prop="receiveType">
         <template slot-scope="scope">
-          <span>{{ getOptionLabel(receiveTypeOptions, scope.row.receiveType) }}</span>
+          <span>{{ formatReceiveType(scope.row.receiveType) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="收货人姓名快照" align="center" prop="receiverName" />
-      <el-table-column label="收货人电话快照" align="center" prop="receiverPhone" />
-      <el-table-column label="收货地址快照" align="center" prop="receiverAddress" />
+      <el-table-column label="收货人姓名" align="center" prop="receiverName" />
+      <el-table-column label="收货人电话" align="center" prop="receiverPhone" />
+      <el-table-column label="收货地址" align="center" prop="receiverAddress" />
       <el-table-column label="订单总金额" align="center" prop="totalAmount" />
       <el-table-column label="实付金额" align="center" prop="payAmount" />
       <el-table-column label="已退款金额" align="center" prop="refundAmount" />
       <el-table-column label="支付状态" align="center" prop="payStatus">
         <template slot-scope="scope">
-          <span>{{ getOptionLabel(payStatusOptions, scope.row.payStatus) }}</span>
+          <span>{{ formatPayStatus(scope.row.payStatus) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="订单状态" align="center" prop="orderStatus">
         <template slot-scope="scope">
-          <span>{{ getOptionLabel(orderStatusOptions, scope.row.orderStatus) }}</span>
+          <span>{{ formatOrderStatus(scope.row.orderStatus) }}</span>
         </template>
       </el-table-column>
       <el-table-column label="支付时间" align="center" prop="payTime" width="180">
@@ -334,12 +262,8 @@
         </el-form-item>
         <el-form-item label="订单类型" prop="orderType">
           <el-select v-model="form.orderType" placeholder="请选择订单类型" style="width: 100%">
-            <el-option
-              v-for="item in orderTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option label="统购" value="1" />
+            <el-option label="零售" value="2" />
           </el-select>
         </el-form-item>
         <el-form-item label="统购公告ID" prop="noticeId">
@@ -380,12 +304,8 @@
         </el-form-item>
         <el-form-item label="收货类型" prop="receiveType">
           <el-select v-model="form.receiveType" placeholder="请选择收货类型" style="width: 100%">
-            <el-option
-              v-for="item in receiveTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option label="学校收货" value="1" />
+            <el-option label="家庭收货" value="2" />
           </el-select>
         </el-form-item>
         <el-form-item label="收货人姓名快照" prop="receiverName">
@@ -408,22 +328,21 @@
         </el-form-item>
         <el-form-item label="支付状态" prop="payStatus">
           <el-select v-model="form.payStatus" placeholder="请选择支付状态" style="width: 100%">
-            <el-option
-              v-for="item in payStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option label="待支付" value="0" />
+            <el-option label="已支付" value="1" />
+            <el-option label="部分退款" value="2" />
+            <el-option label="已退款" value="3" />
           </el-select>
         </el-form-item>
         <el-form-item label="订单状态" prop="orderStatus">
           <el-select v-model="form.orderStatus" placeholder="请选择订单状态" style="width: 100%">
-            <el-option
-              v-for="item in orderStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
+            <el-option label="待支付" value="0" />
+            <el-option label="待生产" value="1" />
+            <el-option label="待发货" value="2" />
+            <el-option label="待收货" value="3" />
+            <el-option label="已完成" value="4" />
+            <el-option label="已取消" value="5" />
+            <el-option label="售后中" value="6" />
           </el-select>
         </el-form-item>
         <el-form-item label="支付时间" prop="payTime">
@@ -491,15 +410,12 @@
               <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称快照" />
             </template>
           </el-table-column>
-          <el-table-column label="销售类型，1统购 2零售" prop="saleType" width="150">
+          <el-table-column label="销售类型，1统购 2零售 3统购零售" prop="saleType" width="180">
             <template slot-scope="scope">
               <el-select v-model="scope.row.saleType" placeholder="请选择销售类型">
-                <el-option
-                  v-for="item in saleTypeOptions"
-                  :key="item.value"
-                  :label="item.label"
-                  :value="item.value"
-                />
+                <el-option label="统购" value="1" />
+                <el-option label="零售" value="2" />
+                <el-option label="统购零售" value="3" />
               </el-select>
             </template>
           </el-table-column>
@@ -536,38 +452,6 @@
 <script>
 import { listOrderInfo, getOrderInfo, delOrderInfo, addOrderInfo, updateOrderInfo } from "@/api/school/orderInfo";
 
-const SALE_TYPE_OPTIONS = [
-  { label: "统购", value: "1" },
-  { label: "零售", value: "2" }
-];
-
-const ORDER_TYPE_OPTIONS = [
-  { label: "统购", value: "1" },
-  { label: "零售", value: "2" }
-];
-
-const RECEIVE_TYPE_OPTIONS = [
-  { label: "学校", value: "1" },
-  { label: "家庭", value: "2" }
-];
-
-const PAY_STATUS_OPTIONS = [
-  { label: "待支付", value: "0" },
-  { label: "已支付", value: "1" },
-  { label: "部分退款", value: "2" },
-  { label: "已退款", value: "3" }
-];
-
-const ORDER_STATUS_OPTIONS = [
-  { label: "待支付", value: "0" },
-  { label: "待生产", value: "1" },
-  { label: "待发货", value: "2" },
-  { label: "待收货", value: "3" },
-  { label: "已完成", value: "4" },
-  { label: "已取消", value: "5" },
-  { label: "售后中", value: "6" }
-];
-
 export default {
   name: "OrderInfo",
   data() {
@@ -584,11 +468,6 @@ export default {
       multiple: true,
       // 显示搜索条件
       showSearch: true,
-      saleTypeOptions: SALE_TYPE_OPTIONS,
-      orderTypeOptions: ORDER_TYPE_OPTIONS,
-      receiveTypeOptions: RECEIVE_TYPE_OPTIONS,
-      payStatusOptions: PAY_STATUS_OPTIONS,
-      orderStatusOptions: ORDER_STATUS_OPTIONS,
       // 总条数
       total: 0,
       // 订单信息表格数据
@@ -684,9 +563,40 @@ export default {
     this.getList();
   },
   methods: {
-    getOptionLabel(options, value) {
-      const match = options.find(item => item.value === value);
-      return match ? match.label : value;
+    formatOrderType(value) {
+      const optionMap = {
+        "1": "统购",
+        "2": "零售",
+      };
+      return optionMap[String(value)] || "-";
+    },
+    formatReceiveType(value) {
+      const optionMap = {
+        "1": "学校收货",
+        "2": "家庭收货",
+      };
+      return optionMap[String(value)] || "-";
+    },
+    formatPayStatus(value) {
+      const optionMap = {
+        "0": "待支付",
+        "1": "已支付",
+        "2": "部分退款",
+        "3": "已退款",
+      };
+      return optionMap[String(value)] || "-";
+    },
+    formatOrderStatus(value) {
+      const optionMap = {
+        "0": "待支付",
+        "1": "待生产",
+        "2": "待发货",
+        "3": "待收货",
+        "4": "已完成",
+        "5": "已取消",
+        "6": "售后中",
+      };
+      return optionMap[String(value)] || "-";
     },
     /** 查询订单信息列表 */
     getList() {
@@ -819,7 +729,7 @@ export default {
       obj.goodsName = "";
       obj.sizeName = "";
       obj.mainImage = "";
-      obj.saleType = "";
+      obj.saleType = this.form.orderType || "1";
       obj.unitPrice = "";
       obj.buyNum = "";
       obj.itemAmount = "";

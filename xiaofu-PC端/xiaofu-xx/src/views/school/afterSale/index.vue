@@ -24,6 +24,14 @@
             @keyup.enter.native="handleQuery"
           />
         </el-form-item>
+        <el-form-item label="退货物流单号" prop="returnTrackingNo">
+          <el-input
+            v-model="queryParams.returnTrackingNo"
+            placeholder="请输入退货物流单号"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
         <el-form-item label="申请用户" prop="userName">
           <el-input
             v-model="queryParams.userName"
@@ -74,20 +82,25 @@
       <div class="page-header">
         <div>
           <div class="page-title">售后单处理</div>
-          <div class="page-subtitle">查询待处理、已退回和已更换/已完成售后单，并完成审核处理</div>
+          <div class="page-subtitle">查询待处理、已发货和已完成售后单，查看售后单处理情况</div>
         </div>
         <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
       </div>
 
       <el-tabs v-model="activeTab" @tab-click="handleTabChange">
         <el-tab-pane label="待处理" name="pending" />
-        <el-tab-pane label="已退回" name="rejected" />
-        <el-tab-pane label="已更换/已完成" name="replaced" />
+        <el-tab-pane label="已发货" name="shipped" />
+        <el-tab-pane label="已完成" name="completed" />
       </el-tabs>
 
       <el-table v-loading="loading" :data="afterSaleList" border>
         <el-table-column label="售后单号" prop="afterSaleNo" min-width="180" show-overflow-tooltip />
         <el-table-column label="订单编号" prop="orderNo" min-width="170" show-overflow-tooltip />
+        <el-table-column label="退货物流单号" prop="returnTrackingNo" min-width="150" show-overflow-tooltip>
+          <template slot-scope="scope">
+            {{ scope.row.returnTrackingNo || '-' }}
+          </template>
+        </el-table-column>
         <el-table-column label="订单类型" width="90" align="center">
           <template slot-scope="scope">
             <el-tag size="mini" :type="scope.row.orderType === '1' ? 'warning' : 'success'">
@@ -132,27 +145,11 @@
             </el-tag>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="220" align="center" fixed="right">
+        <el-table-column label="操作" width="110" align="center" fixed="right">
           <template slot-scope="scope">
-            <el-button type="text" icon="el-icon-view" @click="handleView(scope.row)">查看详情</el-button>
-            <el-button
-              v-if="isPendingRow(scope.row)"
-              v-hasPermi="['school:afterSale:edit']"
-              type="text"
-              icon="el-icon-check"
-              @click="handleAudit(scope.row, 'approve')"
-            >
-              通过
-            </el-button>
-            <el-button
-              v-if="isPendingRow(scope.row)"
-              v-hasPermi="['school:afterSale:edit']"
-              type="text"
-              icon="el-icon-close"
-              @click="handleAudit(scope.row, 'reject')"
-            >
-              退回
-            </el-button>
+            <div class="action-buttons">
+              <el-button type="text" icon="el-icon-view" @click="handleView(scope.row)">查看详情</el-button>
+            </div>
           </template>
         </el-table-column>
       </el-table>
@@ -173,6 +170,7 @@
           <el-descriptions-item label="当前状态">{{ formatStatus(detailForm.status, detailForm) }}</el-descriptions-item>
           <el-descriptions-item label="订单编号">{{ detailForm.orderNo || '-' }}</el-descriptions-item>
           <el-descriptions-item label="订单类型">{{ formatOrderType(detailForm.orderType) }}</el-descriptions-item>
+          <el-descriptions-item label="退货物流单号">{{ detailForm.returnTrackingNo || '-' }}</el-descriptions-item>
           <el-descriptions-item label="申请类型">{{ formatApplyType(detailForm.applyType) }}</el-descriptions-item>
           <el-descriptions-item label="申请用户">{{ detailForm.userName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="学生姓名">{{ detailForm.studentName || '-' }}</el-descriptions-item>
@@ -227,11 +225,12 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="auditType === 'approve' ? '通过售后单' : '退回售后单'" :visible.sync="auditOpen" width="680px" append-to-body>
+    <el-dialog :title="auditType === 'approve' ? '完成售后处理' : '退回售后单'" :visible.sync="auditOpen" width="680px" append-to-body>
       <div v-loading="auditLoading">
         <el-descriptions :column="2" border class="audit-info">
           <el-descriptions-item label="售后单号">{{ auditForm.afterSaleNo || '-' }}</el-descriptions-item>
           <el-descriptions-item label="订单编号">{{ auditForm.orderNo || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="退货物流单号">{{ auditForm.returnTrackingNo || '-' }}</el-descriptions-item>
           <el-descriptions-item label="申请类型">{{ formatApplyType(auditForm.applyType) }}</el-descriptions-item>
           <el-descriptions-item label="申请用户">{{ auditForm.userName || '-' }}</el-descriptions-item>
         </el-descriptions>
@@ -295,6 +294,7 @@ const createDefaultAfterSale = () => ({
   applyType: '',
   targetSizeId: undefined,
   targetSizeName: '',
+  returnTrackingNo: '',
   reason: '',
   imagesJson: '',
   applyNum: undefined,
@@ -343,6 +343,7 @@ export default {
         pageSize: 10,
         afterSaleNo: '',
         orderNo: '',
+        returnTrackingNo: '',
         orderType: '',
         applyType: '',
         userName: '',
@@ -415,10 +416,10 @@ export default {
     },
     getTabFilters() {
       if (this.activeTab === 'pending') {
-        return { status: '0' }
+        return { status: '1' }
       }
-      if (this.activeTab === 'rejected') {
-        return { status: '2' }
+      if (this.activeTab === 'shipped') {
+        return { status: '3' }
       }
       return { status: '4' }
     },
@@ -490,28 +491,25 @@ export default {
         }
         const source = this.auditForm
         const today = this.formatToday()
-        const isApprove = this.auditType === 'approve'
         const isRefundType = ['1', '2'].includes(String(source.applyType || ''))
         const payload = {
           ...source,
-          status: isApprove ? '4' : '2',
+          status: '4',
           auditBy: this.currentUserName,
           auditTime: today,
-          handleResult: isApprove
-            ? (String(source.applyType) === '3' ? '已通过换货处理' : '已通过售后处理')
-            : '已退回售后申请',
+          handleResult: String(source.applyType) === '3' ? '已完成换货处理' : '已完成售后处理',
           handleRemark: this.auditSubmitForm.handleRemark,
-          finishTime: isApprove ? today : source.finishTime,
-          actualRefundAmount: isApprove && isRefundType
+          finishTime: today,
+          actualRefundAmount: isRefundType
             ? this.auditSubmitForm.actualRefundAmount
             : source.actualRefundAmount,
-          refundStatus: isApprove && isRefundType ? '2' : source.refundStatus,
-          refundTime: isApprove && isRefundType ? today : source.refundTime
+          refundStatus: isRefundType ? '2' : source.refundStatus,
+          refundTime: isRefundType ? today : source.refundTime
         }
         this.submitLoading = true
         updateAfterSale(payload)
           .then(() => {
-            this.$modal.msgSuccess(isApprove ? '处理通过成功' : '退回成功')
+            this.$modal.msgSuccess('处理完成')
             this.auditOpen = false
             this.getList()
             if (this.detailOpen && this.detailForm.id === source.id) {
@@ -524,7 +522,7 @@ export default {
       })
     },
     isPendingRow(row) {
-      return String(row.status) === '0'
+      return ['0', '1'].includes(String(row.status))
     },
     formatOrderType(value) {
       if (String(value) === '1') return '统购'
@@ -538,12 +536,9 @@ export default {
       return '-'
     },
     formatStatus(value, row = {}) {
-      if (String(value) === '0') return '待处理'
-      if (String(value) === '1') return '已通过'
-      if (String(value) === '2') return '已退回'
-      if (String(value) === '3') return '处理中'
-      if (String(value) === '4') return String(row.applyType) === '3' ? '已更换' : '已完成'
-      if (String(value) === '5') return '已关闭'
+      if (String(value) === '1') return '待处理'
+      if (String(value) === '3') return '已发货'
+      if (String(value) === '4') return '已完成'
       return '-'
     },
     formatRefundStatus(value) {
@@ -560,8 +555,8 @@ export default {
       return ''
     },
     getStatusTagType(value) {
-      if (String(value) === '0') return 'warning'
-      if (String(value) === '2') return 'danger'
+      if (String(value) === '1') return 'warning'
+      if (String(value) === '3') return 'primary'
       if (String(value) === '4') return 'success'
       return 'info'
     },
@@ -629,6 +624,19 @@ export default {
   margin-top: 6px;
   font-size: 13px;
   color: #909399;
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.action-buttons :deep(.el-button) {
+  margin-left: 0;
 }
 
 .detail-wrap {

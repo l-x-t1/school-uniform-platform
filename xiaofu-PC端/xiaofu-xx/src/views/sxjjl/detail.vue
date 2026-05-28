@@ -22,11 +22,18 @@
         <el-col :span="8"><span class="label">厂商名称：</span>{{ detail.manufacturerName || '-' }}</el-col>
         <el-col :span="8"><span class="label">订单编号：</span>{{ detail.orderNo || '-' }}</el-col>
         <el-col :span="8"><span class="label">售后编号：</span>{{ detail.afterSaleNo || '-' }}</el-col>
-        <el-col :span="8"><span class="label">价格：</span>{{ detail.price || '-' }}</el-col>
+        <el-col :span="8"><span class="label">申请人：</span>{{ detail.userName || '-' }}</el-col>
+        <el-col :span="8"><span class="label">学生姓名：</span>{{ detail.studentName || '-' }}</el-col>
+        <el-col :span="8"><span class="label">价格：</span>{{ formatPrice(detail.price) }}</el-col>
         <el-col :span="8"><span class="label">原尺码：</span>{{ detail.sizeName || '-' }}</el-col>
         <el-col :span="8"><span class="label">调换尺码：</span>{{ detail.targetSizeName || '-' }}</el-col>
         <el-col :span="8"><span class="label">申请数量：</span>{{ detail.applyNum || '-' }}</el-col>
+        <el-col :span="8"><span class="label">申请时间：</span>{{ detail.createTime || '-' }}</el-col>
         <el-col :span="8"><span class="label">处理时间：</span>{{ detail.operateTime || '-' }}</el-col>
+        <el-col :span="8"><span class="label">完成时间：</span>{{ detail.finishTime || '-' }}</el-col>
+        <el-col :span="24"><span class="label">调换原因：</span>{{ detail.reason || '-' }}</el-col>
+        <el-col :span="24"><span class="label">审核结果：</span>{{ detail.handleResult || '-' }}</el-col>
+        <el-col :span="24"><span class="label">处理备注：</span>{{ detail.handleRemark || '-' }}</el-col>
       </el-row>
     </el-card>
   </div>
@@ -79,6 +86,9 @@ export default {
         '4': 'success'
       }
       return typeMap[status] || 'info'
+    },
+    formatPrice(price) {
+      return price === undefined || price === null || price === '' ? '-' : `￥${price}`
     },
     goBack() {
       this.$router.back()

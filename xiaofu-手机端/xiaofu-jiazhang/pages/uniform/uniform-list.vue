@@ -47,7 +47,7 @@
           :key="index"
           @click="goToDetail(item.id)"
         >
-          <image class="uniform-image" :src="item.image" mode="aspectFill"></image>
+          <image class="uniform-image" :src="item.image" mode="aspectFill" @error="handleImageError(index)"></image>
           <view class="uniform-info">
             <text class="uniform-name">{{item.name}}</text>
             <text class="uniform-meta" v-if="item.categoryName || item.brandName">
@@ -142,6 +142,8 @@
 import config from '@/config'
 import { listUniforms } from '@/api/uniform'
 
+const DEFAULT_IMAGE = '/static/qjxf.png';
+
 export default {
   data() {
     return {
@@ -188,10 +190,13 @@ export default {
   methods: {
     resolveImage(url) {
       if (!url) {
-        return '/static/qjxf.png';
+        return DEFAULT_IMAGE;
       }
       if (/^https?:\/\//i.test(url)) {
         return url;
+      }
+      if (url.indexOf('/profile/upload/') === 0) {
+        return url.replace('/profile/upload/', 'http://127.0.0.1:9300/filestatics/upload/');
       }
       const baseUrl = (this.baseUrl || config.baseUrl || '').replace(/\/$/, '');
       return `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
@@ -243,6 +248,12 @@ export default {
         sortNum: Number(item.sortNum || 0),
         index
       };
+    },
+
+    handleImageError(index) {
+      if (this.uniformList[index]) {
+        this.$set(this.uniformList[index], 'image', DEFAULT_IMAGE);
+      }
     },
 
     getQueryParams() {

@@ -287,9 +287,23 @@
                                 }
                   },
                   {
+                      "path":  "pages/order/after-sale-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "售后详情",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
                       "path":  "pages/order/comment-apply",
                       "style":  {
                                     "navigationBarTitleText":  "订单评价",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/order/comment-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "评价详情",
                                     "enablePullDownRefresh":  false
                                 }
                   },

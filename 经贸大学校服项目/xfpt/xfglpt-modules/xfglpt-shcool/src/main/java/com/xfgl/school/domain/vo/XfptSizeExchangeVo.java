@@ -23,6 +23,10 @@ public class XfptSizeExchangeVo {
 
     private String orderNo;
 
+    private String userName;
+
+    private String studentName;
+
     private Long goodsId;
 
     private String productName;
@@ -48,6 +52,22 @@ public class XfptSizeExchangeVo {
     private String targetSizeName;
 
     private Integer applyNum;
+
+    private String reason;
+
+    private String imagesJson;
+
+    private String auditBy;
+
+    private Date auditTime;
+
+    private String handleResult;
+
+    private String handleRemark;
+
+    private Date finishTime;
+
+    private Date createTime;
 
     private Long deptId;
 

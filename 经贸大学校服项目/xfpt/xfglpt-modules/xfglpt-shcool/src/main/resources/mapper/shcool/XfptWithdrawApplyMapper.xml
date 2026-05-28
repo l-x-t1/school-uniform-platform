@@ -40,39 +40,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyAmount != null "> and apply_amount = #{applyAmount}</if>
             <if test="status != null  and status != ''"> and status = #{status}</if>
             <if test="applyTime != null "> and apply_time = #{applyTime}</if>
-            <if test="params != null and params.beginTime != null and params.beginTime != ''">
-                and apply_time &gt;= str_to_date(#{params.beginTime}, '%Y-%m-%d')
-            </if>
-            <if test="params != null and params.endTime != null and params.endTime != ''">
-                and apply_time &lt; date_add(str_to_date(#{params.endTime}, '%Y-%m-%d'), interval 1 day)
-            </if>
             <if test="auditUserId != null "> and audit_user_id = #{auditUserId}</if>
             <if test="auditUserName != null  and auditUserName != ''"> and audit_user_name like concat('%', #{auditUserName}, '%')</if>
             <if test="auditTime != null "> and audit_time = #{auditTime}</if>
             <if test="payTime != null "> and pay_time = #{payTime}</if>
             <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
             <if test="financeFlowId != null "> and finance_flow_id = #{financeFlowId}</if>
-        order by apply_time desc, id desc
-
-    </select>
-
-    <select id="selectSettlementManageList" parameterType="XfptWithdrawApply" resultMap="XfptWithdrawApplyResult">
-        <include refid="selectXfptWithdrawApplyVo"/>
-        <include refid="search"/>
-            <if test="withdrawNo != null  and withdrawNo != ''"> and withdraw_no like concat('%', #{withdrawNo}, '%')</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
-            <choose>
-                <when test="status != null  and status != ''"> and status = #{status}</when>
-                <otherwise> and status in ('1', '3')</otherwise>
-            </choose>
-            <if test="params != null and params.beginTime != null and params.beginTime != ''">
-                and apply_time &gt;= str_to_date(#{params.beginTime}, '%Y-%m-%d')
-            </if>
-            <if test="params != null and params.endTime != null and params.endTime != ''">
-                and apply_time &lt; date_add(str_to_date(#{params.endTime}, '%Y-%m-%d'), interval 1 day)
-            </if>
-        order by apply_time desc, id desc
 
     </select>
 

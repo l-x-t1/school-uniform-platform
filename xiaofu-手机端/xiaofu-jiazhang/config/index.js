@@ -7,7 +7,7 @@ const config = {
   uploadUrl: `${gatewayOrigin}/common/upload`,
   tokenKey: 'token',
   tokenPrefix: 'Bearer ',
-  enableMockFallback: true
+  enableMockFallback: false
 }
 
 export default config

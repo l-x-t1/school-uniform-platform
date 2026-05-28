@@ -32,3 +32,17 @@ export function createComment(data = {}) {
     }
   })
 }
+
+export function listComments(params = {}) {
+  return request({
+    url: '/school/comment/list',
+    method: 'GET',
+    params: {
+      userId: Number(params.userId || getCurrentUserId()),
+      orderId: params.orderId,
+      orderItemId: params.orderItemId,
+      pageNum: params.pageNum || 1,
+      pageSize: params.pageSize || 20
+    }
+  })
+}

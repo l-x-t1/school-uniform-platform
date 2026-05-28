@@ -7,6 +7,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="XfptOrderItem" id="XfptOrderItemResult">
         <result property="id"    column="id"    />
         <result property="orderId"    column="order_id"    />
+        <result property="orderNo"    column="order_no"    />
         <result property="goodsId"    column="goods_id"    />
         <result property="sizeId"    column="size_id"    />
         <result property="goodsName"    column="goods_name"    />
@@ -26,29 +27,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptOrderItemVo">
-        select id, order_id, goods_id, size_id, goods_name, size_name, main_image, sale_type, unit_price, buy_num, item_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_order_item
+        select oi.id, oi.order_id, o.order_no, oi.goods_id, oi.size_id, oi.goods_name, oi.size_name, oi.main_image, oi.sale_type, oi.unit_price, oi.buy_num, oi.item_amount, oi.dept_id, oi.create_by, oi.create_time, oi.update_by, oi.update_time, oi.remark, oi.del_flag
+        from xfpt_order_item oi
+        left join xfpt_order_info o on oi.order_id = o.id
     </sql>
 
     <select id="selectXfptOrderItemList" parameterType="XfptOrderItem" resultMap="XfptOrderItemResult">
         <include refid="selectXfptOrderItemVo"/>
         <include refid="search"/>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="sizeId != null "> and size_id = #{sizeId}</if>
-            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
-            <if test="sizeName != null  and sizeName != ''"> and size_name like concat('%', #{sizeName}, '%')</if>
-            <if test="mainImage != null  and mainImage != ''"> and main_image = #{mainImage}</if>
-            <if test="saleType != null  and saleType != ''"> and sale_type = #{saleType}</if>
-            <if test="unitPrice != null "> and unit_price = #{unitPrice}</if>
-            <if test="buyNum != null "> and buy_num = #{buyNum}</if>
-            <if test="itemAmount != null "> and item_amount = #{itemAmount}</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
+            <if test="orderId != null "> and oi.order_id = #{orderId}</if>
+            <if test="orderNo != null and orderNo != ''"> and o.order_no like concat('%', #{orderNo}, '%')</if>
+            <if test="goodsId != null "> and oi.goods_id = #{goodsId}</if>
+            <if test="sizeId != null "> and oi.size_id = #{sizeId}</if>
+            <if test="goodsName != null  and goodsName != ''"> and oi.goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="sizeName != null  and sizeName != ''"> and oi.size_name like concat('%', #{sizeName}, '%')</if>
+            <if test="mainImage != null  and mainImage != ''"> and oi.main_image = #{mainImage}</if>
+            <if test="saleType != null  and saleType != ''"> and oi.sale_type = #{saleType}</if>
+            <if test="unitPrice != null "> and oi.unit_price = #{unitPrice}</if>
+            <if test="buyNum != null "> and oi.buy_num = #{buyNum}</if>
+            <if test="itemAmount != null "> and oi.item_amount = #{itemAmount}</if>
+            <if test="deptId != null "> and oi.dept_id = #{deptId}</if>
 
     </select>
 
     <select id="selectXfptOrderItemById" parameterType="Long" resultMap="XfptOrderItemResult">
         <include refid="selectXfptOrderItemVo"/>
-        where id = #{id}
+        where oi.id = #{id}
     </select>
 
     <insert id="insertXfptOrderItem" parameterType="XfptOrderItem" useGeneratedKeys="true" keyProperty="id">
@@ -128,6 +132,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where oi.del_flag = 0
     </sql>
 </mapper>

@@ -10,13 +10,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="orderItemId"    column="order_item_id"    />
         <result property="orderNo"    column="order_no"    />
         <result property="orderType"    column="order_type"    />
-        <result property="schoolId"    column="school_id"    />
-        <result property="schoolName"    column="school_name"    />
         <result property="goodsId"    column="goods_id"    />
         <result property="goodsName"    column="goods_name"    />
         <result property="userId"    column="user_id"    />
         <result property="userName"    column="user_name"    />
-        <result property="userAvatar"    column="user_avatar"    />
         <result property="supplierId"    column="supplier_id"    />
         <result property="score"    column="score"    />
         <result property="content"    column="content"    />
@@ -24,7 +21,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="replyContent"    column="reply_content"    />
         <result property="replyTime"    column="reply_time"    />
         <result property="status"    column="status"    />
-        <result property="replyCount"    column="reply_count"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -46,12 +42,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="supplierId"    column="supplier_id"    />
         <result property="fromUserId"    column="from_user_id"    />
         <result property="fromUserName"    column="from_user_name"    />
-        <result property="fromUserAvatar"    column="from_user_avatar"    />
         <result property="fromRoleType"    column="from_role_type"    />
         <result property="fromRoleTitle"    column="from_role_title"    />
         <result property="toUserId"    column="to_user_id"    />
         <result property="toUserName"    column="to_user_name"    />
-        <result property="toUserAvatar"    column="to_user_avatar"    />
         <result property="toRoleType"    column="to_role_type"    />
         <result property="toRoleTitle"    column="to_role_title"    />
         <result property="content"    column="content"    />
@@ -66,18 +60,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptCommentVo">
-        select c.id, c.order_id, c.order_item_id, c.order_no, o.order_type, c.goods_id, c.goods_name, c.user_id, c.user_name, u.avatar as user_avatar, c.supplier_id, c.score, c.content, c.images_json, c.reply_content, c.reply_time, c.status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag
+        select c.id, c.order_id, c.order_item_id, c.order_no, o.order_type, c.goods_id, c.goods_name, c.user_id, c.user_name, c.supplier_id, c.score, c.content, c.images_json, c.reply_content, c.reply_time, c.status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag
         from xfpt_comment c
         left join xfpt_order_info o on c.order_id = o.id
-        left join sys_user u on c.user_id = u.user_id and u.del_flag = '0'
-    </sql>
-
-    <sql id="selectEvaluationCommentVo">
-        select c.id, c.order_id, c.order_item_id, c.order_no, o.order_type, o.school_id, o.school_name, c.goods_id, c.goods_name, c.user_id, c.user_name, u.avatar as user_avatar, c.supplier_id, c.score, c.content, c.images_json, c.reply_content, c.reply_time, c.status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag,
-            (select count(1) from xfpt_comment_reply r where r.comment_id = c.id and r.del_flag = 0) as reply_count
-        from xfpt_comment c
-        left join xfpt_order_info o on c.order_id = o.id
-        left join sys_user u on c.user_id = u.user_id and u.del_flag = '0'
     </sql>
 
     <select id="selectXfptCommentList" parameterType="XfptComment" resultMap="XfptCommentResult">
@@ -98,53 +83,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     </select>
 
-    <select id="selectEvaluationCommentList" parameterType="XfptComment" resultMap="XfptCommentResult">
-        <include refid="selectEvaluationCommentVo"/>
-        <include refid="search"/>
-            <if test="params.scopeSchoolId != null"> and o.school_id = #{params.scopeSchoolId}</if>
-            <if test="orderNo != null and orderNo != ''"> and c.order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderType != null and orderType != ''"> and o.order_type = #{orderType}</if>
-            <if test="schoolName != null and schoolName != ''"> and o.school_name like concat('%', #{schoolName}, '%')</if>
-            <if test="goodsName != null and goodsName != ''"> and c.goods_name like concat('%', #{goodsName}, '%')</if>
-            <if test="userName != null and userName != ''"> and c.user_name like concat('%', #{userName}, '%')</if>
-            <if test="score != null"> and c.score = #{score}</if>
-            <if test="status != null and status != ''"> and c.status = #{status}</if>
-            <if test="params.replyStatus != null and params.replyStatus == '0'">
-                and (c.reply_content is null or c.reply_content = '')
-                and not exists (select 1 from xfpt_comment_reply r where r.comment_id = c.id and r.del_flag = 0)
-            </if>
-            <if test="params.replyStatus != null and params.replyStatus == '1'">
-                and ((c.reply_content is not null and c.reply_content != '')
-                    or exists (select 1 from xfpt_comment_reply r where r.comment_id = c.id and r.del_flag = 0))
-            </if>
-        order by c.create_time desc, c.id desc
-    </select>
-
-    <select id="selectEvaluationCommentById" resultMap="XfptCommentXfptCommentReplyResult">
-        <include refid="selectEvaluationCommentVo"/>
-        <include refid="search"/>
-            and c.id = #{id}
-            <if test="scopeSchoolId != null"> and o.school_id = #{scopeSchoolId}</if>
-    </select>
-
     <select id="selectXfptCommentById" parameterType="Long" resultMap="XfptCommentXfptCommentReplyResult">
-        select c.id, c.order_id, c.order_item_id, c.order_no, c.goods_id, c.goods_name, c.user_id, c.user_name, u.avatar as user_avatar, c.supplier_id, c.score, c.content, c.images_json, c.reply_content, c.reply_time, c.status, c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag
-        from xfpt_comment c
-        left join sys_user u on c.user_id = u.user_id and u.del_flag = '0'
-        where c.id = #{id}
+        select id, order_id, order_item_id, order_no, goods_id, goods_name, user_id, user_name, supplier_id, score, content, images_json, reply_content, reply_time, status, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_comment
+        where id = #{id}
     </select>
 
     <select id="selectXfptCommentReplyById" resultMap="XfptCommentReplyResult">
-        select r.id, r.comment_id, r.order_id, r.order_item_id, r.goods_id, r.supplier_id,
-               r.from_user_id, r.from_user_name, from_u.avatar as from_user_avatar, r.from_role_type, r.from_role_title,
-               r.to_user_id, r.to_user_name, to_u.avatar as to_user_avatar, r.to_role_type, r.to_role_title,
-               r.content, r.status, r.sort_num, r.create_by, r.create_time, r.update_by, r.update_time, r.remark, r.del_flag
-        from xfpt_comment_reply r
-        left join sys_user from_u on r.from_user_id = from_u.user_id and from_u.del_flag = '0'
-        left join sys_user to_u on r.to_user_id = to_u.user_id and to_u.del_flag = '0'
-        where r.comment_id = #{id}
-          and r.del_flag = 0
-        order by r.sort_num asc, r.create_time asc, r.id asc
+        select id, comment_id, order_id, order_item_id, goods_id, supplier_id, from_user_id, from_user_name, from_role_type, from_role_title, to_user_id, to_user_name, to_role_type, to_role_title, content, status, sort_num, create_by, create_time, update_by, update_time, remark, del_flag
+        from xfpt_comment_reply
+        where comment_id = #{id}
     </select>
 
     <insert id="insertXfptComment" parameterType="XfptComment" useGeneratedKeys="true" keyProperty="id">

@@ -65,6 +65,7 @@
 
 <script>
 import config from '@/config'
+import { deleteCart } from '@/api/cart'
 import { createOrder } from '@/api/order'
 import { getDefaultStudent } from '@/api/student'
 import { listAddress } from '@/api/address'
@@ -332,9 +333,12 @@ export default {
             }
           };
         })
-        .then((res) => {
+        .then(async (res) => {
           const data = res.data || res;
           const orderId = data.id || data.orderId;
+          if (!orderId) {
+            throw new Error('订单创建成功，但未获取到订单编号，请稍后在订单列表中查看');
+          }
           const localOrder = {
             id: orderId,
             orderNo: data.orderNo || `XF${Date.now()}`,
@@ -402,8 +406,21 @@ export default {
           uni.hideLoading();
           if (this.source === 'cart') {
             const localCart = uni.getStorageSync('cartList') || [];
+            const orderedCartIds = [...new Set(this.items.map((item) => item.id).filter((id) => id !== undefined && id !== null && id !== ''))];
             const orderedKeys = this.items.map((item) => `${item.uniformId || item.id}-${item.size}-${item.orderType || item.saleType || '1'}`);
-            uni.setStorageSync('cartList', localCart.filter((item) => !orderedKeys.includes(`${item.uniformId || item.id}-${item.size}-${item.orderType || item.saleType || '1'}`)));
+            if (orderedCartIds.length) {
+              try {
+                await deleteCart(orderedCartIds.join(','));
+              } catch (error) {
+                console.warn('delete cart after order failed', error);
+              }
+            }
+            uni.setStorageSync('cartList', localCart.filter((item) => {
+              if (orderedCartIds.length && orderedCartIds.includes(item.id)) {
+                return false;
+              }
+              return !orderedKeys.includes(`${item.uniformId || item.id}-${item.size}-${item.orderType || item.saleType || '1'}`);
+            }));
           }
           uni.removeStorageSync('confirmOrderItems');
           uni.showToast({

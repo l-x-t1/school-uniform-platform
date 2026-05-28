@@ -22,6 +22,14 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
      */
     public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice);
 
+    /**
+     * 供应商查询学校发布的统购公告列表
+     *
+     * @param xfptGroupNotice 统购公告
+     * @return 统购公告集合
+     */
+    public List<XfptGroupNotice> selectSupplierGroupNoticeList(XfptGroupNotice xfptGroupNotice);
+
         /**
          * 查询统购公告
          *
@@ -29,6 +37,14 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
          * @return 统购公告
          */
         public XfptGroupNotice selectXfptGroupNoticeById(Long id);
+
+        /**
+         * 供应商查询学校发布的统购公告详情
+         *
+         * @param id 统购公告主键
+         * @return 统购公告
+         */
+        public XfptGroupNotice selectSupplierGroupNoticeById(Long id);
 
         /**
          * 新增统购公告
