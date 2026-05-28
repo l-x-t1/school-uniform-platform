@@ -103,18 +103,24 @@
     </select>
 
     <select id="selectSupplierGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
-        <include refid="selectXfptGroupNoticeVo"/>
-        <include refid="search"/>
-        <if test="schoolName != null and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
-        <if test="title != null and title != ''"> and title like concat('%', #{title}, '%')</if>
-        <if test="noticeCode != null and noticeCode != ''"> and notice_code like concat('%', #{noticeCode}, '%')</if>
-        <if test="noticeType != null and noticeType != ''"> and notice_type = #{noticeType}</if>
-        <if test="status != null and status != ''"> and status = #{status}</if>
-        and status in ('1', '2')
+        select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.status, g.apply_status,
+               g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
+               g.update_time, g.remark, g.del_flag
+        from xfpt_group_notice g
+        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        where g.del_flag = 0
+          and gns.supplier_id = #{supplierId}
+        <if test="schoolName != null and schoolName != ''"> and g.school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="title != null and title != ''"> and g.title like concat('%', #{title}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and g.notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="noticeType != null and noticeType != ''"> and g.notice_type = #{noticeType}</if>
+        <if test="status != null and status != ''"> and g.status = #{status}</if>
+        and g.status in ('1', '2')
         order by
-        case when publish_time is null then 1 else 0 end,
-        publish_time desc,
-        id desc
+        case when g.publish_time is null then 1 else 0 end,
+        g.publish_time desc,
+        g.id desc
     </select>
 
     <select id="selectXfptGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeXfptGroupNoticeItemResult">
@@ -123,12 +129,17 @@
         where id = #{id}
     </select>
 
-    <select id="selectSupplierGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeResult">
-        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_group_notice
-        where id = #{id}
-          and del_flag = 0
-          and status in ('1', '2')
+    <select id="selectSupplierGroupNoticeById" resultMap="XfptGroupNoticeResult">
+        select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.status, g.apply_status,
+               g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
+               g.update_time, g.remark, g.del_flag
+        from xfpt_group_notice g
+        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        where g.id = #{id}
+          and g.del_flag = 0
+          and g.status in ('1', '2')
+          and gns.supplier_id = #{supplierId}
     </select>
 
     <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
@@ -343,6 +354,37 @@
     <delete id="deleteXfptGroupNoticeItemByNoticeId" parameterType="Long">
         delete from xfpt_group_notice_item where notice_id = #{id}
     </delete>
+
+    <select id="selectSupplierIdsByNoticeId" parameterType="Long" resultType="Long">
+        select supplier_id
+        from xfpt_group_notice_supplier
+        where notice_id = #{noticeId}
+          and del_flag = '0'
+        order by id asc
+    </select>
+
+    <delete id="deleteXfptGroupNoticeSupplierByNoticeId" parameterType="Long">
+        delete from xfpt_group_notice_supplier where notice_id = #{noticeId}
+    </delete>
+
+    <delete id="deleteXfptGroupNoticeSupplierByNoticeIds">
+        delete from xfpt_group_notice_supplier where notice_id in
+        <foreach item="noticeId" collection="noticeIds" open="(" separator="," close=")">
+            #{noticeId}
+        </foreach>
+    </delete>
+
+    <insert id="batchInsertXfptGroupNoticeSupplier">
+        insert into xfpt_group_notice_supplier(
+            notice_id, supplier_id, supplier_name, create_by, create_time, update_by, update_time, remark, del_flag
+        ) values
+        <foreach item="item" index="index" collection="list" separator=",">
+            (
+            #{item.noticeId}, #{item.supplierId}, #{item.supplierName}, #{item.createBy}, #{item.createTime},
+            #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag}
+            )
+        </foreach>
+    </insert>
 
     <insert id="batchInsertXfptGroupNoticeItem">
         insert into xfpt_group_notice_item( id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag) values

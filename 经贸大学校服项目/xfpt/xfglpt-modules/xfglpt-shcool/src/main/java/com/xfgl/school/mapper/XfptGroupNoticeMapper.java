@@ -7,6 +7,7 @@ import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 import org.apache.ibatis.annotations.Param;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
+import com.xfgl.school.domain.XfptGroupNoticeSupplier;
 
 /**
  * 统购公告Mapper接口
@@ -36,8 +37,16 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
          * @param id 统购公告主键
          * @return 统购公告
          */
-        XfptGroupNotice selectSupplierGroupNoticeById(@Param("id") Long id);
+        XfptGroupNotice selectSupplierGroupNoticeById(@Param("id") Long id, @Param("supplierId") Long supplierId);
         List<XfptGroupNoticeItem> selectXfptGroupNoticeItemById(@Param("id")Long id);
+
+        List<Long> selectSupplierIdsByNoticeId(@Param("noticeId") Long noticeId);
+
+        int deleteXfptGroupNoticeSupplierByNoticeId(@Param("noticeId") Long noticeId);
+
+        int deleteXfptGroupNoticeSupplierByNoticeIds(@Param("noticeIds") List<Long> noticeIds);
+
+        int batchInsertXfptGroupNoticeSupplier(List<XfptGroupNoticeSupplier> supplierList);
 
         /**
          * 删除统购公告信息

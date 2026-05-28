@@ -175,6 +175,26 @@
               <el-input v-else :value="currentSchool.schoolName || '-'" disabled />
             </el-form-item>
           </el-col>
+          <el-col v-if="isAdmin" :span="24">
+            <el-form-item label="可见供应商" prop="supplierIds">
+              <el-select
+                v-model="form.supplierIds"
+                multiple
+                filterable
+                clearable
+                collapse-tags
+                placeholder="请选择可见供应商"
+                style="width: 100%"
+              >
+                <el-option
+                  v-for="supplier in supplierOptions"
+                  :key="supplier.id"
+                  :label="supplier.supplierName"
+                  :value="supplier.id"
+                />
+              </el-select>
+            </el-form-item>
+          </el-col>
           <el-col :span="12">
             <el-form-item label="公告编号" prop="noticeCode">
               <el-input v-model="form.noticeCode" placeholder="可自动或手动填写" />
@@ -308,6 +328,7 @@ import {
   listSchoolMessage,
   getSchoolMessageByDeptId,
 } from "@/api/school/schoolMessage";
+import { listSupplierMessage } from "@/api/school/supplierMessage";
 
 const getDefaultForm = () => ({
   id: null,
@@ -324,6 +345,7 @@ const getDefaultForm = () => ({
   endTime: null,
   status: "0",
   applyStatus: "0",
+  supplierIds: [],
   xfptGroupNoticeItemList: [],
 });
 
@@ -336,6 +358,7 @@ export default {
       total: 0,
       groupNoticeList: [],
       schoolOptions: [],
+      supplierOptions: [],
       currentSchool: {},
       open: false,
       detailOpen: false,
@@ -392,6 +415,7 @@ export default {
         listSchoolMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
           this.schoolOptions = res.rows || [];
         });
+        this.loadSupplierOptions();
         return;
       }
       const deptId = this.$store.getters.deptId;
@@ -400,6 +424,11 @@ export default {
       }
       getSchoolMessageByDeptId(deptId).then((res) => {
         this.currentSchool = res.data || {};
+      });
+    },
+    loadSupplierOptions() {
+      listSupplierMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
+        this.supplierOptions = res.rows || [];
       });
     },
     getList() {
@@ -466,6 +495,10 @@ export default {
         if (!valid) {
           return;
         }
+        if (this.isAdmin && (!this.form.supplierIds || !this.form.supplierIds.length)) {
+          this.$message.error("请选择可见供应商");
+          return;
+        }
         const payload = { ...this.form };
         if (!this.isAdmin) {
           payload.schoolId = this.currentSchool.id;
@@ -519,6 +552,9 @@ export default {
       form.noticeType = form.noticeType ? String(form.noticeType) : "1";
       form.status = form.status ? String(form.status) : "0";
       form.applyStatus = form.applyStatus ? String(form.applyStatus) : "0";
+      form.supplierIds = Array.isArray(form.supplierIds)
+        ? form.supplierIds.map((id) => Number(id)).filter((id) => !Number.isNaN(id))
+        : [];
       return form;
     },
     normalizeDateValue(value) {

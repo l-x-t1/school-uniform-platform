@@ -127,4 +127,14 @@ private static final long serialVersionUID = 1L;
 @TableField(exist = false)
 @Schema(description = "统购公告商品")
 private List<XfptGroupNoticeItem> xfptGroupNoticeItemList;
+
+/** Supplier visibility ids */
+@TableField(exist = false)
+@Schema(description = "Supplier visibility ids")
+private List<Long> supplierIds;
+
+/** Current supplier query id */
+@TableField(exist = false)
+@Schema(description = "Current supplier query id")
+private Long supplierId;
         }
