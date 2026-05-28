@@ -98,7 +98,7 @@ public class XfptAfterSaleController extends BaseController {
             xfptAfterSale.setAuditTime(new Date());
         }
         if (isBlank(xfptAfterSale.getHandleResult())) {
-            xfptAfterSale.setHandleResult("家长端提交后自动通过售后申请");
+            xfptAfterSale.setHandleResult("家长端提交后自动通过售后申请，等待供应商发货");
         }
         if (isBlank(xfptAfterSale.getRefundStatus())) {
             xfptAfterSale.setRefundStatus("0");

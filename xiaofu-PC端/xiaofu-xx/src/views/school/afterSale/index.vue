@@ -82,15 +82,15 @@
       <div class="page-header">
         <div>
           <div class="page-title">售后单处理</div>
-          <div class="page-subtitle">查询待处理、已退回和已更换/已完成售后单，查看售后单处理情况</div>
+          <div class="page-subtitle">查询待处理、已发货和已完成售后单，查看售后单处理情况</div>
         </div>
         <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
       </div>
 
       <el-tabs v-model="activeTab" @tab-click="handleTabChange">
         <el-tab-pane label="待处理" name="pending" />
-        <el-tab-pane label="已退回" name="rejected" />
-        <el-tab-pane label="已更换/已完成" name="replaced" />
+        <el-tab-pane label="已发货" name="shipped" />
+        <el-tab-pane label="已完成" name="completed" />
       </el-tabs>
 
       <el-table v-loading="loading" :data="afterSaleList" border>
@@ -416,10 +416,10 @@ export default {
     },
     getTabFilters() {
       if (this.activeTab === 'pending') {
-        return { status: '0,1' }
+        return { status: '1' }
       }
-      if (this.activeTab === 'rejected') {
-        return { status: '2' }
+      if (this.activeTab === 'shipped') {
+        return { status: '3' }
       }
       return { status: '4' }
     },
@@ -491,28 +491,25 @@ export default {
         }
         const source = this.auditForm
         const today = this.formatToday()
-        const isApprove = this.auditType === 'approve'
         const isRefundType = ['1', '2'].includes(String(source.applyType || ''))
         const payload = {
           ...source,
-          status: isApprove ? '4' : '2',
+          status: '4',
           auditBy: this.currentUserName,
           auditTime: today,
-          handleResult: isApprove
-            ? (String(source.applyType) === '3' ? '已完成换货处理' : '已完成售后处理')
-            : '已退回售后申请',
+          handleResult: String(source.applyType) === '3' ? '已完成换货处理' : '已完成售后处理',
           handleRemark: this.auditSubmitForm.handleRemark,
-          finishTime: isApprove ? today : source.finishTime,
-          actualRefundAmount: isApprove && isRefundType
+          finishTime: today,
+          actualRefundAmount: isRefundType
             ? this.auditSubmitForm.actualRefundAmount
             : source.actualRefundAmount,
-          refundStatus: isApprove && isRefundType ? '2' : source.refundStatus,
-          refundTime: isApprove && isRefundType ? today : source.refundTime
+          refundStatus: isRefundType ? '2' : source.refundStatus,
+          refundTime: isRefundType ? today : source.refundTime
         }
         this.submitLoading = true
         updateAfterSale(payload)
           .then(() => {
-            this.$modal.msgSuccess(isApprove ? '处理完成' : '退回成功')
+            this.$modal.msgSuccess('处理完成')
             this.auditOpen = false
             this.getList()
             if (this.detailOpen && this.detailForm.id === source.id) {
@@ -539,12 +536,9 @@ export default {
       return '-'
     },
     formatStatus(value, row = {}) {
-      if (String(value) === '0') return '待审核'
       if (String(value) === '1') return '待处理'
-      if (String(value) === '2') return '已退回'
-      if (String(value) === '3') return '处理中'
-      if (String(value) === '4') return String(row.applyType) === '3' ? '已更换' : '已完成'
-      if (String(value) === '5') return '已关闭'
+      if (String(value) === '3') return '已发货'
+      if (String(value) === '4') return '已完成'
       return '-'
     },
     formatRefundStatus(value) {
@@ -561,9 +555,8 @@ export default {
       return ''
     },
     getStatusTagType(value) {
-      if (String(value) === '0') return 'info'
       if (String(value) === '1') return 'warning'
-      if (String(value) === '2') return 'danger'
+      if (String(value) === '3') return 'primary'
       if (String(value) === '4') return 'success'
       return 'info'
     },

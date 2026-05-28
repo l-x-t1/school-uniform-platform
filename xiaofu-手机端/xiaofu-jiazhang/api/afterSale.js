@@ -15,12 +15,6 @@ function buildAfterSaleNo() {
   return `AS${Date.now()}`
 }
 
-function getCurrentDateTime() {
-  const pad = (value) => String(value).padStart(2, '0')
-  const date = new Date()
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-}
-
 function normalizeAfterSale(item = {}) {
   return {
     ...item,
@@ -46,7 +40,7 @@ function normalizeAfterSale(item = {}) {
     actualRefundAmount: Number(item.actualRefundAmount || item.actual_refund_amount || 0),
     refundStatus: String(item.refundStatus || item.refund_status || '0'),
     refundTime: item.refundTime || item.refund_time || '',
-    status: String(item.status || '0'),
+    status: String(item.status || '1'),
     auditBy: item.auditBy || item.audit_by || '',
     auditTime: item.auditTime || item.audit_time || '',
     handleResult: item.handleResult || item.handle_result || '',
@@ -82,9 +76,6 @@ export function createAfterSale(data = {}) {
       actualRefundAmount: 0,
       refundStatus: '0',
       status: '1',
-      auditBy: '系统自动通过',
-      auditTime: getCurrentDateTime(),
-      handleResult: '家长端提交后自动通过售后申请',
       handleRemark: data.handleRemark || '',
       deptId: data.deptId,
       delFlag: '0'

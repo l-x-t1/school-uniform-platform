@@ -66,7 +66,7 @@ export function createAfterSale(order, product, form = {}) {
       applyAmount: Number((unitPrice * quantity).toFixed(2)),
       actualRefundAmount: 0,
       refundStatus: '0',
-      status: '0',
+      status: '1',
       deptId: Number(order.deptId || 1),
       createBy: userName,
       delFlag: '0'
