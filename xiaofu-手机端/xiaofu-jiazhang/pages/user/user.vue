@@ -157,7 +157,8 @@ export default {
         { title: '我的订单', icon: 'list', url: '/pages/order/order-list', color: '#30A3FF' },
         { title: '购物车', icon: 'cart', url: '/pages/cart/cart', color: '#12B886' },
         { title: '收货地址', icon: 'location', url: '/pages/user/address-list', color: '#FF9F1C' },
-        { title: '学生信息', icon: 'person', url: '/pages/user/student-info', color: '#7D3BFF' }
+        { title: '学生信息', icon: 'person', url: '/pages/user/student-info', color: '#7D3BFF' },
+        { title: '我的投诉', icon: 'chatbubble', url: '/pages/complaint/complaint-list', color: '#F97316' }
       ],
       // 反馈统计数据
       feedbackStats: {

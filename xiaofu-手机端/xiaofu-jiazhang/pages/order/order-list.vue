@@ -102,6 +102,10 @@
           </view>
           <view class="order-actions">
             <button
+              class="action-btn outline action-btn-complaint"
+              @click.stop="goToComplaint(order)"
+            >投诉</button>
+            <button
               class="action-btn outline"
               v-if="canCancel(order.status)"
               @click.stop="cancelOrder(order.id)"
@@ -810,6 +814,20 @@ export default {
       uni.navigateTo({
         url: `/pages/order/comment-detail?id=${order.id}&orderNo=${encodeURIComponent(order.orderNo || '')}`
       });
+    },
+
+    goToComplaint(order) {
+      const primaryProduct = this.getPrimaryProduct(order);
+      const query = [
+        `orderId=${encodeURIComponent(order.id || '')}`,
+        `orderNo=${encodeURIComponent(order.orderNo || '')}`,
+        `supplierName=${encodeURIComponent(order.supplierName || '')}`,
+        `schoolName=${encodeURIComponent(order.schoolName || '')}`,
+        `goodsName=${encodeURIComponent(primaryProduct.name || '')}`
+      ].join('&');
+      uni.navigateTo({
+        url: `/pages/complaint/complaint?${query}`
+      });
     }
   }
 }
@@ -1168,10 +1186,13 @@ export default {
       .order-actions {
         display: flex;
         justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
         
         .action-btn {
           margin: 0;
           margin-left: 20rpx;
+          margin-top: 12rpx;
           padding: 0 30rpx;
           font-size: 26rpx;
           height: 60rpx;
@@ -1206,6 +1227,14 @@ export default {
               border: none;
             }
           }
+        }
+
+        .action-btn-complaint {
+          margin-left: 0;
+          margin-right: auto;
+          color: #f97316;
+          border: 1rpx solid #fed7aa;
+          background-color: #fff7ed;
         }
       }
     }

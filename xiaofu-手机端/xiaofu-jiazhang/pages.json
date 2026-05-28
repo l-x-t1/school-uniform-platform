@@ -371,6 +371,28 @@
                                 }
                   },
                   {
+                      "path":  "pages/complaint/complaint",
+                      "style":  {
+                                    "navigationBarTitleText":  "\u63D0\u4EA4\u6295\u8BC9",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/complaint/complaint-list",
+                      "style":  {
+                                    "navigationBarTitleText":  "\u6211\u7684\u6295\u8BC9",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+                  {
+                      "path":  "pages/complaint/complaint-detail",
+                      "style":  {
+                                    "navigationBarTitleText":  "\u6295\u8BC9\u8BE6\u60C5",
+                                    "enablePullDownRefresh":  false
+                                }
+                  },
+
+                  {
                       "path":  "pages/user/address-list",
                       "style":  {
                                     "navigationBarTitleText":  "收货地址",
