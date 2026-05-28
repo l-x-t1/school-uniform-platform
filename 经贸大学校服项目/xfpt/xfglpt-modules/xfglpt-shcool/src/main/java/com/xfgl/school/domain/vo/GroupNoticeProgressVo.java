@@ -1,19 +1,24 @@
 package com.xfgl.school.domain.vo;
 
-import java.math.BigDecimal;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import java.util.Date;
 
 public class GroupNoticeProgressVo {
     private Long id;
     private Long noticeId;
     private Long supplierId;
+    private Long schoolId;
+    private String schoolName;
+    private String className;
+    private String orderNo;
+    private Long orderQuantity;
+    private String progressStatus;
+    private String progressStatusName;
+    private String logisticsNo;
     private String noticeName;
     private String manufacturerName;
-    private Long promotionCount;
-    private Long expectedSalesCount;
-    private Long orderCount;
-    private BigDecimal orderRate;
-    private String timeRange;
-    private String remainTime;
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private Date createTime;
 
     public Long getId() {
         return id;
@@ -39,6 +44,70 @@ public class GroupNoticeProgressVo {
         this.supplierId = supplierId;
     }
 
+    public Long getSchoolId() {
+        return schoolId;
+    }
+
+    public void setSchoolId(Long schoolId) {
+        this.schoolId = schoolId;
+    }
+
+    public String getSchoolName() {
+        return schoolName;
+    }
+
+    public void setSchoolName(String schoolName) {
+        this.schoolName = schoolName;
+    }
+
+    public String getClassName() {
+        return className;
+    }
+
+    public void setClassName(String className) {
+        this.className = className;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
+    public Long getOrderQuantity() {
+        return orderQuantity;
+    }
+
+    public void setOrderQuantity(Long orderQuantity) {
+        this.orderQuantity = orderQuantity;
+    }
+
+    public String getProgressStatus() {
+        return progressStatus;
+    }
+
+    public void setProgressStatus(String progressStatus) {
+        this.progressStatus = progressStatus;
+    }
+
+    public String getProgressStatusName() {
+        return progressStatusName;
+    }
+
+    public void setProgressStatusName(String progressStatusName) {
+        this.progressStatusName = progressStatusName;
+    }
+
+    public String getLogisticsNo() {
+        return logisticsNo;
+    }
+
+    public void setLogisticsNo(String logisticsNo) {
+        this.logisticsNo = logisticsNo;
+    }
+
     public String getNoticeName() {
         return noticeName;
     }
@@ -55,51 +124,11 @@ public class GroupNoticeProgressVo {
         this.manufacturerName = manufacturerName;
     }
 
-    public Long getPromotionCount() {
-        return promotionCount;
+    public Date getCreateTime() {
+        return createTime;
     }
 
-    public void setPromotionCount(Long promotionCount) {
-        this.promotionCount = promotionCount;
-    }
-
-    public Long getExpectedSalesCount() {
-        return expectedSalesCount;
-    }
-
-    public void setExpectedSalesCount(Long expectedSalesCount) {
-        this.expectedSalesCount = expectedSalesCount;
-    }
-
-    public Long getOrderCount() {
-        return orderCount;
-    }
-
-    public void setOrderCount(Long orderCount) {
-        this.orderCount = orderCount;
-    }
-
-    public BigDecimal getOrderRate() {
-        return orderRate;
-    }
-
-    public void setOrderRate(BigDecimal orderRate) {
-        this.orderRate = orderRate;
-    }
-
-    public String getTimeRange() {
-        return timeRange;
-    }
-
-    public void setTimeRange(String timeRange) {
-        this.timeRange = timeRange;
-    }
-
-    public String getRemainTime() {
-        return remainTime;
-    }
-
-    public void setRemainTime(String remainTime) {
-        this.remainTime = remainTime;
+    public void setCreateTime(Date createTime) {
+        this.createTime = createTime;
     }
 }

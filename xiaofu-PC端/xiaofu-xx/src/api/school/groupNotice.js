@@ -77,3 +77,36 @@ export function getGroupNoticeProgressDetail(noticeId, supplierId) {
     params: { supplierId }
   })
 }
+
+// 供应商查看统购订单
+export function viewGroupNoticeProgressOrder(orderId) {
+  return request({
+    url: '/school/groupNotice/progress/order/' + orderId,
+    method: 'get'
+  })
+}
+
+// 供应商开始制作统购订单
+export function startGroupNoticeProgressOrder(orderId) {
+  return request({
+    url: '/school/groupNotice/progress/order/' + orderId + '/start',
+    method: 'put'
+  })
+}
+
+// 供应商完成制作统购订单
+export function finishGroupNoticeProgressOrder(orderId) {
+  return request({
+    url: '/school/groupNotice/progress/order/' + orderId + '/finish',
+    method: 'put'
+  })
+}
+
+// 供应商填写统购订单物流单号
+export function fillGroupNoticeProgressLogistics(orderId, logisticsNo) {
+  return request({
+    url: '/school/groupNotice/progress/order/' + orderId + '/logistics',
+    method: 'put',
+    data: { logisticsNo }
+  })
+}

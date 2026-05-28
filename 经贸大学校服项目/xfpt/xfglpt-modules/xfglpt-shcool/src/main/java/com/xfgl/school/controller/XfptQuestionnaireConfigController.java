@@ -72,7 +72,12 @@ public class XfptQuestionnaireConfigController extends BaseController {
     //@RequiresPermissions("question:config:list")
     @GetMapping("/list")
     public TableDataInfo list(XfptQuestionnaireConfig xfptQuestionnaireConfig) {
-        xfptQuestionnaireConfig.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId());
+        SysDept dept = currentDept();
+        xfptQuestionnaireConfig.setViewerDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId());
+        xfptQuestionnaireConfig.setViewerAncestors(dept == null ? null : dept.getAncestors());
+        xfptQuestionnaireConfig.setViewerIsSchool(dept == null ? null : dept.getIsSchool());
+        xfptQuestionnaireConfig.setDeptId(null);
+        xfptQuestionnaireConfig.setAncestors(null);
         startPage();
         List<XfptQuestionnaireConfig> list = xfptQuestionnaireConfigService.selectXfptQuestionnaireConfigList(xfptQuestionnaireConfig);
         for (XfptQuestionnaireConfig config : list) {
@@ -193,11 +198,8 @@ public class XfptQuestionnaireConfigController extends BaseController {
     @Log(title = "问卷调查主配置", businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptQuestionnaireConfig xfptQuestionnaireConfig) {
-        SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
-        String ancestors = dept.getAncestors();
-        xfptQuestionnaireConfig.setAncestors(ancestors);
-
         try {
+            fillOwnerScope(xfptQuestionnaireConfig);
 //            if(xfptQuestionnaireConfig.getCategory().equals("0")){
 //                //开始时间
 //                LocalDateTime startTime = new Timestamp(xfptQuestionnaireConfig.getBeginTime().getTime()).toLocalDateTime();
@@ -215,7 +217,6 @@ public class XfptQuestionnaireConfigController extends BaseController {
 //                    xfptQuestionnaireConfig.setWjStatus("2");
 //                }
 //            }
-            xfptQuestionnaireConfig.setLcCategory("0");
             boolean save = xfptQuestionnaireConfigService.save(xfptQuestionnaireConfig);
             if (save) {
                 List<XfptQuestionnaireSurvey> sonList = xfptQuestionnaireConfig.getSonList();
@@ -240,6 +241,13 @@ public class XfptQuestionnaireConfigController extends BaseController {
     @PutMapping
     public AjaxResult edit(@RequestBody XfptQuestionnaireConfig xfptQuestionnaireConfig) {
         try {
+            XfptQuestionnaireConfig existingConfig = xfptQuestionnaireConfig.getId() == null
+                    ? null
+                    : xfptQuestionnaireConfigService.getById(xfptQuestionnaireConfig.getId());
+            if (existingConfig == null || !canManageQuestionnaire(existingConfig)) {
+                return error("无权限操作该问卷");
+            }
+            keepOwnerScope(xfptQuestionnaireConfig, existingConfig);
             boolean updateFlg = xfptQuestionnaireConfigService.updateById(xfptQuestionnaireConfig);
             if (updateFlg) {
                 List<XfptQuestionnaireSurvey> sonList = xfptQuestionnaireConfig.getSonList();
@@ -265,6 +273,9 @@ public class XfptQuestionnaireConfigController extends BaseController {
     public AjaxResult remove(@PathVariable Long[] ids) {
         try {
             List<Long> questionIdList = Arrays.asList(ids);
+            if (!canManageQuestionnaires(questionIdList)) {
+                return error("无权限操作该问卷");
+            }
             boolean delFlg = xfptQuestionnaireConfigService.removeByIds(questionIdList);
             if (delFlg) {
                 LambdaUpdateWrapper<XfptQuestionnaireSurvey> lambdaUpdateWrapper = new LambdaUpdateWrapper<>();
@@ -290,6 +301,15 @@ public class XfptQuestionnaireConfigController extends BaseController {
     @DeleteMapping("/removeSonData/{ids}")
     public AjaxResult removeSonData(@PathVariable Long[] ids) {
         try {
+            List<XfptQuestionnaireSurvey> surveyList = questionnaireSurveyService.listByIds(Arrays.asList(ids));
+            List<Long> questionIdList = surveyList.stream()
+                    .map(XfptQuestionnaireSurvey::getQuestionConfigId)
+                    .filter(Objects::nonNull)
+                    .distinct()
+                    .collect(Collectors.toList());
+            if (!CollectionUtils.isEmpty(questionIdList) && !canManageQuestionnaires(questionIdList)) {
+                return error("无权限操作该问卷");
+            }
             questionnaireSurveyService.removeByIds(Arrays.asList(ids));
             return toAjax(1);
         } catch (Exception e) {
@@ -477,6 +497,73 @@ public class XfptQuestionnaireConfigController extends BaseController {
         xfptQuestionnaireConfig.setSonList(xfptQuestionnaireSurveys);
         //如果没有查询配置的模版
         return AjaxResult.success(xfptQuestionnaireConfig);
+    }
+
+    private SysDept currentDept() {
+        return SecurityUtils.getLoginUser().getSysUser().getDept();
+    }
+
+    private boolean isSchoolDept(SysDept dept) {
+        return dept != null && "1".equals(dept.getIsSchool());
+    }
+
+    private void fillOwnerScope(XfptQuestionnaireConfig xfptQuestionnaireConfig) {
+        SysDept dept = currentDept();
+        xfptQuestionnaireConfig.setDeptId(SecurityUtils.getLoginUser().getSysUser().getDeptId());
+        xfptQuestionnaireConfig.setAncestors(dept == null ? null : dept.getAncestors());
+        xfptQuestionnaireConfig.setLcCategory(isSchoolDept(dept) ? "1" : "0");
+    }
+
+    private void keepOwnerScope(XfptQuestionnaireConfig target, XfptQuestionnaireConfig source) {
+        target.setDeptId(source.getDeptId());
+        target.setAncestors(source.getAncestors());
+        target.setLcCategory(source.getLcCategory());
+    }
+
+    private boolean canManageQuestionnaire(Long id) {
+        XfptQuestionnaireConfig questionnaireConfig = xfptQuestionnaireConfigService.getById(id);
+        if (questionnaireConfig == null) {
+            return false;
+        }
+        return canManageQuestionnaire(questionnaireConfig);
+    }
+
+    private boolean canManageQuestionnaire(XfptQuestionnaireConfig questionnaireConfig) {
+        Long viewerDeptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        if (Objects.equals(questionnaireConfig.getDeptId(), viewerDeptId)) {
+            return true;
+        }
+        SysDept dept = currentDept();
+        if (isSchoolDept(dept)) {
+            return false;
+        }
+        SysDept ownerDept = questionnaireConfig.getDeptId() == null
+                ? null
+                : xfptSchoolGradeClassService.selectDeptId(String.valueOf(questionnaireConfig.getDeptId()));
+        if (!isSchoolDept(ownerDept)) {
+            return false;
+        }
+        return containsDept(questionnaireConfig.getAncestors(), viewerDeptId)
+                || containsDept(ownerDept.getAncestors(), viewerDeptId);
+    }
+
+    private boolean containsDept(String ancestors, Long deptId) {
+        if (StrUtil.isBlank(ancestors) || deptId == null) {
+            return false;
+        }
+        return Arrays.asList(ancestors.split(",")).contains(String.valueOf(deptId));
+    }
+
+    private boolean canManageQuestionnaires(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return true;
+        }
+        for (Long id : ids) {
+            if (!canManageQuestionnaire(id)) {
+                return false;
+            }
+        }
+        return true;
     }
 
 }

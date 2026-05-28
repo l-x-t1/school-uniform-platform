@@ -19,6 +19,9 @@ public interface XfptGoodsMapper extends BaseMapper<XfptGoods> {
      * @return 商品信息集合
      */
     public List<XfptGoods> selectXfptGoodsList(XfptGoods xfptGoods);
+
+        XfptGoods selectXfptGoodsById(@Param("id") Long id);
+
         /**
          * 查询商品信息
          *
