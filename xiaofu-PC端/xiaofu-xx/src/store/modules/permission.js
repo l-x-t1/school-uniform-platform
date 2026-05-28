@@ -222,6 +222,73 @@ function ensureUsageMenu(routes = []) {
   return routes;
 }
 
+function isCitySupplierSupervisionMenu(route = {}) {
+  return (
+    route.path === "supplierSupervision" ||
+    route.path === "/newFeature/supplierSupervision" ||
+    route.component === "jiaoyuju/supplierSupervision/index" ||
+    (route.meta && route.meta.title === "供应商黑名单与投诉")
+  );
+}
+
+function ensureCitySupplierSupervisionMenu(routes = []) {
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (route.children.some((item) => isCitySupplierSupervisionMenu(item))) {
+      return;
+    }
+    route.children.push({
+      name: "CitySupplierSupervision",
+      path: "supplierSupervision",
+      component: "jiaoyuju/supplierSupervision/index",
+      meta: {
+        title: "供应商黑名单与投诉",
+        icon: "list",
+      },
+    });
+  };
+
+  const visit = (list = []) => {
+    list.forEach((route) => {
+      if (isNewFeatureRoute(route)) {
+        appendMenu(route);
+      }
+      if (route.children && route.children.length) {
+        visit(route.children);
+      }
+    });
+  };
+
+  visit(routes);
+
+  if (!routeTreeSome(routes, isCitySupplierSupervisionMenu)) {
+    routes.push({
+      name: "CitySupplierSupervisionRoot",
+      path: "/supplierSupervision",
+      component: "Layout",
+      meta: {
+        title: "供应商黑名单与投诉",
+        icon: "list",
+      },
+      children: [
+        {
+          name: "CitySupplierSupervision",
+          path: "index",
+          component: "jiaoyuju/supplierSupervision/index",
+          meta: {
+            title: "供应商黑名单与投诉",
+            icon: "list",
+          },
+        },
+      ],
+    });
+  }
+
+  return routes;
+}
+
 function hasSupplierRole(userRoles = []) {
   return userRoles.some((role) => {
     const roleKey = (role || "").toLowerCase();
@@ -230,7 +297,18 @@ function hasSupplierRole(userRoles = []) {
 }
 
 function hasCityEducationRole(userRoles = []) {
-  return userRoles.some((role) => (role || "").toLowerCase().includes("sjyj"));
+  return userRoles.some((role) => {
+    const roleKey = (role || "").toLowerCase();
+    return (
+      roleKey.includes("sjyj") ||
+      roleKey.includes("jyj") ||
+      roleKey.includes("jiaoyuju")
+    );
+  });
+}
+
+function hasAdminRole(userRoles = []) {
+  return userRoles.some((role) => (role || "").toLowerCase() === "admin");
 }
 
 function routeTreeSome(routes = [], predicate) {
@@ -579,6 +657,8 @@ const permission = {
         );
         const isSupplierUser = hasSupplierRole(userRoles);
         const isCityEducationUser = hasCityEducationRole(userRoles);
+        const canViewCitySupplierSupervision =
+          isCityEducationUser || hasAdminRole(userRoles);
 
         const homeRoute = hasXuexiaoRole
           ? homeRoutes.schoolHome
@@ -596,6 +676,11 @@ const permission = {
           );
           if (isCityEducationUser) {
             normalizedBaseRoutes = sanitizeCityEducationMenus(
+              normalizedBaseRoutes
+            );
+          }
+          if (canViewCitySupplierSupervision) {
+            normalizedBaseRoutes = ensureCitySupplierSupervisionMenu(
               normalizedBaseRoutes
             );
           }
