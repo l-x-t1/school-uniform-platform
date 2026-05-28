@@ -85,6 +85,20 @@ SET @supplier_supervision_menu_id := (
   LIMIT 1
 );
 
+UPDATE sys_menu
+SET
+  menu_name = CONVERT(0xE4BE9BE5BA94E59586E9BB91E5908DE58D95E4B88EE68A95E8AF89 USING utf8mb4),
+  parent_id = IF(@new_feature_menu_id IS NOT NULL, @new_feature_menu_id, parent_id),
+  path = 'supplierSupervision',
+  component = 'jiaoyuju/supplierSupervision/index',
+  menu_type = 'C',
+  visible = '0',
+  status = '0',
+  perms = 'school:hmd:list',
+  icon = 'list',
+  update_time = NOW()
+WHERE menu_id = @supplier_supervision_menu_id;
+
 SET @hmd_query_menu_id := (
   SELECT menu_id
   FROM sys_menu
@@ -148,6 +162,15 @@ WHERE @supplier_supervision_menu_id IS NOT NULL
       AND perms = 'school:hmd:query'
   );
 
+SET @hmd_query_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE parent_id = @supplier_supervision_menu_id
+    AND perms = 'school:hmd:query'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
 INSERT INTO sys_role_menu (role_id, menu_id)
 SELECT r.role_id, @new_feature_menu_id
 FROM sys_role r
@@ -194,4 +217,20 @@ WHERE (
     FROM sys_role_menu rm
     WHERE rm.role_id = r.role_id
       AND rm.menu_id = @hmd_query_menu_id
+  );
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, m.menu_id
+FROM sys_role r
+JOIN sys_menu m ON m.perms IN ('school:hmd:list', 'school:hmd:query')
+WHERE (
+    LOWER(r.role_key) LIKE '%jyj%'
+    OR LOWER(r.role_key) LIKE '%jiaoyuju%'
+    OR r.role_name LIKE CONCAT('%', CONVERT(0xE69599E882B2E5B180 USING utf8mb4), '%')
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_role_menu rm
+    WHERE rm.role_id = r.role_id
+      AND rm.menu_id = m.menu_id
   );
