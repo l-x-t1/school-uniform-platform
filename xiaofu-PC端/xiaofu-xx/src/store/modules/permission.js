@@ -30,10 +30,10 @@ function normalizeUsageMenus(routes = []) {
     }
 
     if (isPlatformUsage) {
-      current.name = "使用情况";
+      current.name = "教育局监管统计";
       current.meta = {
         ...(current.meta || {}),
-        title: "使用情况",
+        title: "教育局监管统计",
       };
     }
 
@@ -143,7 +143,7 @@ function ensureUsageMenu(routes = []) {
       path: "platformUsage",
       component: "school/platformUsage/index",
       meta: {
-        title: "使用情况",
+        title: "教育局监管统计",
         icon: "chart",
       },
     });
@@ -155,6 +155,47 @@ function ensureUsageMenu(routes = []) {
     }
     if (route.children && route.children.length) {
       ensureUsageMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
+function ensureVoteResultMenu(routes = []) {
+  const targetTitle = "鏂板鍔熻兘";
+  const exists = (children = []) =>
+    children.some(
+      (item) =>
+        item.path === "voteResult" ||
+        item.path === "/newFeature/voteResult" ||
+        item.component === "school/voteResult/index"
+    );
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "VoteResult",
+      path: "voteResult",
+      component: "school/voteResult/index",
+      meta: {
+        title: "投票结果",
+        icon: "form",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureVoteResultMenu(route.children);
     }
   });
 
@@ -197,10 +238,12 @@ const permission = {
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = ensureUsageMenu(
-            ensureSupplierMessageMenu(
-              ensureSupplierGroupNoticeMenu(
-                normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+          const normalizedRoutes = ensureVoteResultMenu(
+            ensureUsageMenu(
+              ensureSupplierMessageMenu(
+                ensureSupplierGroupNoticeMenu(
+                  normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+                )
               )
             )
           );

@@ -5,6 +5,9 @@ import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo;
+import com.xfgl.school.domain.vo.SupplierOptionVo;
 import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
 import com.xfgl.school.service.IXfptDeliveryOrderService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,6 +83,16 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
     public int deleteXfptDeliveryOrderById(Long id) {
         xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(id);
         return xfptDeliveryOrderMapper.deleteById(id);
+    }
+
+    @Override
+    public List<DeliveryOrderStatisticsVo> selectDeliveryOrderStatisticsList(DeliveryOrderStatisticsQuery query) {
+        return xfptDeliveryOrderMapper.selectDeliveryOrderStatisticsList(query);
+    }
+
+    @Override
+    public List<SupplierOptionVo> selectDeliveryOrderSupplierOptions() {
+        return xfptDeliveryOrderMapper.selectDeliveryOrderSupplierOptions(null, null);
     }
 
     private void insertXfptDeliveryOrderItem(XfptDeliveryOrder xfptDeliveryOrder) {
