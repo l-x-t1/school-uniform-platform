@@ -100,6 +100,11 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "换货目标尺码名称")
     private String targetSizeName;
 
+    /** 退货物流单号 */
+            @Excel(name = "退货物流单号")
+    @Schema(description = "退货物流单号")
+    private String returnTrackingNo;
+
     /** 申请原因 */
             @Excel(name = "申请原因")
     @Schema(description = "申请原因")

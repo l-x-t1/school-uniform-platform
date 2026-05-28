@@ -19,6 +19,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="applyType"    column="apply_type"    />
         <result property="targetSizeId"    column="target_size_id"    />
         <result property="targetSizeName"    column="target_size_name"    />
+        <result property="returnTrackingNo"    column="return_tracking_no"    />
         <result property="reason"    column="reason"    />
         <result property="imagesJson"    column="images_json"    />
         <result property="applyNum"    column="apply_num"    />
@@ -42,7 +43,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptAfterSaleVo">
-        select id, after_sale_no, order_id, order_item_id, order_no, order_type, school_id, supplier_id, user_id, user_name, student_name, apply_type, target_size_id, target_size_name, reason, images_json, apply_num, apply_amount, actual_refund_amount, refund_status, refund_time, status, audit_by, audit_time, handle_result, handle_remark, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_after_sale
+        select id, after_sale_no, order_id, order_item_id, order_no, order_type, school_id, supplier_id, user_id, user_name, student_name, apply_type, target_size_id, target_size_name, return_tracking_no, reason, images_json, apply_num, apply_amount, actual_refund_amount, refund_status, refund_time, status, audit_by, audit_time, handle_result, handle_remark, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_after_sale
     </sql>
 
     <select id="selectXfptAfterSaleList" parameterType="XfptAfterSale" resultMap="XfptAfterSaleResult">
@@ -61,13 +62,22 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyType != null  and applyType != ''"> and apply_type = #{applyType}</if>
             <if test="targetSizeId != null "> and target_size_id = #{targetSizeId}</if>
             <if test="targetSizeName != null  and targetSizeName != ''"> and target_size_name like concat('%', #{targetSizeName}, '%')</if>
+            <if test="returnTrackingNo != null  and returnTrackingNo != ''"> and return_tracking_no like concat('%', #{returnTrackingNo}, '%')</if>
             <if test="reason != null  and reason != ''"> and reason = #{reason}</if>
             <if test="applyNum != null "> and apply_num = #{applyNum}</if>
             <if test="applyAmount != null "> and apply_amount = #{applyAmount}</if>
             <if test="actualRefundAmount != null "> and actual_refund_amount = #{actualRefundAmount}</if>
             <if test="refundStatus != null  and refundStatus != ''"> and refund_status = #{refundStatus}</if>
             <if test="refundTime != null "> and refund_time = #{refundTime}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <choose>
+                <when test="status != null and status != '' and status.indexOf(',') >= 0">
+                    and status in
+                    <foreach collection="status.split(',')" item="statusItem" open="(" separator="," close=")">
+                        #{statusItem}
+                    </foreach>
+                </when>
+                <when test="status != null and status != ''"> and status = #{status}</when>
+            </choose>
             <if test="auditBy != null  and auditBy != ''"> and audit_by = #{auditBy}</if>
             <if test="auditTime != null "> and audit_time = #{auditTime}</if>
             <if test="handleResult != null  and handleResult != ''"> and handle_result = #{handleResult}</if>
@@ -98,6 +108,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyType != null and applyType != ''">apply_type,</if>
             <if test="targetSizeId != null">target_size_id,</if>
             <if test="targetSizeName != null">target_size_name,</if>
+            <if test="returnTrackingNo != null">return_tracking_no,</if>
             <if test="reason != null">reason,</if>
             <if test="imagesJson != null">images_json,</if>
             <if test="applyNum != null">apply_num,</if>
@@ -133,6 +144,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyType != null and applyType != ''">#{applyType},</if>
             <if test="targetSizeId != null">#{targetSizeId},</if>
             <if test="targetSizeName != null">#{targetSizeName},</if>
+            <if test="returnTrackingNo != null">#{returnTrackingNo},</if>
             <if test="reason != null">#{reason},</if>
             <if test="imagesJson != null">#{imagesJson},</if>
             <if test="applyNum != null">#{applyNum},</if>
@@ -172,6 +184,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="applyType != null and applyType != ''">apply_type = #{applyType},</if>
             <if test="targetSizeId != null">target_size_id = #{targetSizeId},</if>
             <if test="targetSizeName != null">target_size_name = #{targetSizeName},</if>
+            <if test="returnTrackingNo != null">return_tracking_no = #{returnTrackingNo},</if>
             <if test="reason != null">reason = #{reason},</if>
             <if test="imagesJson != null">images_json = #{imagesJson},</if>
             <if test="applyNum != null">apply_num = #{applyNum},</if>

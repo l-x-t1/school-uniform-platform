@@ -110,7 +110,7 @@ export default {
       afterSaleNo: '',
       order: {},
       afterSale: {
-        status: '0',
+        status: '1',
         refundStatus: '0'
       }
     }
@@ -182,36 +182,27 @@ export default {
     },
     getStatusText(status) {
       const map = {
-        '0': '待审核',
-        '1': '审核通过',
-        '2': '已驳回',
-        '3': '处理中',
-        '4': '已完成',
-        '5': '已关闭'
+        '1': '待处理',
+        '3': '已发货',
+        '4': '已完成'
       }
-      return map[String(status || '0')] || '处理中'
+      return map[String(status || '1')] || '待处理'
     },
     getStatusDesc(status) {
       const map = {
-        '0': '售后申请已提交，等待学校或供应商审核。',
-        '1': '售后申请已通过审核，请留意后续处理进度。',
-        '2': '售后申请未通过审核，请查看处理备注。',
-        '3': '售后处理中，请耐心等待处理结果。',
-        '4': '售后处理完成，如有退款请注意查收。',
-        '5': '售后单已关闭。'
+        '1': '售后申请已通过，请等待供应商发货。',
+        '3': '供应商已发货，请留意物流或收货通知。',
+        '4': '售后处理已完成。'
       }
-      return map[String(status || '0')] || '售后申请处理中。'
+      return map[String(status || '1')] || '售后申请已通过，请等待供应商发货。'
     },
     getStatusIcon(status) {
       const map = {
-        '0': 'calendar',
-        '1': 'checkmarkempty',
-        '2': 'closeempty',
-        '3': 'reload',
-        '4': 'checkbox-filled',
-        '5': 'minus'
+        '1': 'calendar',
+        '3': 'paperplane',
+        '4': 'checkbox-filled'
       }
-      return map[String(status || '0')] || 'help'
+      return map[String(status || '1')] || 'help'
     },
     getRefundStatusText(status) {
       const map = {

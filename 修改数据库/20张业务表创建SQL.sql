@@ -435,6 +435,7 @@ CREATE TABLE IF NOT EXISTS `xfpt_after_sale` (
   `apply_type` char(1) NOT NULL COMMENT '申请类型，1仅退款 2退货退款 3换货',
   `target_size_id` bigint DEFAULT NULL COMMENT '换货目标尺码ID',
   `target_size_name` varchar(50) DEFAULT NULL COMMENT '换货目标尺码名称',
+  `return_tracking_no` varchar(100) DEFAULT NULL COMMENT '退货物流单号',
   `reason` varchar(500) DEFAULT NULL COMMENT '申请原因',
   `images_json` longtext COMMENT '图片凭证JSON文本',
   `apply_num` int NOT NULL DEFAULT 1 COMMENT '申请数量',
