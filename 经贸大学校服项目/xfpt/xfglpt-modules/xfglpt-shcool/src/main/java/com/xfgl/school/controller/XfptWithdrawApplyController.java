@@ -37,7 +37,7 @@ import com.xfgl.system.api.model.LoginUser;
  */
 @Tag(name="供应商提现申请管理")
 @RestController
-@RequestMapping("/withdrawApply")
+@RequestMapping({"/withdrawApply", "/school/withdrawApply", "/xfglpt-school/withdrawApply"})
 public class XfptWithdrawApplyController extends BaseController {
     @Autowired
     private IXfptWithdrawApplyService xfptWithdrawApplyService;

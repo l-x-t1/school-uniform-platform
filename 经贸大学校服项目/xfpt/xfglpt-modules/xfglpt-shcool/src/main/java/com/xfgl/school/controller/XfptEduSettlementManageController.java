@@ -56,6 +56,6 @@ public class XfptEduSettlementManageController extends BaseController {
     @RequiresPermissions("school:eduSettlementManage:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        return success(xfptEduSettlementService.getById(id));
+        return success(xfptEduSettlementService.selectXfptEduSettlementById(id));
     }
 }

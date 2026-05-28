@@ -33,6 +33,14 @@ public class XfptEduSettlementServiceImpl extends ServiceImpl<XfptEduSettlementM
         return xfptEduSettlementMapper.selectXfptEduSettlementList(xfptEduSettlement);
     }
 
+    @Override
+    public XfptEduSettlement selectXfptEduSettlementById(Long id) {
+        if (id == null) {
+            return null;
+        }
+        return xfptEduSettlementMapper.selectXfptEduSettlementById(id);
+    }
+
     /**
      * 查询教育局结算统计
      *

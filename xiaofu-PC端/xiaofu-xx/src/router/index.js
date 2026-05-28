@@ -180,6 +180,18 @@ export const constantRoutes = [
     ],
   },
   {
+    path: "/schoolGroupNoticeEntry",
+    component: Layout,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/groupNotice/index"),
+        name: "SchoolGroupNoticeEntry",
+        meta: { title: "学校统购公告查询", icon: "message" },
+      },
+    ],
+  },
+  {
     path: "/school/schoolUsage",
     component: Layout,
     hidden: true,

@@ -77,7 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptOrderInfoVo">
-        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, progress_status, logistics_no, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_order_info
+        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, null as progress_status, null as logistics_no, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_order_info
     </sql>
 
     <select id="selectXfptOrderInfoList" parameterType="XfptOrderInfo" resultMap="XfptOrderInfoResult">
@@ -106,8 +106,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null "> and refund_amount = #{refundAmount}</if>
             <if test="payStatus != null  and payStatus != ''"> and pay_status = #{payStatus}</if>
             <if test="orderStatus != null  and orderStatus != ''"> and order_status = #{orderStatus}</if>
-            <if test="progressStatus != null  and progressStatus != ''"> and progress_status = #{progressStatus}</if>
-            <if test="logisticsNo != null  and logisticsNo != ''"> and logistics_no like concat('%', #{logisticsNo}, '%')</if>
             <if test="payTime != null ">
                 and pay_time &gt;= #{payTime}
                 and pay_time &lt; date_add(#{payTime}, interval 1 day)
@@ -125,7 +123,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectXfptOrderInfoById" parameterType="Long" resultMap="XfptOrderInfoXfptOrderItemResult">
-        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, progress_status, logistics_no, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, null as progress_status, null as logistics_no, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_order_info
         where id = #{id}
     </select>
@@ -143,7 +141,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectGroupNoticeForPurchase" resultMap="GroupNoticePurchaseResult">
-        select id, purchase_start_time, purchase_end_time, status, del_flag
+        select id, null as purchase_start_time, null as purchase_end_time, status, del_flag
         from xfpt_group_notice
         where id = #{noticeId}
           and del_flag = '0'

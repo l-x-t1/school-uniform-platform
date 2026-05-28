@@ -50,6 +50,11 @@ export function questionnaireSurvey(query) {
     params: query,
   });
 }
+
+// 兼容现有页面中的旧导出名
+export function listQuestionnaire(query) {
+  return questionnaireSurvey(query);
+}
 // 年级列表
 export function gradeList(query) {
   return request({

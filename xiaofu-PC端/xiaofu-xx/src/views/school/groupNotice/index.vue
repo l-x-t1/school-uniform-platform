@@ -116,7 +116,7 @@
       </el-table-column>
       <el-table-column label="统购时间" min-width="260">
         <template slot-scope="scope">
-          {{ formatDateTime(scope.row.purchaseStartTime) }} ~ {{ formatDateTime(scope.row.purchaseEndTime) }}
+          {{ formatDateTimeRange(scope.row.purchaseStartTime, scope.row.purchaseEndTime) }}
         </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="220" fixed="right">
@@ -202,7 +202,7 @@
           </el-col>
           <el-col :span="12">
             <el-form-item label="公告编号" prop="noticeCode">
-              <el-input v-model="form.noticeCode" placeholder="可自动或手动填写" />
+              <el-input v-model="form.noticeCode" placeholder="可自动生成或手动填写" />
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -297,17 +297,17 @@
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="open = false">取 消</el-button>
+        <el-button type="primary" @click="submitForm">确定</el-button>
+        <el-button @click="open = false">取消</el-button>
       </div>
     </el-dialog>
 
     <el-dialog title="公告详情" :visible.sync="detailOpen" width="980px" append-to-body>
       <div v-loading="detailLoading">
         <el-descriptions :column="2" border>
-          <el-descriptions-item label="公告标题">{{ detail.title || "-" }}</el-descriptions-item>
-          <el-descriptions-item label="公告编号">{{ detail.noticeCode || "-" }}</el-descriptions-item>
-          <el-descriptions-item label="学校名称">{{ detail.schoolName || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="公告标题">{{ detail.title || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="公告编号">{{ detail.noticeCode || '-' }}</el-descriptions-item>
+          <el-descriptions-item label="学校名称">{{ detail.schoolName || '-' }}</el-descriptions-item>
           <el-descriptions-item label="公告类型">
             {{ formatOption(noticeTypeOptions, detail.noticeType) }}
           </el-descriptions-item>
@@ -321,16 +321,16 @@
           <el-descriptions-item label="公告截止时间">{{ formatDate(detail.endTime) }}</el-descriptions-item>
           <el-descriptions-item label="统购开始时间">{{ formatDateTime(detail.purchaseStartTime) }}</el-descriptions-item>
           <el-descriptions-item label="统购结束时间">{{ formatDateTime(detail.purchaseEndTime) }}</el-descriptions-item>
-          <el-descriptions-item label="适用年级">{{ detail.gradeNames || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="适用年级">{{ detail.gradeNames || '-' }}</el-descriptions-item>
           <el-descriptions-item label="发布时间">{{ formatDate(detail.publishTime) }}</el-descriptions-item>
         </el-descriptions>
         <el-card shadow="never" class="detail-section">
           <div slot="header">公告正文</div>
-          <div class="notice-content">{{ detail.content || "暂无公告正文" }}</div>
+          <div class="notice-content">{{ detail.content || '暂无公告正文' }}</div>
         </el-card>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="detailOpen = false">关 闭</el-button>
+        <el-button @click="detailOpen = false">关闭</el-button>
       </div>
     </el-dialog>
   </div>
@@ -385,7 +385,7 @@ export default {
       currentSchool: {},
       open: false,
       detailOpen: false,
-      dialogTitle: '添加公告',
+      dialogTitle: '新增公告',
       form: getDefaultForm(),
       detail: {},
       queryParams: {
@@ -408,7 +408,7 @@ export default {
         { label: '已撤回', value: '3' }
       ],
       applyStatusOptions: [
-        { label: '未开放', value: '0' },
+        { label: '未开始', value: '0' },
         { label: '报名中', value: '1' },
         { label: '报名结束', value: '2' }
       ],
@@ -486,7 +486,7 @@ export default {
     },
     handleAdd() {
       this.resetFormData()
-      this.dialogTitle = '添加公告'
+      this.dialogTitle = '新增公告'
       this.open = true
       this.$nextTick(() => {
         this.$refs.form && this.$refs.form.clearValidate()
@@ -626,6 +626,12 @@ export default {
         return '-'
       }
       return this.parseTime(value, '{y}-{m}-{d} {h}:{i}:{s}')
+    },
+    formatDateTimeRange(start, end) {
+      if (!start && !end) {
+        return '-'
+      }
+      return `${this.formatDateTime(start)} ~ ${this.formatDateTime(end)}`
     }
   }
 }

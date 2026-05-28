@@ -506,7 +506,7 @@ import {
 import { listFinanceFlow } from '@/api/school/financeFlow'
 import { listOrderInfo } from '@/api/school/orderInfo'
 import { listOrderItem } from '@/api/school/orderItem'
-import { listSettlementManage } from '@/api/school/settlementManage'
+import { listEduSettlementManage } from '@/api/school/eduSettlementManage'
 
 export default {
   name: 'UsageDashboard',
@@ -611,7 +611,7 @@ export default {
         (summary, item) => {
           const amount = Number(item.applyAmount || 0)
           summary.applyAmountTotal += amount
-          if (String(item.status) === '3') {
+          if (['2', '3'].includes(String(item.status))) {
             summary.settledAmount += amount
             summary.settledCount += 1
           } else {
@@ -780,8 +780,9 @@ export default {
     formatSettlementStatus(value) {
       return (
         {
+          0: '待结算',
           1: '待结算',
-          2: '审核中',
+          2: '已结算',
           3: '已结算'
         }[value] || value || '-'
       )
@@ -789,8 +790,9 @@ export default {
     settlementStatusType(value) {
       return (
         {
+          0: 'warning',
           1: 'warning',
-          2: 'primary',
+          2: 'success',
           3: 'success'
         }[value] || 'info'
       )
@@ -897,7 +899,7 @@ export default {
       this.financeTotal = response.total || 0
     },
     async loadSettlementData() {
-      const response = await listSettlementManage(
+      const response = await listEduSettlementManage(
         this.buildScopeQuery({
           ...this.settlementQuery,
           supplierName: this.queryParams.supplierName || undefined

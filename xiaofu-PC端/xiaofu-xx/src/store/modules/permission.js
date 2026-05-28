@@ -70,7 +70,23 @@ function ensureSupplierMessageMenu(routes = []) {
 
   routes.forEach((route) => {
     const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+    if (
+      route.path === "newFeature" ||
+      route.path === "/newFeature" ||
+      title === targetTitle ||
+      (route.children &&
+        route.children.some(
+          (item) =>
+            item.path === "supplierMessage" ||
+            item.path === "/newFeature/supplierMessage" ||
+            item.path === "accountBalance" ||
+            item.path === "/newFeature/accountBalance" ||
+            item.path === "platformUsage" ||
+            item.path === "/newFeature/platformUsage" ||
+            item.path === "voteResult" ||
+            item.path === "/newFeature/voteResult"
+        ))
+    ) {
       appendMenu(route);
     }
     if (route.children && route.children.length) {
@@ -83,30 +99,47 @@ function ensureSupplierMessageMenu(routes = []) {
 
 function ensureSupplierGroupNoticeMenu(routes = []) {
   const targetTitle = "新增功能";
-  const exists = (children = []) =>
-    children.some(
-      (item) =>
-        item.path === "supplierGroupNotice" ||
-        item.path === "/newFeature/supplierGroupNotice" ||
-        item.component === "supplier/groupNotice/index"
-    );
+  const groupNoticeTitle = "瀛︽牎缁熻喘鍏憡鏌ヨ";
+  const isGroupNoticeMenu = (item = {}) =>
+    item.path === "supplierGroupNotice" ||
+    item.path === "/newFeature/supplierGroupNotice" ||
+    item.path === "adminGroupNoticeQuery" ||
+    item.path === "/newFeature/adminGroupNoticeQuery" ||
+    item.component === "supplier/groupNotice/index" ||
+    item.component === "school/groupNotice/index" ||
+    item.component === "school/groupNoticeReadonly/index" ||
+    (item.meta && item.meta.title === groupNoticeTitle);
+  const ensureChild = (item) => {
+    item.name = "SupplierGroupNotice";
+    item.path = "supplierGroupNotice";
+    item.component = "school/groupNotice/index";
+    item.hidden = false;
+    item.meta = {
+      ...(item.meta || {}),
+      title: "瀛︽牎缁熻喘鍏憡鏌ヨ",
+      icon: (item.meta && item.meta.icon) || "message",
+    };
+    return item;
+  };
 
   const appendMenu = (route) => {
     if (!route.children) {
       route.children = [];
     }
-    if (exists(route.children)) {
+    const existingMenu = route.children.find(isGroupNoticeMenu);
+    if (existingMenu) {
+      ensureChild(existingMenu);
       return;
     }
-    route.children.push({
+    route.children.push(ensureChild({
       name: "SupplierGroupNotice",
       path: "supplierGroupNotice",
-      component: "supplier/groupNotice/index",
+      component: "school/groupNotice/index",
       meta: {
         title: "学校统购公告查询",
         icon: "message",
       },
-    });
+    }));
   };
 
   routes.forEach((route) => {
@@ -163,6 +196,28 @@ function ensureUsageMenu(routes = []) {
 
 function ensureVoteResultMenu(routes = []) {
   const targetTitle = "鏂板鍔熻兘";
+  const isNewFeatureRoute = (route = {}) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    const children = route.children || [];
+    const hasKnownFeatureChild = children.some(
+      (item) =>
+        item.path === "supplierMessage" ||
+        item.path === "/newFeature/supplierMessage" ||
+        item.path === "accountBalance" ||
+        item.path === "/newFeature/accountBalance" ||
+        item.path === "platformUsage" ||
+        item.path === "/newFeature/platformUsage" ||
+        item.path === "voteResult" ||
+        item.path === "/newFeature/voteResult"
+    );
+
+    return (
+      route.path === "newFeature" ||
+      route.path === "/newFeature" ||
+      title === targetTitle ||
+      hasKnownFeatureChild
+    );
+  };
   const exists = (children = []) =>
     children.some(
       (item) =>
@@ -202,6 +257,39 @@ function ensureVoteResultMenu(routes = []) {
   return routes;
 }
 
+function normalizeGroupNoticeMenus(routes = []) {
+  return routes.map((route) => {
+    const current = { ...route };
+    const currentPath = current.path || "";
+    const currentComponent = current.component || "";
+
+    const isGroupNotice =
+      currentPath === "supplierGroupNotice" ||
+      currentPath === "/newFeature/supplierGroupNotice" ||
+      currentPath === "adminGroupNoticeQuery" ||
+      currentPath === "/newFeature/adminGroupNoticeQuery" ||
+      currentPath === "/supplier/groupNotice" ||
+      currentPath === "/school/groupNoticeReadonly" ||
+      currentComponent === "supplier/groupNotice/index" ||
+      currentComponent === "school/groupNotice/index" ||
+      currentComponent === "school/groupNoticeReadonly/index";
+
+    if (current.children && current.children.length) {
+      current.children = normalizeGroupNoticeMenus(current.children);
+    }
+
+    if (isGroupNotice) {
+      current.name = "SchoolGroupNotice";
+      current.meta = {
+        ...(current.meta || {}),
+        title: "学校统购公告查询",
+      };
+    }
+
+    return current;
+  });
+}
+
 const permission = {
   state: {
     routes: [],
@@ -238,11 +326,13 @@ const permission = {
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = ensureVoteResultMenu(
-            ensureUsageMenu(
-              ensureSupplierMessageMenu(
-                ensureSupplierGroupNoticeMenu(
-                  normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+          const normalizedRoutes = normalizeGroupNoticeMenus(
+            ensureVoteResultMenu(
+              ensureUsageMenu(
+                ensureSupplierMessageMenu(
+                  ensureSupplierGroupNoticeMenu(
+                    normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+                  )
                 )
               )
             )
