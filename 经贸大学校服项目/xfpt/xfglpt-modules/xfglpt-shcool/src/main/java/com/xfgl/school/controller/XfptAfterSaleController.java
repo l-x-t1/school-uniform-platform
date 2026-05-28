@@ -43,7 +43,6 @@ public class XfptAfterSaleController extends BaseController {
  */
 
 @Operation(summary = "查询售后主列表")
-@RequiresPermissions("school:afterSale:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptAfterSale xfptAfterSale) {
         startPage();
@@ -68,7 +67,6 @@ public class XfptAfterSaleController extends BaseController {
      * 获取售后主详细信息
      */
     @Operation(summary = "获取售后主详细信息")
-    @RequiresPermissions("school:afterSale:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptAfterSaleService.getById(id));
@@ -78,7 +76,6 @@ public class XfptAfterSaleController extends BaseController {
      * 新增售后主
      */
     @Operation(summary = "新增售后主")
-    @RequiresPermissions("school:afterSale:add")
     @Log(title = "售后主" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptAfterSale xfptAfterSale) {

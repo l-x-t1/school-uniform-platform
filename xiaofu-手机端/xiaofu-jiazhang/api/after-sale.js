@@ -60,6 +60,7 @@ export function createAfterSale(order, product, form = {}) {
       applyType: form.applyType || '2',
       targetSizeId: form.targetSizeId ? Number(form.targetSizeId) : null,
       targetSizeName: form.targetSizeName || '',
+      returnTrackingNo: form.returnTrackingNo || '',
       reason: form.reason || '',
       imagesJson: JSON.stringify(form.images || []),
       applyNum: quantity,
