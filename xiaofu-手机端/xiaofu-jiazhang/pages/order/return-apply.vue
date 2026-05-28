@@ -201,6 +201,9 @@ export default {
       if (this.form.applyType === '3' && !this.form.targetSizeName.trim()) {
         return '请输入换货尺码'
       }
+      if (!this.form.returnTrackingNo.trim()) {
+        return '请填写退货物流单号'
+      }
       if (!this.form.reason.trim()) {
         return '请填写申请原因'
       }
@@ -220,7 +223,7 @@ export default {
         studentName: this.order.studentName,
         applyType: this.form.applyType,
         targetSizeName: this.form.applyType === '3' ? this.form.targetSizeName.trim() : '',
-        returnTrackingNo: this.form.applyType === '1' ? '' : this.form.returnTrackingNo.trim(),
+        returnTrackingNo: this.form.returnTrackingNo.trim(),
         reason: this.form.reason.trim(),
         applyNum: Number(this.form.applyNum),
         applyAmount: this.form.applyType === '3' ? 0 : Number(this.form.applyAmount || 0),
