@@ -73,12 +73,12 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:groupNotice:add']"
           type="primary"
           plain
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['school:groupNotice:add']"
         >
           新增公告
         </el-button>
@@ -113,6 +113,11 @@
       </el-table-column>
       <el-table-column label="公告截止时间" min-width="120">
         <template slot-scope="scope">{{ formatDate(scope.row.endTime) }}</template>
+      </el-table-column>
+      <el-table-column label="统购时间" min-width="260">
+        <template slot-scope="scope">
+          {{ formatDateTime(scope.row.purchaseStartTime) }} ~ {{ formatDateTime(scope.row.purchaseEndTime) }}
+        </template>
       </el-table-column>
       <el-table-column label="操作" align="center" width="220" fixed="right">
         <template slot-scope="scope">
@@ -237,6 +242,19 @@
               />
             </el-form-item>
           </el-col>
+          <el-col :span="24">
+            <el-form-item label="统购时间" prop="purchaseTimeRange">
+              <el-date-picker
+                v-model="form.purchaseTimeRange"
+                type="datetimerange"
+                value-format="yyyy-MM-dd HH:mm:ss"
+                range-separator="至"
+                start-placeholder="统购开始时间"
+                end-placeholder="统购结束时间"
+                style="width: 100%"
+              />
+            </el-form-item>
+          </el-col>
           <el-col :span="12">
             <el-form-item label="公告状态" prop="status">
               <el-select v-model="form.status" placeholder="请选择公告状态">
@@ -301,6 +319,8 @@
           </el-descriptions-item>
           <el-descriptions-item label="公告开始时间">{{ formatDate(detail.startTime) }}</el-descriptions-item>
           <el-descriptions-item label="公告截止时间">{{ formatDate(detail.endTime) }}</el-descriptions-item>
+          <el-descriptions-item label="统购开始时间">{{ formatDateTime(detail.purchaseStartTime) }}</el-descriptions-item>
+          <el-descriptions-item label="统购结束时间">{{ formatDateTime(detail.purchaseEndTime) }}</el-descriptions-item>
           <el-descriptions-item label="适用年级">{{ detail.gradeNames || "-" }}</el-descriptions-item>
           <el-descriptions-item label="发布时间">{{ formatDate(detail.publishTime) }}</el-descriptions-item>
         </el-descriptions>
@@ -322,13 +342,13 @@ import {
   getGroupNotice,
   addGroupNotice,
   updateGroupNotice,
-  delGroupNotice,
-} from "@/api/school/groupNotice";
+  delGroupNotice
+} from '@/api/school/groupNotice'
 import {
   listSchoolMessage,
-  getSchoolMessageByDeptId,
-} from "@/api/school/schoolMessage";
-import { listSupplierMessage } from "@/api/school/supplierMessage";
+  getSchoolMessageByDeptId
+} from '@/api/school/schoolMessage'
+import { listSupplierMessage } from '@/api/school/supplierMessage'
 
 const getDefaultForm = () => ({
   id: null,
@@ -337,20 +357,23 @@ const getDefaultForm = () => ({
   schoolName: null,
   noticeCode: null,
   title: null,
-  noticeType: "1",
+  noticeType: '1',
   content: null,
   gradeIds: null,
   gradeNames: null,
   startTime: null,
   endTime: null,
-  status: "0",
-  applyStatus: "0",
+  purchaseStartTime: null,
+  purchaseEndTime: null,
+  purchaseTimeRange: [],
+  status: '0',
+  applyStatus: '0',
   supplierIds: [],
-  xfptGroupNoticeItemList: [],
-});
+  xfptGroupNoticeItemList: []
+})
 
 export default {
-  name: "GroupNotice",
+  name: 'GroupNotice',
   data() {
     return {
       loading: false,
@@ -362,7 +385,7 @@ export default {
       currentSchool: {},
       open: false,
       detailOpen: false,
-      dialogTitle: "添加公告",
+      dialogTitle: '添加公告',
       form: getDefaultForm(),
       detail: {},
       queryParams: {
@@ -372,83 +395,84 @@ export default {
         noticeCode: null,
         schoolId: null,
         noticeType: null,
-        status: null,
+        status: null
       },
       noticeTypeOptions: [
-        { label: "选购公告", value: "1" },
-        { label: "结果公告", value: "2" },
+        { label: '选购公告', value: '1' },
+        { label: '结果公告', value: '2' }
       ],
       statusOptions: [
-        { label: "草稿", value: "0" },
-        { label: "已发布", value: "1" },
-        { label: "已结束", value: "2" },
-        { label: "已撤回", value: "3" },
+        { label: '草稿', value: '0' },
+        { label: '已发布', value: '1' },
+        { label: '已结束', value: '2' },
+        { label: '已撤回', value: '3' }
       ],
       applyStatusOptions: [
-        { label: "未开放", value: "0" },
-        { label: "报名中", value: "1" },
-        { label: "报名结束", value: "2" },
+        { label: '未开放', value: '0' },
+        { label: '报名中', value: '1' },
+        { label: '报名结束', value: '2' }
       ],
       rules: {
-        schoolId: [{ required: true, message: "请选择所属学校", trigger: "change" }],
-        title: [{ required: true, message: "请输入公告标题", trigger: "blur" }],
-        noticeType: [{ required: true, message: "请选择公告类型", trigger: "change" }],
-        status: [{ required: true, message: "请选择公告状态", trigger: "change" }],
-        applyStatus: [{ required: true, message: "请选择报名状态", trigger: "change" }],
-        content: [{ required: true, message: "请输入公告正文", trigger: "blur" }],
-      },
-    };
+        schoolId: [{ required: true, message: '请选择所属学校', trigger: 'change' }],
+        title: [{ required: true, message: '请输入公告标题', trigger: 'blur' }],
+        noticeType: [{ required: true, message: '请选择公告类型', trigger: 'change' }],
+        status: [{ required: true, message: '请选择公告状态', trigger: 'change' }],
+        applyStatus: [{ required: true, message: '请选择报名状态', trigger: 'change' }],
+        purchaseTimeRange: [{ required: true, message: '请选择统购时间范围', trigger: 'change' }],
+        content: [{ required: true, message: '请输入公告正文', trigger: 'blur' }]
+      }
+    }
   },
   computed: {
     isAdmin() {
-      const roles = this.$store.getters.roles || [];
-      return roles.includes("admin");
-    },
+      const roles = this.$store.getters.roles || []
+      return roles.includes('admin')
+    }
   },
   created() {
-    this.loadSchoolContext();
-    this.getList();
+    this.loadSchoolContext()
+    this.getList()
   },
   methods: {
     loadSchoolContext() {
       if (this.isAdmin) {
         listSchoolMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
-          this.schoolOptions = res.rows || [];
-        });
-        this.loadSupplierOptions();
-        return;
+          this.schoolOptions = res.rows || []
+        })
+        this.loadSupplierOptions()
+        return
       }
-      const deptId = this.$store.getters.deptId;
+      const deptId = this.$store.getters.deptId
       if (!deptId) {
-        return;
+        return
       }
       getSchoolMessageByDeptId(deptId).then((res) => {
-        this.currentSchool = res.data || {};
-      });
+        this.currentSchool = res.data || {}
+      })
     },
     loadSupplierOptions() {
       listSupplierMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
-        this.supplierOptions = res.rows || [];
-      });
+        this.supplierOptions = res.rows || []
+      })
     },
     getList() {
-      this.loading = true;
+      this.loading = true
       listGroupNotice(this.queryParams)
         .then((response) => {
-          this.groupNoticeList = response.rows || [];
-          this.total = response.total || 0;
+          this.groupNoticeList = response.rows || []
+          this.total = response.total || 0
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.handleQuery()
     },
     resetFormData() {
       this.form = {
@@ -456,134 +480,155 @@ export default {
         id: null,
         schoolId: this.isAdmin ? null : this.currentSchool.id,
         deptId: this.isAdmin ? null : this.currentSchool.deptId,
-        schoolName: this.isAdmin ? null : this.currentSchool.schoolName,
-      };
-      this.$refs.form && this.$refs.form.clearValidate();
+        schoolName: this.isAdmin ? null : this.currentSchool.schoolName
+      }
+      this.$refs.form && this.$refs.form.clearValidate()
     },
     handleAdd() {
-      this.resetFormData();
-      this.dialogTitle = "添加公告";
-      this.open = true;
+      this.resetFormData()
+      this.dialogTitle = '添加公告'
+      this.open = true
       this.$nextTick(() => {
-        this.$refs.form && this.$refs.form.clearValidate();
-      });
+        this.$refs.form && this.$refs.form.clearValidate()
+      })
     },
     handleUpdate(row) {
       if (!row.id) {
-        this.$message.error("当前公告缺少主键，无法修改");
-        return;
+        this.$message.error('当前公告缺少主键，无法修改')
+        return
       }
-      this.resetFormData();
+      this.resetFormData()
       getGroupNotice(row.id).then((response) => {
-        this.form = this.normalizeFormData(response.data || {});
-        this.dialogTitle = "修改公告";
-        this.open = true;
-      });
+        this.form = this.normalizeFormData(response.data || {})
+        this.dialogTitle = '修改公告'
+        this.open = true
+      })
     },
     handleSchoolChange(schoolId) {
-      const school = this.schoolOptions.find((item) => item.id === schoolId);
+      const school = this.schoolOptions.find((item) => item.id === schoolId)
       if (!school) {
-        this.form.deptId = null;
-        this.form.schoolName = null;
-        return;
+        this.form.deptId = null
+        this.form.schoolName = null
+        return
       }
-      this.form.deptId = school.deptId;
-      this.form.schoolName = school.schoolName;
+      this.form.deptId = school.deptId
+      this.form.schoolName = school.schoolName
     },
     submitForm() {
       this.$refs.form.validate((valid) => {
         if (!valid) {
-          return;
+          return
         }
         if (this.isAdmin && (!this.form.supplierIds || !this.form.supplierIds.length)) {
-          this.$message.error("请选择可见供应商");
-          return;
+          this.$message.error('请选择可见供应商')
+          return
         }
-        const payload = { ...this.form };
+        const payload = { ...this.form }
+        payload.purchaseStartTime = payload.purchaseTimeRange[0]
+        payload.purchaseEndTime = payload.purchaseTimeRange[1]
+        delete payload.purchaseTimeRange
         if (!this.isAdmin) {
-          payload.schoolId = this.currentSchool.id;
-          payload.deptId = this.currentSchool.deptId;
-          payload.schoolName = this.currentSchool.schoolName;
+          payload.schoolId = this.currentSchool.id
+          payload.deptId = this.currentSchool.deptId
+          payload.schoolName = this.currentSchool.schoolName
         }
-        const request = payload.id ? updateGroupNotice(payload) : addGroupNotice(payload);
+        const request = payload.id ? updateGroupNotice(payload) : addGroupNotice(payload)
         request.then(() => {
-          this.$modal.msgSuccess(payload.id ? "修改成功" : "新增成功");
-          this.open = false;
-          this.getList();
-        });
-      });
+          this.$modal.msgSuccess(payload.id ? '修改成功' : '新增成功')
+          this.open = false
+          this.getList()
+        })
+      })
     },
     handleDelete(row) {
       if (!row.id) {
-        this.$message.error("当前公告缺少主键，无法删除");
-        return;
+        this.$message.error('当前公告缺少主键，无法删除')
+        return
       }
       this.$modal
         .confirm(`是否确认删除公告编号为“${row.noticeCode || row.id}”的数据项？`)
         .then(() => delGroupNotice(row.id))
         .then(() => {
-          this.getList();
-          this.$modal.msgSuccess("删除成功");
+          this.getList()
+          this.$modal.msgSuccess('删除成功')
         })
-        .catch(() => {});
+        .catch(() => {})
     },
     handleView(row) {
       if (!row.id) {
-        this.$message.error("当前公告缺少主键，无法查看详情");
-        return;
+        this.$message.error('当前公告缺少主键，无法查看详情')
+        return
       }
-      this.detailOpen = true;
-      this.detailLoading = true;
+      this.detailOpen = true
+      this.detailLoading = true
       getGroupNotice(row.id)
         .then((response) => {
-          this.detail = response.data || {};
+          this.detail = response.data || {}
         })
         .finally(() => {
-          this.detailLoading = false;
-        });
+          this.detailLoading = false
+        })
     },
     normalizeFormData(data) {
       const form = {
         ...getDefaultForm(),
-        ...data,
-      };
-      form.startTime = this.normalizeDateValue(form.startTime);
-      form.endTime = this.normalizeDateValue(form.endTime);
-      form.noticeType = form.noticeType ? String(form.noticeType) : "1";
-      form.status = form.status ? String(form.status) : "0";
-      form.applyStatus = form.applyStatus ? String(form.applyStatus) : "0";
+        ...data
+      }
+      form.startTime = this.normalizeDateValue(form.startTime)
+      form.endTime = this.normalizeDateValue(form.endTime)
+      form.purchaseStartTime = this.normalizeDateTimeValue(form.purchaseStartTime)
+      form.purchaseEndTime = this.normalizeDateTimeValue(form.purchaseEndTime)
+      form.purchaseTimeRange = form.purchaseStartTime && form.purchaseEndTime
+        ? [form.purchaseStartTime, form.purchaseEndTime]
+        : []
+      form.noticeType = form.noticeType ? String(form.noticeType) : '1'
+      form.status = form.status ? String(form.status) : '0'
+      form.applyStatus = form.applyStatus ? String(form.applyStatus) : '0'
       form.supplierIds = Array.isArray(form.supplierIds)
         ? form.supplierIds.map((id) => Number(id)).filter((id) => !Number.isNaN(id))
-        : [];
-      return form;
+        : []
+      return form
     },
     normalizeDateValue(value) {
       if (!value) {
-        return null;
+        return null
       }
-      return String(value).slice(0, 10);
+      return String(value).slice(0, 10)
+    },
+    normalizeDateTimeValue(value) {
+      if (!value) {
+        return null
+      }
+      const text = String(value).replace('T', ' ')
+      return text.length >= 19 ? text.slice(0, 19) : text
     },
     formatOption(options, value) {
-      const match = options.find((item) => String(item.value) === String(value));
-      return match ? match.label : value || "-";
+      const match = options.find((item) => String(item.value) === String(value))
+      return match ? match.label : value || '-'
     },
     getStatusTagType(value) {
       const map = {
-        0: "info",
-        1: "success",
-        2: "warning",
-        3: "danger",
-      };
-      return map[value] || "info";
+        0: 'info',
+        1: 'success',
+        2: 'warning',
+        3: 'danger'
+      }
+      return map[value] || 'info'
     },
     formatDate(value) {
       if (!value) {
-        return "-";
+        return '-'
       }
-      return this.parseTime(value, "{y}-{m}-{d}");
+      return this.parseTime(value, '{y}-{m}-{d}')
     },
-  },
-};
+    formatDateTime(value) {
+      if (!value) {
+        return '-'
+      }
+      return this.parseTime(value, '{y}-{m}-{d} {h}:{i}:{s}')
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

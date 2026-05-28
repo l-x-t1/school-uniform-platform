@@ -7,8 +7,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
+import java.util.Date;
+import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
+import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptOrderItem;
 import com.xfgl.school.mapper.XfptOrderInfoMapper;
 import com.xfgl.school.domain.XfptOrderInfo;
@@ -63,6 +66,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public int insertXfptOrderInfo(XfptOrderInfo xfptOrderInfo)
         {
+            validateGroupPurchaseOrder(xfptOrderInfo);
             int rows = xfptOrderInfoMapper.insert(xfptOrderInfo);
             insertXfptOrderItem(xfptOrderInfo);
             return rows;
@@ -145,6 +149,46 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
             }
             if (xfptOrderItem.getDelFlag() == null || "".equals(xfptOrderItem.getDelFlag())) {
                 xfptOrderItem.setDelFlag("0");
+            }
+        }
+
+        private void validateGroupPurchaseOrder(XfptOrderInfo xfptOrderInfo)
+        {
+            if (xfptOrderInfo == null || !"1".equals(String.valueOf(xfptOrderInfo.getOrderType()))) {
+                return;
+            }
+            if (xfptOrderInfo.getNoticeId() == null) {
+                throw new ServiceException("统购下单必须携带统购公告ID");
+            }
+            XfptGroupNotice notice = xfptOrderInfoMapper.selectGroupNoticeForPurchase(xfptOrderInfo.getNoticeId());
+            if (notice == null) {
+                throw new ServiceException("统购公告不存在或已删除");
+            }
+            if (!"1".equals(String.valueOf(notice.getStatus()))) {
+                throw new ServiceException("统购公告未发布，不能下单");
+            }
+            if (notice.getPurchaseStartTime() == null || notice.getPurchaseEndTime() == null) {
+                throw new ServiceException("统购公告未设置可下单时间");
+            }
+            Date now = new Date();
+            if (now.before(notice.getPurchaseStartTime())) {
+                throw new ServiceException("统购尚未开始，不能下单");
+            }
+            if (now.after(notice.getPurchaseEndTime())) {
+                throw new ServiceException("统购已结束，不能下单");
+            }
+            List<XfptOrderItem> orderItems = xfptOrderInfo.getXfptOrderItemList();
+            if (StringUtils.isEmpty(orderItems)) {
+                throw new ServiceException("统购订单明细不能为空");
+            }
+            for (XfptOrderItem item : orderItems) {
+                if (item.getGoodsId() == null) {
+                    throw new ServiceException("统购订单商品不能为空");
+                }
+                int count = xfptOrderInfoMapper.countGroupNoticeGoods(xfptOrderInfo.getNoticeId(), item.getGoodsId());
+                if (count <= 0) {
+                    throw new ServiceException("订单商品不属于当前统购公告，不能下单");
+                }
             }
         }
 

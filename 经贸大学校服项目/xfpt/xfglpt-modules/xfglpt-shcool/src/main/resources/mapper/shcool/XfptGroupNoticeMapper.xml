@@ -18,6 +18,8 @@
         <result property="purchaseProcessId" column="purchase_process_id" />
         <result property="startTime" column="start_time" />
         <result property="endTime" column="end_time" />
+        <result property="purchaseStartTime" column="purchase_start_time" />
+        <result property="purchaseEndTime" column="purchase_end_time" />
         <result property="status" column="status" />
         <result property="applyStatus" column="apply_status" />
         <result property="publishTime" column="publish_time" />
@@ -98,7 +100,7 @@
     </resultMap>
 
     <sql id="selectXfptGroupNoticeVo">
-        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_group_notice
+        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, purchase_start_time, purchase_end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_group_notice
     </sql>
 
     <select id="selectXfptGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
@@ -115,6 +117,8 @@
         <if test="purchaseProcessId != null "> and purchase_process_id = #{purchaseProcessId}</if>
         <if test="startTime != null "> and date_format(start_time, '%Y-%m-%d') = date_format(#{startTime}, '%Y-%m-%d')</if>
         <if test="endTime != null "> and date_format(end_time, '%Y-%m-%d') = date_format(#{endTime}, '%Y-%m-%d')</if>
+        <if test="purchaseStartTime != null "> and purchase_start_time &gt;= #{purchaseStartTime}</if>
+        <if test="purchaseEndTime != null "> and purchase_end_time &lt;= #{purchaseEndTime}</if>
         <if test="status != null and status != ''"> and status = #{status}</if>
         <if test="applyStatus != null and applyStatus != ''"> and apply_status = #{applyStatus}</if>
         <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
@@ -124,7 +128,7 @@
 
     <select id="selectSupplierGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
         select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
-               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.status, g.apply_status,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
                g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
                g.update_time, g.remark, g.del_flag
         from xfpt_group_notice g
@@ -144,14 +148,14 @@
     </select>
 
     <select id="selectXfptGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeXfptGroupNoticeItemResult">
-        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, purchase_start_time, purchase_end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice
         where id = #{id}
     </select>
 
     <select id="selectSupplierGroupNoticeById" resultMap="XfptGroupNoticeResult">
         select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
-               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.status, g.apply_status,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
                g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
                g.update_time, g.remark, g.del_flag
         from xfpt_group_notice g
@@ -349,6 +353,8 @@
             <if test="purchaseProcessId != null">purchase_process_id,</if>
             <if test="startTime != null">start_time,</if>
             <if test="endTime != null">end_time,</if>
+            <if test="purchaseStartTime != null">purchase_start_time,</if>
+            <if test="purchaseEndTime != null">purchase_end_time,</if>
             <if test="status != null and status != ''">status,</if>
             <if test="applyStatus != null and applyStatus != ''">apply_status,</if>
             <if test="publishTime != null">publish_time,</if>
@@ -374,6 +380,8 @@
             <if test="purchaseProcessId != null">#{purchaseProcessId},</if>
             <if test="startTime != null">#{startTime},</if>
             <if test="endTime != null">#{endTime},</if>
+            <if test="purchaseStartTime != null">#{purchaseStartTime},</if>
+            <if test="purchaseEndTime != null">#{purchaseEndTime},</if>
             <if test="status != null and status != ''">#{status},</if>
             <if test="applyStatus != null and applyStatus != ''">#{applyStatus},</if>
             <if test="publishTime != null">#{publishTime},</if>
@@ -403,6 +411,8 @@
             <if test="purchaseProcessId != null">purchase_process_id = #{purchaseProcessId},</if>
             <if test="startTime != null">start_time = #{startTime},</if>
             <if test="endTime != null">end_time = #{endTime},</if>
+            <if test="purchaseStartTime != null">purchase_start_time = #{purchaseStartTime},</if>
+            <if test="purchaseEndTime != null">purchase_end_time = #{purchaseEndTime},</if>
             <if test="status != null and status != ''">status = #{status},</if>
             <if test="applyStatus != null and applyStatus != ''">apply_status = #{applyStatus},</if>
             <if test="publishTime != null">publish_time = #{publishTime},</if>

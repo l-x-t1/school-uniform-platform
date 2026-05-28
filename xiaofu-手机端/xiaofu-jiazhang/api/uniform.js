@@ -17,6 +17,9 @@ function normalizeGoods(item = {}) {
     price: item.salePrice || item.price || item.minPrice || '',
     salePrice: item.salePrice || item.price || item.minPrice || '',
     salesCount: item.saleCount || item.salesCount || item.buyCount || '',
+    noticeId: item.noticeId || null,
+    purchaseStartTime: item.purchaseStartTime || '',
+    purchaseEndTime: item.purchaseEndTime || '',
     categoryName: item.categoryName || '',
     goodsCode: item.goodsCode || '',
     supplierId: item.supplierId || '',
@@ -40,6 +43,7 @@ function buildGoodsParams(params = {}) {
     pageSize: params.pageSize,
     goodsName: params.keyword || params.goodsName || '',
     saleType: params.saleType || '',
+    groupPurchasable: '1',
     status: '1'
   }
 }

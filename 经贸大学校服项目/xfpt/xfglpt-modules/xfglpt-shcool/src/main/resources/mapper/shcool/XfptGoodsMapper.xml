@@ -21,6 +21,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="publishTime"    column="publish_time"    />
         <result property="offShelfTime"    column="off_shelf_time"    />
         <result property="sortNum"    column="sort_num"    />
+        <result property="noticeId"    column="notice_id"    />
+        <result property="purchaseStartTime"    column="purchase_start_time"    />
+        <result property="purchaseEndTime"    column="purchase_end_time"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -53,32 +56,59 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptGoodsVo">
-        select id, goods_name, goods_code, category_name, supplier_id, supplier_name, brand_name, main_image, detail_images_json, detail_content, sale_type, status, publish_status, publish_time, off_shelf_time, sort_num, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_goods
+        select g.id, g.goods_name, g.goods_code, g.category_name, g.supplier_id, g.supplier_name, g.brand_name,
+               g.main_image, g.detail_images_json, g.detail_content, g.sale_type, g.status, g.publish_status,
+               g.publish_time, g.off_shelf_time, g.sort_num, active_notice.notice_id,
+               active_notice.purchase_start_time, active_notice.purchase_end_time,
+               g.create_by, g.create_time, g.update_by, g.update_time, g.remark, g.del_flag
+        from xfpt_goods g
+        left join (
+            select item.goods_id,
+                   min(notice.id) as notice_id,
+                   min(notice.purchase_start_time) as purchase_start_time,
+                   max(notice.purchase_end_time) as purchase_end_time
+            from xfpt_group_notice_item item
+            inner join xfpt_group_notice notice on notice.id = item.notice_id
+                and notice.del_flag = '0'
+                and notice.status = '1'
+                and notice.purchase_start_time is not null
+                and notice.purchase_end_time is not null
+                and notice.purchase_start_time &lt;= now()
+                and notice.purchase_end_time &gt;= now()
+            where item.del_flag = '0'
+            group by item.goods_id
+        ) active_notice on active_notice.goods_id = g.id
     </sql>
 
     <select id="selectXfptGoodsList" parameterType="XfptGoods" resultMap="XfptGoodsResult">
         <include refid="selectXfptGoodsVo"/>
         <include refid="search"/>
-            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
-            <if test="goodsCode != null  and goodsCode != ''"> and goods_code like concat('%', #{goodsCode}, '%')</if>
-            <if test="categoryName != null  and categoryName != ''"> and category_name like concat('%', #{categoryName}, '%')</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
-            <if test="brandName != null  and brandName != ''"> and brand_name like concat('%', #{brandName}, '%')</if>
-            <if test="mainImage != null  and mainImage != ''"> and main_image = #{mainImage}</if>
-            <if test="saleType != null  and saleType != ''"> and sale_type = #{saleType}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="publishStatus != null  and publishStatus != ''"> and publish_status = #{publishStatus}</if>
-            <if test="publishTime != null "> and date_format(publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
-            <if test="offShelfTime != null "> and date_format(off_shelf_time, '%Y-%m-%d') = date_format(#{offShelfTime}, '%Y-%m-%d')</if>
-            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
+            <if test="goodsName != null  and goodsName != ''"> and g.goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="goodsCode != null  and goodsCode != ''"> and g.goods_code like concat('%', #{goodsCode}, '%')</if>
+            <if test="categoryName != null  and categoryName != ''"> and g.category_name like concat('%', #{categoryName}, '%')</if>
+            <if test="supplierId != null "> and g.supplier_id = #{supplierId}</if>
+            <if test="supplierName != null  and supplierName != ''"> and g.supplier_name like concat('%', #{supplierName}, '%')</if>
+            <if test="brandName != null  and brandName != ''"> and g.brand_name like concat('%', #{brandName}, '%')</if>
+            <if test="mainImage != null  and mainImage != ''"> and g.main_image = #{mainImage}</if>
+            <if test="saleType != null  and saleType != ''"> and g.sale_type = #{saleType}</if>
+            <if test="status != null  and status != ''"> and g.status = #{status}</if>
+            <if test="publishStatus != null  and publishStatus != ''"> and g.publish_status = #{publishStatus}</if>
+            <if test="publishTime != null "> and date_format(g.publish_time, '%Y-%m-%d') = date_format(#{publishTime}, '%Y-%m-%d')</if>
+            <if test="offShelfTime != null "> and date_format(g.off_shelf_time, '%Y-%m-%d') = date_format(#{offShelfTime}, '%Y-%m-%d')</if>
+            <if test="sortNum != null "> and g.sort_num = #{sortNum}</if>
+            <if test="groupPurchasable != null and groupPurchasable == '1'">
+                and (
+                    g.sale_type = '2'
+                    or (g.sale_type = '3')
+                    or (g.sale_type = '1' and active_notice.notice_id is not null)
+                )
+            </if>
 
     </select>
 
     <select id="selectXfptGoodsById" parameterType="Long" resultMap="XfptGoodsXfptGoodsSizeResult">
-        select id, goods_name, goods_code, category_name, supplier_id, supplier_name, brand_name, main_image, detail_images_json, detail_content, sale_type, status, publish_status, publish_time, off_shelf_time, sort_num, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_goods
-        where id = #{id}
+        <include refid="selectXfptGoodsVo"/>
+        where g.id = #{id}
     </select>
 
     <select id="selectXfptGoodsSizeById" resultMap="XfptGoodsSizeResult">
@@ -194,6 +224,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </insert>
     <sql id="search">
-        where del_flag = 0
+        where g.del_flag = 0
     </sql>
 </mapper>

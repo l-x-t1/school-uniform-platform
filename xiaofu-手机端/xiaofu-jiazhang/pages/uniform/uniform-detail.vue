@@ -219,7 +219,7 @@ export default {
       return this.purchaseType === '2' ? '零售购买' : '统购购买';
     },
     showGroupPrice() {
-      return this.uniform.saleType === '1' || this.uniform.saleType === '3';
+      return (this.uniform.saleType === '1' || this.uniform.saleType === '3') && !!this.uniform.noticeId;
     },
     showRetailPrice() {
       return this.uniform.saleType === '2' || this.uniform.saleType === '3';
@@ -302,8 +302,11 @@ export default {
       return map[String(saleType || '')] || '商品信息';
     },
 
-    getDefaultPurchaseType(saleType) {
+    getDefaultPurchaseType(saleType, noticeId) {
       if (String(saleType) === '2') {
+        return '2';
+      }
+      if (String(saleType) === '3' && !noticeId) {
         return '2';
       }
       return '1';
@@ -386,6 +389,9 @@ export default {
         schoolId: data.schoolId || data.deptId || '',
         schoolName: data.schoolName || '',
         deptId: data.deptId || data.schoolId || '',
+        noticeId: data.noticeId || null,
+        purchaseStartTime: data.purchaseStartTime || '',
+        purchaseEndTime: data.purchaseEndTime || '',
         publishTime: data.publishTime || '',
         saleType: String(data.saleType || ''),
         saleTypeText: this.getSaleTypeText(data.saleType),
@@ -405,7 +411,7 @@ export default {
       getUniform(this.id)
         .then((res) => {
           this.uniform = this.normalizeUniform(res.data || res);
-          this.purchaseType = this.getDefaultPurchaseType(this.uniform.saleType);
+          this.purchaseType = this.getDefaultPurchaseType(this.uniform.saleType, this.uniform.noticeId);
           if (this.uniform.sizes.length) {
             const defaultSize = this.uniform.sizes.find((item) => item.inStock) || this.uniform.sizes[0];
             this.selectedSizeId = defaultSize.id;
@@ -427,6 +433,12 @@ export default {
     switchPurchaseType(type) {
       if (this.uniform.saleType !== '3') {
         return;
+      }
+      if (type === '1' && !this.uniform.noticeId) {
+        return uni.showToast({
+          title: '当前不在统购时间内',
+          icon: 'none'
+        });
       }
       this.purchaseType = type;
     },
@@ -453,6 +465,17 @@ export default {
 
     navigateTo(url) {
       uni.navigateTo({ url });
+    },
+
+    validatePurchaseAvailable() {
+      if (this.purchaseType === '1' && !this.uniform.noticeId) {
+        uni.showToast({
+          title: '当前不在统购时间内',
+          icon: 'none'
+        });
+        return false;
+      }
+      return true;
     },
 
     buildOrderItem() {
@@ -486,7 +509,7 @@ export default {
         supplierName: this.uniform.supplierName || '',
         selected: true,
         checkedFlag: '1',
-        noticeId: null,
+        noticeId: this.purchaseType === '1' ? this.uniform.noticeId : null,
         saleType: this.purchaseType,
         orderType: this.purchaseType
       };
@@ -519,6 +542,7 @@ export default {
           icon: 'none'
         });
       }
+      if (!this.validatePurchaseAvailable()) return;
 
       const item = this.buildOrderItem();
       upsertCart(item)
@@ -558,6 +582,7 @@ export default {
           icon: 'none'
         });
       }
+      if (!this.validatePurchaseAvailable()) return;
       uni.setStorageSync('confirmOrderItems', [this.buildOrderItem()]);
       uni.navigateTo({
         url: '/pages/order/order-confirm?source=buyNow'

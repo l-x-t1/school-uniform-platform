@@ -244,6 +244,9 @@ export default {
         supplierName: item.supplierName || '',
         saleType: item.saleType || '',
         saleTypeText: this.getSaleTypeText(item.saleType),
+        noticeId: item.noticeId || null,
+        purchaseStartTime: item.purchaseStartTime || '',
+        purchaseEndTime: item.purchaseEndTime || '',
         publishTime: item.publishTime || '',
         sortNum: Number(item.sortNum || 0),
         index

@@ -48,7 +48,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public XfptGoods selectXfptGoodsById(Long id)
         {
-            XfptGoods xfptGoods = xfptGoodsMapper.selectById(id);
+            XfptGoods xfptGoods = xfptGoodsMapper.selectXfptGoodsById(id);
             List<XfptGoodsSize> xfptGoodsSizeList = xfptGoodsMapper.selectXfptGoodsSizeById(id);
             xfptGoods.setXfptGoodsSizeList(xfptGoodsSizeList);
             return xfptGoods;
