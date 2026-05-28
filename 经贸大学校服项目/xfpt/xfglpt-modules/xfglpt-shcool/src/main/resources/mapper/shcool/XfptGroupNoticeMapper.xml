@@ -59,14 +59,17 @@
         <result property="id" column="id" />
         <result property="noticeId" column="notice_id" />
         <result property="supplierId" column="supplier_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="schoolName" column="school_name" />
+        <result property="className" column="class_name" />
+        <result property="orderNo" column="order_no" />
+        <result property="orderQuantity" column="order_quantity" />
+        <result property="progressStatus" column="progress_status" />
+        <result property="progressStatusName" column="progress_status_name" />
+        <result property="logisticsNo" column="logistics_no" />
         <result property="noticeName" column="notice_name" />
         <result property="manufacturerName" column="manufacturer_name" />
-        <result property="promotionCount" column="promotion_count" />
-        <result property="expectedSalesCount" column="expected_sales_count" />
-        <result property="orderCount" column="order_count" />
-        <result property="orderRate" column="order_rate" />
-        <result property="timeRange" column="time_range" />
-        <result property="remainTime" column="remain_time" />
+        <result property="createTime" column="create_time" />
     </resultMap>
 
     <resultMap type="com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo" id="GroupNoticeOrderDetailResult">
@@ -75,6 +78,23 @@
         <result property="quantity" column="quantity" />
         <result property="orderPerson" column="order_person" />
         <result property="orderTime" column="order_time" />
+    </resultMap>
+
+    <resultMap type="XfptOrderInfo" id="ProgressOrderInfoResult">
+        <result property="id" column="id" />
+        <result property="orderNo" column="order_no" />
+        <result property="orderType" column="order_type" />
+        <result property="noticeId" column="notice_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="schoolName" column="school_name" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="supplierName" column="supplier_name" />
+        <result property="className" column="class_name" />
+        <result property="orderStatus" column="order_status" />
+        <result property="progressStatus" column="progress_status" />
+        <result property="logisticsNo" column="logistics_no" />
+        <result property="deptId" column="dept_id" />
+        <result property="createTime" column="create_time" />
     </resultMap>
 
     <sql id="selectXfptGroupNoticeVo">
@@ -150,6 +170,66 @@
     </select>
 
     <select id="selectGroupNoticeProgressList" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">
+        select
+        info.id as id,
+        info.notice_id as notice_id,
+        info.supplier_id as supplier_id,
+        info.school_id as school_id,
+        info.school_name as school_name,
+        info.class_name as class_name,
+        info.order_no as order_no,
+        coalesce(item.order_quantity, 0) as order_quantity,
+        case
+            when info.logistics_no is not null and info.logistics_no != '' then '4'
+            else coalesce(info.progress_status, '0')
+        end as progress_status,
+        case
+            when info.logistics_no is not null and info.logistics_no != '' then '已发货'
+            when coalesce(info.progress_status, '0') = '1' then '供应商已查看'
+            when coalesce(info.progress_status, '0') = '2' then '制作中'
+            when coalesce(info.progress_status, '0') = '3' then '已完成'
+            when coalesce(info.progress_status, '0') = '4' then '已发货'
+            else '待查看'
+        end as progress_status_name,
+        info.logistics_no as logistics_no,
+        g.title as notice_name,
+        info.supplier_name as manufacturer_name,
+        info.create_time as create_time
+        from xfpt_order_info info
+        left join xfpt_group_notice g on g.id = info.notice_id and g.del_flag = 0
+        left join (
+        select order_id, sum(coalesce(buy_num, 0)) as order_quantity
+        from xfpt_order_item
+        where del_flag = 0
+        group by order_id
+        ) item on item.order_id = info.id
+        where info.del_flag = 0
+        and info.order_type = '1'
+        and (info.order_status is null or info.order_status != '5')
+        <if test="schoolId != null">
+            and info.school_id = #{schoolId}
+        </if>
+        <if test="deptId != null">
+            and info.dept_id = #{deptId}
+        </if>
+        <if test="className != null and className != ''">
+            and info.class_name like concat('%', #{className}, '%')
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            and info.order_no like concat('%', #{orderNo}, '%')
+        </if>
+        <if test="progressStatus != null and progressStatus != ''">
+            and (
+                case
+                    when info.logistics_no is not null and info.logistics_no != '' then '4'
+                    else coalesce(info.progress_status, '0')
+                end
+            ) = #{progressStatus}
+        </if>
+        order by info.create_time desc, info.id desc
+    </select>
+
+    <select id="selectGroupNoticeProgressListOld" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">
         select *
         from (
         select
@@ -240,9 +320,14 @@
         inner join xfpt_order_item item on item.order_id = info.id and item.del_flag = 0
         where info.del_flag = 0
         and info.notice_id = #{noticeId}
-        and info.dept_id = #{deptId}
         and info.order_type = '1'
         and (info.order_status is null or info.order_status != '5')
+        <if test="schoolId != null">
+            and info.school_id = #{schoolId}
+        </if>
+        <if test="deptId != null">
+            and info.dept_id = #{deptId}
+        </if>
         <if test="supplierId != null">
             and info.supplier_id = #{supplierId}
         </if>
@@ -392,6 +477,31 @@
             ( #{item.id}, #{item.noticeId}, #{item.goodsId}, #{item.goodsName}, #{item.sizeRuleJson}, #{item.unitName}, #{item.buyNum}, #{item.priceDesc}, #{item.gradeIds}, #{item.gradeNames}, #{item.deptId}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
         </foreach>
     </insert>
+
+    <select id="selectProgressOrderById" resultMap="ProgressOrderInfoResult">
+        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name,
+               class_name, order_status, progress_status, logistics_no, dept_id, create_time
+        from xfpt_order_info
+        where id = #{orderId}
+          and del_flag = 0
+    </select>
+
+    <update id="updateProgressStatus">
+        update xfpt_order_info
+        set progress_status = #{progressStatus},
+            update_time = now()
+        where id = #{orderId}
+          and del_flag = 0
+    </update>
+
+    <update id="updateProgressLogistics">
+        update xfpt_order_info
+        set logistics_no = #{logisticsNo},
+            progress_status = #{progressStatus},
+            update_time = now()
+        where id = #{orderId}
+          and del_flag = 0
+    </update>
 
     <sql id="search">
         where del_flag = 0

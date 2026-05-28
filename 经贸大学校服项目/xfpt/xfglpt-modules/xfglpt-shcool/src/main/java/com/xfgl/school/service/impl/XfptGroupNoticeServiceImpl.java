@@ -8,6 +8,7 @@ import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
 import com.xfgl.school.domain.XfptGroupNoticeSupplier;
+import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
@@ -204,6 +205,11 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     @Override
     public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query)
     {
+        if (isAdminUser()) {
+            query.setDeptId(null);
+            query.setSchoolId(null);
+            return xfptGroupNoticeMapper.selectGroupNoticeProgressList(query);
+        }
         XfptSchoolMessage currentSchool = getCurrentSchool();
         query.setDeptId(currentSchool.getDeptId());
         query.setSchoolId(currentSchool.getId());
@@ -213,9 +219,85 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     @Override
     public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId)
     {
+        if (isAdminUser()) {
+            return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, null, null);
+        }
         checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(noticeId));
         XfptSchoolMessage currentSchool = getCurrentSchool();
-        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, currentSchool.getDeptId());
+        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, currentSchool.getId(), currentSchool.getDeptId());
+    }
+
+    @Override
+    public XfptOrderInfo viewGroupNoticeOrder(Long orderId)
+    {
+        XfptOrderInfo orderInfo = getSupplierProgressOrder(orderId);
+        if ("0".equals(normalizeProgressStatus(orderInfo))) {
+            xfptGroupNoticeMapper.updateProgressStatus(orderId, "1");
+            orderInfo.setProgressStatus("1");
+        }
+        return orderInfo;
+    }
+
+    @Override
+    public int startGroupNoticeOrder(Long orderId)
+    {
+        XfptOrderInfo orderInfo = getSupplierProgressOrder(orderId);
+        requireProgressStatus(orderInfo, "1", "订单需先查看后才能开始制作");
+        return xfptGroupNoticeMapper.updateProgressStatus(orderId, "2");
+    }
+
+    @Override
+    public int finishGroupNoticeOrder(Long orderId)
+    {
+        XfptOrderInfo orderInfo = getSupplierProgressOrder(orderId);
+        requireProgressStatus(orderInfo, "2", "订单需处于制作中才能标记完成");
+        return xfptGroupNoticeMapper.updateProgressStatus(orderId, "3");
+    }
+
+    @Override
+    public int fillGroupNoticeOrderLogistics(Long orderId, String logisticsNo)
+    {
+        if (StringUtils.isBlank(logisticsNo)) {
+            throw new ServiceException("物流单号不能为空");
+        }
+        XfptOrderInfo orderInfo = getSupplierProgressOrder(orderId);
+        requireProgressStatus(orderInfo, "3", "订单需制作完成后才能填写物流单号");
+        return xfptGroupNoticeMapper.updateProgressLogistics(orderId, "4", logisticsNo.trim());
+    }
+
+    private XfptOrderInfo getSupplierProgressOrder(Long orderId)
+    {
+        XfptOrderInfo orderInfo = xfptGroupNoticeMapper.selectProgressOrderById(orderId);
+        if (orderInfo == null || orderInfo.getId() == null) {
+            throw new ServiceException("统购订单不存在");
+        }
+        if (!"1".equals(orderInfo.getOrderType())) {
+            throw new ServiceException("只能操作统购订单");
+        }
+        Long supplierId = getCurrentSupplierId();
+        if (!Objects.equals(orderInfo.getSupplierId(), supplierId)) {
+            throw new ServiceException("只能操作当前供应商自己的订单");
+        }
+        if (StringUtils.isNotBlank(orderInfo.getLogisticsNo()) && !"4".equals(orderInfo.getProgressStatus())) {
+            orderInfo.setProgressStatus("4");
+        }
+        return orderInfo;
+    }
+
+    private String normalizeProgressStatus(XfptOrderInfo orderInfo)
+    {
+        if (StringUtils.isNotBlank(orderInfo.getLogisticsNo())) {
+            return "4";
+        }
+        return StringUtils.isBlank(orderInfo.getProgressStatus()) ? "0" : orderInfo.getProgressStatus();
+    }
+
+    private void requireProgressStatus(XfptOrderInfo orderInfo, String expectedStatus, String message)
+    {
+        String progressStatus = normalizeProgressStatus(orderInfo);
+        if (!expectedStatus.equals(progressStatus)) {
+            throw new ServiceException(message);
+        }
     }
 
     /**

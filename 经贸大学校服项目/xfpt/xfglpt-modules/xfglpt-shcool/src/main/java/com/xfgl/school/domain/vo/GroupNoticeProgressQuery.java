@@ -1,17 +1,12 @@
 package com.xfgl.school.domain.vo;
 
-import java.math.BigDecimal;
-
 public class GroupNoticeProgressQuery {
     private Long schoolId;
     private Long deptId;
-    private String dateType;
-    private Boolean enableDateRange;
-    private String startTime;
-    private String endTime;
-    private BigDecimal orderRateMin;
-    private BigDecimal orderRateMax;
-    private String manufacturerName;
+    private Long supplierId;
+    private String className;
+    private String progressStatus;
+    private String orderNo;
 
     public Long getSchoolId() {
         return schoolId;
@@ -29,59 +24,35 @@ public class GroupNoticeProgressQuery {
         this.deptId = deptId;
     }
 
-    public String getDateType() {
-        return dateType;
+    public Long getSupplierId() {
+        return supplierId;
     }
 
-    public void setDateType(String dateType) {
-        this.dateType = dateType;
+    public void setSupplierId(Long supplierId) {
+        this.supplierId = supplierId;
     }
 
-    public Boolean getEnableDateRange() {
-        return enableDateRange;
+    public String getClassName() {
+        return className;
     }
 
-    public void setEnableDateRange(Boolean enableDateRange) {
-        this.enableDateRange = enableDateRange;
+    public void setClassName(String className) {
+        this.className = className;
     }
 
-    public String getStartTime() {
-        return startTime;
+    public String getProgressStatus() {
+        return progressStatus;
     }
 
-    public void setStartTime(String startTime) {
-        this.startTime = startTime;
+    public void setProgressStatus(String progressStatus) {
+        this.progressStatus = progressStatus;
     }
 
-    public String getEndTime() {
-        return endTime;
+    public String getOrderNo() {
+        return orderNo;
     }
 
-    public void setEndTime(String endTime) {
-        this.endTime = endTime;
-    }
-
-    public BigDecimal getOrderRateMin() {
-        return orderRateMin;
-    }
-
-    public void setOrderRateMin(BigDecimal orderRateMin) {
-        this.orderRateMin = orderRateMin;
-    }
-
-    public BigDecimal getOrderRateMax() {
-        return orderRateMax;
-    }
-
-    public void setOrderRateMax(BigDecimal orderRateMax) {
-        this.orderRateMax = orderRateMax;
-    }
-
-    public String getManufacturerName() {
-        return manufacturerName;
-    }
-
-    public void setManufacturerName(String manufacturerName) {
-        this.manufacturerName = manufacturerName;
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
     }
 }
