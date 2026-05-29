@@ -36,6 +36,12 @@ public class SupplierMessage extends BaseEntity {
     private Long id;
 
     /**
+     * 关联的系统用户ID
+     */
+    @Schema(description = "关联的系统用户ID")
+    private Long userId;
+
+    /**
      * 厂商名称
      */
     @Excel(name = "厂商名称")

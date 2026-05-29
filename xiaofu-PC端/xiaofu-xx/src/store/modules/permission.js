@@ -1,4 +1,4 @@
-import auth from "@/plugins/auth";
+﻿import auth from "@/plugins/auth";
 import router, { constantRoutes, dynamicRoutes, homeRoutes } from "@/router";
 import { getRouters } from "@/api/menu";
 import Layout from "@/layout/index";
@@ -91,6 +91,112 @@ function ensureSupplierMessageMenu(routes = []) {
     }
     if (route.children && route.children.length) {
       ensureSupplierMessageMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
+function ensureSupplierSettleMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const exists = (children = []) =>
+    children.some((item) => item.path === "supplierSettle" || item.path === "/newFeature/supplierSettle");
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "SupplierSettle",
+      path: "supplierSettle",
+      component: "supplier-settle/index",
+      meta: {
+        title: "供应商入驻申请",
+        icon: "form",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (
+      route.path === "newFeature" ||
+      route.path === "/newFeature" ||
+      title === targetTitle ||
+      (route.children &&
+        route.children.some(
+          (item) =>
+            item.path === "supplierMessage" ||
+            item.path === "/newFeature/supplierMessage" ||
+            item.path === "accountBalance" ||
+            item.path === "/newFeature/accountBalance" ||
+            item.path === "platformUsage" ||
+            item.path === "/newFeature/platformUsage" ||
+            item.path === "voteResult" ||
+            item.path === "/newFeature/voteResult"
+        ))
+    ) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierSettleMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
+function ensureSupplierSettleAuditMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const exists = (children = []) =>
+    children.some((item) => item.path === "supplierSettleAudit" || item.path === "/newFeature/supplierSettleAudit");
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "SupplierSettleAudit",
+      path: "supplierSettleAudit",
+      component: "jiaoyuju/supplierSettleAudit/index",
+      meta: {
+        title: "供应商入驻审核",
+        icon: "edit",
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (
+      route.path === "newFeature" ||
+      route.path === "/newFeature" ||
+      title === targetTitle ||
+      (route.children &&
+        route.children.some(
+          (item) =>
+            item.path === "supplierMessage" ||
+            item.path === "/newFeature/supplierMessage" ||
+            item.path === "accountBalance" ||
+            item.path === "/newFeature/accountBalance" ||
+            item.path === "platformUsage" ||
+            item.path === "/newFeature/platformUsage" ||
+            item.path === "voteResult" ||
+            item.path === "/newFeature/voteResult" ||
+            item.path === "supplierSettle" ||
+            item.path === "/newFeature/supplierSettle"
+        ))
+    ) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureSupplierSettleAuditMenu(route.children);
     }
   });
 
@@ -327,16 +433,19 @@ const permission = {
 
         getRouters().then((res) => {
           const normalizedRoutes = normalizeGroupNoticeMenus(
-            ensureVoteResultMenu(
-              ensureUsageMenu(
-                ensureSupplierMessageMenu(
-                  ensureSupplierGroupNoticeMenu(
-                    normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+            ensureSupplierSettleMenu(
+              ensureSupplierSettleAuditMenu(
+              ensureVoteResultMenu(
+                ensureUsageMenu(
+                  ensureSupplierMessageMenu(
+                    ensureSupplierGroupNoticeMenu(
+                      normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
+                    )
                   )
                 )
               )
             )
-          );
+          ));
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);

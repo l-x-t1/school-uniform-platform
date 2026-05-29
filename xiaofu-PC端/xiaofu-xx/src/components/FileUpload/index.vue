@@ -10,7 +10,7 @@
       :on-exceed="handleExceed"
       :on-success="handleUploadSuccess"
       :show-file-list="false"
-      :headers="headers"
+      :headers="uploadHeaders"
       class="upload-file-uploader"
       ref="fileUpload"
       v-if="!disabled"
@@ -180,6 +180,15 @@ export default {
       type: Boolean,
       default: false,
     },
+    isToken: {
+      type: Boolean,
+      default: true,
+    },
+    // 自定义上传地址，默认 /file/upload
+    uploadUrl: {
+      type: String,
+      default: "/file/upload",
+    },
   },
   data() {
     return {
@@ -187,10 +196,7 @@ export default {
       previewUrl: "",
       number: 0,
       uploadList: [],
-      uploadFileUrl: process.env.VUE_APP_BASE_API + "/file/upload", // 上传文件服务器地址
-      headers: {
-        Authorization: "Bearer " + getToken(),
-      },
+      uploadFileUrl: process.env.VUE_APP_BASE_API + this.uploadUrl, // 上传文件服务器地址
       fileList: [],
     };
   },
@@ -222,6 +228,10 @@ export default {
     // 是否显示提示
     showTip() {
       return this.isShowTip && (this.fileType || this.fileSize);
+    },
+    uploadHeaders() {
+      const token = getToken();
+      return this.isToken && token ? { Authorization: "Bearer " + token } : {};
     },
   },
   methods: {
@@ -306,7 +316,7 @@ export default {
     // 上传成功回调
     handleUploadSuccess(res, file) {
       if (res.code === 200) {
-        this.uploadList.push({ name: res.data.url, url: res.data.url }); 
+        this.uploadList.push({ name: res.data.url, url: res.data.url });
         this.uploadedSuccessfully();
       } else {
         this.number--;
@@ -357,7 +367,7 @@ export default {
     //获取文件类型
     getFileType(file) {
       const fileName = file.name.split(".");
-      const fileExt = fileName[fileName.length - 1]; 
+      const fileExt = fileName[fileName.length - 1];
       return fileExt;
     },
   },

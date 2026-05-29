@@ -3874,6 +3874,11 @@ CREATE TABLE `xfpt_supplier_message` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Fix: add AUTO_INCREMENT to xfpt_supplier_message.ID (2026-05-29)
+--
+ALTER TABLE `xfpt_supplier_message` MODIFY COLUMN `ID` bigint NOT NULL AUTO_INCREMENT;
+
+--
 -- Dumping data for table `xfpt_supplier_message`
 --
 
@@ -6507,5 +6512,394 @@ SELECT `USER_ID`, `ROLE_ID`
 FROM `_tmp_testuser_user_role`;
 
 DROP TEMPORARY TABLE IF EXISTS `_tmp_testuser_user_role`;
+
+
+
+-- ============================================================
+-- 合并增量脚本：供应商入驻公开接口白名单.sql
+-- ============================================================
+-- config_info 是 Nacos 配置库表，不一定存在于 xfglpt 业务库。
+-- 重新导入业务库时如果没有该表则跳过，避免 Error Code: 1146。
+SET @supplier_settle_white_sql := IF(
+  EXISTS (
+    SELECT 1
+    FROM information_schema.tables
+    WHERE table_schema = DATABASE()
+      AND table_name = 'config_info'
+  ),
+  'UPDATE `config_info` SET `content` = REPLACE(`content`, ''      - /auth/register'', CONCAT(''      - /auth/register'', CHAR(10), ''      - /school/supplierSettleApply'', CHAR(10), ''      - /file/upload'')) WHERE `data_id` = ''xfglpt-gateway-dev.yml'' AND `content` NOT LIKE ''%/school/supplierSettleApply%''',
+  'SELECT ''skip supplier settle gateway whitelist: config_info table not found in current database'' AS message'
+);
+PREPARE supplier_settle_white_stmt FROM @supplier_settle_white_sql;
+EXECUTE supplier_settle_white_stmt;
+DEALLOCATE PREPARE supplier_settle_white_stmt;
+
+-- ============================================================
+-- 合并增量脚本：教育局供应商黑名单与投诉菜单.sql
+-- ============================================================
+-- Add supplier blacklist and complaint supervision menu for education bureau roles.
+-- Role keys: jyj = district education bureau, sjyj = city education bureau.
+-- The page reads blacklist records and complaint feedback; blacklist detail APIs
+-- require school:hmd:list and school:hmd:query permissions.
+
+SET @new_feature_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE path = 'newFeature'
+    AND menu_type = 'M'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+SET @supplier_supervision_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE component = 'jiaoyuju/supplierSupervision/index'
+     OR (@new_feature_menu_id IS NOT NULL AND parent_id = @new_feature_menu_id AND path = 'supplierSupervision')
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+SET @supplier_supervision_menu_id := IFNULL(
+  @supplier_supervision_menu_id,
+  (SELECT IFNULL(MAX(menu_id), 3000) + 1 FROM sys_menu)
+);
+
+INSERT INTO sys_menu (
+  menu_id,
+  menu_name,
+  parent_id,
+  order_num,
+  path,
+  component,
+  query,
+  is_frame,
+  is_cache,
+  menu_type,
+  visible,
+  status,
+  perms,
+  icon,
+  create_by,
+  create_time,
+  update_by,
+  update_time,
+  remark
+)
+SELECT
+  @supplier_supervision_menu_id,
+  CONVERT(0xE4BE9BE5BA94E59586E9BB91E5908DE58D95E4B88EE68A95E8AF89 USING utf8mb4),
+  @new_feature_menu_id,
+  3,
+  'supplierSupervision',
+  'jiaoyuju/supplierSupervision/index',
+  NULL,
+  1,
+  0,
+  'C',
+  '0',
+  '0',
+  'school:hmd:list',
+  'list',
+  'system',
+  NOW(),
+  NULL,
+  NULL,
+  CONVERT(0xE69599E882B2E5B180E7ABAFE4BE9BE5BA94E59586E9BB91E5908DE58D95E4B88EE68A95E8AF89E79B91E79DA3 USING utf8mb4)
+WHERE @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_menu
+    WHERE menu_id = @supplier_supervision_menu_id
+       OR component = 'jiaoyuju/supplierSupervision/index'
+       OR (parent_id = @new_feature_menu_id AND path = 'supplierSupervision')
+  );
+
+SET @supplier_supervision_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE component = 'jiaoyuju/supplierSupervision/index'
+     OR (@new_feature_menu_id IS NOT NULL AND parent_id = @new_feature_menu_id AND path = 'supplierSupervision')
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+UPDATE sys_menu
+SET
+  menu_name = CONVERT(0xE4BE9BE5BA94E59586E9BB91E5908DE58D95E4B88EE68A95E8AF89 USING utf8mb4),
+  parent_id = IF(@new_feature_menu_id IS NOT NULL, @new_feature_menu_id, parent_id),
+  path = 'supplierSupervision',
+  component = 'jiaoyuju/supplierSupervision/index',
+  menu_type = 'C',
+  visible = '0',
+  status = '0',
+  perms = 'school:hmd:list',
+  icon = 'list',
+  update_time = NOW()
+WHERE menu_id = @supplier_supervision_menu_id;
+
+SET @hmd_query_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE parent_id = @supplier_supervision_menu_id
+    AND perms = 'school:hmd:query'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+SET @hmd_query_menu_id := IFNULL(
+  @hmd_query_menu_id,
+  (SELECT IFNULL(MAX(menu_id), 3000) + 1 FROM sys_menu)
+);
+
+INSERT INTO sys_menu (
+  menu_id,
+  menu_name,
+  parent_id,
+  order_num,
+  path,
+  component,
+  query,
+  is_frame,
+  is_cache,
+  menu_type,
+  visible,
+  status,
+  perms,
+  icon,
+  create_by,
+  create_time,
+  update_by,
+  update_time,
+  remark
+)
+SELECT
+  @hmd_query_menu_id,
+  CONVERT(0xE9BB91E5908DE58D95E8AFA6E68385 USING utf8mb4),
+  @supplier_supervision_menu_id,
+  1,
+  '',
+  NULL,
+  NULL,
+  1,
+  0,
+  'F',
+  '0',
+  '0',
+  'school:hmd:query',
+  '#',
+  'system',
+  NOW(),
+  NULL,
+  NULL,
+  ''
+WHERE @supplier_supervision_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_menu
+    WHERE parent_id = @supplier_supervision_menu_id
+      AND perms = 'school:hmd:query'
+  );
+
+SET @hmd_query_menu_id := (
+  SELECT menu_id
+  FROM sys_menu
+  WHERE parent_id = @supplier_supervision_menu_id
+    AND perms = 'school:hmd:query'
+  ORDER BY menu_id
+  LIMIT 1
+);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, @new_feature_menu_id
+FROM sys_role r
+WHERE (
+    LOWER(r.role_key) LIKE '%jyj%'
+    OR LOWER(r.role_key) LIKE '%jiaoyuju%'
+    OR r.role_name LIKE CONCAT('%', CONVERT(0xE69599E882B2E5B180 USING utf8mb4), '%')
+  )
+  AND @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_role_menu rm
+    WHERE rm.role_id = r.role_id
+      AND rm.menu_id = @new_feature_menu_id
+  );
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, @supplier_supervision_menu_id
+FROM sys_role r
+WHERE (
+    LOWER(r.role_key) LIKE '%jyj%'
+    OR LOWER(r.role_key) LIKE '%jiaoyuju%'
+    OR r.role_name LIKE CONCAT('%', CONVERT(0xE69599E882B2E5B180 USING utf8mb4), '%')
+  )
+  AND @supplier_supervision_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_role_menu rm
+    WHERE rm.role_id = r.role_id
+      AND rm.menu_id = @supplier_supervision_menu_id
+  );
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, @hmd_query_menu_id
+FROM sys_role r
+WHERE (
+    LOWER(r.role_key) LIKE '%jyj%'
+    OR LOWER(r.role_key) LIKE '%jiaoyuju%'
+    OR r.role_name LIKE CONCAT('%', CONVERT(0xE69599E882B2E5B180 USING utf8mb4), '%')
+  )
+  AND @hmd_query_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_role_menu rm
+    WHERE rm.role_id = r.role_id
+      AND rm.menu_id = @hmd_query_menu_id
+  );
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT r.role_id, m.menu_id
+FROM sys_role r
+JOIN sys_menu m ON m.perms IN ('school:hmd:list', 'school:hmd:query')
+WHERE (
+    LOWER(r.role_key) LIKE '%jyj%'
+    OR LOWER(r.role_key) LIKE '%jiaoyuju%'
+    OR r.role_name LIKE CONCAT('%', CONVERT(0xE69599E882B2E5B180 USING utf8mb4), '%')
+  )
+  AND NOT EXISTS (
+    SELECT 1
+    FROM sys_role_menu rm
+    WHERE rm.role_id = r.role_id
+      AND rm.menu_id = m.menu_id
+  );
+
+-- ============================================================
+-- 合并增量脚本：教育局网上调查管理菜单.sql
+-- ============================================================
+-- Give school and education bureau roles access to online survey management.
+-- Role 101 = xuexiao
+-- Role 102 = jyj
+-- Role 103 = sjyj
+-- Menu 2094 = wjdc/index
+-- Menu 2124 = school:survey:add
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 101, 2094
+WHERE NOT EXISTS (
+  SELECT 1 FROM sys_role_menu WHERE role_id = 101 AND menu_id = 2094
+);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 101, 2124
+WHERE NOT EXISTS (
+  SELECT 1 FROM sys_role_menu WHERE role_id = 101 AND menu_id = 2124
+);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 102, 2094
+WHERE NOT EXISTS (
+  SELECT 1 FROM sys_role_menu WHERE role_id = 102 AND menu_id = 2094
+);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 102, 2124
+WHERE NOT EXISTS (
+  SELECT 1 FROM sys_role_menu WHERE role_id = 102 AND menu_id = 2124
+);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 103, 2094
+WHERE NOT EXISTS (
+  SELECT 1 FROM sys_role_menu WHERE role_id = 103 AND menu_id = 2094
+);
+
+INSERT INTO sys_role_menu (role_id, menu_id)
+SELECT 103, 2124
+WHERE NOT EXISTS (
+  SELECT 1 FROM sys_role_menu WHERE role_id = 103 AND menu_id = 2124
+);
+
+-- ============================================================
+-- 合并增量脚本：xfpt_category_notice主键自增修复.sql
+-- ============================================================
+-- 修复栏目分类表 xfpt_category_notice 的主键自增问题
+-- 问题现象：
+-- 新增栏目分类时报错：
+-- Field 'ID' doesn't have a default value
+--
+-- 根因：
+-- Java 实体 XfptCategoryNotice 使用了 IdType.AUTO，
+-- 但数据库表 xfpt_category_notice.ID 不是 AUTO_INCREMENT。
+
+ALTER TABLE `xfpt_category_notice`
+MODIFY COLUMN `ID` bigint NOT NULL AUTO_INCREMENT COMMENT '主键ID';
+
+-- 根据当前已有数据重置自增起点，避免和现有记录冲突
+ALTER TABLE `xfpt_category_notice`
+AUTO_INCREMENT = 19;
+
+-- ============================================================
+-- 合并增量脚本：xfpt_school_grade_class主键自增修复.sql
+-- ============================================================
+-- 修复说明：
+-- 某些库里的 xfpt_school_grade_class.ID 不是 AUTO_INCREMENT，
+-- 会导致新增采购流程时插入年级班级数据报错：
+-- Field 'ID' doesn't have a default value
+
+ALTER TABLE `xfpt_school_grade_class`
+MODIFY COLUMN `ID` bigint NOT NULL AUTO_INCREMENT COMMENT '主键';
+
+-- 如果当前自增值落后于现有数据，可以同步抬高。
+-- 这里按仓库现有导出数据预设为 8159；如果你的库里最大 ID 更大，请改成 max(id)+1。
+ALTER TABLE `xfpt_school_grade_class`
+AUTO_INCREMENT = 8159;
+
+
+
+--
+-- Table structure for table `xfpt_supplier_settle_apply` (added 2026-05-29)
+--
+
+CREATE TABLE IF NOT EXISTS `xfpt_supplier_settle_apply` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `username` varchar(30) NOT NULL COMMENT '用户名',
+  `phone` varchar(20) NOT NULL COMMENT '手机号',
+  `password_hash` varchar(100) NOT NULL COMMENT '密码哈希',
+  `supplier_name` varchar(200) NOT NULL COMMENT '厂商名称',
+  `supplier_phone` varchar(20) NOT NULL COMMENT '联系电话',
+  `supplier_type` varchar(100) NOT NULL COMMENT '厂商类型',
+  `legal_representative` varchar(100) NOT NULL COMMENT '法定代表人',
+  `staff_number` varchar(50) NOT NULL COMMENT '职工人数',
+  `established_time` date NOT NULL COMMENT '成立时间',
+  `supplier_address` varchar(500) NOT NULL COMMENT '厂商地址',
+  `supplier_introduce` longtext NOT NULL COMMENT '厂商简介',
+  `business_license` varchar(1000) NOT NULL COMMENT '厂商资质',
+  `registered_capital` varchar(100) NOT NULL COMMENT '注册资金',
+  `xypj` varchar(1000) DEFAULT NULL COMMENT '信用评价',
+  `audit_status` char(1) NOT NULL DEFAULT '0' COMMENT '审核状态：0待审核，1通过，2驳回',
+  `audit_time` datetime DEFAULT NULL COMMENT '审核时间',
+  `audit_remark` varchar(500) DEFAULT NULL COMMENT '审核备注',
+  `target_role_id` bigint DEFAULT 100 COMMENT '目标角色ID',
+  `target_role_key` varchar(64) DEFAULT 'changshang' COMMENT '目标角色标识',
+  `create_by` varchar(64) DEFAULT 'supplier_settle' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) DEFAULT '0' COMMENT '删除标志：0存在，2删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_xfpt_supplier_settle_username` (`username`),
+  KEY `idx_xfpt_supplier_settle_phone` (`phone`),
+  KEY `idx_xfpt_supplier_settle_supplier_name` (`supplier_name`),
+  KEY `idx_xfpt_supplier_settle_status` (`audit_status`, `create_time`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='供应商入驻申请表';
+
+
+
+--
+-- ALTER: add user_id to xfpt_supplier_message (added 2026-05-29)
+--
+ALTER TABLE `xfpt_supplier_message` ADD COLUMN `user_id` bigint DEFAULT NULL COMMENT '关联的系统用户ID' AFTER `ID`;
 
 -- Dump completed on 2026-05-04 19:18:33
