@@ -155,7 +155,7 @@ export default {
         uni.showToast({ title: '请选择投诉选项', icon: 'none' })
         return
       }
-      if (!this.formData.reason || this.formData.reason.trim().length < 5) {
+      if (!this.formData.reason || !this.formData.reason.trim()) {
         uni.showToast({ title: '请填写投诉原因', icon: 'none' })
         return
       }
