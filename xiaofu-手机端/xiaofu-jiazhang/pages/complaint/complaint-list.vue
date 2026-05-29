@@ -16,8 +16,8 @@
         >
           <view class="card-head">
             <text class="goods-name">{{ item.goodsName || '未填写商品' }}</text>
-            <text class="status-tag" :class="item.replyState ? 'done' : 'pending'">
-              {{ item.replyState ? '已处理' : '处理中' }}
+            <text class="status-tag" :class="item.status === '1' ? 'done' : 'pending'">
+              {{ item.status === '1' ? '已处理' : '处理中' }}
             </text>
           </view>
 
@@ -35,7 +35,7 @@
           </view>
 
           <view class="card-foot">
-            <text class="submit-time">{{ item.createTime }}</text>
+            <text class="submit-time">{{ formatTime(item.createTime) }}</text>
             <button class="detail-btn" @click="goDetail(item)">投诉详情</button>
           </view>
         </view>
@@ -96,30 +96,25 @@ export default {
       }
       this.loading = true
       uni.request({
-        url: `${this.baseUrl}/school/parentsFeedback/list2`,
+        url: `${this.baseUrl}/school/parentComplaint/list2`,
         method: 'GET',
         header: {
           Authorization: uni.getStorageSync('token'),
           'Content-Type': 'application/json'
         },
         data: {
-          userId: uni.getStorageSync('simId'),
+          userId: `${uni.getStorageSync('simId') || ''}`,
           pageNum: this.pageNum,
           pageSize: this.pageSize
         },
         success: ({ data, statusCode }) => {
           if (statusCode === 200 && data.code === 200) {
             const rows = Array.isArray(data.rows) ? data.rows : []
-            const complaintRows = rows
-              .map((item) => this.normalizeComplaint(item))
-              .filter((item) => item.isComplaint)
-
             if (isLoadMore) {
-              this.complaintList = this.complaintList.concat(complaintRows)
+              this.complaintList = this.complaintList.concat(rows)
             } else {
-              this.complaintList = complaintRows
+              this.complaintList = rows
             }
-
             this.hasMore = rows.length >= this.pageSize
             return
           }
@@ -133,34 +128,6 @@ export default {
           this.refreshing = false
         }
       })
-    },
-    normalizeComplaint(item) {
-      const parsed = this.parseComplaintContent(item.feedbackContent || '')
-      return {
-        id: item.id,
-        goodsName: parsed.goodsName,
-        supplierName: parsed.supplierName || item.deptName || '',
-        orderNo: parsed.orderNo,
-        complaintType: parsed.complaintType,
-        reason: parsed.reason,
-        replyState: Number(item.replyState) || 0,
-        createTime: this.formatTime(item.createTime || item.createDate),
-        isComplaint: parsed.isComplaint
-      }
-    },
-    parseComplaintContent(content) {
-      const getValue = (label) => {
-        const match = content.match(new RegExp(`${label}：([^\\n\\r]+)`))
-        return match ? match[1].trim() : ''
-      }
-      return {
-        isComplaint: content.includes('投诉类型：'),
-        complaintType: getValue('投诉类型'),
-        goodsName: getValue('商品'),
-        supplierName: getValue('供应商'),
-        orderNo: getValue('订单号'),
-        reason: getValue('投诉原因')
-      }
     },
     formatTime(value) {
       if (!value) {

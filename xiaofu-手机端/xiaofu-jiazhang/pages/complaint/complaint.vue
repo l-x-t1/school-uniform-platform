@@ -122,26 +122,33 @@ export default {
       if (!photos.length) {
         return Promise.resolve([])
       }
-      const tasks = photos.map((filePath) => new Promise((resolve) => {
+      const tasks = photos.map((filePath) => new Promise((resolve, reject) => {
         uni.uploadFile({
-          url: `${this.baseUrl}/upload/image`,
+          url: `${this.baseUrl}/file/upload`,
           filePath,
           name: 'file',
+          header: {
+            Authorization: uni.getStorageSync('token')
+          },
           success: (res) => {
             try {
               const data = JSON.parse(res.data)
               if (data.code === 200) {
-                resolve(data.data.url || data.url || '')
-                return
+                const imageUrl = data.data?.url || data.data?.fileUrl || data.url || data.data || ''
+                if (imageUrl) {
+                  resolve(imageUrl)
+                  return
+                }
               }
+              reject(new Error(data.message || data.msg || 'upload failed'))
             } catch (error) {
+              reject(error)
             }
-            resolve('')
           },
-          fail: () => resolve('')
+          fail: (error) => reject(error)
         })
       }))
-      return Promise.all(tasks).then((list) => list.filter(Boolean))
+      return Promise.all(tasks)
     },
     async submitComplaint() {
       if (!this.formData.complaintType) {
@@ -154,28 +161,34 @@ export default {
       }
 
       this.submitting = true
-      const photoUrls = await this.uploadPhotos()
+      let photoUrls = []
+      try {
+        photoUrls = await this.uploadPhotos()
+      } catch (error) {
+        uni.showToast({ title: '图片上传失败，请重试', icon: 'none' })
+        this.submitting = false
+        return
+      }
       const userInfo = uni.getStorageSync('userInfo') || {}
       const studentList = uni.getStorageSync('studentList') || []
       const firstStudent = studentList[0] || {}
       const payload = {
-        userId: uni.getStorageSync('simId'),
+        userId: `${uni.getStorageSync('simId') || ''}`,
         userName: userInfo.name || userInfo.nickName || '家长用户',
-        deptId: firstStudent.deptId || firstStudent.schoolId || '',
+        deptId: `${firstStudent.deptId || firstStudent.schoolId || ''}`,
         deptName: this.schoolName || firstStudent.schoolName || firstStudent.school || '',
-        lxfs: userInfo.phone || userInfo.parm1 || uni.getStorageSync('phone') || '',
-        feedbackUrl: photoUrls.join(','),
-        feedbackContent: [
-          `投诉类型：${this.formData.complaintType}`,
-          this.goodsName ? `商品：${this.goodsName}` : '',
-          this.supplierName ? `供应商：${this.supplierName}` : '',
-          this.orderNo ? `订单号：${this.orderNo}` : '',
-          `投诉原因：${this.formData.reason}`
-        ].filter(Boolean).join('\n')
+        orderId: this.orderId || '',
+        orderNo: this.orderNo,
+        goodsName: this.goodsName,
+        supplierName: this.supplierName,
+        complaintType: this.formData.complaintType,
+        complaintReason: this.formData.reason.trim(),
+        complaintImages: photoUrls.join(','),
+        contactPhone: userInfo.phone || userInfo.parm1 || uni.getStorageSync('phone') || ''
       }
 
       uni.request({
-        url: `${this.baseUrl}/school/parentsFeedback`,
+        url: `${this.baseUrl}/school/parentComplaint`,
         method: 'POST',
         data: payload,
         header: {

@@ -1,7 +1,7 @@
 <template>
   <view class="container">
-    <view class="status-bar" :class="detail.replyState ? 'done' : 'pending'">
-      {{ detail.replyState ? '投诉已处理' : '投诉处理中' }}
+    <view class="status-bar" :class="detail.status === '1' ? 'done' : 'pending'">
+      {{ detail.status === '1' ? '投诉已处理' : '投诉处理中' }}
     </view>
 
     <view class="card">
@@ -20,7 +20,7 @@
       </view>
       <view class="info-row">
         <text class="info-label">提交时间</text>
-        <text class="info-value">{{ detail.createTime || '-' }}</text>
+        <text class="info-value">{{ formatDateTime(detail.createTime) || '-' }}</text>
       </view>
     </view>
 
@@ -31,26 +31,32 @@
         <text class="info-value">{{ detail.complaintType || '-' }}</text>
       </view>
       <view class="reason-box">
-        <text class="reason-text">{{ detail.reason || '未填写投诉原因' }}</text>
+        <text class="reason-text">{{ detail.complaintReason || '未填写投诉原因' }}</text>
       </view>
-      <view v-if="detail.photos.length" class="photo-list">
-        <image
-          v-for="(photo, index) in detail.photos"
-          :key="photo"
-          class="photo-item"
-          :src="photo"
-          mode="aspectFill"
-          @click="previewImage(index)"
-        />
+      <view v-if="photoList.length" class="evidence-section">
+        <text class="evidence-title">投诉凭证</text>
+        <text class="evidence-tip">以下为提交投诉时上传的照片</text>
+        <view class="photo-list">
+          <image
+            v-for="(photo, index) in photoList"
+            :key="photo"
+            class="photo-item"
+            :src="photo"
+            mode="aspectFill"
+            @click="previewImage(index)"
+          />
+        </view>
       </view>
     </view>
 
-    <view class="card" v-if="detail.replyState">
+    <view class="card" v-if="detail.status === '1' || detail.handleContent">
       <text class="card-title">处理结果</text>
       <view class="reason-box">
-        <text class="reason-text">{{ detail.replyContent || '暂无处理说明' }}</text>
+        <text class="reason-text">{{ detail.handleContent || '暂无处理说明' }}</text>
       </view>
-      <view class="reply-time" v-if="detail.replyTime">处理时间：{{ detail.replyTime }}</view>
+      <view class="reply-time" v-if="detail.handleTime">
+        处理时间：{{ formatDateTime(detail.handleTime) }}
+      </view>
     </view>
   </view>
 </template>
@@ -66,13 +72,21 @@ export default {
         supplierName: '',
         orderNo: '',
         complaintType: '',
-        reason: '',
+        complaintReason: '',
         createTime: '',
-        replyState: 0,
-        replyContent: '',
-        replyTime: '',
-        photos: []
+        status: '0',
+        handleContent: '',
+        handleTime: '',
+        complaintImages: ''
       }
+    }
+  },
+  computed: {
+    photoList() {
+      return (this.detail.complaintImages || '')
+        .split(',')
+        .filter(Boolean)
+        .map((item) => this.resolveImage(item))
     }
   },
   onLoad(options = {}) {
@@ -80,34 +94,33 @@ export default {
     this.fetchDetail()
   },
   methods: {
+    resolveImage(url) {
+      if (!url) {
+        return ''
+      }
+      if (/^https?:\/\//i.test(url)) {
+        return url
+      }
+      if (url.indexOf('/filestatics/') === 0) {
+        const fileHost = (this.baseUrl || '').replace(/:\d+$/, ':9300').replace(/\/$/, '')
+        return encodeURI(`${fileHost}${url}`)
+      }
+      const baseUrl = (this.baseUrl || '').replace(/\/$/, '')
+      const fullUrl = `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`
+      return encodeURI(fullUrl)
+    },
     fetchDetail() {
       uni.showLoading({ title: '加载中...' })
       uni.request({
-        url: `${this.baseUrl}/school/parentsFeedback/${this.complaintId}`,
+        url: `${this.baseUrl}/school/parentComplaint/${this.complaintId}`,
         method: 'GET',
         header: {
           Authorization: uni.getStorageSync('token'),
           'Content-Type': 'application/json'
         },
-        data: {
-          userId: uni.getStorageSync('simId')
-        },
         success: ({ data }) => {
           if (data.code === 200 && data.data) {
-            const item = data.data
-            const parsed = this.parseComplaintContent(item.feedbackContent || '')
-            this.detail = {
-              goodsName: parsed.goodsName,
-              supplierName: parsed.supplierName || item.deptName || '',
-              orderNo: parsed.orderNo,
-              complaintType: parsed.complaintType,
-              reason: parsed.reason,
-              createTime: this.formatDateTime(item.createTime || item.createDate),
-              replyState: Number(item.replyState) || 0,
-              replyContent: item.replyContent || '',
-              replyTime: item.replyTime ? this.formatDateTime(item.replyTime || item.replyDate) : '',
-              photos: item.feedbackUrl ? item.feedbackUrl.split(',').filter(Boolean) : []
-            }
+            this.detail = data.data
             return
           }
           uni.showToast({ title: data.message || '加载详情失败', icon: 'none' })
@@ -119,19 +132,6 @@ export default {
           uni.hideLoading()
         }
       })
-    },
-    parseComplaintContent(content) {
-      const getValue = (label) => {
-        const match = content.match(new RegExp(`${label}：([^\\n\\r]+)`))
-        return match ? match[1].trim() : ''
-      }
-      return {
-        complaintType: getValue('投诉类型'),
-        goodsName: getValue('商品'),
-        supplierName: getValue('供应商'),
-        orderNo: getValue('订单号'),
-        reason: getValue('投诉原因')
-      }
     },
     formatDateTime(value) {
       if (!value) {
@@ -151,7 +151,7 @@ export default {
     previewImage(index) {
       uni.previewImage({
         current: index,
-        urls: this.detail.photos
+        urls: this.photoList
       })
     }
   }
@@ -237,6 +237,24 @@ export default {
   flex-wrap: wrap;
   gap: 16rpx;
   margin-top: 20rpx;
+}
+
+.evidence-section {
+  margin-top: 20rpx;
+}
+
+.evidence-title {
+  display: block;
+  margin-bottom: 8rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.evidence-tip {
+  display: block;
+  font-size: 24rpx;
+  color: #64748b;
 }
 
 .photo-item {
