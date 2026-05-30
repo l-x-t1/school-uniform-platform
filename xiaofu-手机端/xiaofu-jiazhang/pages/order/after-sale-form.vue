@@ -44,6 +44,11 @@
     </view>
 
     <view class="card">
+      <view class="section-title">退货物流单号</view>
+      <input v-model="form.returnTrackingNo" class="input" maxlength="100" placeholder="请填写退货物流单号" />
+    </view>
+
+    <view class="card">
       <view class="section-title">申请原因</view>
       <textarea
         v-model="form.reason"
@@ -75,7 +80,6 @@ export default {
       products: [],
       selectedProductId: null,
       applyTypeOptions: [
-        { value: '1', label: '仅退款' },
         { value: '2', label: '退货退款' },
         { value: '3', label: '换货' }
       ],
@@ -83,6 +87,7 @@ export default {
         applyType: '2',
         applyNum: '1',
         targetSizeName: '',
+        returnTrackingNo: '',
         reason: ''
       }
     }
@@ -138,6 +143,13 @@ export default {
       if (!this.form.reason.trim()) {
         uni.showToast({
           title: '请填写申请原因',
+          icon: 'none'
+        })
+        return
+      }
+      if (!this.form.returnTrackingNo.trim()) {
+        uni.showToast({
+          title: '请填写退货物流单号',
           icon: 'none'
         })
         return

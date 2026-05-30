@@ -1,0 +1,405 @@
+<template>
+  <div class="app-container supplier-settle-audit-page">
+    <el-card shadow="never">
+      <div class="page-header">
+        <div>
+          <div class="page-title">供应商入驻审核</div>
+          <div class="page-subtitle">审核供应商提交的入驻申请，通过后自动创建厂商账号和厂商信息</div>
+        </div>
+        <el-button type="primary" plain icon="el-icon-refresh" size="mini" @click="refreshList">
+          刷新
+        </el-button>
+      </div>
+
+      <el-form
+        ref="queryForm"
+        :model="queryParams"
+        size="small"
+        :inline="true"
+        label-width="100px"
+        class="query-form"
+      >
+        <el-form-item label="厂商名称" prop="supplierName">
+          <el-input
+            v-model="queryParams.supplierName"
+            placeholder="请输入厂商名称"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item label="联系电话" prop="supplierPhone">
+          <el-input
+            v-model="queryParams.supplierPhone"
+            placeholder="请输入联系电话"
+            clearable
+            @keyup.enter.native="handleQuery"
+          />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">
+            搜索
+          </el-button>
+          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">
+            重置
+          </el-button>
+        </el-form-item>
+      </el-form>
+
+      <el-table v-loading="loading" :data="tableRows" border>
+        <el-table-column type="index" label="序号" width="60" align="center" />
+        <el-table-column label="厂商名称" prop="supplierName" min-width="160" show-overflow-tooltip />
+        <el-table-column label="联系电话" prop="supplierPhone" width="130" align="center" />
+        <el-table-column label="用户名" prop="username" width="120" align="center" />
+        <el-table-column label="提交时间" prop="createTime" width="170" align="center">
+          <template slot-scope="scope">
+            {{ parseTime(scope.row.createTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
+          </template>
+        </el-table-column>
+        <el-table-column label="审核状态" width="100" align="center">
+          <template slot-scope="scope">
+            <el-tag v-if="scope.row.auditStatus === '0'" type="warning" size="small">待审核</el-tag>
+            <el-tag v-else-if="scope.row.auditStatus === '1'" type="success" size="small">已通过</el-tag>
+            <el-tag v-else-if="scope.row.auditStatus === '2'" type="danger" size="small">已驳回</el-tag>
+            <span v-else>-</span>
+          </template>
+        </el-table-column>
+        <el-table-column label="操作" width="160" align="center" fixed="right">
+          <template slot-scope="scope">
+            <template v-if="scope.row.auditStatus === '0'">
+              <el-button type="text" icon="el-icon-check" style="color: #67c23a" @click="handleApprove(scope.row)">
+                通过
+              </el-button>
+              <el-button type="text" icon="el-icon-close" style="color: #f56c6c" @click="handleRejectOpen(scope.row)">
+                驳回
+              </el-button>
+            </template>
+            <el-button type="text" icon="el-icon-view" @click="handleDetail(scope.row)">
+              详情
+            </el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <pagination
+        v-show="total > 0"
+        :total="total"
+        :page.sync="queryParams.pageNum"
+        :limit.sync="queryParams.pageSize"
+        @pagination="getList"
+      />
+    </el-card>
+
+    <!-- 驳回对话框 -->
+    <el-dialog
+      title="驳回入驻申请"
+      :visible.sync="rejectDialogOpen"
+      width="520px"
+      append-to-body
+    >
+      <el-form ref="rejectForm" :model="rejectForm" :rules="rejectRules" label-width="80px">
+        <el-form-item label="厂商名称">
+          <span>{{ currentRow.supplierName }}</span>
+        </el-form-item>
+        <el-form-item label="驳回备注" prop="remark">
+          <el-input
+            v-model="rejectForm.remark"
+            type="textarea"
+            :rows="4"
+            placeholder="请输入驳回原因"
+            maxlength="500"
+            show-word-limit
+          />
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="rejectDialogOpen = false">取 消</el-button>
+        <el-button type="danger" :loading="rejectLoading" @click="handleRejectSubmit">
+          确 定 驳 回
+        </el-button>
+      </div>
+    </el-dialog>
+
+    <!-- 详情对话框 -->
+    <el-dialog
+      title="入驻申请详情"
+      :visible.sync="detailDialogOpen"
+      width="640px"
+      append-to-body
+    >
+      <el-descriptions :column="2" border size="small" v-if="currentRow.id">
+        <el-descriptions-item label="厂商名称" :span="2">
+          {{ currentRow.supplierName || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="用户名">{{ currentRow.username || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="手机号">{{ currentRow.phone || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="联系电话">{{ currentRow.supplierPhone || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="厂商类型">{{ currentRow.supplierType || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="法定代表人">{{ currentRow.legalRepresentative || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="职工人数">{{ currentRow.staffNumber || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="注册资金">{{ currentRow.registeredCapital || "-" }}</el-descriptions-item>
+        <el-descriptions-item label="成立时间">
+          {{ parseTime(currentRow.establishedTime, "{y}-{m}-{d}") || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="厂商地址" :span="2">
+          {{ currentRow.supplierAddress || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="厂商简介" :span="2">
+          <div v-html="currentRow.supplierIntroduce || '-'" style="max-height:300px;overflow-y:auto"></div>
+        </el-descriptions-item>
+        <el-descriptions-item label="厂商资质" :span="2">
+          <template v-if="businessLicenseFiles.length > 0">
+            <div v-for="(file, idx) in businessLicenseFiles" :key="idx" class="attachment-item">
+              <i :class="getFileIcon(file)"></i>
+              <span class="attachment-name">{{ getFileName(file) }}</span>
+              <el-button type="text" size="mini" icon="el-icon-download" @click="downloadFile(file)">下载</el-button>
+              <el-button v-if="isPreviewable(file)" type="text" size="mini" icon="el-icon-view" @click="handlePreview(file)">预览</el-button>
+            </div>
+          </template>
+          <span v-else>-</span>
+        </el-descriptions-item>
+        <el-descriptions-item label="信用评价" :span="2">
+          {{ currentRow.xypj || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="审核状态">
+          <el-tag v-if="currentRow.auditStatus === '0'" type="warning" size="small">待审核</el-tag>
+          <el-tag v-else-if="currentRow.auditStatus === '1'" type="success" size="small">已通过</el-tag>
+          <el-tag v-else-if="currentRow.auditStatus === '2'" type="danger" size="small">已驳回</el-tag>
+        </el-descriptions-item>
+        <el-descriptions-item label="审核备注">
+          {{ currentRow.auditRemark || "-" }}
+        </el-descriptions-item>
+      </el-descriptions>
+    </el-dialog>
+
+    <el-dialog title="文件预览" :visible.sync="previewVisible" width="80%" append-to-body :before-close="handlePreviewClose">
+      <div class="preview-container">
+        <iframe v-if="previewUrl" :src="previewUrl" width="100%" frameborder="0" class="preview-iframe"></iframe>
+      </div>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="previewVisible = false">关闭</el-button>
+      </span>
+    </el-dialog>
+  </div>
+</template>
+
+<script>
+import { auditList, approveApply, rejectApply } from "@/api/school/supplierSettleAudit";
+
+export default {
+  name: "SupplierSettleAudit",
+  data() {
+    return {
+      loading: false,
+      rejectLoading: false,
+      total: 0,
+      tableRows: [],
+      queryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        supplierName: "",
+        supplierPhone: "",
+      },
+      currentRow: {},
+      rejectDialogOpen: false,
+      detailDialogOpen: false,
+      previewVisible: false,
+      previewUrl: "",
+      rejectForm: {
+        remark: "",
+      },
+      rejectRules: {
+        remark: [
+          { required: true, message: "请输入驳回原因", trigger: "blur" },
+        ],
+      },
+    };
+  },
+  computed: {
+    businessLicenseFiles() {
+      if (!this.currentRow.businessLicense) return [];
+      return this.currentRow.businessLicense.split(",").filter(function(f) { return f.trim() !== ""; });
+    },
+  },
+  created() {
+    this.getList();
+  },
+  methods: {
+    getList() {
+      this.loading = true;
+      auditList(this.queryParams)
+        .then((response) => {
+          this.tableRows = response.rows || [];
+          this.total = response.total || 0;
+        })
+        .finally(() => {
+          this.loading = false;
+        });
+    },
+    handleQuery() {
+      this.queryParams.pageNum = 1;
+      this.getList();
+    },
+    resetQuery() {
+      this.resetForm("queryForm");
+      this.handleQuery();
+    },
+    refreshList() {
+      this.getList();
+    },
+    handleApprove(row) {
+      const name = row.supplierName || "该申请";
+      this.$confirm(
+        `确认通过 <strong>${name}</strong> 的入驻申请吗？通过后系统将自动创建厂商账号和厂商信息。`,
+        "审核通过确认",
+        {
+          confirmButtonText: "确认通过",
+          cancelButtonText: "取消",
+          type: "success",
+          dangerouslyUseHTMLString: true,
+        }
+      )
+        .then(() => {
+          return approveApply(row.id);
+        })
+        .then(() => {
+          this.msgSuccess("审核通过，已创建供应商账号和厂商信息");
+        })
+        .catch(() => {
+          // 取消或无操作
+        })
+        .finally(() => {
+          this.getList();
+        });
+    },
+    handleRejectOpen(row) {
+      this.currentRow = row;
+      this.rejectForm.remark = "";
+      this.rejectDialogOpen = true;
+      this.$nextTick(() => {
+        this.$refs.rejectForm && this.$refs.rejectForm.clearValidate();
+      });
+    },
+    handleRejectSubmit() {
+      this.$refs.rejectForm.validate((valid) => {
+        if (!valid) return;
+        this.rejectLoading = true;
+        rejectApply(this.currentRow.id, this.rejectForm.remark)
+          .then(() => {
+            this.msgSuccess("已驳回该入驻申请");
+            this.rejectDialogOpen = false;
+          })
+          .finally(() => {
+            this.getList();
+            this.rejectLoading = false;
+          });
+      });
+    },
+    handleDetail(row) {
+      this.currentRow = row;
+      this.detailDialogOpen = true;
+    },
+    getFileName(filePath) {
+      if (!filePath) return "";
+      var parts = filePath.split("/");
+      return parts[parts.length - 1];
+    },
+    getFileIcon(filePath) {
+      var ext = this.getFileName(filePath).split(".").pop().toLowerCase();
+      var iconMap = {
+        pdf: "el-icon-document",
+        doc: "el-icon-document",
+        docx: "el-icon-document",
+        xls: "el-icon-s-data",
+        xlsx: "el-icon-s-data",
+        ppt: "el-icon-s-data",
+        pptx: "el-icon-s-data",
+        png: "el-icon-picture",
+        jpg: "el-icon-picture",
+        jpeg: "el-icon-picture",
+        gif: "el-icon-picture",
+        txt: "el-icon-tickets",
+      };
+      return iconMap[ext] || "el-icon-document";
+    },
+    isPreviewable(filePath) {
+      var ext = this.getFileName(filePath).split(".").pop().toLowerCase();
+      return ["pdf", "png", "jpg", "jpeg"].indexOf(ext) >= 0;
+    },
+    downloadFile(filePath) {
+      var link = document.createElement("a");
+      link.href = process.env.VUE_APP_IMAGE_BASE_API + filePath;
+      link.setAttribute("download", this.getFileName(filePath));
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    },
+    handlePreview(filePath) {
+      this.previewUrl = process.env.VUE_APP_IMAGE_BASE_API + filePath;
+      this.previewVisible = true;
+    },
+    handlePreviewClose() {
+      this.previewUrl = "";
+      this.previewVisible = false;
+    },
+  },
+};
+</script>
+
+<style scoped>
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
+}
+
+.page-subtitle {
+  margin-top: 6px;
+  font-size: 13px;
+  color: #909399;
+}
+
+.query-form {
+  margin-bottom: 12px;
+}
+
+.attachment-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 0;
+  font-size: 13px;
+}
+
+.attachment-item + .attachment-item {
+  border-top: 1px dashed #e4e7ed;
+}
+
+.attachment-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: #606266;
+}
+
+.preview-container {
+  width: 100%;
+  height: 86vh;
+  border: 1px solid #e4e7ed;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.preview-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+</style>

@@ -65,7 +65,19 @@
         <if test="category != null">and category = #{category}</if>
         <if test="fbStatus != null">and fb_status = #{fbStatus}</if>
         <if test="type != null">and type = #{type}</if>
-        <if test="deptId != null">and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
+        <if test="viewerDeptId != null and viewerIsSchool == '1'">
+            and (
+                dept_id = #{viewerDeptId}
+                or (lc_category = '0' and find_in_set(dept_id, #{viewerAncestors}))
+            )
+        </if>
+        <if test="viewerDeptId != null and viewerIsSchool != '1'">
+            and (
+                dept_id = #{viewerDeptId}
+                or find_in_set(#{viewerDeptId}, ancestors)
+            )
+        </if>
+        <if test="viewerDeptId == null and deptId != null">and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))</if>
         <if test="ancestors != null">and ancestors = #{ancestors}</if>
         <if test="wjStatus != null">and wj_status = #{wjStatus}</if>
         <if test="votingNotice != null">and voting_notice = #{votingNotice}</if>

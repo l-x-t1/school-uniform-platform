@@ -44,7 +44,6 @@ public class XfptHmdController extends BaseController {
  */
 
 @Operation(summary = "查询黑名单列表")
-@RequiresPermissions("school:hmd:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptHmd xfptHmd) {
         startPage();
@@ -69,7 +68,6 @@ public class XfptHmdController extends BaseController {
      * 获取黑名单详细信息
      */
     @Operation(summary = "获取黑名单详细信息")
-    @RequiresPermissions("school:hmd:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptHmdService.getById(id));

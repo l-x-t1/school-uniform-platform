@@ -119,4 +119,20 @@ private static final long serialVersionUID = 1L;
 @TableField(exist = false)
 @Schema(description = "商品尺码")
 private List<XfptGoodsSize> xfptGoodsSizeList;
+
+@TableField(exist = false)
+@Schema(description = "统购公告ID")
+private Long noticeId;
+
+@TableField(exist = false)
+@Schema(description = "统购开始时间")
+private Date purchaseStartTime;
+
+@TableField(exist = false)
+@Schema(description = "统购结束时间")
+private Date purchaseEndTime;
+
+@TableField(exist = false)
+@Schema(description = "家长端统购可买过滤标记")
+private String groupPurchasable;
         }

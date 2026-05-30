@@ -21,7 +21,7 @@
           v-hasPermi="['school:survey:add']">新增</el-button>
       </el-col>
       <el-col :span="1.5">
-        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single" @click="handleUpdate"
+        <el-button type="success" plain icon="el-icon-edit" size="mini" :disabled="single || !canManageSelected" @click="handleUpdate"
           v-hasPermi="['school:survey:edit']">修改</el-button>
       </el-col> 
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
@@ -52,10 +52,10 @@
 
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <el-button size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
+          <el-button v-if="canManage(scope.row)" size="mini" type="text" icon="el-icon-edit" @click="handleUpdate(scope.row)">修改</el-button>
           <el-button v-if="scope.row.fbStatus == 1 && scope.row.category != 1" size="mini" type="text"
             icon="el-icon-edit" @click="handleQrCode(scope.row)">查看问卷二维码</el-button>
-          <el-button size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
+          <el-button v-if="canManage(scope.row)" size="mini" type="text" icon="el-icon-delete" @click="handleDelete(scope.row)">删除</el-button>
           <el-button v-if="scope.row.category != 1" size="mini" type="text" icon="el-icon-view"
             @click="handleStatistics(scope.row)">统计</el-button>
         </template>
@@ -123,6 +123,7 @@ import {
   updateSurvey,
   getSurveyStatistics,
 } from "@/api/school/survey";
+import { getDept } from "@/api/system/dept";
 import SurveyStatistics from "./tongji";
 import QRCode from "qrcode";
 import wjBianji from "./wjBianji";
@@ -143,6 +144,7 @@ export default {
       loading: true,
       // 选中数组
       ids: [],
+      selectedRows: [],
       // 非单个禁用
       single: true,
       // 显示搜索条件
@@ -193,14 +195,25 @@ export default {
       // 统计相关数据
       statisticsVisible: false,
       selectedSurveyId: null,
+      currentDeptInfo: null,
     };
   },
   created() {
+    this.loadCurrentDeptInfo();
     this.getList();
+  },
+  computed: {
+    canManageSelected() {
+      return this.selectedRows.length === 1 && this.canManage(this.selectedRows[0]);
+    },
   },
   methods: {
     //生成二维码
     handleQrCode(row) {
+      if (!row || !row.id) {
+        this.$message.error("问卷标识缺失，无法生成二维码");
+        return;
+      }
       // 显示加载中，防止用户重复点击
       const loading = this.$loading({
         lock: true,
@@ -210,7 +223,7 @@ export default {
       });
 
       // 构建问卷URL
-      const url = process.env.VUE_APP_QR_CODE_URL + `?id=${row.id}`;
+      const url = process.env.VUE_APP_QR_CODE_URL + `?id=${encodeURIComponent(row.id)}`;
 
       // 使用QRCode生成二维码图片URL
       QRCode.toDataURL(url, {
@@ -294,6 +307,36 @@ export default {
         this.selectedSurveyId = row.id;
       });
     },
+    loadCurrentDeptInfo() {
+      const userInfo = this.$store.state.user.userInfo || {};
+      if (userInfo.dept) {
+        this.currentDeptInfo = userInfo.dept;
+        return;
+      }
+      const deptId = this.$store.state.user.deptId;
+      if (!deptId) {
+        return;
+      }
+      getDept(deptId).then((response) => {
+        this.currentDeptInfo = response.data;
+      }).catch(() => {});
+    },
+    canManage(row) {
+      if (!row) {
+        return false;
+      }
+      const currentDeptId = this.$store.state.user.deptId;
+      if (String(row.deptId) === String(currentDeptId)) {
+        return true;
+      }
+      const currentDept = this.currentDeptInfo || (this.$store.state.user.userInfo || {}).dept;
+      if (!currentDept || String(currentDept.isSchool) === "1") {
+        return false;
+      }
+      return String(row.ancestors || "")
+        .split(",")
+        .includes(String(currentDeptId));
+    },
     // 检查是否为文本类型
     isTextType(type) {
       // 根据字典值判断是否为文本输入类型
@@ -311,7 +354,6 @@ export default {
       this.loading = true;
       listSurvey({
         ...this.queryParams,
-        deptId: this.$store.state.user.deptId,
       }).then((response) => {
         this.surveyList = response.rows;
         this.total = response.total;
@@ -352,6 +394,7 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
+      this.selectedRows = selection;
       this.ids = selection.map((item) => item.id);
       this.single = selection.length !== 1;
     },
@@ -365,12 +408,21 @@ export default {
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
-      const id = row.id || (this.ids.length === 1 ? this.ids[0] : null);
+      const selectedRow = row && row.id ? row : this.selectedRows[0];
+      if (selectedRow && !this.canManage(selectedRow)) {
+        this.$message.warning("无权限修改该问卷");
+        return;
+      }
+      const id = selectedRow ? selectedRow.id : (this.ids.length === 1 ? this.ids[0] : null);
       if (!id) {
         this.$message.warning("请选择要修改的问卷");
         return;
       }
       getSurvey(id).then((response) => { 
+        if (!this.canManage(response.data)) {
+          this.$message.warning("无权限修改该问卷");
+          return;
+        }
         this.formAdd = response.data; 
         this.formAdd.tpqzsj = [
           response.data.beginTime,
@@ -431,7 +483,7 @@ export default {
               this.getList();
             });
           } else {
-            submitData.fbStatus = 0;
+            submitData.fbStatus = 1;
             addSurvey({
               ...submitData,
               deptId: this.$store.state.user.deptId,
@@ -446,7 +498,15 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || (this.ids.length > 0 ? this.ids : null);
+      if (row && !this.canManage(row)) {
+        this.$message.warning("无权限删除该问卷");
+        return;
+      }
+      if (!row && this.selectedRows.some(item => !this.canManage(item))) {
+        this.$message.warning("所选问卷中包含无权限删除的数据");
+        return;
+      }
+      const ids = row ? row.id : (this.ids.length > 0 ? this.ids : null);
       if (!ids) {
         this.$message.warning("请选择要删除的问卷");
         return;

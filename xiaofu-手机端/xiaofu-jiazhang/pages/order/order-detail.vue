@@ -529,8 +529,8 @@ export default {
     
     // 申请退换
     applyReturn() {
-      const options = ['退货退款', '换货', '仅退款'];
-      const typeMap = ['2', '3', '1'];
+      const options = ['退货退款', '换货'];
+      const typeMap = ['2', '3'];
       uni.showActionSheet({
         itemList: options,
         success: (res) => {

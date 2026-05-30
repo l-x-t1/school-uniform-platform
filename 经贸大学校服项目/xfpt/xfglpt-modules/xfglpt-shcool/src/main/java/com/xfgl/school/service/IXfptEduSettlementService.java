@@ -20,6 +20,8 @@ public interface IXfptEduSettlementService extends IService<XfptEduSettlement> {
      */
     public List<XfptEduSettlement> selectXfptEduSettlementList(XfptEduSettlement xfptEduSettlement);
 
+    public XfptEduSettlement selectXfptEduSettlementById(Long id);
+
     /**
      * 查询教育局结算统计
      *

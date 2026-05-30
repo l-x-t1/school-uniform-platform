@@ -220,7 +220,6 @@
 
     <el-tabs v-model="activeOrderType" @tab-click="handleOrderTypeTabChange">
       <el-tab-pane label="统购" name="1" />
-      <el-tab-pane label="零售" name="2" />
     </el-tabs>
 
     <el-table v-loading="loading" :data="productionOrderList" @selection-change="handleSelectionChange">

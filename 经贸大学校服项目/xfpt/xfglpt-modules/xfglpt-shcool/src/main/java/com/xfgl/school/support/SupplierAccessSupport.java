@@ -1,6 +1,5 @@
 package com.xfgl.school.support;
 
-import com.xfgl.common.core.enums.RoleType;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.service.ISupplierMessageService;
@@ -32,7 +31,7 @@ public class SupplierAccessSupport {
             if (Long.valueOf(115L).equals(role.getRoleId())) {
                 return true;
             }
-            if (StringUtils.equalsAnyIgnoreCase(role.getRoleKey(), "gys", RoleType.CSGY.getCode())) {
+            if (StringUtils.equalsAnyIgnoreCase(role.getRoleKey(), "gys", "ceshigongying")) {
                 return true;
             }
         }

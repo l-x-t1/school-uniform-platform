@@ -2,11 +2,13 @@ package com.xfgl.school.mapper;
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 import org.apache.ibatis.annotations.Param;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
+import com.xfgl.school.domain.XfptGroupNoticeSupplier;
 
 /**
  * 统购公告Mapper接口
@@ -36,8 +38,16 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
          * @param id 统购公告主键
          * @return 统购公告
          */
-        XfptGroupNotice selectSupplierGroupNoticeById(@Param("id") Long id);
+        XfptGroupNotice selectSupplierGroupNoticeById(@Param("id") Long id, @Param("supplierId") Long supplierId);
         List<XfptGroupNoticeItem> selectXfptGroupNoticeItemById(@Param("id")Long id);
+
+        List<Long> selectSupplierIdsByNoticeId(@Param("noticeId") Long noticeId);
+
+        int deleteXfptGroupNoticeSupplierByNoticeId(@Param("noticeId") Long noticeId);
+
+        int deleteXfptGroupNoticeSupplierByNoticeIds(@Param("noticeIds") List<Long> noticeIds);
+
+        int batchInsertXfptGroupNoticeSupplier(List<XfptGroupNoticeSupplier> supplierList);
 
         /**
          * 删除统购公告信息
@@ -59,5 +69,15 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
 
         List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(@Param("noticeId") Long noticeId,
                                                                     @Param("supplierId") Long supplierId,
+                                                                    @Param("schoolId") Long schoolId,
                                                                     @Param("deptId") Long deptId);
+
+        XfptOrderInfo selectProgressOrderById(@Param("orderId") Long orderId);
+
+        int updateProgressStatus(@Param("orderId") Long orderId,
+                                 @Param("progressStatus") String progressStatus);
+
+        int updateProgressLogistics(@Param("orderId") Long orderId,
+                                    @Param("progressStatus") String progressStatus,
+                                    @Param("logisticsNo") String logisticsNo);
 }

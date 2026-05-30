@@ -1,9 +1,9 @@
 -- 校服采购流程菜单权限补充
 -- 说明：
 -- 1. 在“校服采购流程”下补充“选用组织自主确定企业模式（一）”二级菜单及相关功能权限。
--- 2. 在“校服采购流程”和“校服厂商管理”之间新增“统购管理”一级菜单。
+-- 2. 在管理端“新增功能”下新增“统购管理”一级菜单。
 -- 3. “统购管理”下二级菜单按需求表第二列生成，功能权限按第三列生成，remark 写入第四列描述。
--- 4. 授权给已拥有“校服采购流程”或“校服厂商管理”访问权限的角色。
+-- 4. 授权给已拥有“新增功能”访问权限的角色。
 
 -- 一、校服采购流程：选用组织自主确定企业模式（一）
 INSERT INTO `sys_menu` (
@@ -51,7 +51,7 @@ INSERT INTO `sys_menu` (
   `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
   `create_by`, `create_time`, `update_by`, `update_time`, `remark`
 ) VALUES
-(3000, '统购管理', 0, 2, 'tonggou', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', NOW(), '', NULL, '统购管理目录')
+(3000, '统购管理', 2333, 8, 'tonggou', NULL, NULL, '', 1, 0, 'M', '0', '0', '', 'shopping', 'admin', NOW(), '', NULL, '统购管理目录')
 ON DUPLICATE KEY UPDATE
   `menu_name` = VALUES(`menu_name`),
   `parent_id` = VALUES(`parent_id`),
@@ -129,7 +129,7 @@ SELECT roles.role_id, menus.menu_id
 FROM (
   SELECT DISTINCT role_id
   FROM `sys_role_menu`
-  WHERE menu_id IN (2021, 2105)
+  WHERE menu_id = 2333
     AND role_id <> 0
 ) roles
 CROSS JOIN (

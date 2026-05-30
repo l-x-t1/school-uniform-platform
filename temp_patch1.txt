@@ -1,0 +1,60 @@
+﻿*** Begin Patch
+*** Update File: D:\校服项目\xiaofu-PC端\xiaofu-xx\src\store\modules\permission.js
+@@ function ensureSupplierSettleMenu(routes = []) {
++
++function ensureSupplierSettleAuditMenu(routes = []) {
++  const targetTitle = "新增功能";
++  const exists = (children = []) =>
++    children.some((item) => item.path === "supplierSettleAudit" || item.path === "/newFeature/supplierSettleAudit");
++
++  const appendMenu = (route) => {
++    if (!route.children) {
++      route.children = [];
++    }
++    if (exists(route.children)) {
++      return;
++    }
++    route.children.push({
++      name: "SupplierSettleAudit",
++      path: "supplierSettleAudit",
++      component: "jiaoyuju/supplierSettleAudit/index",
++      meta: {
++        title: "供应商入驻审核",
++        icon: "edit",
++      },
++    });
++  };
++
++  routes.forEach((route) => {
++    const title = route.meta && route.meta.title ? route.meta.title : route.name;
++    if (
++      route.path === "newFeature" ||
++      route.path === "/newFeature" ||
++      title === targetTitle ||
++      (route.children &&
++        route.children.some(
++          (item) =>
++            item.path === "supplierMessage" ||
++            item.path === "/newFeature/supplierMessage" ||
++            item.path === "accountBalance" ||
++            item.path === "/newFeature/accountBalance" ||
++            item.path === "platformUsage" ||
++            item.path === "/newFeature/platformUsage" ||
++            item.path === "voteResult" ||
++            item.path === "/newFeature/voteResult" ||
++            item.path === "supplierSettle" ||
++            item.path === "/newFeature/supplierSettle"
++        ))
++    ) {
++      appendMenu(route);
++    }
++    if (route.children && route.children.length) {
++      ensureSupplierSettleAuditMenu(route.children);
++    }
++  });
++
++  return routes;
++}
++
++function ensureSupplierGroupNoticeMenu(routes = []) {
+*** End Patch

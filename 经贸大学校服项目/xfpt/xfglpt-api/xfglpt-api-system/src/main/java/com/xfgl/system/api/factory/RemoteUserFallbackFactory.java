@@ -38,6 +38,12 @@ public class RemoteUserFallbackFactory implements FallbackFactory<RemoteUserServ
             }
 
             @Override
+            public R<Boolean> addInnerUser(SysUser sysUser, String source)
+            {
+                return R.fail("新增用户失败:" + throwable.getMessage());
+            }
+
+            @Override
             public R<Boolean> recordUserLogin(SysUser sysUser, String source)
             {
                 return R.fail("记录用户登录信息失败:" + throwable.getMessage());

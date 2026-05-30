@@ -2,6 +2,9 @@ package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
 import com.xfgl.school.domain.XfptDeliveryOrder;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery;
+import com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo;
+import com.xfgl.school.domain.vo.SupplierOptionVo;
 
 /**
  * 发货单Service接口
@@ -58,4 +61,8 @@ public interface IXfptDeliveryOrderService extends IService<XfptDeliveryOrder> {
          * @return 结果
          */
         public int deleteXfptDeliveryOrderById(Long id);
+
+        public List<DeliveryOrderStatisticsVo> selectDeliveryOrderStatisticsList(DeliveryOrderStatisticsQuery query);
+
+        public List<SupplierOptionVo> selectDeliveryOrderSupplierOptions();
 }

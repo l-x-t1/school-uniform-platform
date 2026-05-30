@@ -73,6 +73,7 @@ function normalizeOrderItem(item = {}) {
     color: item.colorName || item.color || item.spec || '-',
     supplierId: item.supplierId,
     supplierName: item.supplierName || '',
+    noticeId: item.noticeId || null,
     saleType: orderType,
     orderType,
     orderTypeText: getOrderTypeText(orderType),
@@ -149,11 +150,14 @@ function buildOrderPayload(data = {}) {
   const totalAmount = items.reduce((sum, item) => sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1), 0)
 
   const orderType = String(data.orderType || items[0]?.orderType || items[0]?.saleType || '2')
+  const noticeId = orderType === '1'
+    ? Number(data.noticeId || items[0]?.noticeId || 0) || null
+    : null
   const deptId = Number(selectedStudent.deptId || selectedStudent.schoolId || 1)
   return {
     orderNo: `APP${Date.now()}`,
     orderType,
-    noticeId: 1,
+    noticeId,
     schoolId: Number(selectedStudent.schoolId || 1),
     schoolName: selectedStudent.school || selectedStudent.schoolName || '测试学校',
     supplierId: Number(items[0]?.supplierId || 1),

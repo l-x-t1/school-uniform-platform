@@ -1,7 +1,32 @@
 <template>
   <div class="questionnaire-container">
     <div v-if="!isFish">
-      <div v-if="question.state != 2">
+      <div v-if="invalidQuestion" class="expired-container">
+        <div class="expired-content">
+          <div class="expired-icon-wrapper">
+            <svg
+              class="expired-icon"
+              viewBox="0 0 1024 1024"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"
+                fill="#f56c6c"
+              />
+              <path
+                d="M464 336a48 48 0 0 1 96 0v112a48 48 0 0 1-96 0V336zm32 272a48 48 0 1 1 96 0 48 48 0 0 1-96 0z"
+                fill="#f56c6c"
+              />
+            </svg>
+          </div>
+          <h2 class="expired-title">二维码无效</h2>
+          <div class="expired-message">
+            <p>缺少问卷标识，无法打开对应问卷。</p>
+            <p>请重新扫描正确的问卷二维码。</p>
+          </div>
+        </div>
+      </div>
+      <div v-else-if="question.state != 2">
         <!-- 顶部导航栏 -->
         <div class="header-bar">
           <div class="header-left">
@@ -283,6 +308,7 @@ export default {
       qyList: [], //企业列表
       signatureMode: false, // 签名模式
       signature: null, // 签名实例
+      invalidQuestion: false,
       videoDialogVisible: false,
       videoUrl: "",
     };
@@ -295,8 +321,7 @@ export default {
   },
   computed: {
     questionsId() {
-      return this.$route.query.id ?? 2;
-      // return 31;
+      return this.$route.query.id;
     },
     totalQuestions() {
       return this.question.sonList ? this.question.sonList.length : 0;
@@ -527,8 +552,14 @@ export default {
 
     // 获取问卷内容
     handleGetQuestion() {
+      const questionId = Number(this.questionsId);
+      if (!this.questionsId || !Number.isFinite(questionId)) {
+        this.invalidQuestion = true;
+        this.$message.error("二维码无效，缺少问卷标识");
+        return;
+      }
       this.loading = true;
-      getQuestionnaireContent({ id: Number(this.questionsId) })
+      getQuestionnaireContent({ id: questionId })
         .then((res) => {
           this.question = res.data || {};
           if (this.question.category == 3) {

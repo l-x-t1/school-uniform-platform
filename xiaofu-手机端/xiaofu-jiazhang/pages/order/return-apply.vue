@@ -19,6 +19,18 @@
       </view>
     </view>
 
+    <view class="supplier-card">
+      <view class="card-title">供应商退换货信息</view>
+      <view class="info-row">
+        <text class="label">供应商手机号</text>
+        <text class="value">{{ supplierInfo.supplierPhone || '-' }}</text>
+      </view>
+      <view class="info-row">
+        <text class="label">收货地址</text>
+        <text class="value">{{ supplierInfo.supplierAddress || '-' }}</text>
+      </view>
+    </view>
+
     <view class="form-card">
       <view class="form-item column no-border">
         <text class="form-label">申请类型</text>
@@ -51,6 +63,11 @@
         <input class="input" type="digit" v-model="form.applyAmount" :placeholder="form.applyType === '1' ? '请输入退款金额' : '请输入退货退款金额'" />
       </view>
 
+      <view class="form-item" v-if="form.applyType !== '1'">
+        <text class="form-label">退货物流单号</text>
+        <input class="input" v-model="form.returnTrackingNo" maxlength="100" placeholder="请填写退货物流单号" />
+      </view>
+
       <view class="form-item column">
         <text class="form-label">申请原因</text>
         <textarea class="textarea" v-model="form.reason" maxlength="200" placeholder="请填写退换原因" />
@@ -72,6 +89,7 @@
 import config from '@/config'
 import { getOrder } from '@/api/order'
 import { createAfterSale } from '@/api/afterSale'
+import { getSupplierMessage } from '@/api/supplier'
 
 export default {
   data() {
@@ -79,14 +97,15 @@ export default {
       orderId: '',
       submitting: false,
       order: {},
+      supplierInfo: {},
       applyTypeOptions: [
-        { label: '仅退款', value: '1', desc: '无需退回商品，直接申请退款' },
         { label: '退货退款', value: '2', desc: '退回商品后按审核结果退款' },
         { label: '换货', value: '3', desc: '商品不合适时申请更换尺码' }
       ],
       form: {
         applyType: '2',
         targetSizeName: '',
+        returnTrackingNo: '',
         applyNum: 1,
         applyAmount: '',
         reason: ''
@@ -96,7 +115,7 @@ export default {
   },
   computed: {
     currentApplyType() {
-      return this.applyTypeOptions.find((item) => item.value === this.form.applyType) || this.applyTypeOptions[1]
+      return this.applyTypeOptions.find((item) => item.value === this.form.applyType) || this.applyTypeOptions[0]
     },
     firstProduct() {
       const products = this.order.products || this.order.items || this.order.orderItems || []
@@ -105,7 +124,7 @@ export default {
   },
   onLoad(options) {
     this.orderId = options.id || options.orderId || ''
-    this.form.applyType = options.applyType || '2'
+    this.form.applyType = options.applyType === '3' ? '3' : '2'
     this.order = {
       id: this.orderId,
       orderNo: options.orderNo ? decodeURIComponent(options.orderNo) : '',
@@ -132,18 +151,38 @@ export default {
           if (!this.form.applyAmount) {
             this.form.applyAmount = this.order.payAmount || this.order.totalAmount || '0.00'
           }
+          this.loadSupplierInfo()
         })
         .catch((error) => {
           const localOrders = uni.getStorageSync('devOrders') || {}
           if (config.enableMockFallback && localOrders[this.orderId]) {
             this.order = localOrders[this.orderId]
             this.form.applyAmount = this.order.payAmount || this.order.totalAmount || '0.00'
+            this.loadSupplierInfo()
             return
           }
           uni.showToast({
             title: error.message || '订单加载失败',
             icon: 'none'
           })
+        })
+    },
+    loadSupplierInfo() {
+      const supplierId = this.order.supplierId || this.firstProduct.supplierId
+      if (!supplierId) {
+        this.supplierInfo = {}
+        return
+      }
+      getSupplierMessage(supplierId)
+        .then((res) => {
+          const data = res.data || res || {}
+          this.supplierInfo = {
+            supplierPhone: data.supplierPhone || data.supplier_phone || '',
+            supplierAddress: data.supplierAddress || data.supplier_address || ''
+          }
+        })
+        .catch(() => {
+          this.supplierInfo = {}
         })
     },
     selectApplyType(value) {
@@ -161,6 +200,9 @@ export default {
       }
       if (this.form.applyType === '3' && !this.form.targetSizeName.trim()) {
         return '请输入换货尺码'
+      }
+      if (!this.form.returnTrackingNo.trim()) {
+        return '请填写退货物流单号'
       }
       if (!this.form.reason.trim()) {
         return '请填写申请原因'
@@ -181,6 +223,7 @@ export default {
         studentName: this.order.studentName,
         applyType: this.form.applyType,
         targetSizeName: this.form.applyType === '3' ? this.form.targetSizeName.trim() : '',
+        returnTrackingNo: this.form.returnTrackingNo.trim(),
         reason: this.form.reason.trim(),
         applyNum: Number(this.form.applyNum),
         applyAmount: this.form.applyType === '3' ? 0 : Number(this.form.applyAmount || 0),
@@ -237,6 +280,7 @@ export default {
 }
 
 .order-card,
+.supplier-card,
 .form-card {
   background: #fff;
   border-radius: 12rpx;

@@ -31,6 +31,20 @@ public class SysFileController
     @PostMapping("upload")
     public R<SysFile> upload(MultipartFile file)
     {
+        return doUpload(file);
+    }
+
+    /**
+     * 供应商入驻专用文件上传（无需登录认证）
+     */
+    @PostMapping("settle/upload")
+    public R<SysFile> settleUpload(MultipartFile file)
+    {
+        return doUpload(file);
+    }
+
+    private R<SysFile> doUpload(MultipartFile file)
+    {
         try
         {
             log.info("开始上传文件");

@@ -1,6 +1,7 @@
 package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Map;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -73,6 +74,34 @@ public class XfptGroupNoticeController extends BaseController {
 @GetMapping("/progress/{noticeId}")
     public AjaxResult progressDetail(@PathVariable("noticeId") Long noticeId, Long supplierId) {
         return success(xfptGroupNoticeService.selectGroupNoticeOrderDetail(noticeId, supplierId));
+    }
+
+@Operation(summary = "供应商查看统购订单")
+@RequiresPermissions("school:tgjd:query")
+@GetMapping("/progress/order/{orderId}")
+    public AjaxResult viewProgressOrder(@PathVariable("orderId") Long orderId) {
+        return success(xfptGroupNoticeService.viewGroupNoticeOrder(orderId));
+    }
+
+@Operation(summary = "供应商开始制作统购订单")
+@RequiresPermissions("school:tgjd:edit")
+@PutMapping("/progress/order/{orderId}/start")
+    public AjaxResult startProgressOrder(@PathVariable("orderId") Long orderId) {
+        return toAjax(xfptGroupNoticeService.startGroupNoticeOrder(orderId));
+    }
+
+@Operation(summary = "供应商完成制作统购订单")
+@RequiresPermissions("school:tgjd:edit")
+@PutMapping("/progress/order/{orderId}/finish")
+    public AjaxResult finishProgressOrder(@PathVariable("orderId") Long orderId) {
+        return toAjax(xfptGroupNoticeService.finishGroupNoticeOrder(orderId));
+    }
+
+@Operation(summary = "供应商填写统购订单物流单号")
+@RequiresPermissions("school:tgjd:edit")
+@PutMapping("/progress/order/{orderId}/logistics")
+    public AjaxResult fillProgressOrderLogistics(@PathVariable("orderId") Long orderId, @RequestBody Map<String, String> body) {
+        return toAjax(xfptGroupNoticeService.fillGroupNoticeOrderLogistics(orderId, body == null ? null : body.get("logisticsNo")));
     }
 
     /**

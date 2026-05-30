@@ -32,7 +32,7 @@ import com.xfgl.common.core.web.page.TableDataInfo;
  */
 @Tag(name="订单信息管理")
 @RestController
-@RequestMapping("/orderInfo")
+@RequestMapping({"/orderInfo", "/school/orderInfo", "/xfglpt-school/orderInfo"})
 public class XfptOrderInfoController extends BaseController {
     @Autowired
     private IXfptOrderInfoService xfptOrderInfoService;
