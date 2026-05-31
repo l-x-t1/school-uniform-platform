@@ -186,7 +186,7 @@ public class XfptPdxzSureSupplierController extends BaseController {
             }
             //保存时间轴
             String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-            int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptPdxzSureSupplierVo.getXfptPdxzSureSupplier().getTeamId(), ProceConstants.PDXZ + "#" + format);
+            int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptPdxzSureSupplierVo.getXfptPdxzSureSupplier().getTeamId(), ProceConstants.JZTP + "#" + format);
             if(i==0){
                 log.error("保存时间轴失败：{}",xfptPdxzSureSupplierVo.toString());
                 throw new ServiceException("系统错误");

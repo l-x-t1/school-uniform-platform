@@ -236,13 +236,7 @@ public class XfptOrganizationModeController extends BaseController {
                 log.error("远程调用保存公告失败：{}", save1.getMsg());
                 throw new ServiceException("远程调用保存公告失败");
             }
-        }
-        //保存时间轴
-        String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-        int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptOrganizationMode.getTeamId(), ProceConstants.ZZTP + "#" + format);
-        if(i==0){
-            log.error("保存时间轴失败：{}",xfptOrganizationMode.toString());
-            throw new ServiceException("系统错误");
+            saveProcurementNoticeProcess(xfptOrganizationMode.getTeamId());
         }
         //保存采购信息报备
         XfptProcSummary xfptProcSummary=new XfptProcSummary();
@@ -270,9 +264,8 @@ public class XfptOrganizationModeController extends BaseController {
     @PutMapping
     @Transactional
     public AjaxResult edit(@RequestBody XfptOrganizationMode xfptOrganizationMode) {
-        if(StrUtil.isNotEmpty(xfptOrganizationMode.getIsRelease())){
-            remoteNoticService.updateStatus(xfptOrganizationMode.getId(),xfptOrganizationMode.getIsRelease(), SecurityConstants.INNER);
-        }
+        XfptOrganizationMode dbEntity = xfptOrganizationModeService.getById(xfptOrganizationMode.getId());
+        String oldRelease = dbEntity == null ? null : dbEntity.getIsRelease();
 //        //查询供应商是否有数据
 //        Long count = iXfptSupplierListService.lambdaQuery().eq(XfptSupplierList::getModeId,
 //                xfptOrganizationMode.getId() + "-" + PurchaseType.ZZXJ.getCode()).count();
@@ -300,7 +293,8 @@ public class XfptOrganizationModeController extends BaseController {
 //        }
         SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
         //判断是否发布到公告页面
-        if(NoticeStatus.FB.getCode().equals(xfptOrganizationMode.getIsRelease())){
+        if(NoticeStatus.FB.getCode().equals(xfptOrganizationMode.getIsRelease()) &&
+                !NoticeStatus.FB.getCode().equals(oldRelease)){
             XfptNotice xfptNotice = getXfptNotice(xfptOrganizationMode);
             Long parentId = dept.getParentId();
             R<List<SysDept>> deptDataList = remoteDeptService.getDeptListByDeptId(parentId, SecurityConstants.INNER);
@@ -317,6 +311,10 @@ public class XfptOrganizationModeController extends BaseController {
                 log.error("远程调用保存公告失败：{}", save1.getMsg());
                 throw new ServiceException("远程调用保存公告失败");
             }
+            saveProcurementNoticeProcess(xfptOrganizationMode.getTeamId());
+        } else if (dbEntity != null && StrUtil.isNotEmpty(xfptOrganizationMode.getIsRelease())
+                && NoticeStatus.FB.getCode().equals(oldRelease)) {
+            remoteNoticService.updateStatus(xfptOrganizationMode.getId(),xfptOrganizationMode.getIsRelease(), SecurityConstants.INNER);
         }
         //保存采购信息报备
         XfptProcSummary xfptProcSummary=new XfptProcSummary();
@@ -332,6 +330,14 @@ public class XfptOrganizationModeController extends BaseController {
             throw new ServiceException("系统错误");
         }
         return toAjax(xfptOrganizationModeService.updateById(xfptOrganizationMode));
+    }
+
+    private void saveProcurementNoticeProcess(Long teamId) {
+        String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        int i = iTeamMeetingService.updateTeamMeetingCurrOrder(teamId, ProceConstants.CGGGFB + "#" + format);
+        if(i==0){
+            throw new ServiceException("保存流程状态失败");
+        }
     }
 
     /**

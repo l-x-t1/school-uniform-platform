@@ -23,25 +23,29 @@ public class XfptProcessCGStatisticsVO {
     @Excel(name = "班子会议纪要报备学校数（所）")
     private Long bzhyTotal;
 
-    //家长购买意见征集报备学校数
-    @Excel(name = "家长购买意见征集报备学校数(所)")
+    //发布采购公告学校数
+    @Excel(name = "发布采购公告学校数(所)")
     private Long jzgmyjTotal;
 
-    //选用组织名单报备学校数
-    @Excel(name = "选用组织名单报备学校数(所)")
+    //备选公告展示学校数
+    @Excel(name = "备选公告展示学校数(所)")
     private Long zzmdTotal;
 
-    //选用组织选购模式报备学校数
-    @Excel(name = "选用组织选购模式报备学校数(所)")
+    //家长投票学校数
+    @Excel(name = "家长投票学校数(所)")
     private Long zzxgmsTotal;
 
-    //选购结果公示报备学校数
-    @Excel(name = "选购结果公示报备学校数(所)")
+    //投票结果公示学校数
+    @Excel(name = "投票结果公示学校数(所)")
     private Long xgjggsTotal;
 
-    //采购合同报备学校数
-    @Excel(name = "采购合同报备学校数(所)")
+    //签订合同学校数
+    @Excel(name = "签订合同学校数(所)")
     private Long cghtTotal;
+
+    //采购结果公告学校数
+    @Excel(name = "采购结果公告学校数(所)")
+    private Long cgjgggTotal;
 
     //产品质量检测报告报备学校数
     @Excel(name = "产品质量检验报告报备学校数(所)")

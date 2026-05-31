@@ -116,7 +116,7 @@
       <el-table-column
         align="center"
         prop="jzgmyjFlg"
-        label="家长购买意向征集管理"
+        label="发布采购公告"
       >
         <template slot-scope="scope">
           <el-tag v-if="scope.row.jzgmyjFlg == '已报备'" type="success">已报备</el-tag>
@@ -126,7 +126,7 @@
       <el-table-column
         align="center"
         prop="zzmdFlg"
-        label="选用组织名单报备与公开"
+        label="备选公告展示"
       >
         <template slot-scope="scope">
           <el-tag v-if="scope.row.zzmdFlg == '已报备'" type="success">已报备</el-tag>
@@ -136,32 +136,17 @@
       <el-table-column
         align="center"
         prop="xyzzxgmsFlg"
-        label="选用组织确定选购模式报备与公开"
+        label="家长投票"
       >
         <template slot-scope="scope">
           <el-tag v-if="scope.row.xyzzxgmsFlg == '已报备'" type="success">已报备</el-tag>
           <el-tag v-else type="danger">未报备</el-tag>
         </template>
       </el-table-column>
-      <!-- <el-table-column
-        align="center"
-        prop="fbggFlg"
-        label="发布公告"
-      />
-      <el-table-column
-        align="center"
-        prop="rwggFlg"
-        label="备选公告展示"
-      />
-      <el-table-column
-        align="center"
-        prop="zjpdFlg"
-        label="组建评定小组投票确定厂商"
-      /> -->
       <el-table-column
         align="center"
         prop="xgjggsFlg"
-        label="选用组织选购结果公示报备与公开"
+        label="投票结果公示"
       >
         <template slot-scope="scope">
           <el-tag v-if="scope.row.xgjggsFlg == '已报备'" type="success">已报备</el-tag>
@@ -171,10 +156,20 @@
       <el-table-column 
         align="center" 
         prop="cghtFlg" 
-        label="学校采购合同报备与公开" 
+        label="签订合同" 
       >
         <template slot-scope="scope">
           <el-tag v-if="scope.row.cghtFlg == '已报备'" type="success">已报备</el-tag>
+          <el-tag v-else type="danger">未报备</el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        align="center"
+        prop="cgjgggFlg"
+        label="采购结果公告"
+      >
+        <template slot-scope="scope">
+          <el-tag v-if="scope.row.cgjgggFlg == '已报备'" type="success">已报备</el-tag>
           <el-tag v-else type="danger">未报备</el-tag>
         </template>
       </el-table-column>
@@ -208,7 +203,7 @@
           <el-tag v-else type="danger">未报备</el-tag>
         </template>
       </el-table-column>
-      <!-- <el-table-column
+      <el-table-column
         align="center"
         prop="cggzzjFlag"
         label="学校校服采购工作总结"
@@ -217,7 +212,7 @@
           <el-tag v-if="scope.row.cggzzjFlag == '已报备'" type="success">已报备</el-tag>
           <el-tag v-else type="danger">未报备</el-tag>
         </template>
-      </el-table-column> -->
+      </el-table-column>
       <el-table-column align="center" label="操作">
         <template slot-scope="scope">
           <el-button type="text" @click="hanldeProcess(scope.row)"
@@ -267,7 +262,7 @@ export default {
         schoolName: "",
         parentDeptId: "",
         schoolType: "",
-        selectType: "9",
+        selectType: "12",
         bblbValue: "",
         startDate: "",
         endDate: "",

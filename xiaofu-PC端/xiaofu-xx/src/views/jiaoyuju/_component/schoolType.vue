@@ -59,45 +59,32 @@
       <el-table-column 
         align="center"
         prop="jzgmyjTotal"
-        label="家长购买意向征集管理学校数"
+        label="发布采购公告学校数"
       />
       <el-table-column 
         align="center"
         prop="zzmdTotal"
-        label="选用组织名单报备与公开学校数"
+        label="备选公告展示学校数"
       />
       <el-table-column 
         align="center"
         prop="zzxgmsTotal"
-        label="选用组织确定选购模式报备与公开学校数"
+        label="家长投票学校数"
       />
-      <!-- <el-table-column
-        width="200"
-        align="center"
-        prop="fbggTotal"
-        label="发布公告学校数"
-      />
-      <el-table-column
-        width="200"
-        align="center"
-        prop="rwggTotal"
-        label="备选公告展示学校数"
-      />
-      <el-table-column
-        width="200"
-        align="center"
-        prop="zjpdTotal"
-        label="组建评定小组投票确定厂商学校数"
-      /> -->
       <el-table-column 
         align="center"
         prop="xgjggsTotal"
-        label="选用组织选购结果公示报备与公开学校数"
+        label="投票结果公示学校数"
       />
       <el-table-column 
         align="center"
         prop="cghtTotal"
-        label="学校采购合同报备与公开学校数"
+        label="签订合同学校数"
+      />
+      <el-table-column 
+        align="center"
+        prop="cgjgggTotal"
+        label="采购结果公告学校数"
       />
       <el-table-column 
         align="center"

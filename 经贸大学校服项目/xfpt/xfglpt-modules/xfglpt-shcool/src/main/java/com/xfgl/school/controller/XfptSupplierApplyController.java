@@ -3,6 +3,8 @@ import java.util.List;
 import java.util.Arrays;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+
+import cn.hutool.core.util.StrUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +16,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
+import com.xfgl.common.core.exception.ServiceException;
+import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.system.api.domain.SysDept;
 import com.xfgl.common.security.annotation.RequiresPermissions;
+import com.xfgl.school.domain.XfptOrganizationMode;
 import com.xfgl.school.domain.XfptSupplierApply;
+import com.xfgl.school.service.IXfptOrganizationModeService;
 import com.xfgl.school.service.IXfptSupplierApplyService;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
@@ -36,6 +43,8 @@ import com.xfgl.common.core.web.page.TableDataInfo;
 public class XfptSupplierApplyController extends BaseController {
     @Autowired
     private IXfptSupplierApplyService xfptSupplierApplyService;
+    @Autowired
+    private IXfptOrganizationModeService xfptOrganizationModeService;
 
 /**
  * 查询供应商报名列表
@@ -81,6 +90,29 @@ public class XfptSupplierApplyController extends BaseController {
     @Log(title = "供应商报名" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSupplierApply xfptSupplierApply) {
+            XfptOrganizationMode organizationMode = xfptOrganizationModeService.getById(xfptSupplierApply.getNoticeId());
+            if (organizationMode == null) {
+                throw new ServiceException("采购公告不存在");
+            }
+            if (organizationMode.getSignupLimit() != null && organizationMode.getSignupLimit() > 0) {
+                long currentCount = xfptSupplierApplyService.lambdaQuery()
+                        .eq(XfptSupplierApply::getNoticeId, xfptSupplierApply.getNoticeId())
+                        .ne(XfptSupplierApply::getApplyStatus, "2")
+                        .count();
+                if (currentCount >= organizationMode.getSignupLimit()) {
+                    throw new ServiceException("当前采购公告报名人数已满");
+                }
+            }
+            SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
+            if (xfptSupplierApply.getDeptId() == null) {
+                xfptSupplierApply.setDeptId(dept.getDeptId());
+            }
+            if (xfptSupplierApply.getSchoolId() == null) {
+                xfptSupplierApply.setSchoolId(dept.getDeptId());
+            }
+            if (StrUtil.isBlank(xfptSupplierApply.getApplyStatus())) {
+                xfptSupplierApply.setApplyStatus("1");
+            }
             return toAjax(xfptSupplierApplyService.save(xfptSupplierApply));
     }
 

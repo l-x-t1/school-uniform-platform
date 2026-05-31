@@ -58,39 +58,11 @@
         @success="handleSuccess"
       />
 
-      <!-- 2. 家长购买意向征集管理 -->
-      <parent-purchase
-        @handleGetProcessMenu="handleGetProcessMenu"
-        v-if="activeMenu === 1"
-        :parent-purchase-list="parentPurchaseList"
-        :formId="formId"
-        @add-parent-purchase="$emit('add-parent-purchase')"
-        @view-parent-purchase="$emit('view-parent-purchase', $event)"
-        @bianji-parent-purchase="$emit('bianji-parent-purchase', $event)"
-      />
-
-      <!-- 3. 选用组织名单报备与公开 -->
-      <organization-list
-        @handleGetProcessMenu="handleGetProcessMenu"
-        v-if="activeMenu == 2"
-        :formId="formId"
-        :zuzhi-detail="zuzhiDetail"
-        @import-zuzhi="$emit('import-zuzhi')"
-      />
-
-      <!-- 4. 选用组织确定选购模式报备与公开 -->
-      <purchase-mode
-        @handleGetProcessMenu="cgTypeChoose"
-        @handlegetModeByTeamId="handlegetModeByTeamId"
-        :formId="formId"
-        v-if="activeMenu == 3"
-      /> 
-
-      <!-- 5. 发布公告 -->
+      <!-- 2. 发布采购公告 -->
       <enterprise-mode-one
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 4"
+        v-if="activeMenu === 1"
         :active-xs-name="activeXSName"
         :table-data="tableData"
         @add-xuagou="$emit('add-xuagou')"
@@ -98,33 +70,37 @@
       /> 
 
 
-      <!-- 6. 备选公告展示 -->
+      <!-- 3. 备选公告展示 -->
       <Ruweigonggao
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 5"
+        v-if="activeMenu === 2"
       />
-      <!-- 7. 组建评定小组投票确定厂商 -->
+      <!-- 4. 家长投票 -->
       <Zuzhi
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 6"
+        v-if="activeMenu === 3"
       />
 
-      <!-- 8. 选用组织选购结果公示报备与公开 -->
+      <!-- 5. 投票结果公示 -->
       <purchase-result
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 7"
+        v-if="activeMenu === 4"
+        stage-type="1"
+        step-title="投票结果公示"
+        add-button-text="新增投票结果公示"
+        publish-button-text="手动公示"
         :table-gs="tableGS"
         @add-xuangou="$emit('add-xuangou')"
       />
 
-      <!-- 9. 学校采购合同报备与公开 -->
+      <!-- 6. 签订合同 -->
       <purchase-contract
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 8"
+        v-if="activeMenu === 5"
         :table-gs="tableGS"
         @add-hezuo="$emit('add-hezuo')"
         @see-info="$emit('see-info', $event)"
@@ -132,11 +108,24 @@
         @handle-edit="$emit('handle-edit', $event)"
       />
 
-      <!-- 10. 产品质量检验报告报备与公开 -->
+      <!-- 7. 发采购结果公告让家长购买 -->
+      <purchase-result
+        @handleGetProcessMenu="handleGetProcessMenu"
+        :formId="formId"
+        v-if="activeMenu === 6"
+        stage-type="2"
+        step-title="采购结果公告"
+        add-button-text="发布采购结果公告"
+        publish-button-text="发布采购结果公告"
+        :table-gs="tableGS"
+        @add-xuangou="$emit('add-xuangou')"
+      />
+
+      <!-- 8. 产品质量检验报告报备与公开 -->
       <quality-report
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 9"
+        v-if="activeMenu === 7"
         :table-gs="tableGS"
         @add-cs="$emit('add-cs')"
         @see-zj="$emit('see-zj', $event)"
@@ -144,28 +133,28 @@
         @see-info="$emit('see-info', $event)"
       />
 
-      <!-- 11. 选用组织家长满意度总结报告报备与公开 -->
+      <!-- 9. 选用组织家长满意度总结报告报备与公开 -->
       <satisfaction-report
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 10"
+        v-if="activeMenu === 8"
         :table-gs="tableGS"
         @add-zjbg="$emit('add-zjbg')"
         @see-yijian="$emit('see-yijian', $event)"
         @edit-dc="$emit('edit-dc', $event)"
       />
 
-      <!-- 12. 采购信息报备 -->
+      <!-- 10. 采购信息报备 -->
       <Caigoubaobei
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 11"
+        v-if="activeMenu === 9"
       />
-      <!-- 13. 学校校服采购工作总结 -->
+      <!-- 11. 学校校服采购工作总结 -->
       <procurementWork
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
-        v-if="activeMenu === 12"
+        v-if="activeMenu === 10"
       ></procurementWork>
     </div>
   </div>
@@ -283,33 +272,31 @@ export default {
       processStates: [],
       modeProcess: null,
       activeMenu: 0,
-      menu:[ { title: "班子会议纪要报备与公开", type: 0 },
-        { title: "家长购买意向征集管理", type: 1 },
-        { title: "选用组织名单报备与公开", type: 2 },
-        { title: "选用组织确定选购模式报备与公开", type: 3 }, 
-        { title: "发布公告", type: 4, value: 0 }, 
-        { title: "备选公告展示", type:5 },
-        { title: "组建评定小组投票确定厂商", type: 6 },
-        { title: "选用组织选购结果公示报备与公开", type: 7 },
-        { title: "学校采购合同报备与公开", type: 8 },
-        { title: "产品质量检验报告报备与公开", type: 9 },
-        { title: "选用组织家长满意度总结报告报备与公开", type: 10 },
-        { title: "采购信息报备", type: 11 },
-        { title: "学校校服采购工作总结", type: 12 },],
+      menu:[ 
+        { title: "班子会议纪要报备与公开", type: 0 },
+        { title: "发布采购公告", type: 1 },
+        { title: "备选公告展示", type: 2 },
+        { title: "家长投票", type: 3 },
+        { title: "投票结果公示", type: 4 },
+        { title: "签订合同", type: 5 },
+        { title: "发采购结果公告让家长购买", type: 6 },
+        { title: "产品质量检验报告报备与公开", type: 7 },
+        { title: "选用组织家长满意度总结报告报备与公开", type: 8 },
+        { title: "采购信息报备", type: 9 },
+        { title: "学校校服采购工作总结", type: 10 },
+      ],
       detailMenu: [
-         { title: "班子会议纪要报备与公开", type: 0 },
-        { title: "家长购买意向征集管理", type: 1 },
-        { title: "选用组织名单报备与公开", type: 2 },
-        { title: "选用组织确定选购模式报备与公开", type: 3 }, 
-        { title: "发布公告", type: 4, value: 0 }, 
-        { title: "备选公告展示", type:5 },
-        { title: "组建评定小组投票确定厂商", type: 6 },
-        { title: "选用组织选购结果公示报备与公开", type: 7 },
-        { title: "学校采购合同报备与公开", type: 8 },
-        { title: "产品质量检验报告报备与公开", type: 9 },
-        { title: "选用组织家长满意度总结报告报备与公开", type: 10 },
-        { title: "采购信息报备", type: 11 },
-        { title: "学校校服采购工作总结", type: 12 },
+        { title: "班子会议纪要报备与公开", type: 0 },
+        { title: "发布采购公告", type: 1 },
+        { title: "备选公告展示", type: 2 },
+        { title: "家长投票", type: 3 },
+        { title: "投票结果公示", type: 4 },
+        { title: "签订合同", type: 5 },
+        { title: "发采购结果公告让家长购买", type: 6 },
+        { title: "产品质量检验报告报备与公开", type: 7 },
+        { title: "选用组织家长满意度总结报告报备与公开", type: 8 },
+        { title: "采购信息报备", type: 9 },
+        { title: "学校校服采购工作总结", type: 10 },
       ],
       cgType:null,//0 选用组织自主确定 2 招投标
     };
@@ -323,23 +310,13 @@ export default {
     getCgType(){
       getCgType(this.formId == null ? "" : this.formId).then((res) => {
         this.cgType = res.msg;
-        if(res.msg == 0){
-          this.detailMenu = [...this.menu];
-        }else if(res.msg == 2){
-          this.detailMenu = [...this.menu];
-          this.detailMenu.splice(5,2);
-        }else{
-          this.detailMenu = [...this.menu];
-        }  
+        this.detailMenu = [...this.menu];
       })
     this.handleGetProcessMenu();
     },
     handleGetProcessMenu() { 
       getProcessMenu(this.formId == null ? "" : this.formId).then((res) => {
         this.processStates = res.data;
-        if(this.cgType == 2){
-          this.processStates.splice(5,2);
-        }
       });
     },
     handleMenuClick(item, index) {
@@ -354,12 +331,7 @@ export default {
     },
     cgTypeChoose(res){
       this.cgType = res;
-      if(this.cgType == 0){
-        this.detailMenu = [...this.menu];
-      }else{
-        this.detailMenu = [...this.menu];
-        this.detailMenu.splice(5,2);
-      }
+      this.detailMenu = [...this.menu];
       this.handleGetProcessMenu();
     },
     handlegetModeByTeamId() {

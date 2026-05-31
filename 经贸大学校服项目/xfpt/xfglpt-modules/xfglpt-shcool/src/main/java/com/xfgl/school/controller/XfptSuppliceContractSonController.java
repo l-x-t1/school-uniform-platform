@@ -158,34 +158,6 @@ public class XfptSuppliceContractSonController extends BaseController {
             log.error("保存采购信息报备失败：{}", xfptSuppliceContractSon.toString());
             throw new ServiceException("系统错误");
         }
-        //增加公告发布
-        XfptNotice xfptNotice = new XfptNotice();
-        xfptNotice.setTitle(xfptSuppliceContractSon.getContractName());
-        xfptNotice.setGgFile(xfptSuppliceContractSon.getUrl());
-        xfptNotice.setType(NoticeTypeStatus.CJGG.getCode());
-        xfptNotice.setStatus(NoticeStatus.FB.getCode());
-        //生成30到100随机数
-        int i = RandomUtil.randomInt(30, 100);
-        xfptNotice.setReadCount(Long.valueOf(i));
-        //xfptNotice.setFileType(xfptAnnoResults.getFileType());
-        xfptNotice.setCatagory(Constants.CGGG);
-        xfptNotice.setEnteId(Long.valueOf(xfptSuppliceContractSon.getSuppliceContractId()));
-        xfptNotice.setRemark(String.valueOf(xfptSuppliceContract.getDeptId()));
-        Long parentId = dept.getParentId();
-        R<List<SysDept>> deptDataList = remoteDeptService.getDeptListByDeptId(parentId, SecurityConstants.INNER);
-        if (deptDataList == null || deptDataList.getCode() != 200) {
-            log.error("远程调用获取部门数据列表失败：{}", deptDataList.getMsg());
-            throw new ServiceException("远程调用获取部门数据列表失败");
-        }
-        SysDept sysDept = deptDataList.getData().get(0);
-        xfptNotice.setArea(String.valueOf(sysDept.getDeptId()));
-        xfptNotice.setAreaname(sysDept.getDeptName());
-        xfptNotice.setDeptname(dept.getDeptName());
-                R<Boolean> save = remoteNoticService.save(xfptNotice, SecurityConstants.INNER);
-        if (save == null || save.getCode() != 200) {
-            log.error("远程调用保存公告失败：{}", save.getMsg());
-            throw new ServiceException("远程调用保存公告失败");
-        }
         xfptSuppliceContractSon.setFzrdh(mpUtil.encrypt(xfptSuppliceContractSon.getFzrdh(),mpUtil.getToken()));
         xfptSuppliceContractSon.setIntegrity(mpUtil.mac(xfptSuppliceContractSon.getUrl()));
         return toAjax(xfptSuppliceContractSonService.save(xfptSuppliceContractSon));

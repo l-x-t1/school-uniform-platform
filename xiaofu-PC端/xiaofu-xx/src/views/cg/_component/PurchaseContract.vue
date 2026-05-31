@@ -523,6 +523,29 @@
             >
           </FileUpload>
         </el-form-item>
+        <el-form-item label="电子合同内容：" prop="electronicContent">
+          <el-input
+            type="textarea"
+            :rows="6"
+            placeholder="请输入电子合同内容"
+            v-model="addSupplierHetong.electronicContent"
+            :readonly="isViewMode"
+          />
+        </el-form-item>
+        <el-form-item label="合同模板：" prop="templateFile">
+          <FileUpload
+            :fileType="['doc', 'docx', 'pdf']"
+            v-model="addSupplierHetong.templateFile"
+            :disabled="isViewMode"
+          />
+        </el-form-item>
+        <el-form-item label="纸质合同图片：" prop="paperContractFiles">
+          <FileUpload
+            :fileType="['jpg', 'jpeg', 'png', 'pdf']"
+            v-model="addSupplierHetong.paperContractFiles"
+            :disabled="isViewMode"
+          />
+        </el-form-item>
 
 
       </el-form>
@@ -901,6 +924,9 @@ export default {
         contractDeadline: null,
         contractDeadlineStr: "",
         fileType: 1,
+        electronicContent: "",
+        templateFile: "",
+        paperContractFiles: "",
         count: "",
         dj: "",
         zj: "",
@@ -1334,6 +1360,9 @@ export default {
         contractDeadlineStr: "",
         isPublic: false,
         fileType: 1,
+        electronicContent: "",
+        templateFile: "",
+        paperContractFiles: "",
         count: "",
         dj: "",
         zj: "",

@@ -92,6 +92,13 @@ public class XfptOrganizationMode extends BaseEntity {
     private Date bmjzTime;
 
     /**
+     * 报名上限
+     */
+    @Excel(name = "报名上限")
+    @Schema(description = "报名上限")
+    private Integer signupLimit;
+
+    /**
      * 是否发布
      */
     @Excel(name = "是否发布")

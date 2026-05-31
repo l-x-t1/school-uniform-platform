@@ -20,6 +20,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="type"    column="type"    />
         <result property="quesId"    column="ques_id"    />
         <result property="bmjzTime"    column="bmjz_time"    />
+        <result property="signupLimit"    column="signup_limit"    />
         <result property="isRelease"    column="is_release"    />
         <result property="inviteFile"    column="invite_file"    />
         <result property="deptId"    column="dept_id"    />
@@ -28,7 +29,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptOrganizationModeVo">
-        select dept_id,ancestors,team_id,id, title, is_samples_pic, samples_pic, update_time, update_by, create_time, create_by, del_flag, remark, other_file, notice_file, type, ques_id, bmjz_time, is_release, invite_file from xfpt_organization_mode
+        select dept_id,ancestors,team_id,id, title, is_samples_pic, samples_pic, update_time, update_by, create_time, create_by, del_flag, remark, other_file, notice_file, type, ques_id, bmjz_time, signup_limit, is_release, invite_file from xfpt_organization_mode
     </sql>
 
     <select id="selectXfptOrganizationModeList" parameterType="XfptOrganizationMode" resultMap="XfptOrganizationModeResult">
@@ -42,6 +43,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="type != null  and type != ''"> and type = #{type}</if>
             <if test="quesId != null "> and ques_id = #{quesId}</if>
             <if test="bmjzTime != null "> and bmjz_time = #{bmjzTime}</if>
+            <if test="signupLimit != null "> and signup_limit = #{signupLimit}</if>
             <if test="teamId != null "> and team_id = #{teamId}</if>
             <if test="isRelease != null  and isRelease != ''"> and is_release = #{isRelease}</if>
             <if test="inviteFile != null  and inviteFile != ''"> and invite_file = #{inviteFile}</if>
@@ -75,6 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="type != null">type,</if>
             <if test="quesId != null">ques_id,</if>
             <if test="bmjzTime != null">bmjz_time,</if>
+            <if test="signupLimit != null">signup_limit,</if>
             <if test="isRelease != null">is_release,</if>
             <if test="inviteFile != null">invite_file,</if>
          </trim>
@@ -93,6 +96,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="type != null">#{type},</if>
             <if test="quesId != null">#{quesId},</if>
             <if test="bmjzTime != null">#{bmjzTime},</if>
+            <if test="signupLimit != null">#{signupLimit},</if>
             <if test="isRelease != null">#{isRelease},</if>
             <if test="inviteFile != null">#{inviteFile},</if>
          </trim>
@@ -115,6 +119,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="type != null">type = #{type},</if>
             <if test="quesId != null">ques_id = #{quesId},</if>
             <if test="bmjzTime != null">bmjz_time = #{bmjzTime},</if>
+            <if test="signupLimit != null">signup_limit = #{signupLimit},</if>
             <if test="isRelease != null">is_release = #{isRelease},</if>
             <if test="inviteFile != null">invite_file = #{inviteFile},</if>
         </trim>

@@ -6771,4 +6771,99 @@ END
 WHERE oi.`del_flag` = '0'
   AND oi.`order_type` = '1';
 
+-- sync purchase process 11-step schema updates
+SET @has_org_mode_signup_limit := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'xfpt_organization_mode'
+    AND COLUMN_NAME = 'signup_limit'
+);
+
+SET @org_mode_signup_limit_ddl := IF(
+  @has_org_mode_signup_limit = 0,
+  'ALTER TABLE `xfpt_organization_mode` ADD COLUMN `signup_limit` int NULL COMMENT ''报名上限''',
+  'SELECT 1'
+);
+
+PREPARE stmt_org_mode_signup_limit FROM @org_mode_signup_limit_ddl;
+EXECUTE stmt_org_mode_signup_limit;
+DEALLOCATE PREPARE stmt_org_mode_signup_limit;
+
+SET @has_anno_results_stage_type := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'xfpt_anno_results'
+    AND COLUMN_NAME = 'stage_type'
+);
+
+SET @anno_results_stage_type_ddl := IF(
+  @has_anno_results_stage_type = 0,
+  'ALTER TABLE `xfpt_anno_results` ADD COLUMN `stage_type` char(1) NOT NULL DEFAULT ''1'' COMMENT ''阶段类型：1投票结果公示 2采购结果公告''',
+  'SELECT 1'
+);
+
+PREPARE stmt_anno_results_stage_type FROM @anno_results_stage_type_ddl;
+EXECUTE stmt_anno_results_stage_type;
+DEALLOCATE PREPARE stmt_anno_results_stage_type;
+
+UPDATE `xfpt_anno_results`
+SET `stage_type` = '1'
+WHERE `stage_type` IS NULL OR `stage_type` = '';
+
+SET @has_contract_son_electronic_content := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'xfpt_supplice_contract_son'
+    AND COLUMN_NAME = 'electronic_content'
+);
+
+SET @contract_son_electronic_content_ddl := IF(
+  @has_contract_son_electronic_content = 0,
+  'ALTER TABLE `xfpt_supplice_contract_son` ADD COLUMN `electronic_content` longtext NULL COMMENT ''电子合同内容''',
+  'SELECT 1'
+);
+
+PREPARE stmt_contract_son_electronic_content FROM @contract_son_electronic_content_ddl;
+EXECUTE stmt_contract_son_electronic_content;
+DEALLOCATE PREPARE stmt_contract_son_electronic_content;
+
+SET @has_contract_son_template_file := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'xfpt_supplice_contract_son'
+    AND COLUMN_NAME = 'template_file'
+);
+
+SET @contract_son_template_file_ddl := IF(
+  @has_contract_son_template_file = 0,
+  'ALTER TABLE `xfpt_supplice_contract_son` ADD COLUMN `template_file` varchar(500) NULL COMMENT ''合同模板文件''',
+  'SELECT 1'
+);
+
+PREPARE stmt_contract_son_template_file FROM @contract_son_template_file_ddl;
+EXECUTE stmt_contract_son_template_file;
+DEALLOCATE PREPARE stmt_contract_son_template_file;
+
+SET @has_contract_son_paper_contract_files := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'xfpt_supplice_contract_son'
+    AND COLUMN_NAME = 'paper_contract_files'
+);
+
+SET @contract_son_paper_contract_files_ddl := IF(
+  @has_contract_son_paper_contract_files = 0,
+  'ALTER TABLE `xfpt_supplice_contract_son` ADD COLUMN `paper_contract_files` varchar(2000) NULL COMMENT ''纸质合同图片''',
+  'SELECT 1'
+);
+
+PREPARE stmt_contract_son_paper_contract_files FROM @contract_son_paper_contract_files_ddl;
+EXECUTE stmt_contract_son_paper_contract_files;
+DEALLOCATE PREPARE stmt_contract_son_paper_contract_files;
+
 -- Dump completed on 2026-05-04 19:18:33

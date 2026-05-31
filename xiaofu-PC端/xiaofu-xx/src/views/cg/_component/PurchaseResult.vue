@@ -1,7 +1,7 @@
 <template>
   <div class="detail-panel">
     <div class="header" style="display: flex; align-items: center">
-      <h3>选用组织选购结果公示报备与公开</h3>
+      <h3>{{ stepTitle }}</h3>
       <div style="margin-left: 20px">
         <el-button
           type="primary"
@@ -9,7 +9,7 @@
           v-hasPermi="['xfpt:xgjggk-add']"
           @click="handleAdd"
           v-if="resultsList.length == 0"
-          >发布选购结果</el-button
+          >{{ addButtonText }}</el-button
         >
       </div>
     </div>
@@ -19,7 +19,7 @@
       :data="resultsList"
     >
       <el-table-column label="序号" align="center" type="index" />
-      <el-table-column label="公示标题" align="center" prop="noticeTitle" />
+      <el-table-column :label="titleLabel" align="center" prop="noticeTitle" />
       <el-table-column label="选购模式" align="center" prop="reportMode">
         <template slot-scope="scope">
           <dict-tag :options="dict.type.cgmslx" :value="scope.row.reportMode" />
@@ -75,7 +75,7 @@
             icon="el-icon-top"
             @click="handleFB(scope.row)"
             v-hasPermi="['xfpt:xgjggk-fb']"
-            >发布</el-button
+            >{{ publishButtonText }}</el-button
           >
           <el-button
             size="mini"
@@ -97,7 +97,7 @@
       append-to-body
     >
       <el-form ref="form" :model="form" :rules="rules" label-width="140px">
-        <el-form-item label="成交公告名称" prop="noticeTitle">
+        <el-form-item :label="titleLabel" prop="noticeTitle">
           <el-input
             v-model="form.noticeTitle"
             placeholder="xx市xx区xx学校20xx-20xx学年学校服务类采购成交公告"
@@ -105,7 +105,7 @@
           />
         </el-form-item>
 
-        <el-form-item label="成交公告" prop="noticeFile">
+        <el-form-item :label="fileLabel" prop="noticeFile">
           <file-upload
             :fileType="['pdf']"
             v-model="form.noticeFile"
@@ -490,6 +490,22 @@ export default {
       type: String,
       default: "",
     },
+    stageType: {
+      type: String,
+      default: "1",
+    },
+    stepTitle: {
+      type: String,
+      default: "投票结果公示",
+    },
+    addButtonText: {
+      type: String,
+      default: "新增投票结果公示",
+    },
+    publishButtonText: {
+      type: String,
+      default: "手动公示",
+    },
   },
   data() {
     return {
@@ -551,6 +567,14 @@ export default {
       xgType: false,
     };
   },
+  computed: {
+    titleLabel() {
+      return this.stageType === "2" ? "采购结果公告名称" : "投票结果公示名称";
+    },
+    fileLabel() {
+      return this.stageType === "2" ? "采购结果公告文件" : "投票结果公示文件";
+    },
+  },
   created() {
 
     this.form.teamId = this.formId;
@@ -595,7 +619,7 @@ export default {
     },
     getList() {
       this.loading = true;
-      listResults({ ...this.queryParams, teamId: this.formId }).then(
+      listResults({ ...this.queryParams, teamId: this.formId, stageType: this.stageType }).then(
         (response) => {
           this.resultsList = response.rows;
           this.total = response.total;
@@ -620,6 +644,8 @@ export default {
         otherFile: null,
         cgsj: null,
         teamId: this.formId,
+        stageType: this.stageType,
+        isRelease: "0",
         sonDataList: [...this.formIdList],
       };
       this.resetForm("form");
@@ -630,7 +656,7 @@ export default {
       this.reset();
       this.open = true;
       this.xgType = true
-      this.title = "发布选购结果";
+      this.title = this.addButtonText;
       this.getInfo();
     },
     handleUpdate(row) {
@@ -638,8 +664,9 @@ export default {
       const id = row.id;
       getResults(id).then((response) => {
         this.form = response.data;
+        this.form.stageType = this.form.stageType || this.stageType;
         this.open = true;
-        this.title = "修改选用组织选购结果公示报备与公开";
+        this.title = "修改" + this.stepTitle;
       });
     },
     submitForm() {
@@ -691,6 +718,7 @@ export default {
       this.xgType = false
       getResults(row.id).then((response) => {
         this.form = response.data;
+        this.form.stageType = this.form.stageType || this.stageType;
         // // 检查文件类型
         // this.form.noticeFile = this.checkIsImage(this.form.noticeFile);
 
@@ -716,10 +744,12 @@ export default {
           const updateData = {
             id: row.id,
             isRelease: "1",
+            stageType: this.stageType,
           };
           updateResults(updateData).then(() => {
-            this.$modal.msgSuccess("发布成功");
+            this.$modal.msgSuccess(this.publishButtonText + "成功");
             this.getList();
+            this.$emit("handleGetProcessMenu");
           });
         })
         .catch(() => {});

@@ -157,6 +157,9 @@ public class XfptAnnoResultsController extends BaseController {
     @PostMapping
     @Transactional
     public AjaxResult add(@RequestBody XfptAnnoResults xfptAnnoResults) {
+        if (StrUtil.isBlank(xfptAnnoResults.getStageType())) {
+            xfptAnnoResults.setStageType("1");
+        }
         //查询选购模式
         List<XfptReportMode> list = iXfptReportModeService.lambdaQuery().eq(XfptReportMode::getTeamId, xfptAnnoResults.getTeamId()).list();
         if (CollUtil.isEmpty(list)) {
@@ -166,31 +169,16 @@ public class XfptAnnoResultsController extends BaseController {
         SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
         xfptAnnoResults.setAncestors(dept.getAncestors());
         xfptAnnoResults.setDeptId(dept.getDeptId());
-        xfptAnnoResults.setIsRelease(NoticeStatus.FB.getCode());
+        if (StrUtil.isBlank(xfptAnnoResults.getIsRelease())) {
+            xfptAnnoResults.setIsRelease(NoticeStatus.WFB.getCode());
+        }
         boolean save1 = xfptAnnoResultsService.save(xfptAnnoResults);
         if (!save1) {
             log.error("保存选用组织选购结果公示报备与公开失败：{}", xfptAnnoResults.toString());
             throw new ServiceException("保存失败");
         }
-        Long parentId = dept.getParentId();
-        R<List<SysDept>> deptDataList = remoteDeptService.getDeptListByDeptId(parentId, SecurityConstants.INNER);
-        if (deptDataList == null || deptDataList.getCode() != 200) {
-            log.error("远程调用获取部门数据列表失败：{}", deptDataList.getMsg());
-            throw new ServiceException("远程调用获取部门数据列表失败");
-        }
-        SysDept sysDept2 = deptDataList.getData().get(0);
-        XfptNotice xfptNotice = getXfptNotice(xfptAnnoResults, list,sysDept2);
-        R<Boolean> save = remoteNoticService.save(xfptNotice, SecurityConstants.INNER);
-        if (save == null || save.getCode() != 200) {
-            log.error("远程调用保存公告失败：{}", save.getMsg());
-            throw new ServiceException("远程调用保存公告失败");
-        }
-        //保存时间轴
-        String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-        int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptAnnoResults.getTeamId(), ProceConstants.JGGS + "#" + format);
-        if (i == 0) {
-            log.error("保存时间轴失败：{}", xfptAnnoResults.toString());
-            throw new ServiceException("系统错误");
+        if (NoticeStatus.FB.getCode().equals(xfptAnnoResults.getIsRelease())) {
+            publishResultNotice(xfptAnnoResults, list, dept);
         }
         //保存报备信息
         //保存采购信息报备
@@ -241,7 +229,13 @@ public class XfptAnnoResultsController extends BaseController {
    // @RequiresPermissions("school:results:edit")
     @Log(title = "选用组织选购结果公示报备与公开", businessType = BusinessType.UPDATE)
     @PutMapping
+    @Transactional
     public AjaxResult edit(@RequestBody XfptAnnoResults xfptAnnoResults) {
+        if (StrUtil.isBlank(xfptAnnoResults.getStageType())) {
+            xfptAnnoResults.setStageType("1");
+        }
+        XfptAnnoResults dbEntity = xfptAnnoResultsService.getById(xfptAnnoResults.getId());
+        String oldRelease = dbEntity == null ? null : dbEntity.getIsRelease();
         //保存报备信息
         //保存采购信息报备
         XfptProcSummary xfptProcSummary=new XfptProcSummary();
@@ -254,7 +248,22 @@ public class XfptAnnoResultsController extends BaseController {
             log.error("保存采购信息报备失败：{}", xfptAnnoResults.toString());
             throw new ServiceException("系统错误");
         }
-        return toAjax(xfptAnnoResultsService.updateById(xfptAnnoResults));
+        boolean updated = xfptAnnoResultsService.updateById(xfptAnnoResults);
+        if (!updated) {
+            return toAjax(false);
+        }
+        if (NoticeStatus.FB.getCode().equals(xfptAnnoResults.getIsRelease())
+                && !NoticeStatus.FB.getCode().equals(oldRelease)) {
+            List<XfptReportMode> list = iXfptReportModeService.lambdaQuery().eq(XfptReportMode::getTeamId, xfptAnnoResults.getTeamId()).list();
+            if (CollUtil.isEmpty(list)) {
+                throw new ServiceException("未查询到选购模式");
+            }
+            SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
+            publishResultNotice(xfptAnnoResultsService.getById(xfptAnnoResults.getId()), list, dept);
+        } else if (StrUtil.isNotBlank(oldRelease) && !oldRelease.equals(xfptAnnoResults.getIsRelease())) {
+            remoteNoticService.updateStatus(xfptAnnoResults.getId(), xfptAnnoResults.getIsRelease(), SecurityConstants.INNER);
+        }
+        return toAjax(true);
     }
 
 
@@ -293,5 +302,27 @@ public class XfptAnnoResultsController extends BaseController {
     @Log(title = "撤回公告", businessType = BusinessType.UPDATE)
     public AjaxResult withdraw(Long id){
         return toAjax(xfptAnnoResultsService.withdraw(id));
+    }
+
+    private void publishResultNotice(XfptAnnoResults xfptAnnoResults, List<XfptReportMode> list, SysDept dept) {
+        Long parentId = dept.getParentId();
+        R<List<SysDept>> deptDataList = remoteDeptService.getDeptListByDeptId(parentId, SecurityConstants.INNER);
+        if (deptDataList == null || deptDataList.getCode() != 200) {
+            log.error("远程调用获取部门数据列表失败：{}", deptDataList == null ? "" : deptDataList.getMsg());
+            throw new ServiceException("远程调用获取部门数据列表失败");
+        }
+        SysDept sysDept2 = deptDataList.getData().get(0);
+        XfptNotice xfptNotice = getXfptNotice(xfptAnnoResults, list,sysDept2);
+        R<Boolean> save = remoteNoticService.save(xfptNotice, SecurityConstants.INNER);
+        if (save == null || save.getCode() != 200) {
+            log.error("远程调用保存公告失败：{}", save == null ? "" : save.getMsg());
+            throw new ServiceException("远程调用保存公告失败");
+        }
+        String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
+        String processName = "2".equals(xfptAnnoResults.getStageType()) ? ProceConstants.CGJGGG : ProceConstants.TPJGGS;
+        int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptAnnoResults.getTeamId(), processName + "#" + format);
+        if (i == 0) {
+            throw new ServiceException("保存流程状态失败");
+        }
     }
 }

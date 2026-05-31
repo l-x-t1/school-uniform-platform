@@ -15,6 +15,10 @@ public class ProceConstants {
     public static final String RWZS = "企业入围展示";
     public static final String PDXZ = "评定小组确定厂商";
     public static final String JGGS = "选用组织选购结果公示报备与公开";
+    public static final String CGGGFB = "发布采购公告";
+    public static final String BXGGZS = "备选公告展示";
+    public static final String TPJGGS = "投票结果公示";
+    public static final String CGJGGG = "采购结果公告";
     public static final String HTGK = "学校采购合同报备与公开";
     public static final String ZJBGGK = "产品质量检验报告报备与公开";
     public static final String MDYBB = "选用组织家长满意度总结报告报备与公开";

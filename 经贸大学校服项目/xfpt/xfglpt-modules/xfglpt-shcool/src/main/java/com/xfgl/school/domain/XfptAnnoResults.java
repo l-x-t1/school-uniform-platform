@@ -129,6 +129,11 @@ public class XfptAnnoResults extends BaseEntity {
     private String isRelease;
 
     /**
+     * 阶段类型：1-投票结果公示 2-采购结果公告
+     */
+    private String stageType;
+
+    /**
      * 选购模式
      */
     @TableField(exist = false)
