@@ -81,7 +81,7 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
 
         public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query);
 
-        public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId);
+        public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long orderId, Long supplierId);
 
         public XfptOrderInfo viewGroupNoticeOrder(Long orderId);
 

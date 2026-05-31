@@ -70,9 +70,9 @@ export function listGroupNoticeProgress(query) {
 }
 
 // 查询统购订购进度详情
-export function getGroupNoticeProgressDetail(noticeId, supplierId) {
+export function getGroupNoticeProgressDetail(orderId, supplierId) {
   return request({
-    url: '/school/groupNotice/progress/' + noticeId,
+    url: '/school/groupNotice/progress/' + orderId,
     method: 'get',
     params: { supplierId }
   })

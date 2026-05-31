@@ -67,7 +67,7 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
 
         List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query);
 
-        List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(@Param("noticeId") Long noticeId,
+        List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(@Param("orderId") Long orderId,
                                                                     @Param("supplierId") Long supplierId,
                                                                     @Param("schoolId") Long schoolId,
                                                                     @Param("deptId") Long deptId);

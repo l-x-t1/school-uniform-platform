@@ -71,9 +71,9 @@ public class XfptGroupNoticeController extends BaseController {
 
 @Operation(summary = "查询统购订购进度详情")
 @RequiresPermissions("school:tgjd:query")
-@GetMapping("/progress/{noticeId}")
-    public AjaxResult progressDetail(@PathVariable("noticeId") Long noticeId, Long supplierId) {
-        return success(xfptGroupNoticeService.selectGroupNoticeOrderDetail(noticeId, supplierId));
+@GetMapping("/progress/{orderId}")
+    public AjaxResult progressDetail(@PathVariable("orderId") Long orderId, Long supplierId) {
+        return success(xfptGroupNoticeService.selectGroupNoticeOrderDetail(orderId, supplierId));
     }
 
 @Operation(summary = "供应商查看统购订单")

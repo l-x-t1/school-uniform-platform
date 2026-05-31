@@ -41,7 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 统购公告Service业务层处理
+ * 缁熻喘鍏憡Service涓氬姟灞傚鐞?
  *
  * @author yinet
  * @date 2026-05-04
@@ -66,10 +66,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
 
     /**
-     * 查询统购公告列表
+     * 鏌ヨ缁熻喘鍏憡鍒楄〃
      *
-     * @param xfptGroupNotice 统购公告
-     * @return 统购公告
+     * @param xfptGroupNotice 缁熻喘鍏憡
+     * @return 缁熻喘鍏憡
      */
     @Override
     public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice)
@@ -90,10 +90,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 查询统购公告
+     * 鏌ヨ缁熻喘鍏憡
      *
-     * @param id 统购公告主键
-     * @return 统购公告
+     * @param id 缁熻喘鍏憡涓婚敭
+     * @return 缁熻喘鍏憡
      */
     @Override
     public XfptGroupNotice selectXfptGroupNoticeById(Long id)
@@ -124,10 +124,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 新增统购公告
+     * 鏂板缁熻喘鍏憡
      *
-     * @param xfptGroupNotice 统购公告
-     * @return 结果
+     * @param xfptGroupNotice 缁熻喘鍏憡
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -144,10 +144,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 修改统购公告
+     * 淇敼缁熻喘鍏憡
      *
-     * @param xfptGroupNotice 统购公告
-     * @return 结果
+     * @param xfptGroupNotice 缁熻喘鍏憡
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -170,10 +170,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 批量删除统购公告
+     * 鎵归噺鍒犻櫎缁熻喘鍏憡
      *
-     * @param ids 需要删除的统购公告主键
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑缁熻喘鍏憡涓婚敭
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -191,10 +191,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 删除统购公告信息
+     * 鍒犻櫎缁熻喘鍏憡淇℃伅
      *
-     * @param id 统购公告主键
-     * @return 结果
+     * @param id 缁熻喘鍏憡涓婚敭
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -223,14 +223,24 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     @Override
-    public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId)
+    public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long orderId, Long supplierId)
     {
-        if (isAdminUser()) {
-            return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, null, null);
+        XfptOrderInfo orderInfo = xfptGroupNoticeMapper.selectProgressOrderById(orderId);
+        if (orderInfo == null || orderInfo.getId() == null) {
+            throw new ServiceException("统购订单不存在");
         }
-        checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(noticeId));
+        if (!"1".equals(orderInfo.getOrderType())) {
+            throw new ServiceException("只能查看统购订单明细");
+        }
+        if (isAdminUser()) {
+            return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(orderId, supplierId, null, null);
+        }
         XfptSchoolMessage currentSchool = getCurrentSchool();
-        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, currentSchool.getId(), currentSchool.getDeptId());
+        if (!Objects.equals(orderInfo.getSchoolId(), currentSchool.getId())
+                || !Objects.equals(orderInfo.getDeptId(), currentSchool.getDeptId())) {
+            throw new ServiceException("只能查看当前学校的订单明细");
+        }
+        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(orderId, supplierId, currentSchool.getId(), currentSchool.getDeptId());
     }
 
     @Override
@@ -314,9 +324,9 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 新增统购公告商品信息
+     * 鏂板缁熻喘鍏憡鍟嗗搧淇℃伅
      *
-     * @param xfptGroupNotice 统购公告对象
+     * @param xfptGroupNotice 缁熻喘鍏憡瀵硅薄
      */
     // Keep logistics in delivery orders and read them back from delivery data.
     private void saveProgressDeliveryOrder(XfptOrderInfo orderInfo, String logisticsNo)
@@ -544,7 +554,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
         Long supplierId = supplierAccessSupport.resolveSupplierId(sysUser);
         if (supplierId == null) {
-            throw new ServiceException("Current supplier not found");
+            throw new ServiceException("未找到当前供应商");
         }
         return supplierId;
     }
