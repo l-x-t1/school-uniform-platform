@@ -206,10 +206,14 @@ export default {
       this.handleQuery()
     },
     handleDetail(row) {
+      if (!row || !row.id) {
+        this.$modal.msgError('当前订单缺少主键，无法查看详情')
+        return
+      }
       this.currentRow = row
       this.detailVisible = true
       this.detailList = []
-      getGroupNoticeProgressDetail(row.noticeId, row.supplierId).then(response => {
+      getGroupNoticeProgressDetail(row.id, row.supplierId).then(response => {
         this.detailList = response.data || []
       })
     },

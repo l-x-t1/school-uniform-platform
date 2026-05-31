@@ -1,10 +1,12 @@
 package com.xfgl.school.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.SupplierMessage;
+import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
 import com.xfgl.school.domain.XfptGroupNoticeSupplier;
@@ -13,6 +15,7 @@ import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
+import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
 import com.xfgl.school.mapper.XfptGroupNoticeMapper;
 import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptGroupNoticeService;
@@ -38,7 +41,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 统购公告Service业务层处理
+ * 缁熻喘鍏憡Service涓氬姟灞傚鐞?
  *
  * @author yinet
  * @date 2026-05-04
@@ -59,11 +62,14 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     @Autowired
     private SupplierAccessSupport supplierAccessSupport;
 
+    @Autowired
+    private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
+
     /**
-     * 查询统购公告列表
+     * 鏌ヨ缁熻喘鍏憡鍒楄〃
      *
-     * @param xfptGroupNotice 统购公告
-     * @return 统购公告
+     * @param xfptGroupNotice 缁熻喘鍏憡
+     * @return 缁熻喘鍏憡
      */
     @Override
     public List<XfptGroupNotice> selectXfptGroupNoticeList(XfptGroupNotice xfptGroupNotice)
@@ -84,10 +90,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 查询统购公告
+     * 鏌ヨ缁熻喘鍏憡
      *
-     * @param id 统购公告主键
-     * @return 统购公告
+     * @param id 缁熻喘鍏憡涓婚敭
+     * @return 缁熻喘鍏憡
      */
     @Override
     public XfptGroupNotice selectXfptGroupNoticeById(Long id)
@@ -118,10 +124,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 新增统购公告
+     * 鏂板缁熻喘鍏憡
      *
-     * @param xfptGroupNotice 统购公告
-     * @return 结果
+     * @param xfptGroupNotice 缁熻喘鍏憡
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -138,10 +144,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 修改统购公告
+     * 淇敼缁熻喘鍏憡
      *
-     * @param xfptGroupNotice 统购公告
-     * @return 结果
+     * @param xfptGroupNotice 缁熻喘鍏憡
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -164,10 +170,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 批量删除统购公告
+     * 鎵归噺鍒犻櫎缁熻喘鍏憡
      *
-     * @param ids 需要删除的统购公告主键
-     * @return 结果
+     * @param ids 闇€瑕佸垹闄ょ殑缁熻喘鍏憡涓婚敭
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -185,10 +191,10 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 删除统购公告信息
+     * 鍒犻櫎缁熻喘鍏憡淇℃伅
      *
-     * @param id 统购公告主键
-     * @return 结果
+     * @param id 缁熻喘鍏憡涓婚敭
+     * @return 缁撴灉
      */
     @Transactional
     @Override
@@ -217,14 +223,24 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     @Override
-    public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId)
+    public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long orderId, Long supplierId)
     {
-        if (isAdminUser()) {
-            return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, null, null);
+        XfptOrderInfo orderInfo = xfptGroupNoticeMapper.selectProgressOrderById(orderId);
+        if (orderInfo == null || orderInfo.getId() == null) {
+            throw new ServiceException("统购订单不存在");
         }
-        checkNoticeBelongsToCurrentSchool(xfptGroupNoticeMapper.selectById(noticeId));
+        if (!"1".equals(orderInfo.getOrderType())) {
+            throw new ServiceException("只能查看统购订单明细");
+        }
+        if (isAdminUser()) {
+            return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(orderId, supplierId, null, null);
+        }
         XfptSchoolMessage currentSchool = getCurrentSchool();
-        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(noticeId, supplierId, currentSchool.getId(), currentSchool.getDeptId());
+        if (!Objects.equals(orderInfo.getSchoolId(), currentSchool.getId())
+                || !Objects.equals(orderInfo.getDeptId(), currentSchool.getDeptId())) {
+            throw new ServiceException("只能查看当前学校的订单明细");
+        }
+        return xfptGroupNoticeMapper.selectGroupNoticeOrderDetail(orderId, supplierId, currentSchool.getId(), currentSchool.getDeptId());
     }
 
     @Override
@@ -254,6 +270,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         return xfptGroupNoticeMapper.updateProgressStatus(orderId, "3");
     }
 
+    @Transactional
     @Override
     public int fillGroupNoticeOrderLogistics(Long orderId, String logisticsNo)
     {
@@ -262,7 +279,13 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         }
         XfptOrderInfo orderInfo = getSupplierProgressOrder(orderId);
         requireProgressStatus(orderInfo, "3", "订单需制作完成后才能填写物流单号");
-        return xfptGroupNoticeMapper.updateProgressLogistics(orderId, "4", logisticsNo.trim());
+        String trimmedLogisticsNo = logisticsNo.trim();
+        saveProgressDeliveryOrder(orderInfo, trimmedLogisticsNo);
+        int rows = xfptGroupNoticeMapper.updateProgressStatus(orderId, "4");
+        if (rows <= 0) {
+            throw new ServiceException("failed to update group order progress");
+        }
+        return rows;
     }
 
     private XfptOrderInfo getSupplierProgressOrder(Long orderId)
@@ -301,10 +324,67 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     }
 
     /**
-     * 新增统购公告商品信息
+     * 鏂板缁熻喘鍏憡鍟嗗搧淇℃伅
      *
-     * @param xfptGroupNotice 统购公告对象
+     * @param xfptGroupNotice 缁熻喘鍏憡瀵硅薄
      */
+    // Keep logistics in delivery orders and read them back from delivery data.
+    private void saveProgressDeliveryOrder(XfptOrderInfo orderInfo, String logisticsNo)
+    {
+        XfptDeliveryOrder deliveryOrder = xfptDeliveryOrderMapper.selectOne(
+                Wrappers.<XfptDeliveryOrder>lambdaQuery()
+                        .eq(XfptDeliveryOrder::getOrderId, orderInfo.getId())
+                        .eq(XfptDeliveryOrder::getDelFlag, "0")
+                        .orderByDesc(XfptDeliveryOrder::getId)
+                        .last("limit 1"));
+        Date now = new Date();
+        String username = SecurityUtils.getUsername();
+        if (deliveryOrder == null) {
+            deliveryOrder = new XfptDeliveryOrder();
+            deliveryOrder.setDeliveryNo(buildProgressDeliveryNo(orderInfo.getId()));
+            deliveryOrder.setNoticeId(orderInfo.getNoticeId());
+            deliveryOrder.setOrderId(orderInfo.getId());
+            deliveryOrder.setOrderNo(orderInfo.getOrderNo());
+            deliveryOrder.setSchoolId(orderInfo.getSchoolId());
+            deliveryOrder.setSupplierId(orderInfo.getSupplierId());
+            deliveryOrder.setReceiverName(defaultReceiverValue(orderInfo.getReceiverName(), orderInfo.getSchoolName()));
+            deliveryOrder.setReceiverPhone(defaultReceiverValue(orderInfo.getReceiverPhone(), ""));
+            deliveryOrder.setReceiverAddress(defaultReceiverValue(orderInfo.getReceiverAddress(), ""));
+            deliveryOrder.setLogisticsNo(logisticsNo);
+            deliveryOrder.setDeliveryStatus("1");
+            deliveryOrder.setDeliveryTime(now);
+            deliveryOrder.setDeptId(orderInfo.getDeptId());
+            deliveryOrder.setCreateBy(username);
+            deliveryOrder.setCreateTime(now);
+            deliveryOrder.setUpdateBy(username);
+            deliveryOrder.setUpdateTime(now);
+            deliveryOrder.setDelFlag("0");
+            xfptDeliveryOrderMapper.insert(deliveryOrder);
+            return;
+        }
+        deliveryOrder.setLogisticsNo(logisticsNo);
+        deliveryOrder.setDeliveryStatus("1");
+        if (deliveryOrder.getDeliveryTime() == null) {
+            deliveryOrder.setDeliveryTime(now);
+        }
+        deliveryOrder.setUpdateBy(username);
+        deliveryOrder.setUpdateTime(now);
+        xfptDeliveryOrderMapper.updateById(deliveryOrder);
+    }
+
+    private String buildProgressDeliveryNo(Long orderId)
+    {
+        return "DEL-" + System.currentTimeMillis() + "-" + orderId;
+    }
+
+    private String defaultReceiverValue(String value, String fallback)
+    {
+        if (StringUtils.isNotBlank(value)) {
+            return value;
+        }
+        return fallback == null ? "" : fallback;
+    }
+
     private void insertXfptGroupNoticeItem(XfptGroupNotice xfptGroupNotice)
     {
         List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNotice.getXfptGroupNoticeItemList();
@@ -474,7 +554,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         SysUser sysUser = loginUser == null ? null : loginUser.getSysUser();
         Long supplierId = supplierAccessSupport.resolveSupplierId(sysUser);
         if (supplierId == null) {
-            throw new ServiceException("Current supplier not found");
+            throw new ServiceException("未找到当前供应商");
         }
         return supplierId;
     }

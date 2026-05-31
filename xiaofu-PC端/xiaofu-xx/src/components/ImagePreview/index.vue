@@ -4,6 +4,7 @@
     fit="cover"
     :style="`width:${realWidth};height:${realHeight};`"
     :preview-src-list="realSrcList"
+    :class="{ 'is-hover-zoom': hoverScale }"
   >
     <div slot="error" class="image-slot">
       <i class="el-icon-picture-outline" />
@@ -30,6 +31,10 @@ export default {
     baseUrl: {
       type: String,
       default: process.env.VUE_APP_IMAGE_BASE_API
+    },
+    hoverScale: {
+      type: Boolean,
+      default: true
     }
   },
   computed: {
@@ -81,17 +86,15 @@ export default {
 
 <style lang="scss" scoped>
 .el-image {
+  display: inline-flex;
   border-radius: 5px;
+  overflow: hidden;
   background-color: #ebeef5;
   box-shadow: 0 0 5px 1px #ccc;
 
   :deep(.el-image__inner) {
     transition: all 0.3s;
     cursor: pointer;
-
-    &:hover {
-      transform: scale(1.2);
-    }
   }
 
   :deep(.image-slot) {
@@ -102,6 +105,11 @@ export default {
     height: 100%;
     color: #909399;
     font-size: 30px;
+  }
+
+  &.is-hover-zoom :deep(.el-image__inner:hover) {
+    transform: scale(1.2);
+    transform-origin: center center;
   }
 }
 </style>

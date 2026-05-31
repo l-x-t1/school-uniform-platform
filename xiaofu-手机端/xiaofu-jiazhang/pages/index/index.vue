@@ -134,6 +134,9 @@
 </template>
 
 <script>
+import { listOrders } from '@/api/order'
+import { listAfterSale } from '@/api/afterSale'
+
 export default {
   data() {
     return {
@@ -325,11 +328,31 @@ export default {
       const value = item.publishTime || item.resultPublishTime || item.createTime;
       return value ? String(value).split(' ')[0] : '暂无';
     },
-    refreshHomeStats() {
+    async refreshHomeStats() {
       this.studentCount = (uni.getStorageSync('studentList') || []).length;
       this.cartCount = (uni.getStorageSync('cartList') || []).reduce((sum, item) => sum + Number(item.quantity || 1), 0);
-      const localOrders = uni.getStorageSync('devOrders') || {};
-      this.unpaidCount = Object.keys(localOrders).filter((key) => ['unpaid', 'unshipped'].includes(localOrders[key].status)).length;
+      try {
+        const [unpaidRes, unshippedRes, shippedRes, afterSaleRes] = await Promise.all([
+          listOrders({ status: 'unpaid', pageNum: 1, pageSize: 1 }),
+          listOrders({ status: 'unshipped', pageNum: 1, pageSize: 1 }),
+          listOrders({ status: 'shipped', pageNum: 1, pageSize: 1 }),
+          listAfterSale({ pageNum: 1, pageSize: 200 })
+        ]);
+
+        const afterSaleCount = (afterSaleRes.rows || []).filter((item) =>
+          ['0', '1', '3'].includes(String(item.status || '0'))
+        ).length;
+
+        this.unpaidCount =
+          Number(unpaidRes.total || 0) +
+          Number(unshippedRes.total || 0) +
+          Number(shippedRes.total || 0) +
+          afterSaleCount;
+      } catch (error) {
+        const localOrders = uni.getStorageSync('devOrders') || {};
+        const pendingStatuses = ['unpaid', 'unshipped', 'shipped', 'afterSale'];
+        this.unpaidCount = Object.keys(localOrders).filter((key) => pendingStatuses.includes(localOrders[key].status)).length;
+      }
     },
     
     // 切换公告标签

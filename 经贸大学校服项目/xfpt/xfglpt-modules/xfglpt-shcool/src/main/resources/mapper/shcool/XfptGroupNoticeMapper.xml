@@ -95,6 +95,9 @@
         <result property="orderStatus" column="order_status" />
         <result property="progressStatus" column="progress_status" />
         <result property="logisticsNo" column="logistics_no" />
+        <result property="receiverName" column="receiver_name" />
+        <result property="receiverPhone" column="receiver_phone" />
+        <result property="receiverAddress" column="receiver_address" />
         <result property="deptId" column="dept_id" />
         <result property="createTime" column="create_time" />
     </resultMap>
@@ -171,6 +174,15 @@
           and del_flag = 0
     </select>
 
+    <sql id="progressDeliverySummary">
+        select
+            order_id,
+            max(case when coalesce(logistics_no, '') = '' then null else logistics_no end) as logistics_no
+        from xfpt_delivery_order
+        where del_flag = 0
+        group by order_id
+    </sql>
+
     <select id="selectGroupNoticeProgressList" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">
         select
         info.id as id,
@@ -182,18 +194,18 @@
         info.order_no as order_no,
         coalesce(item.order_quantity, 0) as order_quantity,
         case
-            when info.logistics_no is not null and info.logistics_no != '' then '4'
+            when delivery.logistics_no is not null and delivery.logistics_no != '' then '4'
             else coalesce(info.progress_status, '0')
         end as progress_status,
         case
-            when info.logistics_no is not null and info.logistics_no != '' then '已发货'
+            when delivery.logistics_no is not null and delivery.logistics_no != '' then '已发货'
             when coalesce(info.progress_status, '0') = '1' then '供应商已查看'
             when coalesce(info.progress_status, '0') = '2' then '制作中'
             when coalesce(info.progress_status, '0') = '3' then '已完成'
             when coalesce(info.progress_status, '0') = '4' then '已发货'
             else '待查看'
         end as progress_status_name,
-        info.logistics_no as logistics_no,
+        delivery.logistics_no as logistics_no,
         g.title as notice_name,
         info.supplier_name as manufacturer_name,
         info.create_time as create_time
@@ -205,6 +217,9 @@
         where del_flag = 0
         group by order_id
         ) item on item.order_id = info.id
+        left join (
+        <include refid="progressDeliverySummary"/>
+        ) delivery on delivery.order_id = info.id
         where info.del_flag = 0
         and info.order_type = '1'
         and (info.order_status is null or info.order_status != '5')
@@ -223,7 +238,7 @@
         <if test="progressStatus != null and progressStatus != ''">
             and (
                 case
-                    when info.logistics_no is not null and info.logistics_no != '' then '4'
+                    when delivery.logistics_no is not null and delivery.logistics_no != '' then '4'
                     else coalesce(info.progress_status, '0')
                 end
             ) = #{progressStatus}
@@ -321,7 +336,7 @@
         from xfpt_order_info info
         inner join xfpt_order_item item on item.order_id = info.id and item.del_flag = 0
         where info.del_flag = 0
-        and info.notice_id = #{noticeId}
+        and info.id = #{orderId}
         and info.order_type = '1'
         and (info.order_status is null or info.order_status != '5')
         <if test="schoolId != null">
@@ -481,25 +496,21 @@
     </insert>
 
     <select id="selectProgressOrderById" resultMap="ProgressOrderInfoResult">
-        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name,
-               class_name, order_status, progress_status, logistics_no, dept_id, create_time
-        from xfpt_order_info
-        where id = #{orderId}
-          and del_flag = 0
+        select info.id, info.order_no, info.order_type, info.notice_id, info.school_id, info.school_name,
+               info.supplier_id, info.supplier_name, info.class_name, info.order_status, info.progress_status,
+               delivery.logistics_no, info.receiver_name, info.receiver_phone, info.receiver_address,
+               info.dept_id, info.create_time
+        from xfpt_order_info info
+        left join (
+        <include refid="progressDeliverySummary"/>
+        ) delivery on delivery.order_id = info.id
+        where info.id = #{orderId}
+          and info.del_flag = 0
     </select>
 
     <update id="updateProgressStatus">
         update xfpt_order_info
         set progress_status = #{progressStatus},
-            update_time = now()
-        where id = #{orderId}
-          and del_flag = 0
-    </update>
-
-    <update id="updateProgressLogistics">
-        update xfpt_order_info
-        set logistics_no = #{logisticsNo},
-            progress_status = #{progressStatus},
             update_time = now()
         where id = #{orderId}
           and del_flag = 0
