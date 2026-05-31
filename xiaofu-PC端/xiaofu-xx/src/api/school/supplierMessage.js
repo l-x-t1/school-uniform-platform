@@ -25,3 +25,38 @@ export function updateSupplierMessage(data) {
     data,
   });
 }
+
+// 获取供应商绑定的用户列表
+export function getSupplierUsers(supplierId) {
+  return request({
+    url: '/school/supplierMessage/' + supplierId + '/users',
+    method: 'get'
+  })
+}
+
+// 获取可绑定的供应商用户列表
+export function getAvailableUsers(keyword) {
+  return request({
+    url: '/school/supplierMessage/availableUsers',
+    method: 'get',
+    params: { keyword }
+  })
+}
+
+// 绑定用户到供应商
+export function bindUser(data) {
+  return request({
+    url: '/school/supplierMessage/bindUser',
+    method: 'post',
+    data
+  })
+}
+
+// 解除用户与供应商的绑定
+export function unbindUser(data) {
+  return request({
+    url: '/school/supplierMessage/unbindUser',
+    method: 'delete',
+    data
+  })
+}

@@ -10,14 +10,19 @@ import cn.hutool.core.date.DateUtil;
 import com.xfgl.common.core.constant.ProceConstants;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.SupplierMessage;
+import com.xfgl.school.domain.SupplierUserRel;
+import com.xfgl.school.mapper.SysUserRoleMapper;
+import com.xfgl.school.mapper.SupplierUserRelMapper;
 import com.xfgl.school.domain.XfptHmd;
 import com.xfgl.school.domain.XfptSchoolGradeClass;
 import com.xfgl.school.domain.XfptSuppliceContract;
 import com.xfgl.school.service.ISupplierMessageService;
+import com.xfgl.school.service.ISupplierUserRelService;
 import com.xfgl.school.service.IXfptHmdService;
 import com.xfgl.school.service.IXfptSchoolGradeClassService;
 import com.xfgl.school.service.IXfptSuppliceContractService;
 import com.xfgl.system.api.domain.SysDept;
+import com.xfgl.system.api.domain.SysUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -26,6 +31,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
@@ -55,6 +61,12 @@ public class SupplierMessageController extends BaseController {
     private IXfptSchoolGradeClassService xfptSchoolGradeClassService;
     @Autowired
     private IXfptHmdService iXfptHmdService;
+    @Autowired
+    private ISupplierUserRelService supplierUserRelService;
+    @Autowired
+    private SysUserRoleMapper sysUserRoleMapper;
+    @Autowired
+    private SupplierUserRelMapper supplierUserRelMapper;
 
     /**
      * 查询供应商信息列表
@@ -185,8 +197,60 @@ public class SupplierMessageController extends BaseController {
         return getDataTable(list);
     }
 
+    /**
+     * 获取供应商绑定的用户列表
+     */
+    @Operation(summary = "获取供应商绑定的用户列表")
+    @GetMapping("/{supplierId}/users")
+    public AjaxResult getUsersBySupplierId(@PathVariable("supplierId") Long supplierId) {
+        List<SysUser> users = supplierUserRelService.getUserListBySupplierId(supplierId);
+        return success(users);
+    }
+
+    /**
+     * 绑定用户到供应商
+     */
+    @Operation(summary = "绑定用户到供应商")
+    @Log(title = "供应商用户关联", businessType = BusinessType.INSERT)
+    @PostMapping("/bindUser")
+    public AjaxResult bindUser(@RequestBody SupplierUserRel rel) {
+        // 校验用户是否为供应商角色
+        if (!sysUserRoleMapper.isSupplierUser(rel.getUserId())) {
+            return error("该用户不是供应商角色，无法绑定");
+        }
+        // 校验用户是否已绑定其他厂商
+        if (supplierUserRelMapper.existsByUserId(rel.getUserId())) {
+            return error("该用户已绑定其他厂商");
+        }
+        // 校验是否已绑定当前厂商
+        List<Long> existingUserIds = supplierUserRelService.findUserIdsBySupplierId(rel.getSupplierId());
+        if (existingUserIds.contains(rel.getUserId())) {
+            return error("该用户已绑定此厂商，请勿重复绑定");
+        }
+        supplierUserRelService.createRel(rel.getSupplierId(), rel.getUserId());
+        return success();
+    }
+
+    /**
+     * 解除用户与供应商的绑定
+     */
+    @Operation(summary = "解除用户与供应商的绑定")
+    @Log(title = "供应商用户关联", businessType = BusinessType.DELETE)
+    @DeleteMapping("/unbindUser")
+    public AjaxResult unbindUser(@RequestBody SupplierUserRel rel) {
+        supplierUserRelService.unbindUser(rel.getSupplierId(), rel.getUserId());
+        return success();
+    }
 
 
 
-
+    /**
+     * 获取可绑定的供应商用户列表（排除已绑定用户）
+     */
+    @Operation(summary = "获取可绑定的供应商用户列表")
+    @GetMapping("/availableUsers")
+    public AjaxResult availableUsers(@RequestParam(required = false) String keyword) {
+        List<SysUser> users = supplierUserRelMapper.findAvailableSupplierUsers(keyword);
+        return success(users);
+    }
 }

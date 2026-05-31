@@ -38,7 +38,8 @@ public class SupplierMessage extends BaseEntity {
     /**
      * 关联的系统用户ID
      */
-    @Schema(description = "关联的系统用户ID")
+    @Schema(description = "关联的系统用户ID（已迁移至 xfpt_supplier_user_rel 表）")
+    @TableField(exist = false)
     private Long userId;
 
     /**

@@ -14,6 +14,7 @@ import com.xfgl.school.domain.XfptSupplierSettleApply;
 import com.xfgl.school.mapper.SysUserRoleMapper;
 import com.xfgl.school.mapper.XfptSupplierSettleApplyMapper;
 import com.xfgl.school.service.ISupplierMessageService;
+import com.xfgl.school.service.ISupplierUserRelService;
 import com.xfgl.school.service.IXfptHmdService;
 import com.xfgl.school.service.IXfptSupplierSettleApplyService;
 import com.xfgl.system.api.RemoteUserService;
@@ -22,6 +23,7 @@ import com.xfgl.system.api.model.LoginUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.xfgl.school.utils.MailUtils;
 
 /**
  * 供应商入驻申请Service业务层处理
@@ -38,6 +40,7 @@ public class XfptSupplierSettleApplyServiceImpl
     private static final String SUPPLIER_ROLE_KEY = "gys";
     private static final String PHONE_PATTERN = "^1[3-9]\\d{9}$";
     private static final String INVALID_PASSWORD_PATTERN = ".*[<>\"'|\\\\].*";
+    private static final String EMAIL_PATTERN = "^[\\w.-]+@[\\w.-]+\\.[a-zA-Z]{2,}$";
 
     @Autowired
     private ISupplierMessageService supplierMessageService;
@@ -50,6 +53,12 @@ public class XfptSupplierSettleApplyServiceImpl
 
     @Autowired
     private SysUserRoleMapper sysUserRoleMapper;
+
+    @Autowired
+    private ISupplierUserRelService supplierUserRelService;
+
+    @Autowired
+    private MailUtils mailUtils;
 
     @Override
     public boolean submitApply(XfptSupplierSettleApply apply) {
@@ -85,6 +94,7 @@ public class XfptSupplierSettleApplyServiceImpl
         sysUser.setNickName(apply.getSupplierName());
         sysUser.setPassword(apply.getPasswordHash());
         sysUser.setPhonenumber(apply.getPhone());
+        sysUser.setEmail(apply.getEmail());
         sysUser.setSex("0");
         sysUser.setStatus("0");
         sysUser.setDelFlag("0");
@@ -110,14 +120,19 @@ public class XfptSupplierSettleApplyServiceImpl
 
         // 3. 写入厂商信息并关联用户
         SupplierMessage supplierMessage = buildSupplierMessage(apply);
-        supplierMessage.setUserId(userId);
         supplierMessageService.save(supplierMessage);
+        supplierUserRelService.createRel(supplierMessage.getId(), userId);
 
         // 4. 更新申请状态为通过
         apply.setAuditStatus(AUDIT_STATUS_APPROVED);
         apply.setAuditTime(new Date());
         apply.setUpdateBy(SecurityUtils.getUsername());
         updateById(apply);
+
+        // 异步发送审核通过邮件通知
+        if (StringUtils.isNotBlank(apply.getEmail())) {
+            mailUtils.sendApproveEmail(apply.getEmail(), apply.getSupplierName());
+        }
     }
 
     @Override
@@ -134,6 +149,11 @@ public class XfptSupplierSettleApplyServiceImpl
         apply.setAuditRemark(remark);
         apply.setUpdateBy(SecurityUtils.getUsername());
         updateById(apply);
+
+        // 异步发送审核驳回邮件通知
+        if (StringUtils.isNotBlank(apply.getEmail())) {
+            mailUtils.sendRejectEmail(apply.getEmail(), apply.getSupplierName(), apply.getAuditRemark());
+        }
     }
 
     private SupplierMessage buildSupplierMessage(XfptSupplierSettleApply apply) {
@@ -170,6 +190,7 @@ public class XfptSupplierSettleApplyServiceImpl
         apply.setSupplierType(StringUtils.trim(apply.getSupplierType()));
         apply.setBusinessLicense(StringUtils.trim(apply.getBusinessLicense()));
         apply.setXypj(StringUtils.trim(apply.getXypj()));
+        apply.setEmail(StringUtils.trim(apply.getEmail()));
     }
 
     private void validateApply(XfptSupplierSettleApply apply) {
@@ -216,6 +237,9 @@ public class XfptSupplierSettleApplyServiceImpl
         }
         if (StringUtils.isBlank(apply.getBusinessLicense())) {
             throw new ServiceException("厂商资质不能为空");
+        }
+        if (StringUtils.isBlank(apply.getEmail()) || !apply.getEmail().matches(EMAIL_PATTERN)) {
+            throw new ServiceException("邮箱格式不正确");
         }
     }
 

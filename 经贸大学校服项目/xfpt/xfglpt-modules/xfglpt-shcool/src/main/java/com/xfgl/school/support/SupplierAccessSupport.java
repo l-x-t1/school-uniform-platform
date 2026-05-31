@@ -3,6 +3,7 @@ package com.xfgl.school.support;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.service.ISupplierMessageService;
+import com.xfgl.school.service.ISupplierUserRelService;
 import com.xfgl.system.api.domain.SysRole;
 import com.xfgl.system.api.domain.SysUser;
 import java.util.LinkedHashSet;
@@ -15,6 +16,9 @@ import org.springframework.stereotype.Component;
 public class SupplierAccessSupport {
     @Autowired
     private ISupplierMessageService supplierMessageService;
+
+    @Autowired
+    private ISupplierUserRelService supplierUserRelService;
 
     public boolean isSupplierUser(SysUser sysUser) {
         if (sysUser == null) {
@@ -42,10 +46,12 @@ public class SupplierAccessSupport {
         if (!isSupplierUser(sysUser)) {
             return null;
         }
-        SupplierMessage directSupplier = findSupplierById(sysUser.getUserId());
-        if (directSupplier != null) {
-            return directSupplier.getId();
+        // 优先从关联表查找厂商ID
+        Long supplierIdFromRel = supplierUserRelService.findFirstSupplierIdByUserId(sysUser.getUserId());
+        if (supplierIdFromRel != null) {
+            return supplierIdFromRel;
         }
+        // 兜底：按名称或手机号查找厂商
 
         Set<String> candidateNames = new LinkedHashSet<>();
         addCandidate(candidateNames, sysUser.getUserName());

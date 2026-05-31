@@ -3930,7 +3930,45 @@ INSERT INTO `xfpt_supplier_message` VALUES (1,'河北超享纺织服装有限公
 /*!40000 ALTER TABLE `xfpt_supplier_message` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
 --
+-- Fix: add AUTO_INCREMENT to xfpt_supplier_message.ID (2026-05-29)
+--
+ALTER TABLE `xfpt_supplier_message` MODIFY COLUMN `ID` bigint NOT NULL AUTO_INCREMENT;
+
+-- ----------------------------
+-- Table structure for xfpt_supplier_user_rel (2026-05-31)
+-- ----------------------------
+DROP TABLE IF EXISTS `xfpt_supplier_user_rel`;
+CREATE TABLE `xfpt_supplier_user_rel` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `SUPPLIER_ID` bigint NOT NULL COMMENT '厂商ID',
+  `USER_ID` bigint NOT NULL COMMENT '用户ID',
+  `CREATE_TIME` timestamp NULL DEFAULT NULL,
+  `CREATE_BY` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uk_supplier_user` (`SUPPLIER_ID`, `USER_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供应商用户关联表';
+
+-- 存量数据迁移：检查 USER_ID 列是否存在，存在则迁移并清理
+SET @col_exists = (SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'xfpt_supplier_message' AND COLUMN_NAME = 'USER_ID');
+SET @migrate_sql = IF(@col_exists > 0,
+    'INSERT INTO `xfpt_supplier_user_rel` (`SUPPLIER_ID`, `USER_ID`, `CREATE_TIME`) SELECT `ID`, `USER_ID`, NOW() FROM `xfpt_supplier_message` WHERE `USER_ID` IS NOT NULL',
+    'SELECT ''SKIP: USER_ID column not found, nothing to migrate'' AS info');
+PREPARE stmt FROM @migrate_sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+SET @drop_sql = IF(@col_exists > 0,
+    'ALTER TABLE `xfpt_supplier_message` DROP COLUMN `USER_ID`',
+    'SELECT ''SKIP: no USER_ID column to drop'' AS info');
+PREPARE stmt FROM @drop_sql;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+SET @col_exists = NULL;
+SET @migrate_sql = NULL;
+SET @drop_sql = NULL;
+
 -- Table structure for table `xfpt_team_meeting`
 --
 
@@ -6576,3 +6614,9 @@ INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`) VALUES
   (101,3039),(101,3040),(101,3041),(101,3042);
 
 -- Dump completed on 2026-05-04 19:18:33
+
+-- ============================================
+-- 供应商入驻申请表新增邮箱字段 (2026-05-31)
+-- ============================================
+ALTER TABLE xfpt_supplier_settle_apply
+  ADD COLUMN email VARCHAR(128) NULL COMMENT '邮箱' AFTER phone;
