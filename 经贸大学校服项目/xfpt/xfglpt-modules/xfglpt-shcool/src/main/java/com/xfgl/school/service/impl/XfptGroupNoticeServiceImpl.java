@@ -1,10 +1,12 @@
 package com.xfgl.school.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.SupplierMessage;
+import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
 import com.xfgl.school.domain.XfptGroupNoticeSupplier;
@@ -13,6 +15,7 @@ import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
+import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
 import com.xfgl.school.mapper.XfptGroupNoticeMapper;
 import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptGroupNoticeService;
@@ -58,6 +61,9 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
 
     @Autowired
     private SupplierAccessSupport supplierAccessSupport;
+
+    @Autowired
+    private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
 
     /**
      * 查询统购公告列表
@@ -254,6 +260,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         return xfptGroupNoticeMapper.updateProgressStatus(orderId, "3");
     }
 
+    @Transactional
     @Override
     public int fillGroupNoticeOrderLogistics(Long orderId, String logisticsNo)
     {
@@ -262,7 +269,13 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         }
         XfptOrderInfo orderInfo = getSupplierProgressOrder(orderId);
         requireProgressStatus(orderInfo, "3", "订单需制作完成后才能填写物流单号");
-        return xfptGroupNoticeMapper.updateProgressLogistics(orderId, "4", logisticsNo.trim());
+        String trimmedLogisticsNo = logisticsNo.trim();
+        saveProgressDeliveryOrder(orderInfo, trimmedLogisticsNo);
+        int rows = xfptGroupNoticeMapper.updateProgressStatus(orderId, "4");
+        if (rows <= 0) {
+            throw new ServiceException("failed to update group order progress");
+        }
+        return rows;
     }
 
     private XfptOrderInfo getSupplierProgressOrder(Long orderId)
@@ -305,6 +318,63 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
      *
      * @param xfptGroupNotice 统购公告对象
      */
+    // Keep logistics in delivery orders and read them back from delivery data.
+    private void saveProgressDeliveryOrder(XfptOrderInfo orderInfo, String logisticsNo)
+    {
+        XfptDeliveryOrder deliveryOrder = xfptDeliveryOrderMapper.selectOne(
+                Wrappers.<XfptDeliveryOrder>lambdaQuery()
+                        .eq(XfptDeliveryOrder::getOrderId, orderInfo.getId())
+                        .eq(XfptDeliveryOrder::getDelFlag, "0")
+                        .orderByDesc(XfptDeliveryOrder::getId)
+                        .last("limit 1"));
+        Date now = new Date();
+        String username = SecurityUtils.getUsername();
+        if (deliveryOrder == null) {
+            deliveryOrder = new XfptDeliveryOrder();
+            deliveryOrder.setDeliveryNo(buildProgressDeliveryNo(orderInfo.getId()));
+            deliveryOrder.setNoticeId(orderInfo.getNoticeId());
+            deliveryOrder.setOrderId(orderInfo.getId());
+            deliveryOrder.setOrderNo(orderInfo.getOrderNo());
+            deliveryOrder.setSchoolId(orderInfo.getSchoolId());
+            deliveryOrder.setSupplierId(orderInfo.getSupplierId());
+            deliveryOrder.setReceiverName(defaultReceiverValue(orderInfo.getReceiverName(), orderInfo.getSchoolName()));
+            deliveryOrder.setReceiverPhone(defaultReceiverValue(orderInfo.getReceiverPhone(), ""));
+            deliveryOrder.setReceiverAddress(defaultReceiverValue(orderInfo.getReceiverAddress(), ""));
+            deliveryOrder.setLogisticsNo(logisticsNo);
+            deliveryOrder.setDeliveryStatus("1");
+            deliveryOrder.setDeliveryTime(now);
+            deliveryOrder.setDeptId(orderInfo.getDeptId());
+            deliveryOrder.setCreateBy(username);
+            deliveryOrder.setCreateTime(now);
+            deliveryOrder.setUpdateBy(username);
+            deliveryOrder.setUpdateTime(now);
+            deliveryOrder.setDelFlag("0");
+            xfptDeliveryOrderMapper.insert(deliveryOrder);
+            return;
+        }
+        deliveryOrder.setLogisticsNo(logisticsNo);
+        deliveryOrder.setDeliveryStatus("1");
+        if (deliveryOrder.getDeliveryTime() == null) {
+            deliveryOrder.setDeliveryTime(now);
+        }
+        deliveryOrder.setUpdateBy(username);
+        deliveryOrder.setUpdateTime(now);
+        xfptDeliveryOrderMapper.updateById(deliveryOrder);
+    }
+
+    private String buildProgressDeliveryNo(Long orderId)
+    {
+        return "DEL-" + System.currentTimeMillis() + "-" + orderId;
+    }
+
+    private String defaultReceiverValue(String value, String fallback)
+    {
+        if (StringUtils.isNotBlank(value)) {
+            return value;
+        }
+        return fallback == null ? "" : fallback;
+    }
+
     private void insertXfptGroupNoticeItem(XfptGroupNotice xfptGroupNotice)
     {
         List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNotice.getXfptGroupNoticeItemList();

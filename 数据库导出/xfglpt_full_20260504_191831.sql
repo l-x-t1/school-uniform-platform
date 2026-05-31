@@ -6734,4 +6734,41 @@ SELECT 101, @tonggou_shelf_edit_id
 WHERE NOT EXISTS (
   SELECT 1 FROM `sys_role_menu` WHERE `ROLE_ID` = 101 AND `MENU_ID` = @tonggou_shelf_edit_id
 );
+
+-- sync group notice order progress schema and data
+SET @has_order_progress_status := (
+  SELECT COUNT(*)
+  FROM information_schema.COLUMNS
+  WHERE TABLE_SCHEMA = DATABASE()
+    AND TABLE_NAME = 'xfpt_order_info'
+    AND COLUMN_NAME = 'progress_status'
+);
+
+SET @order_progress_status_ddl := IF(
+  @has_order_progress_status = 0,
+  'ALTER TABLE `xfpt_order_info` ADD COLUMN `progress_status` char(1) NOT NULL DEFAULT ''0'' COMMENT ''统购订单进度状态，0待查看 1供应商已查看 2制作中 3已完成 4已发货'' AFTER `order_status`',
+  'SELECT 1'
+);
+
+PREPARE stmt_order_progress_status FROM @order_progress_status_ddl;
+EXECUTE stmt_order_progress_status;
+DEALLOCATE PREPARE stmt_order_progress_status;
+
+UPDATE `xfpt_order_info` oi
+LEFT JOIN (
+  SELECT
+    `order_id`,
+    MAX(CASE WHEN COALESCE(`logistics_no`, '') <> '' THEN 1 ELSE 0 END) AS `has_logistics`
+  FROM `xfpt_delivery_order`
+  WHERE `del_flag` = '0'
+  GROUP BY `order_id`
+) d ON d.`order_id` = oi.`id`
+SET oi.`progress_status` = CASE
+  WHEN COALESCE(d.`has_logistics`, 0) = 1 THEN '4'
+  WHEN oi.`progress_status` IS NULL OR oi.`progress_status` = '' THEN '0'
+  ELSE oi.`progress_status`
+END
+WHERE oi.`del_flag` = '0'
+  AND oi.`order_type` = '1';
+
 -- Dump completed on 2026-05-04 19:18:33
