@@ -1307,10 +1307,7 @@ export default {
       });
     },
     addHezuo() {
-      this.getInfo();
-      this.manufacturerDialogVisible = true;
-      this.supplierMessage();
-      // this.$emit('add-hezuo')
+      this.$message.warning("添加合作厂商功能待调整，暂不可用");
     },
     /** 添加合作厂商 */
     addManufacturer(row) {

@@ -77,7 +77,7 @@
         v-if="activeMenu === 2"
       />
       <!-- 4. 家长投票 -->
-      <Zuzhi
+      <ParentPurchase
         @handleGetProcessMenu="handleGetProcessMenu"
         :formId="formId"
         v-if="activeMenu === 3"
@@ -175,7 +175,6 @@ import PurchaseContract from "./PurchaseContract.vue";
 import QualityReport from "./QualityReport.vue";
 import SatisfactionReport from "./SatisfactionReport.vue";
 import Caigoubaobei from "./Caigoubaobei.vue";
-import Zuzhi from "./zuzhi.vue";
 import Ruweigonggao from "./ruweigonggao.vue";
 import Banzihuiyi from "./banzihuiyi.vue";
 export default {
@@ -194,7 +193,6 @@ export default {
     QualityReport,
     SatisfactionReport,
     Caigoubaobei,
-    Zuzhi,
     procurementWork,
     Ruweigonggao,
   },
