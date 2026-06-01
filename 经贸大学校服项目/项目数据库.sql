@@ -98480,6 +98480,27 @@ CREATE TABLE `xfpt_supplier_message` (
   PRIMARY KEY (`ID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供应商信息表';
 
+
+-- ----------------------------
+-- Table structure for xfpt_supplier_user_rel
+-- ----------------------------
+DROP TABLE IF EXISTS `xfpt_supplier_user_rel`;
+CREATE TABLE `xfpt_supplier_user_rel` (
+  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `SUPPLIER_ID` bigint NOT NULL COMMENT '厂商ID',
+  `USER_ID` bigint NOT NULL COMMENT '用户ID',
+  `CREATE_TIME` timestamp NULL DEFAULT NULL,
+  `CREATE_BY` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`ID`),
+  UNIQUE KEY `uk_supplier_user` (`SUPPLIER_ID`, `USER_ID`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供应商用户关联表';
+
+-- 存量数据迁移
+INSERT INTO xfpt_supplier_user_rel (SUPPLIER_ID, USER_ID, CREATE_TIME)
+SELECT ID, USER_ID, NOW()
+FROM xfpt_supplier_message
+WHERE USER_ID IS NOT NULL;
+
 -- ----------------------------
 -- Records of xfpt_supplier_message
 -- ----------------------------

@@ -43,6 +43,10 @@ public class XfptSupplierSettleApply extends BaseEntity {
     @Schema(description = "手机号")
     private String phone;
 
+    @Excel(name = "邮箱")
+    @Schema(description = "邮箱")
+    private String email;
+
     @Schema(description = "密码哈希")
     private String passwordHash;
 

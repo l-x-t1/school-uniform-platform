@@ -37,6 +37,9 @@
               <el-form-item label="手机号" prop="phone">
                 <el-input v-model.trim="form.phone" placeholder="请输入手机号" maxlength="11" />
               </el-form-item>
+              <el-form-item label="邮箱" prop="email">
+                <el-input v-model.trim="form.email" placeholder="请输入邮箱" maxlength="128" />
+              </el-form-item>
               <el-form-item label="用户名" prop="username">
                 <el-input v-model.trim="form.username" placeholder="请输入用户名" maxlength="20" />
               </el-form-item>
@@ -185,6 +188,7 @@ export default {
       uploadFileTypes: ["jpg", "png", "jpeg", "pdf"],
       form: {
         phone: "",
+        email: "",
         username: "",
         password: "",
         confirmPassword: "",
@@ -202,6 +206,10 @@ export default {
       },
       rules: {
         phone: [{ required: true, validator: validatePhone, trigger: "blur" }],
+        email: [
+          { required: true, message: "请输入邮箱", trigger: "blur" },
+          { type: "email", message: "邮箱格式不正确", trigger: "blur" },
+        ],
         username: [
           { required: true, message: "请输入用户名", trigger: "blur" },
           { min: 2, max: 20, message: "用户名长度应为 2 到 20 位", trigger: "blur" },
@@ -247,7 +255,7 @@ export default {
       });
     },
     async nextStep() {
-      const valid = await this.validateFields(["phone", "username", "password", "confirmPassword"]);
+      const valid = await this.validateFields(["phone", "email", "username", "password", "confirmPassword"]);
       if (valid) {
         this.activeStep = 1;
       }

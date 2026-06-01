@@ -2,6 +2,7 @@ package com.xfgl;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
 import com.xfgl.common.security.annotation.EnableCustomConfig;
 import com.xfgl.common.security.annotation.EnableRyFeignClients;
 import org.springframework.context.annotation.ComponentScan;
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.ComponentScan;
 @EnableCustomConfig
 @EnableRyFeignClients
 @SpringBootApplication
+@EnableAsync
 public class RuoYiSchoolApplication
 {
     public static void main(String[] args)

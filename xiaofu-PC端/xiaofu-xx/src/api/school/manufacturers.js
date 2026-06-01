@@ -1,4 +1,4 @@
-import request from "@/utils/request";
+﻿import request from "@/utils/request";
 
 // 查询供应商信息列表
 export function listSupplierMessage(query) {
@@ -40,5 +40,31 @@ export function delSupplierMessage(id) {
   return request({
     url: "/school/supplierMessage/" + id,
     method: "delete",
+  });
+}
+
+// 查询供应商绑定的用户列表
+export function getSupplierUsers(supplierId) {
+  return request({
+    url: "/school/supplierMessage/" + supplierId + "/users",
+    method: "get",
+  });
+}
+
+// 绑定用户到供应商
+export function bindSupplierUser(data) {
+  return request({
+    url: "/school/supplierMessage/bindUser",
+    method: "post",
+    data: data,
+  });
+}
+
+// 解除用户与供应商的绑定
+export function unbindSupplierUser(data) {
+  return request({
+    url: "/school/supplierMessage/unbindUser",
+    method: "delete",
+    data: data,
   });
 }

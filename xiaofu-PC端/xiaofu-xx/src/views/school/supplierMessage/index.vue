@@ -146,93 +146,120 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="编辑供应商信息" :visible.sync="editOpen" width="980px" append-to-body>
-      <el-form ref="editForm" :model="editForm" :rules="rules" label-width="110px">
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="供应商名称" prop="supplierName">
-              <el-input v-model="editForm.supplierName" placeholder="请输入供应商名称" />
+    <el-dialog title="编辑供应商信息" :visible.sync="editOpen" width="980px" append-to-body @closed="editTab = 'info'">
+      <el-tabs v-model="editTab">
+        <el-tab-pane label="基本信息" name="info">
+          <el-form ref="editForm" :model="editForm" :rules="rules" label-width="110px">
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="供应商名称" prop="supplierName">
+                  <el-input v-model="editForm.supplierName" placeholder="请输入供应商名称" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="联系电话" prop="supplierPhone">
+                  <el-input v-model="editForm.supplierPhone" placeholder="请输入联系电话" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="法定代表人" prop="legalRepresentative">
+                  <el-input v-model="editForm.legalRepresentative" placeholder="请输入法定代表人" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="企业类型" prop="supplierType">
+                  <el-input v-model="editForm.supplierType" placeholder="请输入企业类型" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="职工人数" prop="staffNumber">
+                  <el-input v-model="editForm.staffNumber" placeholder="请输入职工人数" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="注册资金(万)" prop="registeredCapital">
+                  <el-input v-model="editForm.registeredCapital" placeholder="请输入注册资金" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-row :gutter="16">
+              <el-col :span="12">
+                <el-form-item label="成立日期" prop="establishedTime">
+                  <el-date-picker v-model="editForm.establishedTime" type="date" value-format="yyyy-MM-dd" placeholder="请选择成立日期" style="width: 100%" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="厂商地址" prop="supplierAddress">
+                  <el-input v-model="editForm.supplierAddress" placeholder="请输入厂商地址" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+            <el-form-item label="厂商介绍" prop="supplierIntroduce">
+              <Editor v-model="editForm.supplierIntroduce" :min-height="180" />
             </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="联系电话" prop="supplierPhone">
-              <el-input v-model="editForm.supplierPhone" placeholder="请输入联系电话" />
+            <el-form-item label="厂商资质" prop="businessLicense">
+              <FileUpload v-model="editForm.businessLicense" :limit="1" :file-type="['jpg', 'png', 'jpeg', 'pdf']" />
             </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="法定代表人" prop="legalRepresentative">
-              <el-input v-model="editForm.legalRepresentative" placeholder="请输入法定代表人" />
+            <el-form-item label="信用评级" prop="xypj">
+              <FileUpload v-model="editForm.xypj" :limit="1" :file-type="['jpg', 'png', 'jpeg', 'pdf']" />
             </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="企业类型" prop="supplierType">
-              <el-input v-model="editForm.supplierType" placeholder="请输入企业类型" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="职工人数" prop="staffNumber">
-              <el-input v-model="editForm.staffNumber" placeholder="请输入职工人数" />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="注册资金(万)" prop="registeredCapital">
-              <el-input v-model="editForm.registeredCapital" placeholder="请输入注册资金" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-row :gutter="16">
-          <el-col :span="12">
-            <el-form-item label="成立日期" prop="establishedTime">
-              <el-date-picker
-                v-model="editForm.establishedTime"
-                type="date"
-                value-format="yyyy-MM-dd"
-                placeholder="请选择成立日期"
-                style="width: 100%"
-              />
-            </el-form-item>
-          </el-col>
-          <el-col :span="12">
-            <el-form-item label="厂商地址" prop="supplierAddress">
-              <el-input v-model="editForm.supplierAddress" placeholder="请输入厂商地址" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-
-        <el-form-item label="厂商介绍" prop="supplierIntroduce">
-          <Editor v-model="editForm.supplierIntroduce" :min-height="180" />
-        </el-form-item>
-
-        <el-form-item label="厂商资质" prop="businessLicense">
-          <FileUpload
-            v-model="editForm.businessLicense"
-            :limit="1"
-            :file-type="['jpg', 'png', 'jpeg', 'pdf']"
-          />
-        </el-form-item>
-
-        <el-form-item label="信用评级" prop="xypj">
-          <FileUpload
-            v-model="editForm.xypj"
-            :limit="1"
-            :file-type="['jpg', 'png', 'jpeg', 'pdf']"
-          />
-        </el-form-item>
-      </el-form>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="用户管理" name="users">
+          <div class="user-tab-content">
+            <div class="user-tab-header">
+              <span class="tab-hint">已绑定 {{ boundUsers.length }} 个用户</span>
+              <el-button type="primary" size="small" icon="el-icon-plus" @click="handleBindUserOpen">绑定用户</el-button>
+            </div>
+            <el-table :data="boundUsers" border size="small" v-loading="userLoading">
+              <el-table-column type="index" label="序号" width="50" align="center" />
+              <el-table-column label="用户名" prop="userName" min-width="100" />
+              <el-table-column label="昵称" prop="nickName" min-width="120" />
+              <el-table-column label="手机号" prop="phonenumber" width="130" />
+              <el-table-column label="操作" width="80" align="center">
+                <template slot-scope="scope">
+                  <el-button type="text" style="color: #f56c6c" @click="handleUnbindUser(scope.row)">解绑</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-tab-pane>
+      </el-tabs>
       <div slot="footer" class="dialog-footer">
         <el-button @click="editOpen = false">取 消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="submitEdit">
-          保 存
-        </el-button>
+        <el-button v-if="editTab === 'info'" type="primary" :loading="submitLoading" @click="submitEdit">保 存</el-button>
       </div>
     </el-dialog>
+
+    <!-- 绑定用户选择弹窗 -->
+    <el-dialog title="选择用户" :visible.sync="bindUserOpen" width="580px" append-to-body>
+      <el-form :inline="true" size="small">
+        <el-form-item>
+          <el-input v-model="userSearchKeyword" placeholder="搜索用户名/昵称/手机号" clearable @keyup.enter.native="searchAvailableUsers" />
+        </el-form-item>
+        <el-form-item>
+          <el-button type="primary" icon="el-icon-search" @click="searchAvailableUsers">搜索</el-button>
+        </el-form-item>
+      </el-form>
+      <el-table :data="availableUserList" border size="small" v-loading="userSearchLoading" max-height="360">
+        <el-table-column type="index" label="序号" width="50" align="center" />
+        <el-table-column label="用户名" prop="userName" min-width="100" />
+        <el-table-column label="昵称" prop="nickName" min-width="120" />
+        <el-table-column label="手机号" prop="phonenumber" width="130" />
+        <el-table-column label="操作" width="70" align="center">
+          <template slot-scope="scope">
+            <el-button type="text" style="color: #67c23a" :loading="scope.row._binding" @click="handleBindUser(scope.row)">绑定</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div slot="footer">
+        <el-button @click="bindUserOpen = false">关 闭</el-button>
+      </div>
+    </el-dialog>>
   </div>
 </template>
 
@@ -266,6 +293,14 @@ export default {
       loading: false,
       detailLoading: false,
       submitLoading: false,
+      editingSupplierId: null,
+      editTab: 'info',
+      userLoading: false,
+      boundUsers: [],
+      bindUserOpen: false,
+      userSearchKeyword: '',
+      userSearchLoading: false,
+      availableUserList: [],
       detailOpen: false,
       editOpen: false,
       total: 0,
@@ -357,12 +392,15 @@ export default {
     },
     handleEdit(row) {
       this.submitLoading = false;
+      this.editTab = 'info';
+      this.editingSupplierId = row.id;
       getSupplierMessage(row.id).then((response) => {
         this.editForm = {
           ...createDefaultDetailForm(),
           ...(response.data || {}),
         };
         this.editOpen = true;
+        this.loadBoundUsers();
         this.$nextTick(() => {
           if (this.$refs.editForm) {
             this.$refs.editForm.clearValidate();
@@ -386,6 +424,43 @@ export default {
             this.submitLoading = false;
           });
       });
+    },
+    loadBoundUsers() {
+      if (!this.editingSupplierId) return;
+      this.userLoading = true;
+      getSupplierUsers(this.editingSupplierId)
+        .then((response) => { this.boundUsers = response.data || []; })
+        .finally(() => { this.userLoading = false; });
+    },
+    handleBindUserOpen() {
+      this.userSearchKeyword = "";
+      this.availableUserList = [];
+      this.bindUserOpen = true;
+      this.searchAvailableUsers();
+    },
+    searchAvailableUsers() {
+      this.userSearchLoading = true;
+      getAvailableUsers(this.userSearchKeyword || null)
+        .then((response) => {
+          this.availableUserList = (response.data || []).map((u) => ({ ...u, _binding: false }));
+        })
+        .finally(() => { this.userSearchLoading = false; });
+    },
+    handleBindUser(row) {
+      this.$set(row, "_binding", true);
+      bindUser({ supplierId: this.editingSupplierId, userId: row.userId })
+        .then(() => {
+          this.$message.success("绑定成功");
+          this.loadBoundUsers();
+          this.searchAvailableUsers();
+        })
+        .finally(() => { this.$set(row, "_binding", false); });
+    },
+    handleUnbindUser(row) {
+      this.$modal.confirm("确认解除用户\u300c" + row.userName + "\u300d与当前厂商的绑定？")
+        .then(() => unbindUser({ supplierId: this.editingSupplierId, userId: row.userId }))
+        .then(() => { this.$message.success("解绑成功"); this.loadBoundUsers(); })
+        .catch(() => {});
     },
   },
 };
@@ -433,5 +508,21 @@ export default {
   padding: 12px 0;
   color: #909399;
   font-size: 14px;
+}
+
+.user-tab-content {
+  min-height: 260px;
+}
+
+.user-tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.tab-hint {
+  font-size: 13px;
+  color: #909399;
 }
 </style>
