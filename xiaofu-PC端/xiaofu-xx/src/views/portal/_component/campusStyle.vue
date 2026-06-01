@@ -99,6 +99,7 @@
           </h2>
           <div class="campus-style-dialog-meta">
             <span>发布时间：{{ selectedCampusStyle.createTime }}</span>
+            <span v-if="selectedCampusStyle.endTime">截止时间：{{ selectedCampusStyle.endTime }}</span>
             <span v-if="selectedCampusStyle.createBy"
               >发布人：{{ selectedCampusStyle.createBy }}</span
             >

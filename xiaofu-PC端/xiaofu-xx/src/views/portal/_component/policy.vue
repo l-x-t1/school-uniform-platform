@@ -98,6 +98,7 @@
           <h2 class="policy-dialog-title">{{ dialogData.title }}</h2>
           <div class="policy-dialog-meta">
             <span>发布时间：{{ dialogData.createTime }}</span>
+            <span v-if="dialogData.endTime">截止时间：{{ dialogData.endTime }}</span>
             <span v-if="dialogData.createBy">发布人：{{ dialogData.createBy }}</span>
             <span v-if="dialogData.readCount !== undefined">阅读量：{{ dialogData.readCount }}</span>
           </div>
@@ -183,6 +184,7 @@ export default {
         this.dialogData = {
           title: item.title || "",
           createTime: item.createTime || "",
+          endTime: res.data.endTime || item.endTime || "",
           createBy: item.createBy || "",
           content: res.data.content || item.content || "",
           file: res.data.file || item.file || "",
@@ -199,6 +201,7 @@ export default {
       this.dialogData = {
         title: "",
         createTime: "",
+        endTime: "",
         createBy: "",
         content: "",
         file: "",

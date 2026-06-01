@@ -2474,6 +2474,7 @@ CREATE TABLE `xfpt_notice` (
   `TITLE` varchar(255) DEFAULT NULL,
   `CONTENT` text,
   `CREATE_TIME` timestamp NULL DEFAULT NULL,
+  `END_TIME` datetime DEFAULT NULL COMMENT '截止时间',
   `UPDATE_BY` varchar(100) DEFAULT NULL,
   `UPDATE_TIME` timestamp NULL DEFAULT NULL,
   `DEL_FLAG` varchar(10) DEFAULT NULL,
@@ -3931,6 +3932,48 @@ UNLOCK TABLES;
 -- Fix: add AUTO_INCREMENT to xfpt_supplier_message.ID (2026-05-29)
 --
 ALTER TABLE `xfpt_supplier_message` MODIFY COLUMN `ID` bigint NOT NULL AUTO_INCREMENT;
+
+-- ----------------------------
+-- Table structure for xfpt_supplier_settle_apply
+-- ----------------------------
+DROP TABLE IF EXISTS `xfpt_supplier_settle_apply`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `xfpt_supplier_settle_apply` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `username` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
+  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '手机号',
+  `email` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
+  `password_hash` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码哈希',
+  `supplier_name` varchar(200) COLLATE utf8mb4_general_ci NOT NULL COMMENT '厂商名称',
+  `supplier_phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '联系电话',
+  `supplier_type` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '厂商类型',
+  `legal_representative` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '法人代表',
+  `staff_number` varchar(50) COLLATE utf8mb4_general_ci NOT NULL COMMENT '职工人数',
+  `established_time` date NOT NULL COMMENT '成立时间',
+  `supplier_address` varchar(500) COLLATE utf8mb4_general_ci NOT NULL COMMENT '厂商地址',
+  `supplier_introduce` longtext COLLATE utf8mb4_general_ci NOT NULL COMMENT '厂商简介',
+  `business_license` varchar(1000) COLLATE utf8mb4_general_ci NOT NULL COMMENT '营业执照/厂商资质',
+  `registered_capital` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '注册资金',
+  `xypj` varchar(1000) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '信用评价',
+  `audit_status` char(1) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '0' COMMENT '审核状态：0待审核，1通过，2驳回',
+  `audit_time` datetime DEFAULT NULL COMMENT '审核时间',
+  `audit_remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '审核备注',
+  `target_role_id` bigint DEFAULT '100' COMMENT '目标角色ID',
+  `target_role_key` varchar(64) COLLATE utf8mb4_general_ci DEFAULT 'changshang' COMMENT '目标角色标识',
+  `create_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT 'supplier_settle' COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '删除标志：0存在，2删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_xfpt_supplier_settle_username` (`username`),
+  KEY `idx_xfpt_supplier_settle_phone` (`phone`),
+  KEY `idx_xfpt_supplier_settle_supplier_name` (`supplier_name`),
+  KEY `idx_xfpt_supplier_settle_status` (`audit_status`,`create_time`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='供应商入驻申请';
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 -- ----------------------------
 -- Table structure for xfpt_supplier_user_rel (2026-05-31)
