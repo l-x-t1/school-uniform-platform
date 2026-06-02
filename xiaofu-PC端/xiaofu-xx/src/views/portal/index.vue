@@ -578,6 +578,7 @@
           <h2 class="knowledge-dialog-title">{{ selectedKnowledge.title }}</h2>
           <div class="knowledge-dialog-meta">
             <span>发布时间：{{ selectedKnowledge.createTime }}</span>
+            <span v-if="selectedKnowledge.endTime">截止时间：{{ selectedKnowledge.endTime }}</span>
             <span v-if="selectedKnowledge.createBy"
               >发布人：{{ selectedKnowledge.createBy }}</span
             >
@@ -611,6 +612,9 @@
           <h2 class="policy-dialog-title">{{ selectedAnnouncement.isBc == 1? selectedAnnouncement.title +'（补充）':selectedAnnouncement.title }}</h2>
           <div class="policy-dialog-meta">
             <!-- <span>发布时间：{{ selectedAnnouncement.createTime }}</span> -->
+            <span v-if="selectedAnnouncement.endTime"
+              >截止时间：{{ selectedAnnouncement.endTime }}</span
+            >
             <span v-if="selectedAnnouncement.createBy"
               >发布人：{{ selectedAnnouncement.createBy }}</span
             >
@@ -652,6 +656,7 @@
           <h2 class="policy-dialog-title">{{ selectedPolicy.title }}</h2>
           <div class="policy-dialog-meta">
             <span>发布时间：{{ selectedPolicy.createTime }}</span>
+            <span v-if="selectedPolicy.endTime">截止时间：{{ selectedPolicy.endTime }}</span>
             <span v-if="selectedPolicy.createBy"
               >发布人：{{ selectedPolicy.createBy }}</span
             >
@@ -688,6 +693,7 @@
           <h2 class="education-dialog-title">{{ selectedEducation.title }}</h2>
           <div class="education-dialog-meta">
             <span>发布时间：{{ selectedEducation.createTime }}</span>
+            <span v-if="selectedEducation.endTime">截止时间：{{ selectedEducation.endTime }}</span>
             <span v-if="selectedEducation.createBy"
               >发布人：{{ selectedEducation.createBy }}</span
             >
@@ -723,6 +729,7 @@
           </h2>
           <div class="campus-style-dialog-meta">
             <span>发布时间：{{ selectedCampusStyle.createTime }}</span>
+            <span v-if="selectedCampusStyle.endTime">截止时间：{{ selectedCampusStyle.endTime }}</span>
             <span v-if="selectedCampusStyle.createBy"
               >发布人：{{ selectedCampusStyle.createBy }}</span
             >
