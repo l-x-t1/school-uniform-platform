@@ -1,7 +1,11 @@
 package com.xfgl.school.domain;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -31,6 +35,8 @@ public class TeamMeetingSon extends BaseEntity {
      * 主键id
      */
     @Schema(description = "主键id")
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -38,6 +44,7 @@ public class TeamMeetingSon extends BaseEntity {
      */
     @Excel(name = "班子会议主键")
     @Schema(description = "班子会议主键")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamMeetingId;
 
     /**
@@ -50,6 +57,7 @@ public class TeamMeetingSon extends BaseEntity {
     /**
      * 采购年级id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long cgnjId;
 
     /**

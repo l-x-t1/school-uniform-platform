@@ -12,12 +12,12 @@
             >添加班子会议</el-button
           >
         </div>
-      </div> 
-  
+      </div>
+
       <el-table
         v-loading="loading"
-        :data="meetingList" 
-      >  
+        :data="meetingList"
+      >
         <el-table-column label="序号" align="center" type="index" />
         <el-table-column label="会议名称" align="center" prop="title" />
         <el-table-column label="会议日期" align="center" prop="meetingTime">
@@ -32,7 +32,7 @@
           align="center"
           class-name="small-padding fixed-width"
         >
-          <template slot-scope="scope"> 
+          <template slot-scope="scope">
             <el-button
               type="text"
               icon="el-icon-edit"
@@ -43,13 +43,13 @@
             <el-button
               type="text"
               icon="el-icon-view"
-              @click="handleDetail(scope.row)" 
+              @click="handleDetail(scope.row)"
               >详情</el-button
             >
           </template>
         </el-table-column>
-      </el-table> 
-  
+      </el-table>
+
       <!-- 添加或修改班子会议对话框 -->
       <el-dialog
         top="5vh"
@@ -79,7 +79,7 @@
               </el-form-item>
             </el-col>
           </el-row>
-  
+
           <el-form-item label="参会人员" prop="meetingUser">
             <el-input
               :rows="2"
@@ -125,7 +125,6 @@
                         <el-select
                           placeholder="请选择代表类别"
                           v-model="scope.row.dblb"
-                          disabled
                         >
                           <el-option
                             v-for="item in dict.type.sc_dble"
@@ -169,7 +168,7 @@
               </el-table>
             </el-form-item>
           </div>
-  
+
           <div>
             <span class="form-label">选购需求</span>
             <el-form-item label-width="0">
@@ -203,7 +202,7 @@
                           value-format="yyyy"
                           placeholder="选择采购年级（级）"
                         >
-                        </el-date-picker> 
+                        </el-date-picker>
                       </el-form-item>
                     </el-form>
                   </template>
@@ -268,7 +267,7 @@
                           },
                         ]"
                       >
-                        <el-input 
+                        <el-input
                           placeholder="请输入学生拟购买套数"
                           type="number"
                           v-model="scope.row.gmts"
@@ -301,7 +300,7 @@
                           },
                         ]"
                       >
-                        <el-input 
+                        <el-input
                           placeholder="请输入每套价格区间"
                           v-model="scope.row.jgqj"
                         ></el-input>
@@ -340,8 +339,8 @@
                   </template>
                 </el-table-column>
               </el-table>
-            </el-form-item> 
-  
+            </el-form-item>
+
             <el-form-item label="会议纪要" prop="hyjy">
               <FileUpload
                 :fileType="['pdf']"
@@ -365,8 +364,8 @@
       </el-dialog>
     </div>
   </template>
-  
-  <script> 
+
+  <script>
   import {
     listMeeting,
     getMeeting,
@@ -378,7 +377,7 @@
   import MeetingInfo from "./MeetingInfo.vue";
   export default {
     dicts: ["sc_dble", "xfpl"],
-    name: "Meeting", 
+    name: "Meeting",
     props: {
       teamId: {
         required: true,
@@ -482,7 +481,7 @@
         listMeeting(this.queryParams)
           .then((response) => {
             this.meetingList = response.rows;
-            this.total = response.total; 
+            this.total = response.total;
             this.loading = false;
           })
           .catch(() => {
@@ -506,7 +505,7 @@
           meetingTime: null,
           meetingUser: null,
           zw: null,
-          dblb: 2,
+          dblb: "2",
           zzName: null,
           hyjy: null,
           currOrder: null,
@@ -554,20 +553,28 @@
               { cgnj: null, xfpl: null, gmts: null, jgqj: null, bz: null },
             ];
           }
-  
+
           this.isEdit = true;
-  
+
           // 处理 Proposed 数据
-          if (!this.form.Proposed) {
+          if (!Array.isArray(this.form.Proposed) || this.form.Proposed.length === 0) {
             this.form.Proposed = [
               {
                 zw: "组长",
-                dblb: this.form.dblb,
+                dblb: this.form.dblb || "2",
                 zzName: this.form.zzName,
               },
             ];
           }
-  
+
+          this.form.Proposed[0].zw = this.form.Proposed[0].zw || "缁勯暱";
+          this.form.Proposed[0].dblb = String(
+            this.form.Proposed[0].dblb || this.form.dblb || "2"
+          );
+          this.form.Proposed[0].zzName =
+            this.form.Proposed[0].zzName || this.form.zzName;
+          this.form.dblb = this.form.Proposed[0].dblb;
+
           this.open = true;
           this.title = "修改班子会议";
         });
@@ -592,7 +599,7 @@
             }
           });
         };
-  
+
         // 验证所有组织组长表单
         const validateProposed = () => {
           const promises = [];
@@ -602,7 +609,7 @@
           });
           return Promise.all(promises);
         };
-  
+
         // 验证所有选购需求表单
         const validateSonJsonData = () => {
           const promises = [];
@@ -614,7 +621,7 @@
           });
           return Promise.all(promises);
         };
-  
+
         // 执行验证并处理结果
         return new Promise((resolve) => {
           Promise.all([validateProposed(), validateSonJsonData()]).then(
@@ -622,7 +629,7 @@
               // 将所有验证结果展平并检查是否都通过了验证
               const allResults = results.flat(2);
               const isValid = allResults.every((valid) => valid === true);
-  
+
               if (!isValid) {
                 this.$message.error(`请填写必要信息!`);
                 resolve(false);
@@ -642,15 +649,15 @@
               if (!tableValid) {
                 return;
               }
-  
+
               this.parseForm();
-  
+
               if (this.form.id != null) {
                 updateMeeting(this.form).then((response) => {
                   this.$modal.msgSuccess("修改成功");
                   this.open = false;
                   this.getList();
-                  
+
                 });
               } else {
                 addMeeting(this.form).then((response) => {
@@ -676,7 +683,7 @@
           bz: null,
         });
       },
-  
+
       // 删除表格行
       removeTableRow(index, row) {
         if (this.form.sonJsonData.length > 1) {
@@ -745,11 +752,11 @@
     margin-right: 4px;
   }
 
-  
+
   // 文本域字体样式
   ::v-deep .el-textarea__inner {
     font-family: "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
     font-weight: normal;
   }
   </style>
-  
+

@@ -1,6 +1,7 @@
 package com.xfgl.school.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -39,4 +40,16 @@ public class SupplierUserRel {
 
     @Schema(description = "创建时间")
     private java.util.Date createTime;
+
+    @Schema(description = "用户名称")
+    @TableField(exist = false)
+    private String userName;
+
+    @Schema(description = "用户昵称")
+    @TableField(exist = false)
+    private String nickName;
+
+    @Schema(description = "用户手机号")
+    @TableField(exist = false)
+    private String phonenumber;
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Arrays;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
@@ -45,6 +46,8 @@ import com.xfgl.common.core.web.page.TableDataInfo;
 @RestController
 @RequestMapping("/cglcprocess")
 public class XfptPurchaseProcessController extends BaseController {
+    private static final AtomicLong SCHOOL_GRADE_CLASS_ID_GENERATOR = new AtomicLong(System.currentTimeMillis());
+
     @Autowired
     private IXfptPurchaseProcessService xfptPurchaseProcessService;
     @Autowired
@@ -98,6 +101,9 @@ public class XfptPurchaseProcessController extends BaseController {
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
         XfptPurchaseProcess xfptPurchaseProcess = xfptPurchaseProcessService.getById(id);
+        if (xfptPurchaseProcess == null) {
+            return AjaxResult.error("采购流程不存在或已删除");
+        }
         XfptSchoolGradeClass xfptSchoolGradeClass = new XfptSchoolGradeClass();
         xfptSchoolGradeClass.setParentId(0L);
         xfptSchoolGradeClass.setCgId(id);
@@ -146,6 +152,7 @@ public class XfptPurchaseProcessController extends BaseController {
     //@RequiresPermissions("school:cglcprocess:add")
     @Log(title = "采购流程", businessType = BusinessType.INSERT)
     @PostMapping
+    @Transactional
     public AjaxResult add(@RequestBody XfptPurchaseProcess xfptPurchaseProcess) {
         SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
         xfptPurchaseProcess.setDeptId(dept.getDeptId());
@@ -156,15 +163,21 @@ public class XfptPurchaseProcessController extends BaseController {
         String ancestors = dept.getAncestors();
         for (XfptSchoolGradeClass schoolGradeClass : xfptSchoolGradeClass) {
             List<Classes> classesList = schoolGradeClass.getClasses();
+            schoolGradeClass.setId(nextSchoolGradeClassId());
+            schoolGradeClass.setParentId(0L);
             schoolGradeClass.setAncestors(ancestors);
             schoolGradeClass.setDeptId(dept.getDeptId() + "");
+            schoolGradeClass.setDeptName(dept.getDeptName());
+            if (StringUtils.isBlank(schoolGradeClass.getStatus())) {
+                schoolGradeClass.setStatus("1");
+            }
             schoolGradeClass.setCgId(xfptPurchaseProcess.getId());
 //        LambdaQueryWrapper<XfptSchoolGradeClass> queryWrapper=new LambdaQueryWrapper<>();
 //        queryWrapper.eq(XfptSchoolGradeClass::get)
             xfptSchoolGradeClassService.saveOrUpdate(schoolGradeClass);
             for (Classes classes : classesList) {
                 XfptSchoolGradeClass gradeClass = new XfptSchoolGradeClass();
-                gradeClass.setId(classes.getId());
+                gradeClass.setId(nextSchoolGradeClassId());
                 gradeClass.setDeptId(schoolGradeClass.getDeptId());
                 gradeClass.setDeptName(schoolGradeClass.getDeptName());
                 gradeClass.setGradeClass(classes.getGradeClass());
@@ -172,6 +185,9 @@ public class XfptPurchaseProcessController extends BaseController {
                 gradeClass.setParentId(schoolGradeClass.getId());
                 gradeClass.setAncestors(ancestors);
                 gradeClass.setStatus(classes.getStatus());
+                if (StringUtils.isBlank(gradeClass.getStatus())) {
+                    gradeClass.setStatus("0");
+                }
                 gradeClass.setCgId(xfptPurchaseProcess.getId());
                 xfptSchoolGradeClassService.saveOrUpdate(gradeClass);
             }
@@ -186,6 +202,7 @@ public class XfptPurchaseProcessController extends BaseController {
     //@RequiresPermissions("school:cglcprocess:edit")
     @Log(title = "采购流程", businessType = BusinessType.UPDATE)
     @PutMapping
+    @Transactional
     public AjaxResult edit(@RequestBody XfptPurchaseProcess xfptPurchaseProcess) {
         //先删除再添加
         LambdaQueryWrapper<XfptSchoolGradeClass> lambdaQueryWrapper = new LambdaQueryWrapper<>();
@@ -196,17 +213,22 @@ public class XfptPurchaseProcessController extends BaseController {
         SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
         String ancestors = dept.getAncestors();
         for (XfptSchoolGradeClass schoolGradeClass : xfptSchoolGradeClass) {
-            schoolGradeClass.setId(null);
+            schoolGradeClass.setId(nextSchoolGradeClassId());
             List<Classes> classesList = schoolGradeClass.getClasses();
+            schoolGradeClass.setParentId(0L);
             schoolGradeClass.setAncestors(ancestors);
             schoolGradeClass.setDeptId(dept.getDeptId() + "");
+            schoolGradeClass.setDeptName(dept.getDeptName());
+            if (StringUtils.isBlank(schoolGradeClass.getStatus())) {
+                schoolGradeClass.setStatus("1");
+            }
             schoolGradeClass.setCgId(xfptPurchaseProcess.getId());
 //        LambdaQueryWrapper<XfptSchoolGradeClass> queryWrapper=new LambdaQueryWrapper<>();
 //        queryWrapper.eq(XfptSchoolGradeClass::get)
             xfptSchoolGradeClassService.saveOrUpdate(schoolGradeClass);
             for (Classes classes : classesList) {
                 XfptSchoolGradeClass gradeClass = new XfptSchoolGradeClass();
-                gradeClass.setId(null);
+                gradeClass.setId(nextSchoolGradeClassId());
                 gradeClass.setDeptId(schoolGradeClass.getDeptId());
                 gradeClass.setDeptName(schoolGradeClass.getDeptName());
                 gradeClass.setGradeClass(classes.getGradeClass());
@@ -214,12 +236,19 @@ public class XfptPurchaseProcessController extends BaseController {
                 gradeClass.setParentId(schoolGradeClass.getId());
                 gradeClass.setAncestors(ancestors);
                 gradeClass.setStatus(classes.getStatus());
+                if (StringUtils.isBlank(gradeClass.getStatus())) {
+                    gradeClass.setStatus("0");
+                }
                 gradeClass.setCgId(xfptPurchaseProcess.getId());
                 xfptSchoolGradeClassService.saveOrUpdate(gradeClass);
             }
         }
 
         return toAjax(xfptPurchaseProcessService.updateById(xfptPurchaseProcess));
+    }
+
+    private Long nextSchoolGradeClassId() {
+        return SCHOOL_GRADE_CLASS_ID_GENERATOR.incrementAndGet();
     }
 
 
@@ -260,6 +289,19 @@ public class XfptPurchaseProcessController extends BaseController {
     @Transactional
     public AjaxResult remove(@PathVariable Long[] ids) {
         boolean b = xfptPurchaseProcessService.removeByIds(Arrays.asList(ids));
+        if (!b) {
+            throw new RuntimeException("删除采购流程失败");
+        }
+
+        LambdaQueryWrapper<XfptSchoolGradeClass> gradeClassWrapper = new LambdaQueryWrapper<>();
+        gradeClassWrapper.in(XfptSchoolGradeClass::getCgId, ids);
+        long gradeClassCount = iXfptSchoolGradeClassService.count(gradeClassWrapper);
+        if (gradeClassCount > 0) {
+            boolean removeGradeClasses = iXfptSchoolGradeClassService.remove(gradeClassWrapper);
+            if (!removeGradeClasses) {
+                throw new RuntimeException("删除班级信息失败");
+            }
+        }
 
         List<TeamMeeting> list = iTeamMeetingService.lambdaQuery().in(TeamMeeting::getTeamId, ids).list();
 
@@ -314,13 +356,6 @@ public class XfptPurchaseProcessController extends BaseController {
             LambdaQueryWrapper<XfptProcSummary> queryWrapper11 = new LambdaQueryWrapper<>();
             queryWrapper11.in(XfptProcSummary::getTeamId, collect);
             boolean remove2 = iXfptProcSummaryService.remove(queryWrapper11);
-            //删除班级信息
-            LambdaQueryWrapper<XfptSchoolGradeClass> queryWrapper13 = new LambdaQueryWrapper<>();
-            queryWrapper13.in(XfptSchoolGradeClass::getCgId, ids);
-            boolean remove13 = iXfptSchoolGradeClassService.remove(queryWrapper13);
-            if(!remove13){
-                throw new RuntimeException("删除班级信息失败");
-            }
             LambdaQueryWrapper<XfptCglcgzzj> queryWrapper12 = new LambdaQueryWrapper<>();
             queryWrapper12.in(XfptCglcgzzj::getTeamId, collect);
             boolean remove12 = iXfptCglcgzzjService.remove(queryWrapper12);

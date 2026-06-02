@@ -3,15 +3,18 @@ package com.xfgl.school.domain;
 import java.util.Date;
 import java.util.List;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
 import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
-import nonapi.io.github.classgraph.json.Id;
 
 /**
  * 班子会议对象 xfpt_team_meeting
@@ -34,7 +37,8 @@ public class TeamMeeting extends BaseEntity {
      * 主键id
      */
     @Schema(description = "主键id")
-    @Id
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -127,6 +131,7 @@ public class TeamMeeting extends BaseEntity {
      * 部门id
      */
     @Schema(description = "部门id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     /**
@@ -141,6 +146,7 @@ public class TeamMeeting extends BaseEntity {
     @TableField(exist = false)
     private List<String> timeAxisList;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamId;
 
 

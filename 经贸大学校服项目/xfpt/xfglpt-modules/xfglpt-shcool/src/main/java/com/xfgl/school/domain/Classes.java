@@ -3,6 +3,8 @@ package com.xfgl.school.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.TreeEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -25,6 +27,7 @@ import lombok.experimental.Accessors;
 public class Classes extends TreeEntity {
 
     @TableId(type = IdType.AUTO)
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(description = "$column.columnComment")
     private Long id;
     /**

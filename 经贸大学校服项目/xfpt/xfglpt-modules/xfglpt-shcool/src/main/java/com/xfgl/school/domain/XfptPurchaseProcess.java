@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -34,6 +36,8 @@ public class XfptPurchaseProcess extends BaseEntity {
     /**
      * 采购流程
      */
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(description = "采购流程")
     private Long id;
 
@@ -56,6 +60,7 @@ public class XfptPurchaseProcess extends BaseEntity {
      */
     @Excel(name = "${comment}", readConverterExp = "$column.readConverterExp()")
     @Schema(description = "$column.columnComment")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     /**
@@ -72,6 +77,7 @@ public class XfptPurchaseProcess extends BaseEntity {
     private String cgTime;
 
     @TableField(exist = false)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamId;
 
 

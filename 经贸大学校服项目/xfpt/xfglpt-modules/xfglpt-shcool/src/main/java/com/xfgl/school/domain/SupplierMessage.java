@@ -42,6 +42,18 @@ public class SupplierMessage extends BaseEntity {
     @TableField(exist = false)
     private Long userId;
 
+    @Schema(description = "是否已绑定供应商账号")
+    @TableField(exist = false)
+    private Boolean hasUserBinding;
+
+    @Schema(description = "绑定的供应商账号数量")
+    @TableField(exist = false)
+    private Integer bindUserCount;
+
+    @Schema(description = "绑定的供应商账号名称")
+    @TableField(exist = false)
+    private String bindUserNames;
+
     /**
      * 厂商名称
      */

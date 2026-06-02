@@ -14,6 +14,7 @@ import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptSchoolSupplierRelService;
 import com.xfgl.school.service.IXfptSuppliceInspectionReportService;
 import com.xfgl.school.service.IXfptSuppliceInspectionReportSonService;
+import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -34,6 +35,8 @@ public class SupplierFeatureController extends BaseController {
     private IXfptSuppliceInspectionReportSonService inspectionReportSonService;
     @Autowired
     private IXfptSchoolSupplierRelService schoolSupplierRelService;
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
 
     @GetMapping("/qualityReport/list")
     @RequiresPermissions("supplier:qualityReport:list")
@@ -141,49 +144,8 @@ public class SupplierFeatureController extends BaseController {
     }
 
     private SupplierMessage currentSupplier(SysUser user) {
-        SupplierMessage supplier = findSupplierByPhone(user.getPhonenumber());
-        if (supplier != null) {
-            return supplier;
-        }
-        supplier = findSupplierByPhone(user.getPhone());
-        if (supplier != null) {
-            return supplier;
-        }
-        supplier = findSupplierByName(user.getUserName());
-        if (supplier != null) {
-            return supplier;
-        }
-        supplier = findSupplierByName(user.getNickName());
-        if (supplier != null) {
-            return supplier;
-        }
-        if (user.getDeptId() != null) {
-            return supplierMessageService.lambdaQuery()
-                    .eq(SupplierMessage::getDeptId, String.valueOf(user.getDeptId()))
-                    .last("limit 1")
-                    .one();
-        }
-        return null;
-    }
-
-    private SupplierMessage findSupplierByPhone(String phone) {
-        if (StringUtils.isEmpty(phone)) {
-            return null;
-        }
-        return supplierMessageService.lambdaQuery()
-                .eq(SupplierMessage::getSupplierPhone, phone)
-                .last("limit 1")
-                .one();
-    }
-
-    private SupplierMessage findSupplierByName(String name) {
-        if (StringUtils.isEmpty(name)) {
-            return null;
-        }
-        return supplierMessageService.lambdaQuery()
-                .eq(SupplierMessage::getSupplierName, name)
-                .last("limit 1")
-                .one();
+        Long supplierId = supplierAccessSupport.resolveSupplierId(user);
+        return supplierId == null ? null : supplierMessageService.getById(supplierId);
     }
 
     private void fillNoticeStatusText(XfptSuppliceInspectionReport report) {

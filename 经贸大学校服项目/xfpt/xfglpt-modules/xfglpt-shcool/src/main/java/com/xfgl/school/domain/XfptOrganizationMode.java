@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -34,8 +36,9 @@ public class XfptOrganizationMode extends BaseEntity {
     /**
      * $column.columnComment
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "$column.columnComment")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -81,6 +84,7 @@ public class XfptOrganizationMode extends BaseEntity {
      * 问卷id
      */
     @Schema(description = "问卷id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long quesId;
 
     /**
@@ -114,10 +118,12 @@ public class XfptOrganizationMode extends BaseEntity {
     /**
      * 班子id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamId;
 
     private String ancestors;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     private Date startTime;

@@ -53,10 +53,10 @@
             @click="handleCancel(scope.row)"
             >取消合作</el-button
           >
-          <el-button 
-            type="text" 
-            size="small" 
-            v-hasPermi="['bc-gonggao']" 
+          <el-button
+            type="text"
+            size="small"
+            v-hasPermi="['bc-gonggao']"
             @click="handleBcList(scope.row)"
             v-if="contractList.length > 0"
             >补充</el-button
@@ -106,12 +106,26 @@
         </el-table-column>
 
         <el-table-column label="创建时间" prop="createTime" />
+        <el-table-column label="账号绑定状态" align="center" width="180">
+          <template slot-scope="scope">
+            <el-tag :type="scope.row.hasUserBinding ? 'success' : 'info'" size="mini">
+              {{ scope.row.hasUserBinding ? "已绑定" : "未绑定" }}
+            </el-tag>
+            <div
+              v-if="scope.row.hasUserBinding && scope.row.bindUserNames"
+              style="margin-top: 6px; color: #909399; font-size: 12px; line-height: 1.4"
+            >
+              {{ scope.row.bindUserNames }}
+            </div>
+          </template>
+        </el-table-column>
 
         <el-table-column label="操作" align="center" width="100">
           <template slot-scope="scope">
             <el-button
               size="mini"
               type="text"
+              :disabled="!scope.row.hasUserBinding"
               @click="addManufacturer(scope.row)"
               >选择</el-button
             >
@@ -128,7 +142,7 @@
           :page-size="pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           :total="total"
-        ></el-pagination> 
+        ></el-pagination>
       </div>
     </el-dialog>
     <el-dialog
@@ -268,7 +282,7 @@
       append-to-body
       :visible.sync="dialogVisibleHetongBB"
       width="1100px"
-    > 
+    >
       <el-form
         :rules="rulesForm"
         :model="addSupplierHetong"
@@ -466,7 +480,7 @@
                   >
                   <!-- calculateTotal -->
                     <el-input
-                      readonly 
+                      readonly
                       placeholder="请输入学生购买套数"
                       v-model="scope.row.xsngmts"
                     ></el-input>
@@ -495,7 +509,7 @@
                     prop="jgqj"
                   >
                     <el-input
-                      readonly 
+                      readonly
                       placeholder="请输入每套价格区间"
                       v-model="scope.row.jgqj"
                     ></el-input>
@@ -888,7 +902,7 @@ export default {
         fzr: [{ required: true, message: "请输入厂商负责人", trigger: "blur" }],
         fzrdh: [
           { required: true, message: "请输入厂商联系方式", trigger: "blur" },
-          { 
+          {
             validator: (rule, value, callback) => {
               if (!value) {
                 callback();
@@ -898,14 +912,14 @@ export default {
               const mobileRegex = /^1[3-9]\d{9}$/;
               // 座机号正则：区号+号码，支持多种格式
               const phoneRegex = /^(0\d{2,3}-?\d{7,8})|(400-?\d{3}-?\d{4})|(800-?\d{3}-?\d{4})$/;
-              
+
               if (mobileRegex.test(value) || phoneRegex.test(value)) {
                 callback();
               } else {
                 callback(new Error('请输入正确的手机号或座机号'));
               }
-            }, 
-            trigger: "blur" 
+            },
+            trigger: "blur"
           },
         ],
         count: [{ required: true, message: "请输入订购人数", trigger: "blur" }],
@@ -1031,7 +1045,7 @@ export default {
             deptId: supplier.deptId,
           }).then(res => res.rows || []).catch(() => []);
         });
-        
+
         Promise.all(contractPromises).then(contractArrays => {
           // 合并所有合同列表
           this.contractList = contractArrays.flat();
@@ -1307,10 +1321,16 @@ export default {
       });
     },
     addHezuo() {
-      this.$message.warning("添加合作厂商功能待调整，暂不可用");
+      this.getInfo();
+      this.manufacturerDialogVisible = true;
+      this.supplierMessage();
     },
     /** 添加合作厂商 */
     addManufacturer(row) {
+      if (!row.hasUserBinding) {
+        this.$message.warning("该供应商未绑定账号，暂不可选择");
+        return;
+      }
       this.addSupplierInfo.supplierName = row.supplierName;
       this.addSupplierInfo.supplierPhone = row.supplierPhone;
       this.addSupplierInfo.supplierId = row.id;
@@ -1397,7 +1417,7 @@ export default {
     },
     //文件预览
     handlePreview(row) {
-      
+
       this.previewUrl = process.env.VUE_APP_IMAGE_BASE_API + row.url
       this.previewVisible = true;
     },
@@ -1420,7 +1440,7 @@ export default {
         this.$message.warning("没有可用的合作厂商");
         return;
       }
-      
+
       const data = {
         id: supplierId,
         type: "1",

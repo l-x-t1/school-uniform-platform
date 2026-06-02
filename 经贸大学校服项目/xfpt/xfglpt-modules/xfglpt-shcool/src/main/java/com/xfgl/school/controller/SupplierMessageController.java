@@ -3,11 +3,16 @@ package com.xfgl.school.controller;
 import java.util.Date;
 import java.util.List;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
 import javax.servlet.http.HttpServletResponse;
+import java.util.stream.Collectors;
 
 
 import cn.hutool.core.date.DateUtil;
 import com.xfgl.common.core.constant.ProceConstants;
+import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.domain.SupplierUserRel;
@@ -85,6 +90,7 @@ public class SupplierMessageController extends BaseController {
                     .list();
             message.setServeSchoolNumber(String.valueOf(list1.size()));
         }
+        fillBindingStatus(list);
         return getDataTable(list);
     }
 
@@ -252,5 +258,35 @@ public class SupplierMessageController extends BaseController {
     public AjaxResult availableUsers(@RequestParam(required = false) String keyword) {
         List<SysUser> users = supplierUserRelMapper.findAvailableSupplierUsers(keyword);
         return success(users);
+    }
+
+    private void fillBindingStatus(List<SupplierMessage> suppliers) {
+        if (suppliers == null || suppliers.isEmpty()) {
+            return;
+        }
+        List<Long> supplierIds = suppliers.stream()
+                .map(SupplierMessage::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (supplierIds.isEmpty()) {
+            return;
+        }
+        List<SupplierUserRel> relList = supplierUserRelMapper.findUserRelsBySupplierIds(supplierIds);
+        Map<Long, List<SupplierUserRel>> relMap = relList == null
+                ? Collections.emptyMap()
+                : relList.stream()
+                .filter(rel -> rel.getSupplierId() != null)
+                .collect(Collectors.groupingBy(SupplierUserRel::getSupplierId));
+
+        for (SupplierMessage supplier : suppliers) {
+            List<SupplierUserRel> userRels = relMap.getOrDefault(supplier.getId(), Collections.emptyList());
+            supplier.setHasUserBinding(!userRels.isEmpty());
+            supplier.setBindUserCount(userRels.size());
+            supplier.setBindUserNames(userRels.stream()
+                    .map(rel -> StringUtils.isNotBlank(rel.getNickName()) ? rel.getNickName() : rel.getUserName())
+                    .filter(StringUtils::isNotBlank)
+                    .distinct()
+                    .collect(Collectors.joining("、")));
+        }
     }
 }

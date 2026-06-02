@@ -30,6 +30,17 @@ public interface SupplierUserRelMapper extends BaseMapper<SupplierUserRel> {
     @Select("SELECT u.user_id, u.user_name, u.nick_name, u.phonenumber FROM xfpt_supplier_user_rel r JOIN sys_user u ON r.user_id = u.user_id WHERE r.supplier_id = #{supplierId}")
     List<SysUser> findUsersBySupplierId(@Param("supplierId") Long supplierId);
 
+    @Select("<script>" +
+        "SELECT r.supplier_id, r.user_id, u.user_name, u.nick_name, u.phonenumber " +
+        "FROM xfpt_supplier_user_rel r " +
+        "LEFT JOIN sys_user u ON r.user_id = u.user_id " +
+        "WHERE r.supplier_id IN " +
+        "<foreach collection='supplierIds' item='supplierId' open='(' separator=',' close=')'>" +
+        "#{supplierId}" +
+        "</foreach>" +
+        "</script>")
+    List<SupplierUserRel> findUserRelsBySupplierIds(@Param("supplierIds") List<Long> supplierIds);
+
     @Select("SELECT COUNT(1) > 0 FROM xfpt_supplier_user_rel WHERE user_id = #{userId}")
     boolean existsByUserId(@Param("userId") Long userId);
 
