@@ -3,6 +3,8 @@ package com.xfgl.system.api.domain;
 import com.baomidou.mybatisplus.annotation.*;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -30,8 +32,9 @@ public class XfptNotice extends BaseEntity {
     /**
      * 主键ID
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "主键ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -104,16 +107,19 @@ public class XfptNotice extends BaseEntity {
     /**
      * 选购公告id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long enteId;
 
     /**
      * 阅读量
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long readCount;
 
     /**
      * 发布人id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
 
     /**
@@ -144,6 +150,7 @@ public class XfptNotice extends BaseEntity {
     private String isBc;
 
     @TableField(exist = false)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long simId;
 
 }
