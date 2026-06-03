@@ -1741,7 +1741,7 @@ DROP TABLE IF EXISTS `xfpt_cglcgzzj`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_cglcgzzj` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(255) DEFAULT NULL,
   `FILE` varchar(1000) DEFAULT NULL,
   `REMARK` varchar(100) DEFAULT NULL,
@@ -1969,7 +1969,7 @@ DROP TABLE IF EXISTS `xfpt_enterprise_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_enterprise_mode` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `NOTICE_NAME` varchar(1000) DEFAULT NULL,
   `NOTICE_FILE` varchar(1000) DEFAULT NULL,
   `OTHER_FILE` varchar(1000) DEFAULT NULL,
@@ -2259,7 +2259,7 @@ DROP TABLE IF EXISTS `xfpt_hmd`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_hmd` (
-  `id` bigint NOT NULL,
+  `id` bigint NOT NULL AUTO_INCREMENT,
   `name` varchar(5) DEFAULT NULL,
   `xydm` varchar(5) DEFAULT NULL,
   `user_name` varchar(5) DEFAULT NULL,
@@ -2625,7 +2625,7 @@ DROP TABLE IF EXISTS `xfpt_org_report_disclose`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_org_report_disclose` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TEAM_MEETING_ID` decimal(19,0) NOT NULL,
   `TITLE` varchar(1000) DEFAULT NULL,
   `CREATE_BY` varchar(500) DEFAULT NULL,
@@ -2662,7 +2662,7 @@ DROP TABLE IF EXISTS `xfpt_org_report_disclose_son`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_org_report_disclose_son` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `P_ID` decimal(19,0) NOT NULL,
   `ZW` varchar(50) DEFAULT NULL,
   `CREATE_BY` varchar(500) DEFAULT NULL,
@@ -2745,7 +2745,7 @@ DROP TABLE IF EXISTS `xfpt_parent_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_parent_mode` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(1000) DEFAULT NULL,
   `IS_SAMPLES_PIC` varchar(10) DEFAULT NULL,
   `SAMPLES_PIC` varchar(1000) DEFAULT NULL,
@@ -2787,7 +2787,7 @@ DROP TABLE IF EXISTS `xfpt_parents_feedback`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_parents_feedback` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `USER_ID` varchar(100) DEFAULT NULL,
   `USER_NAME` varchar(100) DEFAULT NULL,
   `DEPT_ID` varchar(100) DEFAULT NULL,
@@ -2874,7 +2874,7 @@ DROP TABLE IF EXISTS `xfpt_pdxz_sure_supplier`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_pdxz_sure_supplier` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TEAM_ID` decimal(19,0) DEFAULT NULL,
   `ANCESTORS` varchar(100) DEFAULT NULL,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
@@ -3266,7 +3266,7 @@ DROP TABLE IF EXISTS `xfpt_report_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_report_mode` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(255) DEFAULT NULL,
   `PURCHASE_MODE` varchar(2) DEFAULT NULL,
   `REPORT_FORM` varchar(1000) DEFAULT NULL,
@@ -3301,7 +3301,7 @@ DROP TABLE IF EXISTS `xfpt_report_mode_oper`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_report_mode_oper` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `CZR` varchar(255) DEFAULT NULL,
   `CREATE_TIME` timestamp NULL DEFAULT NULL,
   `CREATE_BY` varchar(100) DEFAULT NULL,
@@ -3410,7 +3410,7 @@ DROP TABLE IF EXISTS `xfpt_school_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_school_message` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
   `SCHOOL_NAME` varchar(100) DEFAULT NULL,
   `ACADEMY_TYPE` varchar(100) DEFAULT NULL,
@@ -3532,7 +3532,7 @@ DROP TABLE IF EXISTS `xfpt_sim_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_sim_user` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `NAME` varchar(255) DEFAULT NULL,
   `ID_CARD` varchar(255) DEFAULT NULL,
   `PARM1` varchar(255) DEFAULT NULL,
@@ -3566,7 +3566,7 @@ DROP TABLE IF EXISTS `xfpt_student_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_student_info` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `CLASS_ID` varchar(100) DEFAULT NULL,
   `SHCOOL_ID` varchar(100) DEFAULT NULL,
   `NAME` varchar(100) DEFAULT NULL,
@@ -3603,7 +3603,7 @@ DROP TABLE IF EXISTS `xfpt_summary_old`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_summary_old` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(255) DEFAULT NULL,
   `MONEY` decimal(19,0) DEFAULT NULL,
   `INVITE_FILE` varchar(255) DEFAULT NULL,
@@ -3644,7 +3644,7 @@ DROP TABLE IF EXISTS `xfpt_supplice_contract`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_supplice_contract` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `DEPT_ID` varchar(100) DEFAULT NULL,
   `DEPT_NAME` varchar(100) DEFAULT NULL,
   `SUPPLIER_ID` varchar(100) DEFAULT NULL,
@@ -3685,7 +3685,7 @@ DROP TABLE IF EXISTS `xfpt_supplice_contract_son`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_supplice_contract_son` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `SUPPLICE_CONTRACT_ID` varchar(100) DEFAULT NULL,
   `CONTRACT_NAME` varchar(100) DEFAULT NULL,
   `CONTRACT_DEADLINE` varchar(100) DEFAULT NULL,
@@ -4178,7 +4178,7 @@ DROP TABLE IF EXISTS `xfpt_yxwf_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_yxwf_mode` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(100) DEFAULT NULL,
   `IS_SAMPLES_PIC` varchar(10) DEFAULT NULL,
   `SAMPLES_PIC` varchar(1000) DEFAULT NULL,
