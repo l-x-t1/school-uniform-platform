@@ -31,7 +31,7 @@
           <el-button
             type="text"
             size="small"
-            v-hasPermi="['xfpt:zljy:sczjbg']"
+            v-hasPermi="['school:zjbg:upload']"
             v-if="zzType != 2"
             @click="uploadZJ(scope.row)"
             > {{ zzType == 0 ? '上传质量检测报告' : '上传二次质量检测报告' }}</el-button
@@ -277,6 +277,7 @@
             <el-button
               type="text"
               size="small"
+              v-hasPermi="['school:zjbg:upload']"
               @click="handleBianjiReport(scope.row)"
               >编辑</el-button
             > 

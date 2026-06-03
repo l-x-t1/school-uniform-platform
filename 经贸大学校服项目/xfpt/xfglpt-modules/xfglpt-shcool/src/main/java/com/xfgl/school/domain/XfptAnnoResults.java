@@ -1,6 +1,8 @@
 package com.xfgl.school.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -30,7 +32,8 @@ public class XfptAnnoResults extends BaseEntity {
     /**
      * 主键id
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(description = "主键id")
     private Long id;
 
@@ -103,6 +106,7 @@ public class XfptAnnoResults extends BaseEntity {
      */
     @Excel(name = "部门id")
     @Schema(description = "部门id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     /**
@@ -116,6 +120,7 @@ public class XfptAnnoResults extends BaseEntity {
      * 班子会议id
      */
     @Schema(description = "班子会议id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamId;
 
     /**

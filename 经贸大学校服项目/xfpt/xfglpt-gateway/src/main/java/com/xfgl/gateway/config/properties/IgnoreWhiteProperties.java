@@ -32,6 +32,14 @@ public class IgnoreWhiteProperties
         {
             whites.add("/file/settle/**");
         }
+        if (!whites.contains("/team/meeting/importUserName"))
+        {
+            whites.add("/team/meeting/importUserName");
+        }
+        if (!whites.contains("/school/team/meeting/importUserName"))
+        {
+            whites.add("/school/team/meeting/importUserName");
+        }
     }
 
     public List<String> getWhites()

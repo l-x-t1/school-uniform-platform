@@ -2830,7 +2830,7 @@ DROP TABLE IF EXISTS `xfpt_patriarch_satisfaction_summarize`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_patriarch_satisfaction_summarize` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `SUMMARIZE_REPORT_NAME` varchar(100) DEFAULT NULL,
   `SUMMARIZE_REPORT_TYPE` varchar(100) DEFAULT NULL,
   `START_TIME` timestamp NULL DEFAULT NULL,

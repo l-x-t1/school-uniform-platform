@@ -44,6 +44,12 @@ import com.xfgl.common.core.utils.poi.ExcelUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -1103,26 +1109,136 @@ public class TeamMeetingController extends BaseController {
     }
     @PostMapping("/importUserName")
     public AjaxResult importUserName(MultipartFile file) throws IOException {
-        ExcelUtil<UserName> util = new ExcelUtil<UserName>(UserName.class);
-        List<UserName> userList = util.importExcel(file.getInputStream());
-        List<String> collect = userList.stream().map(UserName::getName).collect(Collectors.toList());
-        String result="";
+        if (file == null || file.isEmpty()) {
+            return AjaxResult.error("导入失败：请选择 xls/xlsx 文件");
+        }
+        List<UserName> userList;
+        try {
+            userList = parseUserNameList(file);
+        } catch (Exception e) {
+            String message = StrUtil.blankToDefault(e.getMessage(), "导入失败：请上传有效的 xls/xlsx 文件");
+            return AjaxResult.error(message);
+        }
+        if (CollUtil.isEmpty(userList)) {
+            return AjaxResult.error("导入失败：未识别到人员名单，请使用模板或在第一列填写姓名、第二列填写电话");
+        }
+        String result = userList.stream()
+                .map(this::buildUserNameText)
+                .filter(StrUtil::isNotBlank)
+                .collect(Collectors.joining(","));
+        if (StrUtil.isBlank(result)) {
+            return AjaxResult.error("导入失败：名单内容为空，请检查 Excel");
+        }
+        return AjaxResult.success(result);
+    }
 
-        int flag=0;
-        for (UserName userName : userList) {
-            flag++;
-            if(StrUtil.isNotEmpty(userName.getName())){
-                result=result+userName.getName();
+    private List<UserName> parseUserNameList(MultipartFile file) throws IOException {
+        ExcelUtil<UserName> util = new ExcelUtil<UserName>(UserName.class);
+        List<UserName> userList = normalizeUserNames(util.importExcel(file.getInputStream()));
+        if (CollUtil.isNotEmpty(userList)) {
+            return userList;
+        }
+        return parseUserNamesWithoutHeader(file);
+    }
+
+    private List<UserName> normalizeUserNames(List<UserName> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return Collections.emptyList();
+        }
+        return userList.stream()
+                .filter(Objects::nonNull)
+                .peek(userName -> {
+                    userName.setName(StrUtil.trim(userName.getName()));
+                    userName.setPhone(StrUtil.trim(userName.getPhone()));
+                })
+                .filter(userName -> StrUtil.isNotBlank(userName.getName()) || StrUtil.isNotBlank(userName.getPhone()))
+                .collect(Collectors.toList());
+    }
+
+    private List<UserName> parseUserNamesWithoutHeader(MultipartFile file) throws IOException {
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            if (workbook.getNumberOfSheets() == 0) {
+                return Collections.emptyList();
             }
-            if(StrUtil.isNotEmpty(userName.getPhone())){
-                result=result+"-"+userName.getPhone();
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+            List<UserName> userList = new ArrayList<>();
+            for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (isUserNameRowEmpty(row, formatter)) {
+                    continue;
+                }
+                String name = getCellText(row.getCell(0), formatter);
+                String phone = getCellText(row.getCell(1), formatter);
+                if (i == 0 && isUserNameHeaderRow(name, phone)) {
+                    continue;
+                }
+                UserName userName = new UserName();
+                userName.setName(StrUtil.trim(name));
+                userName.setPhone(StrUtil.trim(phone));
+                if (StrUtil.isBlank(userName.getName()) && StrUtil.isBlank(userName.getPhone())) {
+                    continue;
+                }
+                userList.add(userName);
             }
-            if(flag!=userList.size()){
-                result=result+",";
+            return userList;
+        } catch (IOException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IOException("导入失败：请上传有效的 xls/xlsx 文件", e);
+        }
+    }
+
+    private boolean isUserNameRowEmpty(Row row, DataFormatter formatter) {
+        if (row == null) {
+            return true;
+        }
+        return StrUtil.isBlank(getCellText(row.getCell(0), formatter))
+                && StrUtil.isBlank(getCellText(row.getCell(1), formatter));
+    }
+
+    private boolean isUserNameHeaderRow(String firstCell, String secondCell) {
+        String first = normalizeHeaderCell(firstCell);
+        String second = normalizeHeaderCell(secondCell);
+        return containsHeaderKeyword(first, "学生姓名", "姓名", "名字", "家长姓名")
+                && (StrUtil.isBlank(second) || containsHeaderKeyword(second, "电话", "手机号", "手机号码", "联系电话"));
+    }
+
+    private String normalizeHeaderCell(String value) {
+        if (value == null) {
+            return StrUtil.EMPTY;
+        }
+        return value.replace(" ", "").trim();
+    }
+
+    private boolean containsHeaderKeyword(String value, String... keywords) {
+        for (String keyword : keywords) {
+            if (value.contains(keyword)) {
+                return true;
             }
         }
+        return false;
+    }
 
-        return AjaxResult.success(result);
+    private String getCellText(Cell cell, DataFormatter formatter) {
+        if (cell == null) {
+            return StrUtil.EMPTY;
+        }
+        return formatter.formatCellValue(cell);
+    }
+
+    private String buildUserNameText(UserName userName) {
+        StringBuilder builder = new StringBuilder();
+        if (StrUtil.isNotBlank(userName.getName())) {
+            builder.append(userName.getName());
+        }
+        if (StrUtil.isNotBlank(userName.getPhone())) {
+            if (builder.length() > 0) {
+                builder.append("-");
+            }
+            builder.append(userName.getPhone());
+        }
+        return builder.toString();
     }
 
     @GetMapping("/getStatus")
