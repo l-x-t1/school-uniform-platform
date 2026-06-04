@@ -19,4 +19,12 @@ public interface IXfptSupplierApplyService extends IService<XfptSupplierApply> {
      */
     public List<XfptSupplierApply> selectXfptSupplierApplyList(XfptSupplierApply xfptSupplierApply);
 
+    /**
+     * 查询供应商报名详情
+     *
+     * @param id 主键
+     * @return 供应商报名
+     */
+    public XfptSupplierApply selectXfptSupplierApplyById(Long id);
+
 }

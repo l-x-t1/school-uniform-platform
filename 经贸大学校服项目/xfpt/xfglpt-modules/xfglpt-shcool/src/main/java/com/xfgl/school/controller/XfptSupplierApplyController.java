@@ -79,7 +79,7 @@ public class XfptSupplierApplyController extends BaseController {
     @RequiresPermissions("school:supplierApply:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-            return success(xfptSupplierApplyService.getById(id));
+            return success(xfptSupplierApplyService.selectXfptSupplierApplyById(id));
     }
 
     /**

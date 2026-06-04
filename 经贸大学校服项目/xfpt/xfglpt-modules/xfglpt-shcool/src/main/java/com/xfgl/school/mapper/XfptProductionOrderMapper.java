@@ -19,11 +19,20 @@ public interface XfptProductionOrderMapper extends BaseMapper<XfptProductionOrde
      * @return 生产单集合
      */
     public List<XfptProductionOrder> selectXfptProductionOrderList(XfptProductionOrder xfptProductionOrder);
+
         /**
          * 查询生产单
          *
          * @param id 生产单主键
          * @return 生产单
+         */
+        XfptProductionOrder selectXfptProductionOrderById(@Param("id") Long id);
+
+        /**
+         * 查询生产单明细
+         *
+         * @param id 生产单主键
+         * @return 明细列表
          */
         List<XfptProductionOrderItem> selectXfptProductionOrderItemById(@Param("id")Long id);
 

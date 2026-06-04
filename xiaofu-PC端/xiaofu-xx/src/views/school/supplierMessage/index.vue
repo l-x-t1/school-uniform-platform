@@ -127,7 +127,7 @@
 
         <div class="section-block">
           <div class="section-title">厂商介绍</div>
-          <div class="rich-content" v-html="detailForm.supplierIntroduce || '<p>暂无介绍</p>'"></div>
+          <div class="rich-content" v-html="detailForm.supplierIntroduce || '<p>暂无介绍</p>'" />
         </div>
 
         <div class="section-block">
@@ -215,7 +215,7 @@
               <span class="tab-hint">已绑定 {{ boundUsers.length }} 个用户</span>
               <el-button type="primary" size="small" icon="el-icon-plus" @click="handleBindUserOpen">绑定用户</el-button>
             </div>
-            <el-table :data="boundUsers" border size="small" v-loading="userLoading">
+            <el-table v-loading="userLoading" :data="boundUsers" border size="small">
               <el-table-column type="index" label="序号" width="50" align="center" />
               <el-table-column label="用户名" prop="userName" min-width="100" />
               <el-table-column label="昵称" prop="nickName" min-width="120" />
@@ -245,7 +245,7 @@
           <el-button type="primary" icon="el-icon-search" @click="searchAvailableUsers">搜索</el-button>
         </el-form-item>
       </el-form>
-      <el-table :data="availableUserList" border size="small" v-loading="userSearchLoading" max-height="360">
+      <el-table v-loading="userSearchLoading" :data="availableUserList" border size="small" max-height="360">
         <el-table-column type="index" label="序号" width="50" align="center" />
         <el-table-column label="用户名" prop="userName" min-width="100" />
         <el-table-column label="昵称" prop="nickName" min-width="120" />
@@ -265,29 +265,33 @@
 
 <script>
 import {
+  bindUser,
+  getAvailableUsers,
   getSupplierMessage,
+  getSupplierUsers,
   listSupplierMessage,
-  updateSupplierMessage,
-} from "@/api/school/supplierMessage";
+  unbindUser,
+  updateSupplierMessage
+} from '@/api/school/supplierMessage'
 
 const createDefaultDetailForm = () => ({
   id: undefined,
-  supplierName: "",
-  supplierPhone: "",
-  supplierType: "",
-  legalRepresentative: "",
-  staffNumber: "",
-  establishedTime: "",
-  supplierAddress: "",
-  supplierIntroduce: "",
-  businessLicense: "",
-  registeredCapital: "",
-  xypj: "",
-  blacklistStatus: "0",
-});
+  supplierName: '',
+  supplierPhone: '',
+  supplierType: '',
+  legalRepresentative: '',
+  staffNumber: '',
+  establishedTime: '',
+  supplierAddress: '',
+  supplierIntroduce: '',
+  businessLicense: '',
+  registeredCapital: '',
+  xypj: '',
+  blacklistStatus: '0'
+})
 
 export default {
-  name: "SchoolSupplierMessage",
+  name: 'SchoolSupplierMessage',
   data() {
     return {
       loading: false,
@@ -308,162 +312,162 @@ export default {
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        supplierName: "",
-        supplierPhone: "",
-        legalRepresentative: "",
+        supplierName: '',
+        supplierPhone: '',
+        legalRepresentative: ''
       },
       detailForm: createDefaultDetailForm(),
       editForm: createDefaultDetailForm(),
       rules: {
         supplierName: [
-          { required: true, message: "请输入供应商名称", trigger: "blur" },
+          { required: true, message: '请输入供应商名称', trigger: 'blur' }
         ],
         supplierPhone: [
-          { required: true, message: "请输入联系电话", trigger: "blur" },
+          { required: true, message: '请输入联系电话', trigger: 'blur' },
           {
             pattern: /^1[3-9]\d{9}$/,
-            message: "请输入正确的手机号",
-            trigger: "blur",
-          },
+            message: '请输入正确的手机号',
+            trigger: 'blur'
+          }
         ],
         legalRepresentative: [
-          { required: true, message: "请输入法定代表人", trigger: "blur" },
+          { required: true, message: '请输入法定代表人', trigger: 'blur' }
         ],
         supplierType: [
-          { required: true, message: "请输入企业类型", trigger: "blur" },
+          { required: true, message: '请输入企业类型', trigger: 'blur' }
         ],
         staffNumber: [
-          { required: true, message: "请输入职工人数", trigger: "blur" },
+          { required: true, message: '请输入职工人数', trigger: 'blur' }
         ],
         establishedTime: [
-          { required: true, message: "请选择成立日期", trigger: "change" },
+          { required: true, message: '请选择成立日期', trigger: 'change' }
         ],
         supplierAddress: [
-          { required: true, message: "请输入厂商地址", trigger: "blur" },
+          { required: true, message: '请输入厂商地址', trigger: 'blur' }
         ],
         registeredCapital: [
-          { required: true, message: "请输入注册资金", trigger: "blur" },
+          { required: true, message: '请输入注册资金', trigger: 'blur' }
         ],
         supplierIntroduce: [
-          { required: true, message: "请输入厂商介绍", trigger: "blur" },
+          { required: true, message: '请输入厂商介绍', trigger: 'blur' }
         ],
         businessLicense: [
-          { required: true, message: "请上传厂商资质", trigger: "change" },
-        ],
-      },
-    };
+          { required: true, message: '请上传厂商资质', trigger: 'change' }
+        ]
+      }
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
     getList() {
-      this.loading = true;
+      this.loading = true
       listSupplierMessage(this.queryParams)
         .then((response) => {
-          this.supplierMessageList = response.rows || [];
-          this.total = response.total || 0;
+          this.supplierMessageList = response.rows || []
+          this.total = response.total || 0
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.handleQuery()
     },
     handleView(row) {
-      this.detailOpen = true;
-      this.detailLoading = true;
+      this.detailOpen = true
+      this.detailLoading = true
       getSupplierMessage(row.id)
         .then((response) => {
           this.detailForm = {
             ...createDefaultDetailForm(),
-            ...(response.data || {}),
-          };
+            ...(response.data || {})
+          }
         })
         .finally(() => {
-          this.detailLoading = false;
-        });
+          this.detailLoading = false
+        })
     },
     handleEdit(row) {
-      this.submitLoading = false;
-      this.editTab = 'info';
-      this.editingSupplierId = row.id;
+      this.submitLoading = false
+      this.editTab = 'info'
+      this.editingSupplierId = row.id
       getSupplierMessage(row.id).then((response) => {
         this.editForm = {
           ...createDefaultDetailForm(),
-          ...(response.data || {}),
-        };
-        this.editOpen = true;
-        this.loadBoundUsers();
+          ...(response.data || {})
+        }
+        this.editOpen = true
+        this.loadBoundUsers()
         this.$nextTick(() => {
           if (this.$refs.editForm) {
-            this.$refs.editForm.clearValidate();
+            this.$refs.editForm.clearValidate()
           }
-        });
-      });
+        })
+      })
     },
     submitEdit() {
       this.$refs.editForm.validate((valid) => {
         if (!valid) {
-          return;
+          return
         }
-        this.submitLoading = true;
+        this.submitLoading = true
         updateSupplierMessage(this.editForm)
           .then(() => {
-            this.$modal.msgSuccess("保存成功");
-            this.editOpen = false;
-            this.getList();
+            this.$modal.msgSuccess('保存成功')
+            this.editOpen = false
+            this.getList()
           })
           .finally(() => {
-            this.submitLoading = false;
-          });
-      });
+            this.submitLoading = false
+          })
+      })
     },
     loadBoundUsers() {
-      if (!this.editingSupplierId) return;
-      this.userLoading = true;
+      if (!this.editingSupplierId) return
+      this.userLoading = true
       getSupplierUsers(this.editingSupplierId)
-        .then((response) => { this.boundUsers = response.data || []; })
-        .finally(() => { this.userLoading = false; });
+        .then((response) => { this.boundUsers = response.data || [] })
+        .finally(() => { this.userLoading = false })
     },
     handleBindUserOpen() {
-      this.userSearchKeyword = "";
-      this.availableUserList = [];
-      this.bindUserOpen = true;
-      this.searchAvailableUsers();
+      this.userSearchKeyword = ''
+      this.availableUserList = []
+      this.bindUserOpen = true
+      this.searchAvailableUsers()
     },
     searchAvailableUsers() {
-      this.userSearchLoading = true;
+      this.userSearchLoading = true
       getAvailableUsers(this.userSearchKeyword || null)
         .then((response) => {
-          this.availableUserList = (response.data || []).map((u) => ({ ...u, _binding: false }));
+          this.availableUserList = (response.data || []).map((u) => ({ ...u, _binding: false }))
         })
-        .finally(() => { this.userSearchLoading = false; });
+        .finally(() => { this.userSearchLoading = false })
     },
     handleBindUser(row) {
-      this.$set(row, "_binding", true);
+      this.$set(row, '_binding', true)
       bindUser({ supplierId: this.editingSupplierId, userId: row.userId })
         .then(() => {
-          this.$message.success("绑定成功");
-          this.loadBoundUsers();
-          this.searchAvailableUsers();
+          this.$message.success('绑定成功')
+          this.loadBoundUsers()
+          this.searchAvailableUsers()
         })
-        .finally(() => { this.$set(row, "_binding", false); });
+        .finally(() => { this.$set(row, '_binding', false) })
     },
     handleUnbindUser(row) {
-      this.$modal.confirm("确认解除用户\u300c" + row.userName + "\u300d与当前厂商的绑定？")
+      this.$modal.confirm('确认解除用户\u300c' + row.userName + '\u300d与当前厂商的绑定？')
         .then(() => unbindUser({ supplierId: this.editingSupplierId, userId: row.userId }))
-        .then(() => { this.$message.success("解绑成功"); this.loadBoundUsers(); })
-        .catch(() => {});
-    },
-  },
-};
+        .then(() => { this.$message.success('解绑成功'); this.loadBoundUsers() })
+        .catch(() => {})
+    }
+  }
+}
 </script>
 
 <style scoped>

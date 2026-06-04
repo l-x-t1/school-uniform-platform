@@ -1,11 +1,8 @@
 package com.xfgl.school.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Map;
 import com.xfgl.school.mapper.XfptGroupNoticeItemMapper;
 import com.xfgl.school.domain.XfptGroupNoticeItem;
 import com.xfgl.school.service.IXfptGroupNoticeItemService;
@@ -34,5 +31,10 @@ public class XfptGroupNoticeItemServiceImpl extends ServiceImpl<XfptGroupNoticeI
         return xfptGroupNoticeItemMapper.selectXfptGroupNoticeItemList(xfptGroupNoticeItem);
     }
 
+    @Override
+    public XfptGroupNoticeItem selectXfptGroupNoticeItemById(Long id)
+    {
+        return xfptGroupNoticeItemMapper.selectXfptGroupNoticeItemById(id);
+    }
 
 }

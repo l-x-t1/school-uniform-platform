@@ -5,82 +5,113 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.xfgl.school.mapper.XfptProductionOrderMapper">
 
     <resultMap type="XfptProductionOrder" id="XfptProductionOrderResult">
-        <result property="id"    column="id"    />
-        <result property="productionNo"    column="production_no"    />
-        <result property="noticeId"    column="notice_id"    />
-        <result property="orderId"    column="order_id"    />
-        <result property="orderNo"    column="order_no"    />
-        <result property="orderType"    column="order_type"    />
-        <result property="schoolId"    column="school_id"    />
-        <result property="supplierId"    column="supplier_id"    />
-        <result property="status"    column="status"    />
-        <result property="plannedFinishTime"    column="planned_finish_time"    />
-        <result property="startTime"    column="start_time"    />
-        <result property="finishTime"    column="finish_time"    />
-        <result property="deptId"    column="dept_id"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
-    </resultMap>
-
-    <resultMap id="XfptProductionOrderXfptProductionOrderItemResult" type="XfptProductionOrder" extends="XfptProductionOrderResult">
-        <collection property="xfptProductionOrderItemList" ofType="XfptProductionOrderItem" column="id" select="selectXfptProductionOrderItemList" />
+        <result property="id" column="id" />
+        <result property="productionNo" column="production_no" />
+        <result property="noticeId" column="notice_id" />
+        <result property="orderId" column="order_id" />
+        <result property="orderNo" column="order_no" />
+        <result property="orderType" column="order_type" />
+        <result property="schoolId" column="school_id" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="status" column="status" />
+        <result property="plannedFinishTime" column="planned_finish_time" />
+        <result property="startTime" column="start_time" />
+        <result property="finishTime" column="finish_time" />
+        <result property="deptId" column="dept_id" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
+        <result property="noticeTitle" column="notice_title" />
+        <result property="noticeCode" column="notice_code" />
+        <result property="schoolName" column="school_name" />
+        <result property="supplierName" column="supplier_name" />
     </resultMap>
 
     <resultMap type="XfptProductionOrderItem" id="XfptProductionOrderItemResult">
-        <result property="id"    column="id"    />
-        <result property="productionId"    column="production_id"    />
-        <result property="orderItemId"    column="order_item_id"    />
-        <result property="goodsId"    column="goods_id"    />
-        <result property="sizeId"    column="size_id"    />
-        <result property="goodsName"    column="goods_name"    />
-        <result property="sizeName"    column="size_name"    />
-        <result property="buyNum"    column="buy_num"    />
-        <result property="finishNum"    column="finish_num"    />
-        <result property="status"    column="status"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
+        <result property="id" column="id" />
+        <result property="productionId" column="production_id" />
+        <result property="orderItemId" column="order_item_id" />
+        <result property="goodsId" column="goods_id" />
+        <result property="sizeId" column="size_id" />
+        <result property="goodsName" column="goods_name" />
+        <result property="sizeName" column="size_name" />
+        <result property="buyNum" column="buy_num" />
+        <result property="finishNum" column="finish_num" />
+        <result property="status" column="status" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
     </resultMap>
 
     <sql id="selectXfptProductionOrderVo">
-        select id, production_no, notice_id, order_id, order_no, order_type, school_id, supplier_id, status, planned_finish_time, start_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_production_order
+        select
+            p.id,
+            p.production_no,
+            p.notice_id,
+            p.order_id,
+            p.order_no,
+            p.order_type,
+            p.school_id,
+            p.supplier_id,
+            p.status,
+            p.planned_finish_time,
+            p.start_time,
+            p.finish_time,
+            p.dept_id,
+            p.create_by,
+            p.create_time,
+            p.update_by,
+            p.update_time,
+            p.remark,
+            p.del_flag,
+            n.title as notice_title,
+            n.notice_code as notice_code,
+            coalesce(o.school_name, n.school_name) as school_name,
+            o.supplier_name as supplier_name
+        from xfpt_production_order p
+        left join xfpt_order_info o on o.id = p.order_id and o.del_flag = '0'
+        left join xfpt_group_notice n on n.id = p.notice_id and n.del_flag = '0'
     </sql>
 
     <select id="selectXfptProductionOrderList" parameterType="XfptProductionOrder" resultMap="XfptProductionOrderResult">
-        <include refid="selectXfptProductionOrderVo"/>
-        <include refid="search"/>
-            <if test="productionNo != null  and productionNo != ''"> and production_no like concat('%', #{productionNo}, '%')</if>
-            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
-            <if test="orderId != null "> and order_id = #{orderId}</if>
-            <if test="orderNo != null  and orderNo != ''"> and order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderType != null  and orderType != ''"> and order_type = #{orderType}</if>
-            <if test="schoolId != null "> and school_id = #{schoolId}</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="plannedFinishTime != null "> and date(planned_finish_time) = date(#{plannedFinishTime})</if>
-            <if test="startTime != null "> and date(start_time) = date(#{startTime})</if>
-            <if test="finishTime != null "> and date(finish_time) = date(#{finishTime})</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
-
+        <include refid="selectXfptProductionOrderVo" />
+        <include refid="search" />
+        <if test="productionNo != null and productionNo != ''"> and p.production_no like concat('%', #{productionNo}, '%')</if>
+        <if test="noticeId != null"> and p.notice_id = #{noticeId}</if>
+        <if test="orderId != null"> and p.order_id = #{orderId}</if>
+        <if test="orderNo != null and orderNo != ''"> and p.order_no like concat('%', #{orderNo}, '%')</if>
+        <if test="orderType != null and orderType != ''"> and p.order_type = #{orderType}</if>
+        <if test="schoolId != null"> and p.school_id = #{schoolId}</if>
+        <if test="supplierId != null"> and p.supplier_id = #{supplierId}</if>
+        <if test="status != null and status != ''"> and p.status = #{status}</if>
+        <if test="plannedFinishTime != null"> and date_format(p.planned_finish_time, '%Y-%m-%d') = date_format(#{plannedFinishTime}, '%Y-%m-%d')</if>
+        <if test="startTime != null"> and date_format(p.start_time, '%Y-%m-%d') = date_format(#{startTime}, '%Y-%m-%d')</if>
+        <if test="finishTime != null"> and date_format(p.finish_time, '%Y-%m-%d') = date_format(#{finishTime}, '%Y-%m-%d')</if>
+        <if test="deptId != null"> and p.dept_id = #{deptId}</if>
+        <if test="noticeTitle != null and noticeTitle != ''"> and n.title like concat('%', #{noticeTitle}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and n.notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="schoolName != null and schoolName != ''"> and coalesce(o.school_name, n.school_name) like concat('%', #{schoolName}, '%')</if>
+        <if test="supplierName != null and supplierName != ''"> and o.supplier_name like concat('%', #{supplierName}, '%')</if>
+        order by p.create_time desc, p.id desc
     </select>
 
-    <select id="selectXfptProductionOrderById" parameterType="Long" resultMap="XfptProductionOrderXfptProductionOrderItemResult">
-        select id, production_no, notice_id, order_id, order_no, order_type, school_id, supplier_id, status, planned_finish_time, start_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_production_order
-        where id = #{id}
+    <select id="selectXfptProductionOrderById" parameterType="Long" resultMap="XfptProductionOrderResult">
+        <include refid="selectXfptProductionOrderVo" />
+        where p.id = #{id}
     </select>
 
     <select id="selectXfptProductionOrderItemById" resultMap="XfptProductionOrderItemResult">
         select id, production_id, order_item_id, goods_id, size_id, goods_name, size_name, buy_num, finish_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_production_order_item
         where production_id = #{id}
+          and del_flag = '0'
+        order by id asc
     </select>
 
     <insert id="insertXfptProductionOrder" parameterType="XfptProductionOrder" useGeneratedKeys="true" keyProperty="id">
@@ -180,7 +211,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             ( #{item.id}, #{item.productionId}, #{item.orderItemId}, #{item.goodsId}, #{item.sizeId}, #{item.goodsName}, #{item.sizeName}, #{item.buyNum}, #{item.finishNum}, #{item.status}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
         </foreach>
     </insert>
+
     <sql id="search">
-        where del_flag = 0
+        where p.del_flag = 0
     </sql>
 </mapper>

@@ -1,6 +1,5 @@
 package com.xfgl.school.service.impl;
 
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
@@ -8,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Calendar;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
@@ -37,27 +35,16 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
     @Override
     public List<XfptProductionOrder> selectXfptProductionOrderList(XfptProductionOrder xfptProductionOrder)
     {
-        LambdaQueryWrapper<XfptProductionOrder> queryWrapper = Wrappers.lambdaQuery();
-        queryWrapper.eq(StringUtils.isNotEmpty(xfptProductionOrder.getProductionNo()), XfptProductionOrder::getProductionNo, xfptProductionOrder.getProductionNo());
-        queryWrapper.eq(xfptProductionOrder.getNoticeId() != null, XfptProductionOrder::getNoticeId, xfptProductionOrder.getNoticeId());
-        queryWrapper.eq(xfptProductionOrder.getOrderId() != null, XfptProductionOrder::getOrderId, xfptProductionOrder.getOrderId());
-        queryWrapper.like(StringUtils.isNotEmpty(xfptProductionOrder.getOrderNo()), XfptProductionOrder::getOrderNo, xfptProductionOrder.getOrderNo());
-        queryWrapper.eq(StringUtils.isNotEmpty(xfptProductionOrder.getOrderType()), XfptProductionOrder::getOrderType, xfptProductionOrder.getOrderType());
-        queryWrapper.eq(xfptProductionOrder.getSchoolId() != null, XfptProductionOrder::getSchoolId, xfptProductionOrder.getSchoolId());
-        queryWrapper.eq(xfptProductionOrder.getSupplierId() != null, XfptProductionOrder::getSupplierId, xfptProductionOrder.getSupplierId());
-        queryWrapper.eq(StringUtils.isNotEmpty(xfptProductionOrder.getStatus()), XfptProductionOrder::getStatus, xfptProductionOrder.getStatus());
-        applyDayRange(queryWrapper, xfptProductionOrder.getPlannedFinishTime(), XfptProductionOrder::getPlannedFinishTime);
-        applyDayRange(queryWrapper, xfptProductionOrder.getStartTime(), XfptProductionOrder::getStartTime);
-        applyDayRange(queryWrapper, xfptProductionOrder.getFinishTime(), XfptProductionOrder::getFinishTime);
-        queryWrapper.eq(xfptProductionOrder.getDeptId() != null, XfptProductionOrder::getDeptId, xfptProductionOrder.getDeptId());
-        queryWrapper.eq(XfptProductionOrder::getDelFlag, "0");
-        return this.list(queryWrapper);
+        return xfptProductionOrderMapper.selectXfptProductionOrderList(xfptProductionOrder);
     }
 
     @Override
     public XfptProductionOrder selectXfptProductionOrderById(Long id)
     {
-        XfptProductionOrder xfptProductionOrder = xfptProductionOrderMapper.selectById(id);
+        XfptProductionOrder xfptProductionOrder = xfptProductionOrderMapper.selectXfptProductionOrderById(id);
+        if (xfptProductionOrder == null) {
+            return null;
+        }
         List<XfptProductionOrderItem> xfptProductionOrderItemList = xfptProductionOrderMapper.selectXfptProductionOrderItemById(id);
         xfptProductionOrder.setXfptProductionOrderItemList(xfptProductionOrderItemList);
         return xfptProductionOrder;
@@ -250,22 +237,5 @@ public class XfptProductionOrderServiceImpl extends ServiceImpl<XfptProductionOr
 
             xfptProductionOrderMapper.batchInsertXfptProductionOrderItem(xfptProductionOrderItemList);
         }
-    }
-
-    private <T> void applyDayRange(LambdaQueryWrapper<XfptProductionOrder> queryWrapper, Date value, com.baomidou.mybatisplus.core.toolkit.support.SFunction<XfptProductionOrder, T> column)
-    {
-        if (value == null) {
-            return;
-        }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(value);
-        calendar.set(Calendar.HOUR_OF_DAY, 0);
-        calendar.set(Calendar.MINUTE, 0);
-        calendar.set(Calendar.SECOND, 0);
-        calendar.set(Calendar.MILLISECOND, 0);
-        Date start = calendar.getTime();
-        calendar.add(Calendar.DAY_OF_MONTH, 1);
-        Date end = calendar.getTime();
-        queryWrapper.ge(column, start).lt(column, end);
     }
 }

@@ -70,7 +70,7 @@ public class XfptGroupNoticeItemController extends BaseController {
     @RequiresPermissions("school:groupNoticeItem:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-            return success(xfptGroupNoticeItemService.getById(id));
+            return success(xfptGroupNoticeItemService.selectXfptGroupNoticeItemById(id));
     }
 
     /**

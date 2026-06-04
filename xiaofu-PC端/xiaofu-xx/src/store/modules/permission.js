@@ -396,6 +396,68 @@ function normalizeGroupNoticeMenus(routes = []) {
   });
 }
 
+const schoolTonggouMenuTitles = {
+  公告管理: "统购公告管理",
+  质检报告管理: "统购质检报告管理",
+  尺码调换记录: "统购尺码调换记录",
+  发货单统计: "统购发货单统计",
+};
+
+function promoteSchoolTonggouMenus(routes = []) {
+  return routes.flatMap((route) => {
+    const currentTitle =
+      route.meta && route.meta.title ? route.meta.title : route.name;
+    const isTonggouRoot =
+      route.path === "/tonggou" ||
+      route.path === "//tonggou" ||
+      currentTitle === "统购管理";
+
+    if (!isTonggouRoot) {
+      return [route];
+    }
+
+    const children = Array.isArray(route.children) ? route.children : [];
+    return children.map((child) => {
+      const childTitle =
+        child.meta && child.meta.title ? child.meta.title : child.name;
+      const promotedTitle = schoolTonggouMenuTitles[childTitle] || childTitle;
+      const childPath = (child.path || "").replace(/^\/+/, "");
+
+      return {
+        path: "/",
+        hidden: false,
+        component: "Layout",
+        children: [
+          {
+            ...child,
+            path: `tonggou/${childPath}`,
+            meta: {
+              ...(child.meta || {}),
+              title: promotedTitle,
+            },
+          },
+        ],
+      };
+    });
+  });
+}
+
+function normalizeNonSchoolRoutes(routes = []) {
+  return normalizeGroupNoticeMenus(
+    ensureSupplierSettleMenu(
+      ensureSupplierSettleAuditMenu(
+        ensureVoteResultMenu(
+          ensureUsageMenu(
+            ensureSupplierMessageMenu(
+              ensureSupplierGroupNoticeMenu(normalizeUsageMenus(routes))
+            )
+          )
+        )
+      )
+    )
+  );
+}
+
 const permission = {
   state: {
     routes: [],
@@ -432,20 +494,10 @@ const permission = {
           : homeRoutes.normalHome;
 
         getRouters().then((res) => {
-          const normalizedRoutes = normalizeGroupNoticeMenus(
-            ensureSupplierSettleMenu(
-              ensureSupplierSettleAuditMenu(
-              ensureVoteResultMenu(
-                ensureUsageMenu(
-                  ensureSupplierMessageMenu(
-                    ensureSupplierGroupNoticeMenu(
-                      normalizeUsageMenus(JSON.parse(JSON.stringify(res.data || [])))
-                    )
-                  )
-                )
-              )
-            )
-          ));
+          const serverRoutes = JSON.parse(JSON.stringify(res.data || []));
+          const normalizedRoutes = hasXuexiaoRole
+            ? promoteSchoolTonggouMenus(serverRoutes)
+            : normalizeNonSchoolRoutes(serverRoutes);
           const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);

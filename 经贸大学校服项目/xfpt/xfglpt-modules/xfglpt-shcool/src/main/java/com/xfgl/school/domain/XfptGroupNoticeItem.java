@@ -1,5 +1,6 @@
 package com.xfgl.school.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,12 +33,10 @@ private static final long serialVersionUID = 1L;
     private Long id;
 
     /** 公告ID */
-            @Excel(name = "公告ID")
     @Schema(description = "公告ID")
     private Long noticeId;
 
     /** 商品ID */
-            @Excel(name = "商品ID")
     @Schema(description = "商品ID")
     private Long goodsId;
 
@@ -66,7 +65,6 @@ private static final long serialVersionUID = 1L;
     private String priceDesc;
 
     /** 适用年级ID */
-            @Excel(name = "适用年级ID")
     @Schema(description = "适用年级ID")
     private String gradeIds;
 
@@ -76,8 +74,25 @@ private static final long serialVersionUID = 1L;
     private String gradeNames;
 
     /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
     @Schema(description = "当前归属部门/学校")
     private Long deptId;
+
+    /** 公告标题 */
+    @TableField(exist = false)
+    @Excel(name = "公告标题")
+    @Schema(description = "公告标题")
+    private String noticeTitle;
+
+    /** 公告编号 */
+    @TableField(exist = false)
+    @Excel(name = "公告编号")
+    @Schema(description = "公告编号")
+    private String noticeCode;
+
+    /** 学校名称 */
+    @TableField(exist = false)
+    @Excel(name = "学校名称")
+    @Schema(description = "学校名称")
+    private String schoolName;
 
 }
