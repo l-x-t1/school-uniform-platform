@@ -35,6 +35,15 @@ export function updateWithdrawApply(data) {
   })
 }
 
+// 学校端审核供应商提现申请
+export function auditWithdrawApply(data) {
+  return request({
+    url: '/school/withdrawApply/audit',
+    method: 'put',
+    data: data
+  })
+}
+
 // 删除供应商提现申请
 export function delWithdrawApply(id) {
   return request({

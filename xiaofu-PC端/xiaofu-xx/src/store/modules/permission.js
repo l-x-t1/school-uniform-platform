@@ -516,6 +516,19 @@ const schoolRetiredMenuTitles = new Set([
   "订单明细",
 ]);
 
+const schoolOnlyRetiredMenuPaths = new Set([
+  "settlementManage",
+]);
+
+const schoolOnlyRetiredMenuComponents = new Set([
+  "school/settlementManage/index",
+  "school/eduSettlementManage/index",
+]);
+
+const schoolOnlyRetiredMenuTitles = new Set([
+  "结算管理",
+]);
+
 function isSchoolRetiredRoute(route = {}) {
   const normalizedPath = String(route.path || "").replace(/^\/+/, "");
   const title = getRouteTitle(route);
@@ -537,6 +550,17 @@ function shouldPruneEmptySchoolRoute(route = {}) {
     route.component === "Layout" ||
     route.component === "ParentView" ||
     route.path === "/"
+  );
+}
+
+function isSchoolOnlyRetiredRoute(route = {}) {
+  const normalizedPath = String(route.path || "").replace(/^\/+/, "");
+  const title = getRouteTitle(route);
+
+  return (
+    schoolOnlyRetiredMenuPaths.has(normalizedPath) ||
+    schoolOnlyRetiredMenuComponents.has(route.component || "") ||
+    schoolOnlyRetiredMenuTitles.has(title)
   );
 }
 
@@ -564,6 +588,58 @@ function filterSchoolRetiredMenus(routes = []) {
     result.push(current);
     return result;
   }, []);
+}
+
+function filterSchoolOnlyRetiredMenus(routes = []) {
+  return routes.reduce((result, route) => {
+    const current = { ...route };
+
+    if (current.children && current.children.length) {
+      current.children = filterSchoolOnlyRetiredMenus(current.children);
+    }
+
+    if (isSchoolOnlyRetiredRoute(current)) {
+      return result;
+    }
+
+    if (shouldPruneEmptySchoolRoute(current)) {
+      return result;
+    }
+
+    if (Array.isArray(current.children) && current.children.length === 0) {
+      delete current.children;
+      delete current.redirect;
+    }
+
+    result.push(current);
+    return result;
+  }, []);
+}
+
+function normalizeSchoolSettlementApplyMenu(routes = []) {
+  return routes.map((route) => {
+    const current = { ...route };
+    const currentPath = String(current.path || "").replace(/^\/+/, "");
+    const currentTitle = getRouteTitle(current);
+    const isLeafView =
+      current.component &&
+      current.component !== "Layout" &&
+      current.component !== "ParentView" &&
+      current.component !== "InnerLink";
+
+    if (
+      isLeafView &&
+      (currentPath === "settlementApply" || currentTitle === "申请结算列表")
+    ) {
+      current.component = "school/settlementApply/index";
+    }
+
+    if (current.children && current.children.length) {
+      current.children = normalizeSchoolSettlementApplyMenu(current.children);
+    }
+
+    return current;
+  });
 }
 
 function renameSchoolCommentMenu(routes = []) {
@@ -807,8 +883,12 @@ const permission = {
 
         getRouters().then((res) => {
           const serverRoutes = JSON.parse(JSON.stringify(res.data || []));
-          const schoolRoutes = filterSchoolRetiredMenus(
-            promoteSchoolTonggouMenus(serverRoutes)
+          const schoolRoutes = filterSchoolOnlyRetiredMenus(
+            filterSchoolRetiredMenus(
+              normalizeSchoolSettlementApplyMenu(
+                promoteSchoolTonggouMenus(serverRoutes)
+              )
+            )
           );
           const nonSchoolRoutes = filterSchoolRetiredMenus(
             normalizeNonSchoolRoutes(serverRoutes)

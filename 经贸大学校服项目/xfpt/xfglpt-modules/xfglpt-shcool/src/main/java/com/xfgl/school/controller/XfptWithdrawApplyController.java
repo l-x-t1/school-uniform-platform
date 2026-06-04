@@ -1,7 +1,7 @@
 package com.xfgl.school.controller;
 import java.util.List;
+import java.util.Date;
 import java.util.Arrays;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -118,6 +118,52 @@ public class XfptWithdrawApplyController extends BaseController {
             return toAjax(xfptWithdrawApplyService.updateById(xfptWithdrawApply));
     }
 
+    /**
+     * 学校端审核供应商提现申请
+     */
+    @Operation(summary = "学校端审核供应商提现申请")
+    @RequiresPermissions("school:withdrawApply:edit")
+    @Log(title = "供应商提现申请审核" , businessType = BusinessType.UPDATE)
+    @PutMapping("/audit")
+    public AjaxResult audit(@RequestBody XfptWithdrawApply xfptWithdrawApply) {
+            if (xfptWithdrawApply == null || xfptWithdrawApply.getId() == null) {
+                    return error("提现申请主键不能为空");
+            }
+
+            SysUser currentUser = getCurrentUser();
+            if (supplierAccessSupport.isSupplierUser(currentUser)) {
+                    return error("当前角色不支持审核操作");
+            }
+
+            XfptWithdrawApply existing = xfptWithdrawApplyService.getById(xfptWithdrawApply.getId());
+            if (existing == null) {
+                    return error("提现申请记录不存在");
+            }
+            if (!"0".equals(existing.getStatus())) {
+                    return error("仅待审核记录允许审核");
+            }
+
+            String targetStatus = xfptWithdrawApply.getStatus();
+            if (!"1".equals(targetStatus) && !"2".equals(targetStatus)) {
+                    return error("学校端只允许审核通过或审核拒绝");
+            }
+            if (StringUtils.isBlank(xfptWithdrawApply.getAuditRemark())) {
+                    return error("审核备注不能为空");
+            }
+
+            existing.setStatus(targetStatus);
+            existing.setAuditRemark(xfptWithdrawApply.getAuditRemark());
+            existing.setAuditTime(new Date());
+            existing.setAuditUserId(currentUser == null ? null : currentUser.getUserId());
+            existing.setAuditUserName(resolveAuditUserName(currentUser));
+
+            AjaxResult validateResult = validateWithdrawTimeOrder(existing);
+            if (validateResult != null) {
+                    return validateResult;
+            }
+            return toAjax(xfptWithdrawApplyService.updateById(existing));
+    }
+
 
     /**
      * 删除供应商提现申请
@@ -167,6 +213,19 @@ public class XfptWithdrawApplyController extends BaseController {
     private SysUser getCurrentUser() {
             LoginUser loginUser = SecurityUtils.getLoginUser();
             return loginUser == null ? null : loginUser.getSysUser();
+    }
+
+    private String resolveAuditUserName(SysUser currentUser) {
+            if (currentUser == null) {
+                    return "系统";
+            }
+            if (StringUtils.isNotEmpty(currentUser.getNickName())) {
+                    return currentUser.getNickName();
+            }
+            if (StringUtils.isNotEmpty(currentUser.getUserName())) {
+                    return currentUser.getUserName();
+            }
+            return "系统";
     }
 
     private AjaxResult validateWithdrawTimeOrder(XfptWithdrawApply withdrawApply) {
