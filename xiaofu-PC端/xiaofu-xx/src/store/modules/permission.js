@@ -385,11 +385,80 @@ function normalizeGroupNoticeMenus(routes = []) {
     }
 
     if (isGroupNotice) {
-      current.name = "SchoolGroupNotice";
       current.meta = {
         ...(current.meta || {}),
         title: "学校统购公告查询",
       };
+    }
+
+    return current;
+  });
+}
+
+function buildRouteFullPath(parentPath = "", routePath = "") {
+  if (!routePath) {
+    return parentPath || "/";
+  }
+  if (/^https?:/i.test(routePath)) {
+    return routePath;
+  }
+
+  const normalizedParent = String(parentPath)
+    .replace(/\/+/g, "/")
+    .replace(/\/$/, "");
+  const normalizedPath = String(routePath).replace(/\/+/g, "/");
+
+  if (normalizedPath.startsWith("/")) {
+    return normalizedPath.replace(/\/+/g, "/");
+  }
+  if (!normalizedParent) {
+    return `/${normalizedPath}`.replace(/\/+/g, "/");
+  }
+  return `${normalizedParent}/${normalizedPath}`.replace(/\/+/g, "/");
+}
+
+function sanitizeRouteNameSegment(value = "") {
+  const segment = String(value)
+    .replace(/^\/+|\/+$/g, "")
+    .replace(/[^A-Za-z0-9_]+/g, "_");
+  return segment || "route";
+}
+
+function buildUniqueRouteName(baseName, route, fullPath, usedNames) {
+  if (!usedNames.has(baseName)) {
+    return baseName;
+  }
+
+  const suffixSource = fullPath || route.component || route.path || baseName;
+  const suffix = sanitizeRouteNameSegment(suffixSource);
+  let candidate = `${baseName}__${suffix}`;
+  let index = 2;
+
+  while (usedNames.has(candidate)) {
+    candidate = `${baseName}__${suffix}_${index}`;
+    index += 1;
+  }
+
+  return candidate;
+}
+
+function dedupeRouteNames(routes = [], parentPath = "", usedNames = new Set()) {
+  return routes.map((route) => {
+    const current = { ...route };
+    const fullPath = buildRouteFullPath(parentPath, current.path || "");
+
+    if (current.name) {
+      current.name = buildUniqueRouteName(
+        current.name,
+        current,
+        fullPath,
+        usedNames
+      );
+      usedNames.add(current.name);
+    }
+
+    if (current.children && current.children.length) {
+      current.children = dedupeRouteNames(current.children, fullPath, usedNames);
     }
 
     return current;
@@ -442,6 +511,165 @@ function promoteSchoolTonggouMenus(routes = []) {
   });
 }
 
+const adminNewFeatureMenuTitles = new Set([
+  "统购公告商品",
+  "学校供应商合作商品",
+  "学校供应商合作关系",
+  "统购管理",
+  "评价管理",
+  "结算管理",
+  "申请结算列表",
+  "每日入账金额",
+]);
+
+const adminNewFeatureLeafPaths = new Set([
+  "groupNoticeItem",
+  "schoolSupplierGoodsRel",
+  "schoolSupplierRel",
+  "evaluation",
+  "settlementManage",
+  "settlementApply",
+  "dailyIncome",
+]);
+
+const adminNewFeatureLeafComponents = new Set([
+  "school/groupNoticeItem/index",
+  "school/schoolSupplierGoodsRel/index",
+  "school/schoolSupplierRel/index",
+  "school/commentReply/index",
+  "school/eduSettlementManage/index",
+  "jsgl/index",
+  "school/financeFlow/index",
+]);
+
+function getRouteTitle(route = {}) {
+  return route.meta && route.meta.title ? route.meta.title : route.name;
+}
+
+function isNewFeatureRoute(route = {}) {
+  const title = getRouteTitle(route);
+  return (
+    route.path === "newFeature" ||
+    route.path === "/newFeature" ||
+    title === "新增功能"
+  );
+}
+
+function isAdminTonggouRoot(route = {}) {
+  const title = getRouteTitle(route);
+  return (
+    route.path === "/tonggou" ||
+    route.path === "//tonggou" ||
+    title === "统购管理"
+  );
+}
+
+function isAdminNewFeatureLeafWrapper(route = {}) {
+  if (route.path !== "/" || route.component !== "Layout") {
+    return false;
+  }
+
+  const children = Array.isArray(route.children) ? route.children : [];
+  if (children.length !== 1) {
+    return false;
+  }
+
+  const child = children[0] || {};
+  const childPath = String(child.path || "").replace(/^\/+/, "");
+  const childTitle = getRouteTitle(child);
+
+  return (
+    adminNewFeatureLeafPaths.has(childPath) ||
+    adminNewFeatureLeafComponents.has(child.component || "") ||
+    adminNewFeatureMenuTitles.has(childTitle)
+  );
+}
+
+function shouldNestAdminNewFeatureRoute(route = {}) {
+  return isAdminTonggouRoot(route) || isAdminNewFeatureLeafWrapper(route);
+}
+
+function toAdminNewFeatureChild(route = {}) {
+  if (isAdminTonggouRoot(route)) {
+    return {
+      ...route,
+      path: "tonggou",
+      component: "ParentView",
+      redirect: "noRedirect",
+      hidden: false,
+      alwaysShow: true,
+    };
+  }
+
+  if (isAdminNewFeatureLeafWrapper(route)) {
+    return { ...(route.children[0] || {}) };
+  }
+
+  return null;
+}
+
+function buildAdminNewFeatureRouteKey(route = {}) {
+  return [
+    String(route.path || "").replace(/^\/+/, ""),
+    route.component || "",
+    getRouteTitle(route) || "",
+  ].join("__");
+}
+
+function nestAdminNewFeatureMenus(routes = []) {
+  const newFeatureRoute = routes.find(isNewFeatureRoute);
+  if (!newFeatureRoute) {
+    return routes;
+  }
+
+  const nestedRoutes = [];
+  const remainingRoutes = [];
+
+  routes.forEach((route) => {
+    if (isNewFeatureRoute(route)) {
+      remainingRoutes.push(route);
+      return;
+    }
+
+    if (shouldNestAdminNewFeatureRoute(route)) {
+      nestedRoutes.push(route);
+      return;
+    }
+
+    remainingRoutes.push(route);
+  });
+
+  if (!nestedRoutes.length) {
+    return routes;
+  }
+
+  const existingChildren = Array.isArray(newFeatureRoute.children)
+    ? [...newFeatureRoute.children]
+    : [];
+  const existingKeys = new Set(
+    existingChildren.map((child) => buildAdminNewFeatureRouteKey(child))
+  );
+  const appendedChildren = [];
+
+  nestedRoutes.forEach((route) => {
+    const child = toAdminNewFeatureChild(route);
+    if (!child) {
+      return;
+    }
+
+    const key = buildAdminNewFeatureRouteKey(child);
+    if (existingKeys.has(key)) {
+      return;
+    }
+
+    existingKeys.add(key);
+    appendedChildren.push(child);
+  });
+
+  newFeatureRoute.children = existingChildren.concat(appendedChildren);
+  return remainingRoutes;
+}
+
 function normalizeNonSchoolRoutes(routes = []) {
   return normalizeGroupNoticeMenus(
     ensureSupplierSettleMenu(
@@ -488,6 +716,7 @@ const permission = {
         const hasXuexiaoRole = userRoles.some((role) =>
           role.includes("xuexiao")
         );
+        const hasAdminRole = userRoles.some((role) => role.includes("admin"));
 
         const homeRoute = hasXuexiaoRole
           ? homeRoutes.schoolHome
@@ -498,8 +727,13 @@ const permission = {
           const normalizedRoutes = hasXuexiaoRole
             ? promoteSchoolTonggouMenus(serverRoutes)
             : normalizeNonSchoolRoutes(serverRoutes);
-          const sdata = JSON.parse(JSON.stringify(normalizedRoutes));
-          const rdata = JSON.parse(JSON.stringify(normalizedRoutes));
+          const roleAdjustedRoutes =
+            !hasXuexiaoRole && hasAdminRole
+              ? nestAdminNewFeatureMenus(normalizedRoutes)
+              : normalizedRoutes;
+          const dedupedRoutes = dedupeRouteNames(roleAdjustedRoutes);
+          const sdata = JSON.parse(JSON.stringify(dedupedRoutes));
+          const rdata = JSON.parse(JSON.stringify(dedupedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);
           const rewriteRoutes = filterAsyncRouter(rdata, false, true);
 

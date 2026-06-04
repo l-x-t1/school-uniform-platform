@@ -127,7 +127,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/accountBalance/index"),
-        name: "AccountBalance",
+        name: "SchoolAccountBalanceEntry",
         meta: { title: "账户余额", activeMenu: "/newFeature/accountBalance" },
       },
     ],
@@ -140,7 +140,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/supplierWithdrawRecord/index"),
-        name: "SupplierWithdrawRecord",
+        name: "SchoolSupplierWithdrawRecordEntry",
         meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
       },
     ],
@@ -153,7 +153,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/platformUsage/index"),
-        name: "PlatformUsage",
+        name: "SchoolPlatformUsageEntry",
         meta: { title: "教育局监管统计", activeMenu: "/newFeature/platformUsage" },
       },
     ],
@@ -166,7 +166,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/groupNotice/index"),
-        name: "SupplierGroupNotice",
+        name: "SupplierGroupNoticeEntry",
         meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
       },
     ],
@@ -179,7 +179,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/groupNoticeReadonly/index"),
-        name: "AdminGroupNoticeQuery",
+        name: "SchoolGroupNoticeReadonlyEntry",
         meta: { title: "学校统购公告查询", activeMenu: "/newFeature/adminGroupNoticeQuery" },
       },
     ],
@@ -205,7 +205,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/schoolUsage/index"),
-        name: "SchoolUsage",
+        name: "SchoolUsageEntry",
         meta: { title: "教育局监管统计", activeMenu: "/newFeature/schoolUsage" },
       },
     ],
