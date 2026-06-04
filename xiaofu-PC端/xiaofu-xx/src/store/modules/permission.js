@@ -495,6 +495,7 @@ const schoolRetiredMenuPaths = new Set([
   "comment",
   "productionOrderItem",
   "deliveryOrderItem",
+  "orderItem",
 ]);
 
 const schoolRetiredMenuComponents = new Set([
@@ -503,6 +504,7 @@ const schoolRetiredMenuComponents = new Set([
   "school/comment/index",
   "school/productionOrderItem/index",
   "school/deliveryOrderItem/index",
+  "school/orderItem/index",
 ]);
 
 const schoolRetiredMenuTitles = new Set([
@@ -511,6 +513,7 @@ const schoolRetiredMenuTitles = new Set([
   "商品评价",
   "生产单明细",
   "发货单明细",
+  "订单明细",
 ]);
 
 function isSchoolRetiredRoute(route = {}) {

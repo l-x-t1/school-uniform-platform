@@ -264,6 +264,11 @@ export const constantRoutes = [
     redirect: "/newFeature/deliveryOrder",
     hidden: true,
   },
+  {
+    path: "/newFeature/orderItem",
+    redirect: "/newFeature/orderInfo",
+    hidden: true,
+  },
 ];
 
 // 动态首页路由 - 根据角色动态添加
