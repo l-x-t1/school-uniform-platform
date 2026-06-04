@@ -4,98 +4,167 @@
       <div class="page-header">
         <div>
           <div class="page-title">供应商入驻审核</div>
-          <div class="page-subtitle">审核供应商提交的入驻申请，通过后自动创建厂商账号和厂商信息</div>
+          <div class="page-subtitle">审核供应商提交的入驻申请，并查询自己发布公告下已审核通过的厂商信息</div>
         </div>
         <el-button type="primary" plain icon="el-icon-refresh" size="mini" @click="refreshList">
           刷新
         </el-button>
       </div>
 
-      <el-form
-        ref="queryForm"
-        :model="queryParams"
-        size="small"
-        :inline="true"
-        label-width="100px"
-        class="query-form"
-      >
-        <el-form-item label="厂商名称" prop="supplierName">
-          <el-input
-            v-model="queryParams.supplierName"
-            placeholder="请输入厂商名称"
-            clearable
-            @keyup.enter.native="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item label="联系电话" prop="supplierPhone">
-          <el-input
-            v-model="queryParams.supplierPhone"
-            placeholder="请输入联系电话"
-            clearable
-            @keyup.enter.native="handleQuery"
-          />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">
-            搜索
-          </el-button>
-          <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">
-            重置
-          </el-button>
-        </el-form-item>
-      </el-form>
-
-      <el-table v-loading="loading" :data="tableRows" border>
-        <el-table-column type="index" label="序号" width="60" align="center" />
-        <el-table-column label="厂商名称" prop="supplierName" min-width="160" show-overflow-tooltip />
-        <el-table-column label="联系电话" prop="supplierPhone" width="130" align="center" />
-        <el-table-column label="用户名" prop="username" width="120" align="center" />
-        <el-table-column label="提交时间" prop="createTime" width="170" align="center">
-          <template slot-scope="scope">
-            {{ parseTime(scope.row.createTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
-          </template>
-        </el-table-column>
-        <el-table-column label="审核状态" width="100" align="center">
-          <template slot-scope="scope">
-            <el-tag v-if="scope.row.auditStatus === '0'" type="warning" size="small">待审核</el-tag>
-            <el-tag v-else-if="scope.row.auditStatus === '1'" type="success" size="small">已通过</el-tag>
-            <el-tag v-else-if="scope.row.auditStatus === '2'" type="danger" size="small">已驳回</el-tag>
-            <span v-else>-</span>
-          </template>
-        </el-table-column>
-        <el-table-column label="操作" width="160" align="center" fixed="right">
-          <template slot-scope="scope">
-            <template v-if="scope.row.auditStatus === '0'">
-              <el-button type="text" icon="el-icon-check" style="color: #67c23a" @click="handleApprove(scope.row)">
-                通过
+      <el-tabs v-model="activeTab" @tab-click="handleTabChange">
+        <el-tab-pane label="待审核申请" name="pending">
+          <el-form
+            ref="pendingQueryForm"
+            :model="pendingQueryParams"
+            size="small"
+            :inline="true"
+            label-width="100px"
+            class="query-form"
+          >
+            <el-form-item label="厂商名称" prop="supplierName">
+              <el-input
+                v-model="pendingQueryParams.supplierName"
+                placeholder="请输入厂商名称"
+                clearable
+                @keyup.enter.native="handlePendingQuery"
+              />
+            </el-form-item>
+            <el-form-item label="联系电话" prop="supplierPhone">
+              <el-input
+                v-model="pendingQueryParams.supplierPhone"
+                placeholder="请输入联系电话"
+                clearable
+                @keyup.enter.native="handlePendingQuery"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handlePendingQuery">
+                搜索
               </el-button>
-              <el-button type="text" icon="el-icon-close" style="color: #f56c6c" @click="handleRejectOpen(scope.row)">
-                驳回
+              <el-button icon="el-icon-refresh" size="mini" @click="resetPendingQuery">
+                重置
               </el-button>
-            </template>
-            <el-button type="text" icon="el-icon-view" @click="handleDetail(scope.row)">
-              详情
-            </el-button>
-          </template>
-        </el-table-column>
-      </el-table>
+            </el-form-item>
+          </el-form>
 
-      <pagination
-        v-show="total > 0"
-        :total="total"
-        :page.sync="queryParams.pageNum"
-        :limit.sync="queryParams.pageSize"
-        @pagination="getList"
-      />
+          <el-table v-loading="pendingLoading" :data="pendingRows" border>
+            <el-table-column type="index" label="序号" width="60" align="center" />
+            <el-table-column label="厂商名称" prop="supplierName" min-width="160" show-overflow-tooltip />
+            <el-table-column label="联系电话" prop="supplierPhone" width="130" align="center" />
+            <el-table-column label="入驻公告" prop="noticeTitle" min-width="180" show-overflow-tooltip />
+            <el-table-column label="用户名" prop="username" width="120" align="center" />
+            <el-table-column label="提交时间" prop="createTime" width="170" align="center">
+              <template slot-scope="scope">
+                {{ parseTime(scope.row.createTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
+              </template>
+            </el-table-column>
+            <el-table-column label="审核状态" width="100" align="center">
+              <template slot-scope="scope">
+                <el-tag v-if="scope.row.auditStatus === '0'" type="warning" size="small">待审核</el-tag>
+                <el-tag v-else-if="scope.row.auditStatus === '1'" type="success" size="small">已通过</el-tag>
+                <el-tag v-else-if="scope.row.auditStatus === '2'" type="danger" size="small">已驳回</el-tag>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
+            <el-table-column label="操作" width="180" align="center" fixed="right">
+              <template slot-scope="scope">
+                <template v-if="scope.row.auditStatus === '0'">
+                  <el-button type="text" icon="el-icon-check" style="color: #67c23a" @click="handleApprove(scope.row)">
+                    通过
+                  </el-button>
+                  <el-button type="text" icon="el-icon-close" style="color: #f56c6c" @click="handleRejectOpen(scope.row)">
+                    驳回
+                  </el-button>
+                </template>
+                <el-button type="text" icon="el-icon-view" @click="openDetail(scope.row, 'pending')">
+                  详情
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <pagination
+            v-show="pendingTotal > 0"
+            :total="pendingTotal"
+            :page.sync="pendingQueryParams.pageNum"
+            :limit.sync="pendingQueryParams.pageSize"
+            @pagination="getPendingList"
+          />
+        </el-tab-pane>
+
+        <el-tab-pane label="已通过厂商" name="approved">
+          <el-form
+            ref="approvedQueryForm"
+            :model="approvedQueryParams"
+            size="small"
+            :inline="true"
+            label-width="100px"
+            class="query-form"
+          >
+            <el-form-item label="厂商名称" prop="supplierName">
+              <el-input
+                v-model="approvedQueryParams.supplierName"
+                placeholder="请输入厂商名称"
+                clearable
+                @keyup.enter.native="handleApprovedQuery"
+              />
+            </el-form-item>
+            <el-form-item label="公告标题" prop="noticeTitle">
+              <el-input
+                v-model="approvedQueryParams.noticeTitle"
+                placeholder="请输入公告标题"
+                clearable
+                @keyup.enter.native="handleApprovedQuery"
+              />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleApprovedQuery">
+                搜索
+              </el-button>
+              <el-button icon="el-icon-refresh" size="mini" @click="resetApprovedQuery">
+                重置
+              </el-button>
+              <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleApprovedExport">
+                导出
+              </el-button>
+            </el-form-item>
+          </el-form>
+
+          <el-table v-loading="approvedLoading" :data="approvedRows" border>
+            <el-table-column type="index" label="序号" width="60" align="center" />
+            <el-table-column label="厂商名称" prop="supplierName" min-width="160" show-overflow-tooltip />
+            <el-table-column label="联系电话" prop="supplierPhone" width="130" align="center" />
+            <el-table-column label="入驻公告标题" prop="noticeTitle" min-width="220" show-overflow-tooltip />
+            <el-table-column label="用户名" prop="username" width="120" align="center" />
+            <el-table-column label="厂商类型" prop="supplierType" min-width="120" show-overflow-tooltip />
+            <el-table-column label="法定代表人" prop="legalRepresentative" width="120" align="center" />
+            <el-table-column label="审核时间" prop="auditTime" width="170" align="center">
+              <template slot-scope="scope">
+                {{ parseTime(scope.row.auditTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
+              </template>
+            </el-table-column>
+            <el-table-column label="审核人" prop="auditBy" width="120" align="center" />
+            <el-table-column label="操作" width="100" align="center" fixed="right">
+              <template slot-scope="scope">
+                <el-button type="text" icon="el-icon-view" @click="openDetail(scope.row, 'approved')">
+                  详情
+                </el-button>
+              </template>
+            </el-table-column>
+          </el-table>
+
+          <pagination
+            v-show="approvedTotal > 0"
+            :total="approvedTotal"
+            :page.sync="approvedQueryParams.pageNum"
+            :limit.sync="approvedQueryParams.pageSize"
+            @pagination="getApprovedList"
+          />
+        </el-tab-pane>
+      </el-tabs>
     </el-card>
 
-    <!-- 驳回对话框 -->
-    <el-dialog
-      title="驳回入驻申请"
-      :visible.sync="rejectDialogOpen"
-      width="520px"
-      append-to-body
-    >
+    <el-dialog title="驳回入驻申请" :visible.sync="rejectDialogOpen" width="520px" append-to-body>
       <el-form ref="rejectForm" :model="rejectForm" :rules="rejectRules" label-width="80px">
         <el-form-item label="厂商名称">
           <span>{{ currentRow.supplierName }}</span>
@@ -119,16 +188,13 @@
       </div>
     </el-dialog>
 
-    <!-- 详情对话框 -->
-    <el-dialog
-      title="入驻申请详情"
-      :visible.sync="detailDialogOpen"
-      width="640px"
-      append-to-body
-    >
-      <el-descriptions :column="2" border size="small" v-if="currentRow.id">
+    <el-dialog :title="detailDialogTitle" :visible.sync="detailDialogOpen" width="720px" append-to-body>
+      <el-descriptions v-if="currentRow.id" :column="2" border size="small">
         <el-descriptions-item label="厂商名称" :span="2">
           {{ currentRow.supplierName || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="来源入驻公告" :span="2">
+          {{ currentRow.noticeTitle || "-" }}
         </el-descriptions-item>
         <el-descriptions-item label="用户名">{{ currentRow.username || "-" }}</el-descriptions-item>
         <el-descriptions-item label="手机号">{{ currentRow.phone || "-" }}</el-descriptions-item>
@@ -140,11 +206,20 @@
         <el-descriptions-item label="成立时间">
           {{ parseTime(currentRow.establishedTime, "{y}-{m}-{d}") || "-" }}
         </el-descriptions-item>
+        <el-descriptions-item label="提交时间">
+          {{ parseTime(currentRow.createTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="审核时间">
+          {{ parseTime(currentRow.auditTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
+        </el-descriptions-item>
+        <el-descriptions-item label="审核人">
+          {{ currentRow.auditBy || currentRow.updateBy || "-" }}
+        </el-descriptions-item>
         <el-descriptions-item label="厂商地址" :span="2">
           {{ currentRow.supplierAddress || "-" }}
         </el-descriptions-item>
         <el-descriptions-item label="厂商简介" :span="2">
-          <div v-html="currentRow.supplierIntroduce || '-'" style="max-height:300px;overflow-y:auto"></div>
+          <div v-html="currentRow.supplierIntroduce || '-'" class="content-block"></div>
         </el-descriptions-item>
         <el-descriptions-item label="厂商资质" :span="2">
           <template v-if="businessLicenseFiles.length > 0">
@@ -164,6 +239,7 @@
           <el-tag v-if="currentRow.auditStatus === '0'" type="warning" size="small">待审核</el-tag>
           <el-tag v-else-if="currentRow.auditStatus === '1'" type="success" size="small">已通过</el-tag>
           <el-tag v-else-if="currentRow.auditStatus === '2'" type="danger" size="small">已驳回</el-tag>
+          <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="审核备注">
           {{ currentRow.auditRemark || "-" }}
@@ -183,23 +259,41 @@
 </template>
 
 <script>
-import { auditList, approveApply, rejectApply } from "@/api/school/supplierSettleAudit";
+import {
+  auditList,
+  approvedList,
+  approveApply,
+  rejectApply,
+  exportApprovedApply,
+} from "@/api/school/supplierSettleAudit";
 
 export default {
   name: "SupplierSettleAudit",
   data() {
     return {
-      loading: false,
+      activeTab: "pending",
+      pendingLoading: false,
+      approvedLoading: false,
       rejectLoading: false,
-      total: 0,
-      tableRows: [],
-      queryParams: {
+      approvedLoaded: false,
+      pendingTotal: 0,
+      approvedTotal: 0,
+      pendingRows: [],
+      approvedRows: [],
+      pendingQueryParams: {
         pageNum: 1,
         pageSize: 10,
         supplierName: "",
         supplierPhone: "",
       },
+      approvedQueryParams: {
+        pageNum: 1,
+        pageSize: 10,
+        supplierName: "",
+        noticeTitle: "",
+      },
       currentRow: {},
+      detailMode: "pending",
       rejectDialogOpen: false,
       detailDialogOpen: false,
       previewVisible: false,
@@ -208,43 +302,80 @@ export default {
         remark: "",
       },
       rejectRules: {
-        remark: [
-          { required: true, message: "请输入驳回原因", trigger: "blur" },
-        ],
+        remark: [{ required: true, message: "请输入驳回原因", trigger: "blur" }],
       },
     };
   },
   computed: {
     businessLicenseFiles() {
       if (!this.currentRow.businessLicense) return [];
-      return this.currentRow.businessLicense.split(",").filter(function(f) { return f.trim() !== ""; });
+      return this.currentRow.businessLicense.split(",").filter(function(file) {
+        return file.trim() !== "";
+      });
+    },
+    detailDialogTitle() {
+      return this.detailMode === "approved" ? "已通过入驻详情" : "入驻申请详情";
     },
   },
   created() {
-    this.getList();
+    this.getPendingList();
   },
   methods: {
-    getList() {
-      this.loading = true;
-      auditList(this.queryParams)
+    getPendingList() {
+      this.pendingLoading = true;
+      auditList(this.pendingQueryParams)
         .then((response) => {
-          this.tableRows = response.rows || [];
-          this.total = response.total || 0;
+          this.pendingRows = response.rows || [];
+          this.pendingTotal = response.total || 0;
         })
         .finally(() => {
-          this.loading = false;
+          this.pendingLoading = false;
         });
     },
-    handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+    getApprovedList() {
+      this.approvedLoading = true;
+      this.approvedLoaded = true;
+      approvedList(this.approvedQueryParams)
+        .then((response) => {
+          this.approvedRows = response.rows || [];
+          this.approvedTotal = response.total || 0;
+        })
+        .finally(() => {
+          this.approvedLoading = false;
+        });
     },
-    resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+    handleTabChange() {
+      if (this.activeTab === "approved" && !this.approvedLoaded) {
+        this.getApprovedList();
+      }
+    },
+    handlePendingQuery() {
+      this.pendingQueryParams.pageNum = 1;
+      this.getPendingList();
+    },
+    resetPendingQuery() {
+      this.resetForm("pendingQueryForm");
+      this.handlePendingQuery();
+    },
+    handleApprovedQuery() {
+      this.approvedQueryParams.pageNum = 1;
+      this.getApprovedList();
+    },
+    resetApprovedQuery() {
+      this.resetForm("approvedQueryForm");
+      this.handleApprovedQuery();
+    },
+    handleApprovedExport() {
+      exportApprovedApply({
+        ...this.approvedQueryParams,
+      });
     },
     refreshList() {
-      this.getList();
+      if (this.activeTab === "approved") {
+        this.getApprovedList();
+        return;
+      }
+      this.getPendingList();
     },
     handleApprove(row) {
       const name = row.supplierName || "该申请";
@@ -263,12 +394,15 @@ export default {
         })
         .then(() => {
           this.msgSuccess("审核通过，已创建供应商账号和厂商信息");
+          if (this.approvedLoaded) {
+            this.getApprovedList();
+          }
         })
         .catch(() => {
           // 取消或无操作
         })
         .finally(() => {
-          this.getList();
+          this.getPendingList();
         });
     },
     handleRejectOpen(row) {
@@ -289,13 +423,14 @@ export default {
             this.rejectDialogOpen = false;
           })
           .finally(() => {
-            this.getList();
+            this.getPendingList();
             this.rejectLoading = false;
           });
       });
     },
-    handleDetail(row) {
-      this.currentRow = row;
+    openDetail(row, mode) {
+      this.currentRow = { ...row };
+      this.detailMode = mode;
       this.detailDialogOpen = true;
     },
     getFileName(filePath) {
@@ -367,6 +502,11 @@ export default {
 
 .query-form {
   margin-bottom: 12px;
+}
+
+.content-block {
+  max-height: 300px;
+  overflow-y: auto;
 }
 
 .attachment-item {

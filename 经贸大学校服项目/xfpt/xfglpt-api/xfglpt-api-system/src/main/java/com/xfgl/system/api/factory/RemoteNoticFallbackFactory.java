@@ -6,6 +6,7 @@ import com.xfgl.system.api.RemoteNoticService;
 import com.xfgl.system.api.RemoteUserService;
 import com.xfgl.system.api.domain.SysUser;
 import com.xfgl.system.api.domain.XfptNotice;
+import com.xfgl.system.api.domain.NoticePublisherVo;
 import com.xfgl.system.api.model.LoginUser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,6 +42,16 @@ public class RemoteNoticFallbackFactory implements FallbackFactory<RemoteNoticSe
             @Override
             public R<Boolean> removeNotice(Long id, String source) {
                 return R.fail("删除公告失败:" + throwable.getMessage());
+            }
+
+            @Override
+            public R<XfptNotice> getNoticeInfo(Long id, String source) {
+                return R.fail("查询公告详情失败:" + throwable.getMessage());
+            }
+
+            @Override
+            public R<NoticePublisherVo> getNoticePublisher(Long id, String source) {
+                return R.fail("查询公告发布人失败:" + throwable.getMessage());
             }
         };
     }

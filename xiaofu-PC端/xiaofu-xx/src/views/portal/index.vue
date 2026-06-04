@@ -48,12 +48,12 @@
               cursor: pointer;
               border: 1px solid #fff;
               padding: 5px 10px;
-              border-radius: 20px; 
+              border-radius: 20px;
             "
             @click="goLogin"
           >
             请登录
-          </span> 
+          </span>
           <span
             v-else
             style="
@@ -86,7 +86,7 @@
               ref="searchInput"
               class="search-input"
               type="text"
-              placeholder="请输入要搜索的内容" 
+              placeholder="请输入要搜索的内容"
             />
             <button @click="performSearch" class="search-button">
               <i class="el-icon-search"></i>
@@ -115,7 +115,7 @@
         </div>
       </div>
     </div>
-    
+
     <!-- 吸顶导航条 -->
     <div class="sticky-nav" :class="{ 'sticky-active': isSticky }">
       <div class="sticky-nav-content">
@@ -152,7 +152,7 @@
             意见反馈
           </div> -->
         </div>
-        <div class="sticky-user-info"> 
+        <div class="sticky-user-info">
           <span
             v-if="!isLogin"
             class="sticky-login-btn"
@@ -171,28 +171,28 @@
       </div>
     </div>
     <main class="main-content" :class="{ 'no-banner': activeNavId !== 'home' }">
-      <div v-if="activeNavId === 'home'">  
+      <div v-if="activeNavId === 'home'">
         <!-- 公告信息区域 -->
         <div class="announcements-section">
           <div class="section-header">
             <h2 class="section-title">最新公告</h2>
             <div class="section-tabs">
-              <span 
-                class="tab-item" 
+              <span
+                class="tab-item"
                 :class="{ active: activeTab === 'purchase' }"
                 @click="activeTab = 'purchase'"
               >
                 采购公告
               </span>
-              <!-- <span 
-                class="tab-item" 
+              <!-- <span
+                class="tab-item"
                 :class="{ active: activeTab === 'qualified' }"
                 @click="activeTab = 'qualified'"
               >
                 备选公告
               </span> -->
-              <span 
-                class="tab-item" 
+              <span
+                class="tab-item"
                 :class="{ active: activeTab === 'CJGG' }"
                 @click="activeTab = 'CJGG'"
               >
@@ -200,18 +200,18 @@
               </span>
             </div>
           </div>
-          
+
           <div class="announcements-content">
             <div v-if="activeTab === 'purchase'" class="announcements-list">
-              <div 
-                v-for="item in articleList.slice(0, 6)" 
+              <div
+                v-for="item in articleList.slice(0, 6)"
                 :key="item.id"
                 class="announcement-card"
                 @click="handleAnnouncementDetails(item)"
                 :class="{ 'empty-item': item.isEmpty }"
               >
                 <div class="announcement-header">
-                  <h3 class="announcement-title">{{item.isBc == 1? item.title +'（补充）':item.title}}</h3> 
+                  <h3 class="announcement-title">{{item.isBc == 1? item.title +'（补充）':item.title}}</h3>
                 </div>
                 <div class="announcement-meta">
                   <span class="meta-item">地区：{{ item.areaname || '未知' }}</span>
@@ -220,31 +220,31 @@
               </div>
             </div>
             <div v-if="activeTab === 'CJGG'" class="announcements-list">
-              <div 
-                v-for="item in cjggList.slice(0, 6)" 
+              <div
+                v-for="item in cjggList.slice(0, 6)"
                 :key="item.id"
                 class="announcement-card"
                 @click="handleAnnouncementDetails(item)"
                 :class="{ 'empty-item': item.isEmpty }"
               >
                 <div class="announcement-header">
-                  <h3 class="announcement-title">{{item.isBc == 1? item.title +'（补充）':item.title}}</h3> 
+                  <h3 class="announcement-title">{{item.isBc == 1? item.title +'（补充）':item.title}}</h3>
                 </div>
                 <div class="announcement-meta">
                   <span class="meta-item">地区：{{ item.areaname || '未知' }}</span>
                   <span class="meta-item">发布人：{{ item.createBy || '未知' }}</span>
                 </div>
-              </div> 
+              </div>
             <!-- <div v-if="activeTab === 'qualified'" class="announcements-list">
-              <div 
-                v-for="item in qualifiedList.slice(0, 6)" 
+              <div
+                v-for="item in qualifiedList.slice(0, 6)"
                 :key="item.id"
                 class="announcement-card"
                 @click="handleAnnouncementDetails(item)"
                 :class="{ 'empty-item': item.isEmpty }"
               >
                 <div class="announcement-header">
-                  <h3 class="announcement-title">{{ item.title }}</h3> 
+                  <h3 class="announcement-title">{{ item.title }}</h3>
                 </div>
                 <div class="announcement-meta">
                   <span class="meta-item">地区：{{ item.areaname || '未知' }}</span>
@@ -268,8 +268,8 @@
               </div>
             </div>
             <div class="info-list">
-              <div 
-                v-for="(item) in policyList.slice(0, 5)" 
+              <div
+                v-for="(item) in policyList.slice(0, 5)"
                 :key="item.id"
                 class="info-item"
                 @click="showPolicyDetails(item)"
@@ -278,13 +278,13 @@
                 <div class="info-content">
                   <h4 class="info-title">{{ item.title }}</h4>
                   <div class="info-meta">
-                    <span class="info-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span> 
+                    <span class="info-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span>
                   </div>
-                </div> 
+                </div>
               </div>
             </div>
           </div>
-          
+
           <div class="info-column">
             <div class="column-header" @click="setActiveNav('JYZX')" style="cursor: pointer;">
               <div class="header-icon">
@@ -296,8 +296,8 @@
               </div>
             </div>
             <div class="info-list">
-              <div 
-                v-for="(item) in educationList.slice(0, 5)" 
+              <div
+                v-for="(item) in educationList.slice(0, 5)"
                 :key="item.id"
                 class="info-item"
                 @click="showEducationDetails(item)"
@@ -306,13 +306,13 @@
                 <div class="info-content">
                   <h4 class="info-title">{{ item.title }}</h4>
                   <div class="info-meta">
-                    <span class="info-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span> 
+                    <span class="info-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span>
                   </div>
-                </div> 
+                </div>
               </div>
             </div>
           </div>
-          
+
           <div class="info-column">
             <div class="column-header" @click="setActiveNav('ZSKT')" style="cursor: pointer;">
               <div class="header-icon">
@@ -324,8 +324,8 @@
               </div>
             </div>
             <div class="info-list" >
-              <!-- <div 
-                v-for="(item) in knowledgeCards.slice(0, 5)" 
+              <!-- <div
+                v-for="(item) in knowledgeCards.slice(0, 5)"
                 :key="item.id"
                 class="info-item"
                 @click="showKnowledgeDetails(item)"
@@ -334,50 +334,50 @@
                 <div class="info-content">
                   <h4 class="info-title">{{ item.title }}</h4>
                   <div class="info-meta">
-                    <span class="info-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span> 
+                    <span class="info-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span>
                   </div>
-                </div> 
+                </div>
               </div> -->
               <div class="video-grid" style="display: flex;flex-direction: column;">
                 <div class="video-item" @click="playVideo('http://127.0.0.1:9300/filestatics/voide/校服讲座.mp4')">
                   <div class="video-thumbnail">
-                    <!-- <video 
+                    <!-- <video
                       :src="'http://127.0.0.1:9300/filestatics/voide/校服讲座.mp4'"
                       @loadeddata="setVideoThumbnail"
                       preload="metadata"
                       muted
                     ></video> -->
                     <img src="@/assets/images/video_1.png" alt="基于标准的中小学生校服质量研究" style="width: 100%;height: 100%;" />
-                    <div class="video-overlay"> 
-                        <i class="el-icon-video-play" style="font-size: 40px;color: #fff;"></i> 
+                    <div class="video-overlay">
+                        <i class="el-icon-video-play" style="font-size: 40px;color: #fff;"></i>
                     </div>
                   </div>
                   <div class="video-content">
-                    <h3 class="video-description">基于标准的中小学生校服质量研究</h3> 
+                    <h3 class="video-description">基于标准的中小学生校服质量研究</h3>
                   </div>
                 </div>
-                
+
                 <div class="video-item" @click="playVideo('http://127.0.0.1:9300/filestatics/voide/质量把控.mp4')">
                   <div class="video-thumbnail">
-                    <!-- <video 
+                    <!-- <video
                       :src="'http://127.0.0.1:9300/filestatics/voide/质量把控.mp4'"
                       @loadeddata="setVideoThumbnail"
                       preload="metadata"
                       muted
                     ></video> -->
                     <img src="@/assets/images/video_2.png" alt="GB/T31888-2015标准解读与校服质量把控" style="width: 100%;height: 100%;" />
-                    <div class="video-overlay"> 
-                        <i class="el-icon-video-play" style="font-size: 40px;color: #fff;"></i> 
+                    <div class="video-overlay">
+                        <i class="el-icon-video-play" style="font-size: 40px;color: #fff;"></i>
                     </div>
                   </div>
                   <div class="video-content">
-                    <h3 class="video-description">GB/T31888-2015标准解读与校服质量把控</h3> 
+                    <h3 class="video-description">GB/T31888-2015标准解读与校服质量把控</h3>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div> 
+        </div>
 
         <!-- 校园风采区域 -->
         <div class="campus-section">
@@ -387,13 +387,13 @@
               <span class="section-subtitle">展示校服文化与校园风采</span>
             </div>
             <div class="header-right">
-              
+
             </div>
           </div>
           <div class="campus-grid">
             <div class="campus-main">
-              <div 
-                v-for="item in campusStyleList" 
+              <div
+                v-for="item in campusStyleList"
                 :key="item.id"
                 class="campus-main-item"
                 @click="showCampusStyleDetails(item)"
@@ -410,7 +410,7 @@
                 <div class="campus-info">
                   <h4>{{ item.title }}</h4>
                   <div class="campus-meta">
-                    <span class="campus-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span> 
+                    <span class="campus-date">{{ item.createTime ? item.createTime.split(" ")[0] : '' }}</span>
                   </div>
                 </div>
               </div>
@@ -422,19 +422,19 @@
         <!-- 学校信息区域 -->
         <div class="schools-section">
           <div class="section-header" @click="setActiveNav('XXXX')" style="cursor: pointer;">
-            <h2 class="section-title" >学校信息</h2> 
-            <div class="section-more"> 
+            <h2 class="section-title" >学校信息</h2>
+            <div class="section-more">
             </div>
           </div>
           <div class="schools-grid">
-            <div 
-              v-for="school in schoolList.slice(0, 10)" 
+            <div
+              v-for="school in schoolList.slice(0, 10)"
               :key="school.deptId"
               class="school-card"
               @click="showSchoolDetails(school)"
             >
               <div class="school-logo">
-                <img 
+                <img
                   v-if="school.schoolImage"
                   :src="baseUrl + school.schoolImage"
                   :alt="school.deptName"
@@ -448,9 +448,9 @@
               <div class="school-info">
                 <div style="font-size: 14px;font-weight: 500;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;" :title="school.deptName">{{ school.deptName }}</div>
                 <!-- <p class="school-type">
-                  {{ school.schoolType == 0 ? "高级中学" : 
-                     school.schoolType == 1 ? "初级中学" : 
-                     school.schoolType == 2 ? "小学" : 
+                  {{ school.schoolType == 0 ? "高级中学" :
+                     school.schoolType == 1 ? "初级中学" :
+                     school.schoolType == 2 ? "小学" :
                      school.schoolType == 3 ? "幼儿园" : "其他" }}
                 </p> -->
               </div>
@@ -468,15 +468,16 @@
       <schoolInformation v-if="activeNavId === 'XXXX'" />
       <opinion v-if="activeNavId === 'YJFK'" />
       <campusStyle v-if="activeNavId === 'XYFC'" />
+      <supplierSettle v-if="activeNavId === 'GYSRZGG'" />
     </main>
     <footer class="footer">
       <div class="footer-main">
         <div class="footer-content-wrapper">
           <div class="link-section">
             <div class="link-column">
-              <a href="http://localhost/" class="link-item" target="_blank">教育部</a> 
-              <a href="http://localhost/" class="link-item" target="_blank">河北省教育厅</a> 
-              <a href="http://localhost/" class="link-item" target="_blank">石家庄市教育局</a> 
+              <a href="http://localhost/" class="link-item" target="_blank">教育部</a>
+              <a href="http://localhost/" class="link-item" target="_blank">河北省教育厅</a>
+              <a href="http://localhost/" class="link-item" target="_blank">石家庄市教育局</a>
             </div>
             <div class="copyright-section">
               <div class="copyright-item">版权所有: 石家庄市教育局</div>
@@ -493,7 +494,7 @@
             </div>
               <div class="qr-section">
                 <div class="qr-item">
-                  <img src="@/assets/images/sjzbszn.png" style="height: 160px;width: 140px;border-radius: 10px;"  alt="校服平台家长端" /> 
+                  <img src="@/assets/images/sjzbszn.png" style="height: 160px;width: 140px;border-radius: 10px;"  alt="校服平台家长端" />
                 </div>
                 <div class="qr-item" style="background-color: #fff;padding: 10px;border-radius: 10px;">
                   <img src="@/assets/images/sjzjyjgzh.jpg" alt="微信公众号" />
@@ -506,7 +507,7 @@
     </footer>
     <el-dialog
       :visible.sync="schoolDialogVisible"
-      width="600px" 
+      width="600px"
       title="学校详情"
       append-to-body
     >
@@ -559,7 +560,7 @@
             <strong>详细地址：</strong>
             {{ selectedSchool.detailedAddress || "未提供" }}
           </p>
-          <p> 
+          <p>
             <strong>学校简介：</strong>
             {{ selectedSchool.remark || "未提供" }}
           </p>
@@ -569,7 +570,7 @@
     <!-- 知识课堂详情对话框 -->
     <el-dialog
       :visible.sync="knowledgeDialogVisible"
-      width="1200px" 
+      width="1200px"
       append-to-body
       custom-class="knowledge-dialog"
     >
@@ -593,7 +594,7 @@
           <div v-if="selectedKnowledge.file != '' && selectedKnowledge.file != null">
             <file-upload :value="selectedKnowledge.file" :disabled="true" />
           </div>
-        </div> 
+        </div>
       </div>
       <div slot="footer" class="dialog-footer">
         <!-- <el-button @click="knowledgeDialogVisible = false">关 闭</el-button> -->
@@ -647,7 +648,7 @@
     <!-- 政策法规详情对话框 -->
     <el-dialog
       :visible.sync="policyDialogVisible"
-      width="1200px" 
+      width="1200px"
       append-to-body
       custom-class="policy-dialog"
     >
@@ -674,7 +675,7 @@
           <div v-if="selectedPolicy.file != '' && selectedPolicy.file != null">
             <file-upload :value="selectedPolicy.file" :disabled="true" />
           </div>
-        </div> 
+        </div>
       </div>
       <div slot="footer" class="dialog-footer">
         <!-- <el-button @click="policyDialogVisible = false">关 闭</el-button> -->
@@ -684,7 +685,7 @@
     <!-- 教育咨询详情对话框 -->
     <el-dialog
       :visible.sync="educationDialogVisible"
-      width="1200px" 
+      width="1200px"
       append-to-body
       custom-class="education-dialog"
     >
@@ -718,7 +719,7 @@
     <!-- 校园风采详情对话框 -->
     <el-dialog
       :visible.sync="campusStyleDialogVisible"
-      width="1200px" 
+      width="1200px"
       append-to-body
       custom-class="campus-style-dialog"
     >
@@ -813,13 +814,13 @@
           提 交
         </el-button>
         <el-button @click="closeFeedbackDialog">关 闭</el-button>
-        
+
       </span>
     </el-dialog>
-    
+
     <!-- 回到顶部按钮 -->
-    <div 
-      class="back-to-top" 
+    <div
+      class="back-to-top"
       :class="{ 'show': showBackToTop }"
       @click="scrollToTop"
       v-show="showBackToTop"
@@ -830,7 +831,7 @@
 </template>
 
 <script>
-import { getToken } from "@/utils/auth"; 
+import { getToken } from "@/utils/auth";
 
 import purchase from "./_component/purchase.vue";
 import policy from "./_component/policy.vue";
@@ -840,6 +841,7 @@ import schoolInformation from "./_component/schoolInformation.vue";
 import campusStyle from "./_component/campusStyle.vue";
 import opinion from "./_component/opinion.vue";
 import shortlisted from "./_component/shortlisted.vue";
+import supplierSettle from "./_component/supplierSettle.vue";
 import cjgg from "./_component/cjgg.vue";
 import {
   getNoticeColumnList,
@@ -863,6 +865,7 @@ export default {
     campusStyle,
     shortlisted,
     cjgg,
+    supplierSettle,
   },
   name: "Portal",
   data() {
@@ -923,7 +926,7 @@ export default {
         userName: [{ required: true, message: "请输入姓名", trigger: "blur" }],
         lxfs: [{ required: true, message: "请输入联系方式", trigger: "blur" },{pattern: /^1[3-9]\d{9}$/, message: "请输入正确的手机号", trigger: "blur" }],
         feedbackContent: [
-          { required: true, message: "请输入反馈内容", trigger: "blur" }, 
+          { required: true, message: "请输入反馈内容", trigger: "blur" },
         ],
         region: [{ required: true, message: "请选择区县", trigger: "blur" }],
       },
@@ -986,7 +989,7 @@ export default {
         this.$store.dispatch("GenerateRoutes").then((accessRoutes) => {
           this.$router.addRoutes(accessRoutes);
         });
-        this.userInfo = this.$store.state.user; 
+        this.userInfo = this.$store.state.user;
       });
     }
     // 组件创建时的钩子
@@ -1001,7 +1004,7 @@ export default {
     this.$refs.banner.style.top = top + "px";
     this.$refs.banner.style.right = right + "px";
   },
-  mounted() {  
+  mounted() {
     window.addEventListener("resize", this.handleResize);
     // 添加滚动监听
     window.addEventListener("scroll", this.handleScroll);
@@ -1019,7 +1022,7 @@ export default {
       // 根据当前页面状态设置吸顶阈值
       const threshold = this.activeNavId === 'home' ? 600 : 120;
       this.isSticky = scrollTop > threshold;
-      
+
       // 控制回到顶部按钮的显示
       this.showBackToTop = scrollTop > 300;
     },
@@ -1088,7 +1091,7 @@ export default {
       }
       searchContent({
         name: searchTerm,
-      }).then((res) => { 
+      }).then((res) => {
         this.searchResults = res.data;
         console.log(this.searchResults, "搜索结果");
         // 如果搜索框有焦点且有搜索结果，显示结果列表
@@ -1101,11 +1104,11 @@ export default {
       try {
         // 先调用增加阅读数量接口
         await addReadCount(item.id);
-        
+
         // 然后获取详情
         const res = await getArticleDetail(item.id);
         const detailData = res.data;
-        
+
         // 设置详情数据，包含阅读数量
         this.selectedCampusStyle = {
           ...detailData,
@@ -1128,22 +1131,22 @@ export default {
     //阅览查看
     async handleAnnouncementDetails(item) {
       if (item.isEmpty) return;
-      
+
       try {
         // 先调用增加阅读数量接口
         await addReadCount(item.id);
-        
+
         // 然后获取详情
         const res = await getArticleDetail(item.id);
         const detailData = res.data;
-        
+
         // 设置预览URL
         if (detailData.ggFile) {
           this.previewUrl = process.env.VUE_APP_IMAGE_BASE_API + detailData.ggFile;
         } else if (detailData.file) {
           this.previewUrl = process.env.VUE_APP_IMAGE_BASE_API + detailData.file;
         }
-        
+
         // 设置详情数据，包含阅读数量
         this.selectedAnnouncement = {
           ...detailData,
@@ -1170,11 +1173,11 @@ export default {
       try {
         // 先调用增加阅读数量接口
         await addReadCount(item.id);
-        
+
         // 然后获取详情
         const res = await getArticleDetail(item.id);
         const detailData = res.data;
-        
+
         // 设置详情数据，包含阅读数量
         this.selectedPolicy = {
           ...detailData,
@@ -1192,11 +1195,11 @@ export default {
       try {
         // 先调用增加阅读数量接口
         await addReadCount(item.id);
-        
+
         // 然后获取详情
         const res = await getArticleDetail(item.id);
         const detailData = res.data;
-        
+
         // 设置详情数据，包含阅读数量
         this.selectedEducation = {
           ...detailData,
@@ -1215,10 +1218,10 @@ export default {
         bs: "XYFC",
       }).then((res) => {
         this.campusStyleList = res.rows.slice(0,4);
-      }); 
+      });
     },
     showSchoolDetails(school) {
-      this.selectedSchool = school; 
+      this.selectedSchool = school;
 
       this.schoolDialogVisible = true;
     },
@@ -1437,17 +1440,17 @@ export default {
     // 设置选中的导航项
     setActiveNav(navId) {
       this.activeNavId = navId;
-      
+
       // 清空搜索结果
       this.searchResults = [];
       this.showSearchResults = false;
-      
+
       // 清空搜索输入框
       if (this.$refs.searchInput) {
         this.$refs.searchInput.value = "";
       }
     },
-    
+
     // 回到顶部
     scrollToTop() {
       window.scrollTo({
@@ -1466,13 +1469,13 @@ export default {
             await feedback(this.feedbackForm);
             this.$message.success("反馈提交成功！");
             this.closeFeedbackDialog();
-          } catch (error) { 
+          } catch (error) {
             console.error(error);
           } finally {
             this.submitting = false;
           }
         } else {
-          
+
           return false;
         }
       });
@@ -1527,7 +1530,7 @@ export default {
       canvas.height = video.videoHeight;
       const ctx = canvas.getContext('2d');
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      
+
       // 将canvas转换为背景图片
       const thumbnailUrl = canvas.toDataURL('image/jpeg');
       video.style.backgroundImage = `url(${thumbnailUrl})`;
@@ -1574,7 +1577,7 @@ header {
   width: 100%;
   max-width: 100vw;
   overflow: hidden;
-  
+
   &.no-banner {
     height: 80px;
     background-image: none;
@@ -1633,7 +1636,7 @@ header {
   background: #f8fafc;
   flex: 1;
   overflow-x: hidden;
-  
+
   &.no-banner {
     padding-top: 20px;
   }
@@ -1659,13 +1662,13 @@ header {
   transition: all 0.3s ease;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     border-color: #3b82f6;
   }
-  
+
   .quick-access-icon {
     width: 60px;
     height: 60px;
@@ -1675,13 +1678,13 @@ header {
     align-items: center;
     justify-content: center;
     margin: 0 auto 20px;
-    
+
     .svg-icon {
       font-size: 28px;
       color: white;
     }
   }
-  
+
   .quick-access-content {
     h3 {
       font-size: 18px;
@@ -1692,7 +1695,7 @@ header {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
+
     p {
       font-size: 14px;
       color: #64748b;
@@ -1724,7 +1727,7 @@ header {
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 2px solid #f1f5f9;
-  
+
   .section-title {
     font-size: 24px;
     font-weight: 600;
@@ -1734,7 +1737,7 @@ header {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .section-subtitle {
     font-size: 14px;
     color: #64748b;
@@ -1742,7 +1745,7 @@ header {
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  
+
   .section-tabs {
     display: flex;
     gap: 30px;
@@ -1761,11 +1764,11 @@ header {
       position: relative;
       border: none;
       background: none;
-      
+
       &:hover {
         color: #3b82f6;
       }
-      
+
       &.active {
         font-size: 18px;
         color: #3b82f6;
@@ -1794,7 +1797,7 @@ header {
     grid-template-columns: repeat(2, 1fr);
     gap: 20px;
   }
-  
+
   .announcement-card {
     background: #f8fafc;
     border-radius: 12px;
@@ -1802,31 +1805,31 @@ header {
     cursor: pointer;
     transition: all 0.3s ease;
     border: 1px solid #e2e8f0;
-    
+
     &:hover {
       background: white;
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
       border-color: #3b82f6;
       transform: translateY(-2px);
     }
-    
+
     &.empty-item {
       opacity: 0.6;
       cursor: not-allowed;
-      
+
       &:hover {
         transform: none;
         box-shadow: none;
         border-color: #e2e8f0;
       }
     }
-    
+
     .announcement-header {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
       margin-bottom: 15px;
-      
+
       .announcement-title {
         font-size: 16px;
         font-weight: 600;
@@ -1841,7 +1844,7 @@ header {
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       .announcement-date {
         font-size: 12px;
         color: #64748b;
@@ -1853,12 +1856,12 @@ header {
         text-overflow: ellipsis;
       }
     }
-    
+
     .announcement-meta {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
-      
+
       .meta-item {
         font-size: 12px;
         color: #64748b;
@@ -1906,34 +1909,34 @@ header {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #e2e8f0;
-  
+
   &:hover {
     transform: translateY(-5px);
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
     border-color: #3b82f6;
-    
+
     .video-overlay {
       background: rgba(0, 0, 0, 0.7);
     }
-    
+
     .play-button {
       transform: scale(1.1);
     }
   }
-  
+
   .video-thumbnail {
     position: relative;
     width: 100%;
     height: 160px;
     overflow: hidden;
-    
+
     video {
       width: 100%;
       height: 100%;
       object-fit: cover;
       background: #e2e8f0;
     }
-    
+
     .video-overlay {
       position: absolute;
       top: 0;
@@ -1946,7 +1949,7 @@ header {
       justify-content: center;
       align-items: center;
       transition: background 0.3s ease;
-      
+
       .play-button {
         width: 40px;
         height: 40px;
@@ -1957,13 +1960,13 @@ header {
         justify-content: center;
         margin-bottom: 15px;
         transition: all 0.3s ease;
-        
+
         i {
           font-size: 24px;
           color: #3b82f6;
         }
       }
-      
+
       .video-info {
         .video-duration {
           color: white;
@@ -1976,10 +1979,10 @@ header {
       }
     }
   }
-  
+
   .video-content {
-    padding: 10px; 
-    
+    padding: 10px;
+
     .video-description {
       font-size: 14px;
       color: #64748b;
@@ -1991,11 +1994,11 @@ header {
 }
 
 /* 视频播放弹窗样式 */
-::v-deep .video-dialog { 
+::v-deep .video-dialog {
   .el-message-box__content {
     padding: 20px;
   }
-  
+
   .video-player-container {
     display: flex;
     justify-content: center;
@@ -2010,7 +2013,7 @@ header {
   padding: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
-  
+
   .column-header {
     display: flex;
     align-items: flex-start;
@@ -2018,19 +2021,19 @@ header {
     padding-bottom: 15px;
     border-bottom: 2px solid #f1f5f9;
     transition: all 0.3s ease;
-    
+
     &:hover {
-      // transform: translateY(-2px); 
-      
+      // transform: translateY(-2px);
+
       .header-icon {
         transform: scale(1.05);
       }
-      
+
       .header-content h3 {
         color: #3b82f6;
       }
     }
-    
+
     .header-icon {
       width: 50px;
       height: 50px;
@@ -2041,16 +2044,16 @@ header {
       justify-content: center;
       margin-right: 15px;
       flex-shrink: 0;
-      
+
       .svg-icon {
         font-size: 24px;
         color: white;
       }
     }
-    
+
     .header-content {
       flex: 1;
-      
+
       h3 {
         font-size: 18px;
         font-weight: 600;
@@ -2060,7 +2063,7 @@ header {
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       p {
         font-size: 14px;
         color: #64748b;
@@ -2071,7 +2074,7 @@ header {
       }
     }
   }
-  
+
   .info-list {
     .info-item {
       display: flex;
@@ -2082,26 +2085,26 @@ header {
       transition: all 0.3s ease;
       border: 1px solid transparent;
       margin-bottom: 10px;
-      
+
       &:last-child {
         margin-bottom: 0;
       }
-      
+
       &:hover {
         background: #f8fafc;
         border-color: #3b82f6;
         transform: translateX(5px);
-        
+
         .info-title {
           color: #3b82f6;
         }
-        
+
         .info-arrow .svg-icon {
           color: #3b82f6;
           transform: translateX(3px);
         }
       }
-      
+
       .info-number {
         width: 10px;
         height: 10px;
@@ -2117,10 +2120,10 @@ header {
         flex-shrink: 0;
         margin-top: 4px;
       }
-      
+
       .info-content {
         flex: 1;
-        
+
         .info-title {
           font-size: 16px;
           color: #374151;
@@ -2133,12 +2136,12 @@ header {
           text-overflow: ellipsis;
           margin: 0 0 8px 0;
         }
-        
+
         .info-meta {
           display: flex;
           gap: 10px;
           align-items: center;
-          
+
           .info-date {
             font-size: 14px;
             color: #9ca3af;
@@ -2146,7 +2149,7 @@ header {
             overflow: hidden;
             text-overflow: ellipsis;
           }
-          
+
           .info-tag {
             font-size: 11px;
             color: #3b82f6;
@@ -2160,10 +2163,10 @@ header {
           }
         }
       }
-      
+
       .info-arrow {
         margin-left: 15px;
-        
+
         .svg-icon {
           font-size: 18px;
           color: #9ca3af;
@@ -2193,22 +2196,22 @@ header {
   margin-bottom: 30px;
   padding-bottom: 20px;
   border-bottom: 2px solid #f1f5f9;
-  
+
   .header-left {
     transition: all 0.3s ease;
-    
+
     &:hover {
       // transform: translateY(-2px);
-      
+
       .section-title {
         color: #3b82f6;
       }
-      
+
       .section-subtitle {
         color: #3b82f6;
       }
     }
-    
+
     .section-title {
       font-size: 24px;
       font-weight: 600;
@@ -2219,7 +2222,7 @@ header {
       text-overflow: ellipsis;
       transition: color 0.3s ease;
     }
-    
+
     .section-subtitle {
       font-size: 14px;
       color: #64748b;
@@ -2229,7 +2232,7 @@ header {
       transition: color 0.3s ease;
     }
   }
-  
+
   .header-right {
     .view-more-btn {
       display: flex;
@@ -2247,12 +2250,12 @@ header {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      
+
       &:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
       }
-      
+
       .svg-icon {
         font-size: 16px;
       }
@@ -2279,36 +2282,36 @@ header {
     overflow: hidden;
     white-space: nowrap;
     box-shadow: 0 4px 15px rgba(59, 130, 246, 0.2);
-    
+
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
       background: linear-gradient(135deg, #2563eb, #1e40af);
-      
+
       .more-icon {
         transform: translateX(3px);
       }
-      
+
       .more-ripple {
         animation: ripple 0.6s ease-out;
       }
     }
-    
+
     &:active {
       transform: translateY(0);
       box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
     }
-    
+
     .more-text {
       font-weight: 500;
       letter-spacing: 0.5px;
     }
-    
+
     .more-icon {
       font-size: 14px;
       transition: transform 0.3s ease;
     }
-    
+
     .more-ripple {
       position: absolute;
       top: 50%;
@@ -2346,7 +2349,7 @@ header {
   display: flex;
   gap: 20px;
   flex: 1;
-  
+
   .campus-main-item {
     cursor: pointer;
     transition: all 0.3s ease;
@@ -2357,24 +2360,24 @@ header {
     flex-direction: column;
     flex: 1;
     overflow: hidden;
-    
+
     &:hover {
       transform: translateY(-3px);
       box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
       border-color: #3b82f6;
-      
+
       .campus-image-wrapper img {
         transform: scale(1.05);
       }
     }
-    
+
     .campus-image-wrapper {
       position: relative;
       width: 100%;
       height: 200px;
       overflow: hidden;
       flex-shrink: 0;
-      
+
       img {
         width: 100%;
         height: 100%;
@@ -2382,28 +2385,28 @@ header {
         transition: transform 0.3s ease;
       }
     }
-    
+
     .campus-info {
       padding: 15px;
       background: white;
       display: flex;
       flex-direction: column;
       gap: 8px;
-      
+
       h4 {
         font-size: 16px;
         font-weight: 600;
         color: #333;
         margin: 0;
-        line-height: 1.4; 
+        line-height: 1.4;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      
+
       .campus-meta {
-        display: flex; 
-        
+        display: flex;
+
         .campus-date {
           font-size: 14px;
           color: #666;
@@ -2422,18 +2425,18 @@ header {
   padding: 40px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
-  
+
   .section-header {
     transition: all 0.3s ease;
-    
+
     &:hover {
       // transform: translateY(-2px);
-      
+
       .section-title {
         color: #3b82f6;
       }
     }
-    
+
     .section-title {
       transition: color 0.3s ease;
     }
@@ -2454,19 +2457,19 @@ header {
   cursor: pointer;
   transition: all 0.3s ease;
   border: 1px solid #e2e8f0;
-  
+
   &:hover {
     background: white;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     border-color: #3b82f6;
     transform: translateY(-3px);
   }
-  
+
   .school-logo {
     width: 50px;
     height: 50px;
     margin: 0 auto 15px;
-    
+
     img {
       width: 100%;
       height: 100%;
@@ -2474,7 +2477,7 @@ header {
       border-radius: 8px;
     }
   }
-  
+
   .school-info {
     .school-name {
       font-size: 14px;
@@ -2488,7 +2491,7 @@ header {
       overflow: hidden;
       text-overflow: ellipsis;
     }
-    
+
     .school-type {
       font-size: 12px;
       color: #64748b;
@@ -2510,32 +2513,32 @@ header {
   .quick-access-grid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .info-knowledge-section {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .video-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-  
+
   .campus-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .schools-grid {
     grid-template-columns: repeat(3, 1fr);
   }
-  
+
   .sticky-nav .sticky-nav-content {
     max-width: 100%;
     padding: 15px;
-    
+
     .sticky-nav-menu {
       gap: 20px;
-      
+
       .sticky-nav-item {
         font-size: 14px;
         padding: 6px 12px;
@@ -2549,56 +2552,56 @@ header {
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    
+
     .title {
       font-size: 24px;
     }
-    
+
     .nav {
       width: 100%;
       flex-wrap: wrap;
       justify-content: center;
-      
+
       .nav-item {
         font-size: 14px;
         padding: 6px 12px;
       }
     }
   }
-  
+
   .footer-content-wrapper {
     flex-direction: column;
     gap: 30px;
     text-align: center;
   }
-  
+
   .link-section {
     gap: 40px;
   }
-  
+
   .sticky-nav .sticky-nav-content {
     flex-direction: column;
     gap: 15px;
     padding: 10px 15px;
-    
+
     .sticky-title {
       font-size: 18px;
     }
-    
+
     .sticky-nav-menu {
       gap: 15px;
       flex-wrap: wrap;
       justify-content: center;
-      
+
       .sticky-nav-item {
         font-size: 13px;
         padding: 5px 10px;
       }
     }
-    
+
     .sticky-user-info {
       gap: 15px;
-      
+
       .sticky-user-text,
       .sticky-login-btn,
       .sticky-user-name {
@@ -2613,35 +2616,35 @@ header {
   .header-container {
     height: 500px;
   }
-  
+
   .header-top .title {
     font-size: 20px;
   }
-  
+
   .search-box {
     width: 90%;
     max-width: 400px;
   }
-  
+
   .sticky-nav .sticky-nav-content {
     padding: 8px 10px;
-    
+
     .sticky-title {
       font-size: 16px;
     }
-    
+
     .sticky-nav-menu {
       gap: 10px;
-      
+
       .sticky-nav-item {
         font-size: 12px;
         padding: 4px 8px;
       }
     }
-    
+
     .sticky-user-info {
       gap: 10px;
-      
+
       .sticky-user-text,
       .sticky-login-btn,
       .sticky-user-name {
@@ -2654,7 +2657,7 @@ header {
 
 .footer {
   margin-top: auto;
-  
+
   .footer-main {
     background-color: #337dff;
     padding: 30px 0 10px 0;
@@ -2707,10 +2710,10 @@ header {
       }
     }
 
-    .copyright-section { 
+    .copyright-section {
       padding-top: 15px;
       border-top: 1px solid rgba(255, 255, 255, 0.3);
-      
+
       .copyright-item {
         color: rgba(255, 255, 255, 0.9);
         font-size: 14px;
@@ -2724,7 +2727,7 @@ header {
       display: flex;
       align-items: flex-start;
       gap: 40px;
-      
+
       @media (max-width: 768px) {
         flex-direction: column;
         gap: 20px;
@@ -2737,7 +2740,7 @@ header {
       align-items: flex-start;
       padding-top: 10px;
       animation: subtle-pulse 3s ease-in-out infinite;
-      
+
       @keyframes subtle-pulse {
         0%, 100% {
           transform: scale(1);
@@ -2746,7 +2749,7 @@ header {
           transform: scale(1.01);
         }
       }
-      
+
       .feedback-link {
         color: white;
         text-decoration: none;
@@ -2763,7 +2766,7 @@ header {
         display: flex;
         align-items: center;
         gap: 8px;
-        
+
         &::before {
           content: '';
           position: absolute;
@@ -2774,28 +2777,28 @@ header {
           background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
           transition: left 0.5s ease;
         }
-        
+
         &:hover {
           background: rgba(255, 255, 255, 0.2);
           border-color: rgba(255, 255, 255, 0.6);
           transform: translateY(-2px);
           box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-          
+
           &::before {
             left: 100%;
           }
         }
-        
+
         &:active {
           transform: translateY(0);
           box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
-        
+
         i {
           font-size: 18px;
           transition: transform 0.3s ease;
         }
-        
+
         &:hover i {
           transform: scale(1.1);
         }
@@ -2809,8 +2812,8 @@ header {
         text-align: center;
         img {
           width: 100px;
-          height: 100px; 
-          background-color: #fff; 
+          height: 100px;
+          background-color: #fff;
           border-radius: 4px;
         }
         p {
@@ -2956,7 +2959,7 @@ header {
 .policy-dialog-meta {
   text-align: center;
   font-size: 14px;
-  color: #888; 
+  color: #888;
   span {
     margin: 0 15px;
   }
@@ -3002,7 +3005,7 @@ header {
 .education-dialog-meta {
   text-align: center;
   font-size: 14px;
-  color: #888; 
+  color: #888;
   span {
     margin: 0 15px;
   }
@@ -3058,7 +3061,7 @@ header {
 .campus-style-dialog-meta {
   text-align: center;
   font-size: 14px;
-  color: #888; 
+  color: #888;
   span {
     margin: 0 15px;
   }
@@ -3083,7 +3086,7 @@ header {
 }
 
 .banner {
-  position: absolute; 
+  position: absolute;
   top: 416px;
   width: 100%;
   max-width: 100vw;
@@ -3135,7 +3138,7 @@ header {
   padding: 20px;
   color: #999;
   font-size: 14px;
-  
+
   i {
     margin-right: 8px;
     font-size: 16px;
@@ -3235,29 +3238,29 @@ header {
     flex-direction: column;
     align-items: center;
     gap: 20px;
-    
+
     .title {
       font-size: 24px;
     }
-    
+
     .nav {
       width: 100%;
       flex-wrap: wrap;
       justify-content: center;
-      
+
       .nav-item {
         font-size: 14px;
         padding: 6px 12px;
       }
     }
   }
-  
+
   .footer-content-wrapper {
     flex-direction: column;
     gap: 30px;
     text-align: center;
   }
-  
+
   .link-section {
     gap: 40px;
   }
@@ -3267,11 +3270,11 @@ header {
   .header-container {
     height: 500px;
   }
-  
+
   .header-top .title {
     font-size: 20px;
   }
-  
+
   .search-box {
     width: 90%;
     max-width: 400px;
@@ -3417,18 +3420,18 @@ html, body {
   transition: all 0.3s ease;
   opacity: 0;
   transform: translateY(20px);
-  
+
   &:hover {
     background: linear-gradient(135deg, #2563eb, #1e40af);
     transform: translateY(-3px);
     box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
   }
-  
+
   &.show {
     opacity: 1;
     transform: translateY(0);
   }
-  
+
   .svg-icon {
     font-size: 20px;
     color: white;
@@ -3439,18 +3442,18 @@ html, body {
 .feedback-form {
   .el-form-item {
     margin-bottom: 20px;
-    
+
     .el-form-item__label {
       font-weight: 500;
       color: #374151;
     }
-    
+
     .el-input__inner,
     .el-textarea__inner,
     .el-select .el-input__inner {
       border-radius: 8px;
       border: 1px solid #e2e8f0;
-      
+
       &:focus {
         border-color: #3b82f6;
         box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
@@ -3464,13 +3467,13 @@ html, body {
   display: flex;
   justify-content: center;
   gap: 20px;
-  
+
   .el-button--primary {
     background: linear-gradient(135deg, #3b82f6, #1d4ed8);
     border: none;
     border-radius: 8px;
     font-weight: 500;
-    
+
     &:hover {
       background: linear-gradient(135deg, #2563eb, #1e40af);
       transform: translateY(-1px);
@@ -3485,7 +3488,7 @@ html, body {
     bottom: 20px;
     width: 45px;
     height: 45px;
-    
+
     .svg-icon {
       font-size: 18px;
     }

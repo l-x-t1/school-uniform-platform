@@ -40,6 +40,14 @@ public class IgnoreWhiteProperties
         {
             whites.add("/school/team/meeting/importUserName");
         }
+        if (!whites.contains("/school/supplierSettleApply/public/**"))
+        {
+            whites.add("/school/supplierSettleApply/public/**");
+        }
+        if (!whites.contains("/supplierSettleApply/public/**"))
+        {
+            whites.add("/supplierSettleApply/public/**");
+        }
     }
 
     public List<String> getWhites()

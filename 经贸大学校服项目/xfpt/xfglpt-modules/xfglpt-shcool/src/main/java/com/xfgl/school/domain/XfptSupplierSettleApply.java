@@ -35,6 +35,30 @@ public class XfptSupplierSettleApply extends BaseEntity {
     @Schema(description = "主键")
     private Long id;
 
+    @Excel(name = "公告ID")
+    @Schema(description = "公告ID")
+    private Long noticeId;
+
+    @Excel(name = "公告标题")
+    @Schema(description = "公告标题")
+    private String noticeTitle;
+
+    @Excel(name = "公告发布人ID")
+    @Schema(description = "公告发布人ID")
+    private Long noticeUserId;
+
+    @Excel(name = "申请用户ID")
+    @Schema(description = "申请用户ID")
+    private Long applyUserId;
+
+    @Excel(name = "供应商ID")
+    @Schema(description = "供应商ID")
+    private Long supplierId;
+
+    @Excel(name = "申请来源")
+    @Schema(description = "申请来源：LOGIN_BOUND / REGISTER")
+    private String sourceType;
+
     @Excel(name = "用户名")
     @Schema(description = "用户名")
     private String username;
@@ -106,6 +130,11 @@ public class XfptSupplierSettleApply extends BaseEntity {
 
     @Schema(description = "审核备注")
     private String auditRemark;
+
+    @Excel(name = "审核人")
+    @TableField(exist = false)
+    @Schema(description = "审核人")
+    private String auditBy;
 
     @Schema(description = "目标角色ID")
     private Long targetRoleId;

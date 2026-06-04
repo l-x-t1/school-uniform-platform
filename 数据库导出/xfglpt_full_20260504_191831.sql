@@ -1703,7 +1703,7 @@ DROP TABLE IF EXISTS `xfpt_category_notice`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_category_notice` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `NAME` varchar(255) DEFAULT NULL,
   `STATUS` varchar(10) DEFAULT NULL,
   `CREATE_BY` varchar(32) DEFAULT NULL,
@@ -1720,7 +1720,7 @@ CREATE TABLE `xfpt_category_notice` (
   `REMARK` varchar(100) DEFAULT NULL,
   `IS_COVER_IMAGE` varchar(10) DEFAULT '0',
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='栏目分类';
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='栏目分类';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1729,7 +1729,7 @@ CREATE TABLE `xfpt_category_notice` (
 
 LOCK TABLES `xfpt_category_notice` WRITE;
 /*!40000 ALTER TABLE `xfpt_category_notice` DISABLE KEYS */;
-INSERT INTO `xfpt_category_notice` VALUES (8,'政策法规','1','管理员','2025-06-03 17:08:39','管理员','2025-05-06 22:35:35',4,'0',0,'ZCFG',NULL,NULL,NULL,NULL,'0'),(9,'教育咨询','1','管理员','2025-05-06 22:36:46','管理员','2025-05-06 22:35:52',3,'0',0,'JYZX',NULL,NULL,NULL,NULL,'0'),(10,'知识课堂','1','管理员','2025-07-02 00:43:19','管理员','2025-05-06 22:36:02',5,'0',0,'ZSKT',NULL,NULL,NULL,NULL,'1'),(11,'校园风采','1','管理员','2025-07-02 00:22:57','管理员','2025-05-06 22:36:20',6,'0',0,'XYFC',NULL,NULL,NULL,NULL,'1'),(12,'国家标准','0','管理员','2025-05-26 21:49:42','管理员','2025-05-06 22:37:15',1,'0',8,'GJBZ',NULL,NULL,NULL,NULL,'0'),(13,'测试','1','管理员','2025-05-30 22:06:50','管理员','2025-05-30 22:02:04',1,'1',11,'CS',NULL,NULL,NULL,NULL,'0'),(14,'采购公告','1','管理员','2025-07-01 22:01:19','管理员','2025-06-03 17:07:52',2,'0',0,'CGGG',NULL,NULL,NULL,NULL,'0'),(15,'入围公告','0','管理员','2025-09-10 17:16:18','管理员','2025-07-24 21:49:15',3,'0',0,'QYRWGG',NULL,NULL,NULL,NULL,'0'),(16,'采购结果公告','1','管理员','2025-09-22 15:15:54','管理员','2025-09-10 17:15:23',NULL,'0',0,'CJGG',NULL,NULL,NULL,NULL,'0'),(17,'测试分类','0','教育局测试','2025-09-22 14:45:37','教育局测试','2025-09-22 14:45:32',0,'0',0,NULL,NULL,NULL,NULL,NULL,'1'),(18,'111','0','教育局测试','2025-09-22 14:45:59','教育局测试','2025-09-22 14:45:46',NULL,'1',17,NULL,NULL,NULL,NULL,NULL,'0');
+INSERT INTO `xfpt_category_notice` VALUES (8,'政策法规','1','管理员','2025-06-03 17:08:39','管理员','2025-05-06 22:35:35',4,'0',0,'ZCFG',NULL,NULL,NULL,NULL,'0'),(9,'教育咨询','1','管理员','2025-05-06 22:36:46','管理员','2025-05-06 22:35:52',3,'0',0,'JYZX',NULL,NULL,NULL,NULL,'0'),(10,'知识课堂','1','管理员','2025-07-02 00:43:19','管理员','2025-05-06 22:36:02',5,'0',0,'ZSKT',NULL,NULL,NULL,NULL,'1'),(11,'校园风采','1','管理员','2025-07-02 00:22:57','管理员','2025-05-06 22:36:20',6,'0',0,'XYFC',NULL,NULL,NULL,NULL,'1'),(12,'国家标准','0','管理员','2025-05-26 21:49:42','管理员','2025-05-06 22:37:15',1,'0',8,'GJBZ',NULL,NULL,NULL,NULL,'0'),(13,'测试','1','管理员','2025-05-30 22:06:50','管理员','2025-05-30 22:02:04',1,'1',11,'CS',NULL,NULL,NULL,NULL,'0'),(14,'采购公告','1','管理员','2025-07-01 22:01:19','管理员','2025-06-03 17:07:52',2,'0',0,'CGGG',NULL,NULL,NULL,NULL,'0'),(15,'入围公告','0','管理员','2025-09-10 17:16:18','管理员','2025-07-24 21:49:15',3,'0',0,'QYRWGG',NULL,NULL,NULL,NULL,'0'),(16,'采购结果公告','1','管理员','2025-09-22 15:15:54','管理员','2025-09-10 17:15:23',NULL,'0',0,'CJGG',NULL,NULL,NULL,NULL,'0'),(17,'测试分类','0','教育局测试','2025-09-22 14:45:37','教育局测试','2025-09-22 14:45:32',0,'0',0,NULL,NULL,NULL,NULL,NULL,'1'),(18,'111','0','教育局测试','2025-09-22 14:45:59','教育局测试','2025-09-22 14:45:46',NULL,'1',17,NULL,NULL,NULL,NULL,NULL,'0'),(19,'供应商入驻公告','1','admin','2026-06-03 00:00:00','admin','2026-06-03 00:00:00',7,'0',0,'GYSRZGG',NULL,NULL,NULL,NULL,'0');
 /*!40000 ALTER TABLE `xfpt_category_notice` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1741,7 +1741,7 @@ DROP TABLE IF EXISTS `xfpt_cglcgzzj`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_cglcgzzj` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TITLE` varchar(255) DEFAULT NULL,
   `FILE` varchar(1000) DEFAULT NULL,
   `REMARK` varchar(100) DEFAULT NULL,
@@ -1969,7 +1969,7 @@ DROP TABLE IF EXISTS `xfpt_enterprise_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_enterprise_mode` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `NOTICE_NAME` varchar(1000) DEFAULT NULL,
   `NOTICE_FILE` varchar(1000) DEFAULT NULL,
   `OTHER_FILE` varchar(1000) DEFAULT NULL,
@@ -2259,7 +2259,7 @@ DROP TABLE IF EXISTS `xfpt_hmd`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_hmd` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
+  `id` bigint NOT NULL,
   `name` varchar(5) DEFAULT NULL,
   `xydm` varchar(5) DEFAULT NULL,
   `user_name` varchar(5) DEFAULT NULL,
@@ -2470,7 +2470,7 @@ DROP TABLE IF EXISTS `xfpt_notice`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_notice` (
-  `ID` bigint NOT NULL,
+  `ID` bigint NOT NULL AUTO_INCREMENT,
   `TITLE` varchar(255) DEFAULT NULL,
   `CONTENT` text,
   `CREATE_TIME` timestamp NULL DEFAULT NULL,
@@ -2497,7 +2497,7 @@ CREATE TABLE `xfpt_notice` (
   `DEPTNAME` varchar(100) DEFAULT NULL,
   `IS_BC` varchar(10) DEFAULT NULL,
   PRIMARY KEY (`ID`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='首页公告表';
+) ENGINE=InnoDB AUTO_INCREMENT=2858 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='首页公告表';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -2625,7 +2625,7 @@ DROP TABLE IF EXISTS `xfpt_org_report_disclose`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_org_report_disclose` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TEAM_MEETING_ID` decimal(19,0) NOT NULL,
   `TITLE` varchar(1000) DEFAULT NULL,
   `CREATE_BY` varchar(500) DEFAULT NULL,
@@ -2662,7 +2662,7 @@ DROP TABLE IF EXISTS `xfpt_org_report_disclose_son`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_org_report_disclose_son` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `P_ID` decimal(19,0) NOT NULL,
   `ZW` varchar(50) DEFAULT NULL,
   `CREATE_BY` varchar(500) DEFAULT NULL,
@@ -2745,7 +2745,7 @@ DROP TABLE IF EXISTS `xfpt_parent_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_parent_mode` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TITLE` varchar(1000) DEFAULT NULL,
   `IS_SAMPLES_PIC` varchar(10) DEFAULT NULL,
   `SAMPLES_PIC` varchar(1000) DEFAULT NULL,
@@ -2787,7 +2787,7 @@ DROP TABLE IF EXISTS `xfpt_parents_feedback`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_parents_feedback` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `USER_ID` varchar(100) DEFAULT NULL,
   `USER_NAME` varchar(100) DEFAULT NULL,
   `DEPT_ID` varchar(100) DEFAULT NULL,
@@ -2830,7 +2830,7 @@ DROP TABLE IF EXISTS `xfpt_patriarch_satisfaction_summarize`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_patriarch_satisfaction_summarize` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `SUMMARIZE_REPORT_NAME` varchar(100) DEFAULT NULL,
   `SUMMARIZE_REPORT_TYPE` varchar(100) DEFAULT NULL,
   `START_TIME` timestamp NULL DEFAULT NULL,
@@ -2874,7 +2874,7 @@ DROP TABLE IF EXISTS `xfpt_pdxz_sure_supplier`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_pdxz_sure_supplier` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TEAM_ID` decimal(19,0) DEFAULT NULL,
   `ANCESTORS` varchar(100) DEFAULT NULL,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
@@ -3266,7 +3266,7 @@ DROP TABLE IF EXISTS `xfpt_report_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_report_mode` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TITLE` varchar(255) DEFAULT NULL,
   `PURCHASE_MODE` varchar(2) DEFAULT NULL,
   `REPORT_FORM` varchar(1000) DEFAULT NULL,
@@ -3301,7 +3301,7 @@ DROP TABLE IF EXISTS `xfpt_report_mode_oper`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_report_mode_oper` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `CZR` varchar(255) DEFAULT NULL,
   `CREATE_TIME` timestamp NULL DEFAULT NULL,
   `CREATE_BY` varchar(100) DEFAULT NULL,
@@ -3410,7 +3410,7 @@ DROP TABLE IF EXISTS `xfpt_school_message`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_school_message` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `DEPT_ID` decimal(19,0) DEFAULT NULL,
   `SCHOOL_NAME` varchar(100) DEFAULT NULL,
   `ACADEMY_TYPE` varchar(100) DEFAULT NULL,
@@ -3532,7 +3532,7 @@ DROP TABLE IF EXISTS `xfpt_sim_user`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_sim_user` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `NAME` varchar(255) DEFAULT NULL,
   `ID_CARD` varchar(255) DEFAULT NULL,
   `PARM1` varchar(255) DEFAULT NULL,
@@ -3566,7 +3566,7 @@ DROP TABLE IF EXISTS `xfpt_student_info`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_student_info` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `CLASS_ID` varchar(100) DEFAULT NULL,
   `SHCOOL_ID` varchar(100) DEFAULT NULL,
   `NAME` varchar(100) DEFAULT NULL,
@@ -3603,7 +3603,7 @@ DROP TABLE IF EXISTS `xfpt_summary_old`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_summary_old` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TITLE` varchar(255) DEFAULT NULL,
   `MONEY` decimal(19,0) DEFAULT NULL,
   `INVITE_FILE` varchar(255) DEFAULT NULL,
@@ -3644,7 +3644,7 @@ DROP TABLE IF EXISTS `xfpt_supplice_contract`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_supplice_contract` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `DEPT_ID` varchar(100) DEFAULT NULL,
   `DEPT_NAME` varchar(100) DEFAULT NULL,
   `SUPPLIER_ID` varchar(100) DEFAULT NULL,
@@ -3685,7 +3685,7 @@ DROP TABLE IF EXISTS `xfpt_supplice_contract_son`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_supplice_contract_son` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `SUPPLICE_CONTRACT_ID` varchar(100) DEFAULT NULL,
   `CONTRACT_NAME` varchar(100) DEFAULT NULL,
   `CONTRACT_DEADLINE` varchar(100) DEFAULT NULL,
@@ -3941,10 +3941,16 @@ DROP TABLE IF EXISTS `xfpt_supplier_settle_apply`;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_supplier_settle_apply` (
   `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `notice_id` bigint DEFAULT NULL COMMENT '公告ID',
+  `notice_title` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '公告标题',
+  `notice_user_id` bigint DEFAULT NULL COMMENT '公告发布人ID',
+  `apply_user_id` bigint DEFAULT NULL COMMENT '申请用户ID',
+  `supplier_id` bigint DEFAULT NULL COMMENT '供应商ID',
+  `source_type` varchar(32) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '申请来源：LOGIN_BOUND / REGISTER',
   `username` varchar(30) COLLATE utf8mb4_general_ci NOT NULL COMMENT '用户名',
   `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '手机号',
   `email` varchar(128) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '邮箱',
-  `password_hash` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '密码哈希',
+  `password_hash` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT '' COMMENT '密码哈希',
   `supplier_name` varchar(200) COLLATE utf8mb4_general_ci NOT NULL COMMENT '厂商名称',
   `supplier_phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL COMMENT '联系电话',
   `supplier_type` varchar(100) COLLATE utf8mb4_general_ci NOT NULL COMMENT '厂商类型',
@@ -3973,6 +3979,31 @@ CREATE TABLE `xfpt_supplier_settle_apply` (
   KEY `idx_xfpt_supplier_settle_supplier_name` (`supplier_name`),
   KEY `idx_xfpt_supplier_settle_status` (`audit_status`,`create_time`)
 ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='供应商入驻申请';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+-- ----------------------------
+-- Table structure for xfpt_notice_supplier_rel
+-- ----------------------------
+DROP TABLE IF EXISTS `xfpt_notice_supplier_rel`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `xfpt_notice_supplier_rel` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `notice_id` bigint NOT NULL COMMENT '公告ID',
+  `supplier_id` bigint NOT NULL COMMENT '供应商ID',
+  `apply_id` bigint DEFAULT NULL COMMENT '申请ID',
+  `audit_time` datetime DEFAULT NULL COMMENT '审核时间',
+  `audit_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '审核人',
+  `create_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '创建者',
+  `create_time` datetime DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `update_by` varchar(64) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '更新者',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) COLLATE utf8mb4_general_ci DEFAULT '0' COMMENT '删除标志：0存在，2删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_notice_supplier` (`notice_id`,`supplier_id`),
+  KEY `idx_notice_supplier_apply` (`apply_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='公告供应商关联';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 -- ----------------------------
@@ -4178,7 +4209,7 @@ DROP TABLE IF EXISTS `xfpt_yxwf_mode`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `xfpt_yxwf_mode` (
-  `ID` bigint NOT NULL AUTO_INCREMENT,
+  `ID` bigint NOT NULL,
   `TITLE` varchar(100) DEFAULT NULL,
   `IS_SAMPLES_PIC` varchar(10) DEFAULT NULL,
   `SAMPLES_PIC` varchar(1000) DEFAULT NULL,
@@ -6852,120 +6883,4 @@ END
 WHERE oi.`del_flag` = '0'
   AND oi.`order_type` = '1';
 
--- sync purchase process 11-step schema updates
-SET @has_org_mode_signup_limit := (
-  SELECT COUNT(*)
-  FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'xfpt_organization_mode'
-    AND COLUMN_NAME = 'signup_limit'
-);
-
-SET @org_mode_signup_limit_ddl := IF(
-  @has_org_mode_signup_limit = 0,
-  'ALTER TABLE `xfpt_organization_mode` ADD COLUMN `signup_limit` int NULL COMMENT ''报名上限''',
-  'SELECT 1'
-);
-
-PREPARE stmt_org_mode_signup_limit FROM @org_mode_signup_limit_ddl;
-EXECUTE stmt_org_mode_signup_limit;
-DEALLOCATE PREPARE stmt_org_mode_signup_limit;
-
-SET @has_anno_results_stage_type := (
-  SELECT COUNT(*)
-  FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'xfpt_anno_results'
-    AND COLUMN_NAME = 'stage_type'
-);
-
-SET @anno_results_stage_type_ddl := IF(
-  @has_anno_results_stage_type = 0,
-  'ALTER TABLE `xfpt_anno_results` ADD COLUMN `stage_type` char(1) NOT NULL DEFAULT ''1'' COMMENT ''阶段类型：1投票结果公示 2采购结果公告''',
-  'SELECT 1'
-);
-
-PREPARE stmt_anno_results_stage_type FROM @anno_results_stage_type_ddl;
-EXECUTE stmt_anno_results_stage_type;
-DEALLOCATE PREPARE stmt_anno_results_stage_type;
-
-UPDATE `xfpt_anno_results`
-SET `stage_type` = '1'
-WHERE `stage_type` IS NULL OR `stage_type` = '';
-
-SET @has_contract_son_electronic_content := (
-  SELECT COUNT(*)
-  FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'xfpt_supplice_contract_son'
-    AND COLUMN_NAME = 'electronic_content'
-);
-
-SET @contract_son_electronic_content_ddl := IF(
-  @has_contract_son_electronic_content = 0,
-  'ALTER TABLE `xfpt_supplice_contract_son` ADD COLUMN `electronic_content` longtext NULL COMMENT ''电子合同内容''',
-  'SELECT 1'
-);
-
-PREPARE stmt_contract_son_electronic_content FROM @contract_son_electronic_content_ddl;
-EXECUTE stmt_contract_son_electronic_content;
-DEALLOCATE PREPARE stmt_contract_son_electronic_content;
-
-SET @has_contract_son_template_file := (
-  SELECT COUNT(*)
-  FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'xfpt_supplice_contract_son'
-    AND COLUMN_NAME = 'template_file'
-);
-
-SET @contract_son_template_file_ddl := IF(
-  @has_contract_son_template_file = 0,
-  'ALTER TABLE `xfpt_supplice_contract_son` ADD COLUMN `template_file` varchar(500) NULL COMMENT ''合同模板文件''',
-  'SELECT 1'
-);
-
-PREPARE stmt_contract_son_template_file FROM @contract_son_template_file_ddl;
-EXECUTE stmt_contract_son_template_file;
-DEALLOCATE PREPARE stmt_contract_son_template_file;
-
-SET @has_contract_son_paper_contract_files := (
-  SELECT COUNT(*)
-  FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'xfpt_supplice_contract_son'
-    AND COLUMN_NAME = 'paper_contract_files'
-);
-
-SET @contract_son_paper_contract_files_ddl := IF(
-  @has_contract_son_paper_contract_files = 0,
-  'ALTER TABLE `xfpt_supplice_contract_son` ADD COLUMN `paper_contract_files` varchar(2000) NULL COMMENT ''纸质合同图片''',
-  'SELECT 1'
-);
-
-PREPARE stmt_contract_son_paper_contract_files FROM @contract_son_paper_contract_files_ddl;
-EXECUTE stmt_contract_son_paper_contract_files;
-DEALLOCATE PREPARE stmt_contract_son_paper_contract_files;
-
 -- Dump completed on 2026-05-04 19:18:33
-
--- ============================================
--- 供应商入驻申请表新增邮箱字段 (2026-05-31)
--- ============================================
-SET @has_supplier_settle_apply_email := (
-  SELECT COUNT(*)
-  FROM information_schema.COLUMNS
-  WHERE TABLE_SCHEMA = DATABASE()
-    AND TABLE_NAME = 'xfpt_supplier_settle_apply'
-    AND COLUMN_NAME = 'email'
-);
-
-SET @supplier_settle_apply_email_ddl := IF(
-  @has_supplier_settle_apply_email = 0,
-  'ALTER TABLE `xfpt_supplier_settle_apply` ADD COLUMN `email` VARCHAR(128) NULL COMMENT ''邮箱'' AFTER `phone`',
-  'SELECT 1'
-);
-
-PREPARE stmt_supplier_settle_apply_email FROM @supplier_settle_apply_email_ddl;
-EXECUTE stmt_supplier_settle_apply_email;
-DEALLOCATE PREPARE stmt_supplier_settle_apply_email;

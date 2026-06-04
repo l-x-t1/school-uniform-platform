@@ -6,6 +6,7 @@ import com.xfgl.common.core.domain.R;
 import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.system.api.domain.SysUser;
 import com.xfgl.system.api.domain.XfptNotice;
+import com.xfgl.system.api.domain.NoticePublisherVo;
 import com.xfgl.system.api.factory.RemoteNoticFallbackFactory;
 import com.xfgl.system.api.factory.RemoteUserFallbackFactory;
 import com.xfgl.system.api.model.LoginUser;
@@ -43,4 +44,10 @@ public interface RemoteNoticService
 
     @PostMapping("/xfptnotice/removeNotice/{id}")
     public R<Boolean> removeNotice(@PathVariable("id") Long id, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+    @GetMapping("/xfptnotice/inner/{id}")
+    public R<XfptNotice> getNoticeInfo(@PathVariable("id") Long id, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+    @GetMapping("/xfptnotice/inner/publisher/{id}")
+    public R<NoticePublisherVo> getNoticePublisher(@PathVariable("id") Long id, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
 }

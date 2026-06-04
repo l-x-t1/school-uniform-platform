@@ -18,6 +18,7 @@ const whiteList = [
   "/forget-password",
   "/phone-login",
   "/caLogin",
+  "/supplier-settle",
 ];
 
 const isWhiteList = (path) => {

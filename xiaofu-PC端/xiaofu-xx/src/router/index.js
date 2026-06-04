@@ -91,6 +91,11 @@ export const constantRoutes = [
     hidden: true,
   },
   {
+    path: "/supplier-settle",
+    component: () => import("@/views/supplier-settle/index"),
+    hidden: true,
+  },
+  {
     path: "/404",
     component: () => import("@/views/error/404"),
     hidden: true,
