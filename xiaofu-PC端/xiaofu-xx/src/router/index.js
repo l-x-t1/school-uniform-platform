@@ -249,6 +249,26 @@ export const constantRoutes = [
       },
     ],
   },
+  {
+    path: "/newFeature/comment",
+    redirect: "/newFeature/commentReply",
+    hidden: true,
+  },
+  {
+    path: "/newFeature/productionOrderItem",
+    redirect: "/newFeature/productionOrder",
+    hidden: true,
+  },
+  {
+    path: "/newFeature/deliveryOrderItem",
+    redirect: "/newFeature/deliveryOrder",
+    hidden: true,
+  },
+  {
+    path: "/newFeature/orderItem",
+    redirect: "/newFeature/orderInfo",
+    hidden: true,
+  },
 ];
 
 // 动态首页路由 - 根据角色动态添加

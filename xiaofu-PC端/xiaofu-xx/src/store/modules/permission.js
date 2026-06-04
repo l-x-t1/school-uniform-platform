@@ -302,28 +302,6 @@ function ensureUsageMenu(routes = []) {
 
 function ensureVoteResultMenu(routes = []) {
   const targetTitle = "鏂板鍔熻兘";
-  const isNewFeatureRoute = (route = {}) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    const children = route.children || [];
-    const hasKnownFeatureChild = children.some(
-      (item) =>
-        item.path === "supplierMessage" ||
-        item.path === "/newFeature/supplierMessage" ||
-        item.path === "accountBalance" ||
-        item.path === "/newFeature/accountBalance" ||
-        item.path === "platformUsage" ||
-        item.path === "/newFeature/platformUsage" ||
-        item.path === "voteResult" ||
-        item.path === "/newFeature/voteResult"
-    );
-
-    return (
-      route.path === "newFeature" ||
-      route.path === "/newFeature" ||
-      title === targetTitle ||
-      hasKnownFeatureChild
-    );
-  };
   const exists = (children = []) =>
     children.some(
       (item) =>
@@ -508,6 +486,111 @@ function promoteSchoolTonggouMenus(routes = []) {
         ],
       };
     });
+  });
+}
+
+const schoolRetiredMenuPaths = new Set([
+  "cartItem",
+  "userAddress",
+  "comment",
+  "productionOrderItem",
+  "deliveryOrderItem",
+  "orderItem",
+]);
+
+const schoolRetiredMenuComponents = new Set([
+  "school/cartItem/index",
+  "school/userAddress/index",
+  "school/comment/index",
+  "school/productionOrderItem/index",
+  "school/deliveryOrderItem/index",
+  "school/orderItem/index",
+]);
+
+const schoolRetiredMenuTitles = new Set([
+  "购物车明细",
+  "用户收货地址",
+  "商品评价",
+  "生产单明细",
+  "发货单明细",
+  "订单明细",
+]);
+
+function isSchoolRetiredRoute(route = {}) {
+  const normalizedPath = String(route.path || "").replace(/^\/+/, "");
+  const title = getRouteTitle(route);
+
+  return (
+    schoolRetiredMenuPaths.has(normalizedPath) ||
+    schoolRetiredMenuComponents.has(route.component || "") ||
+    schoolRetiredMenuTitles.has(title)
+  );
+}
+
+function shouldPruneEmptySchoolRoute(route = {}) {
+  const hasChildren = Array.isArray(route.children) && route.children.length > 0;
+  if (hasChildren) {
+    return false;
+  }
+
+  return (
+    route.component === "Layout" ||
+    route.component === "ParentView" ||
+    route.path === "/"
+  );
+}
+
+function filterSchoolRetiredMenus(routes = []) {
+  return routes.reduce((result, route) => {
+    const current = { ...route };
+
+    if (current.children && current.children.length) {
+      current.children = filterSchoolRetiredMenus(current.children);
+    }
+
+    if (isSchoolRetiredRoute(current)) {
+      return result;
+    }
+
+    if (shouldPruneEmptySchoolRoute(current)) {
+      return result;
+    }
+
+    if (Array.isArray(current.children) && current.children.length === 0) {
+      delete current.children;
+      delete current.redirect;
+    }
+
+    result.push(current);
+    return result;
+  }, []);
+}
+
+function renameSchoolCommentMenu(routes = []) {
+  return routes.map((route) => {
+    const current = { ...route };
+    const currentPath = String(current.path || "").replace(/^\/+/, "");
+    const currentComponent = current.component || "";
+    const currentTitle = getRouteTitle(current);
+
+    if (
+      currentPath === "commentReply" ||
+      currentPath === "evaluation" ||
+      currentComponent === "school/commentReply/index" ||
+      currentTitle === "商品评论回复" ||
+      currentTitle === "订单评价回复"
+    ) {
+      current.meta = {
+        ...(current.meta || {}),
+        title: "评价管理",
+      };
+    }
+
+    if (current.children && current.children.length) {
+      current.children = renameSchoolCommentMenu(current.children);
+    }
+
+    return current;
   });
 }
 
@@ -724,9 +807,15 @@ const permission = {
 
         getRouters().then((res) => {
           const serverRoutes = JSON.parse(JSON.stringify(res.data || []));
+          const schoolRoutes = filterSchoolRetiredMenus(
+            promoteSchoolTonggouMenus(serverRoutes)
+          );
+          const nonSchoolRoutes = filterSchoolRetiredMenus(
+            normalizeNonSchoolRoutes(serverRoutes)
+          );
           const normalizedRoutes = hasXuexiaoRole
-            ? promoteSchoolTonggouMenus(serverRoutes)
-            : normalizeNonSchoolRoutes(serverRoutes);
+            ? renameSchoolCommentMenu(schoolRoutes)
+            : nonSchoolRoutes;
           const roleAdjustedRoutes =
             !hasXuexiaoRole && hasAdminRole
               ? nestAdminNewFeatureMenus(normalizedRoutes)

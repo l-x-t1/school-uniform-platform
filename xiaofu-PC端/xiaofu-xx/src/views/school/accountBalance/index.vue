@@ -37,11 +37,8 @@
           <el-form-item label="流水单号" prop="flowNo">
             <el-input v-model="financeQueryParams.flowNo" placeholder="请输入流水单号" clearable @keyup.enter.native="handleFinanceQuery" />
           </el-form-item>
-          <el-form-item label="供应商ID" prop="supplierId">
-            <el-input v-model="financeQueryParams.supplierId" placeholder="请输入供应商ID" clearable @keyup.enter.native="handleFinanceQuery" />
-          </el-form-item>
-          <el-form-item label="用户ID" prop="userId">
-            <el-input v-model="financeQueryParams.userId" placeholder="请输入用户ID" clearable @keyup.enter.native="handleFinanceQuery" />
+          <el-form-item label="订单编号" prop="orderNo">
+            <el-input v-model="financeQueryParams.orderNo" placeholder="请输入订单编号" clearable @keyup.enter.native="handleFinanceQuery" />
           </el-form-item>
           <el-form-item label="收款方名称" prop="payeeName">
             <el-input v-model="financeQueryParams.payeeName" placeholder="请输入收款方名称" clearable @keyup.enter.native="handleFinanceQuery" />
@@ -58,6 +55,15 @@
               <el-option label="到账学校" value="1" />
               <el-option label="到账供应商" value="2" />
             </el-select>
+          </el-form-item>
+          <el-form-item label="交易时间" prop="tradeTime">
+            <el-date-picker
+              v-model="financeQueryParams.tradeTime"
+              type="date"
+              value-format="yyyy-MM-dd"
+              clearable
+              placeholder="请选择交易时间"
+            />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" icon="el-icon-search" size="mini" @click="handleFinanceQuery">搜索</el-button>
@@ -84,20 +90,18 @@
             <template slot-scope="scope">{{ flowDirectionText(scope.row.flowDirection) }}</template>
           </el-table-column>
           <el-table-column label="订单编号" prop="orderNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="供应商ID" prop="supplierId" width="100" />
-          <el-table-column label="用户ID" prop="userId" width="110" />
+          <el-table-column label="收款方名称" prop="payeeName" min-width="140" show-overflow-tooltip />
           <el-table-column label="金额" width="110">
             <template slot-scope="scope">¥{{ amountText(scope.row.amount) }}</template>
           </el-table-column>
           <el-table-column label="支付渠道" prop="payChannel" min-width="120" show-overflow-tooltip />
-          <el-table-column label="收款方" prop="payeeName" min-width="140" show-overflow-tooltip />
           <el-table-column label="状态" min-width="120">
             <template slot-scope="scope">{{ flowStatusText(scope.row.status) }}</template>
           </el-table-column>
           <el-table-column label="交易时间" width="170">
             <template slot-scope="scope">{{ parseTime(scope.row.tradeTime, "{y}-{m}-{d} {h}:{i}:{s}") }}</template>
           </el-table-column>
-          <el-table-column label="备注" prop="remark" min-width="160" show-overflow-tooltip />
+          <el-table-column label="说明" prop="remark" min-width="160" show-overflow-tooltip />
         </el-table>
 
         <pagination
@@ -129,7 +133,9 @@
           <el-table-column type="selection" width="55" align="center" />
           <el-table-column label="流水单号" prop="flowNo" min-width="180" show-overflow-tooltip />
           <el-table-column label="订单编号" prop="orderNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="供应商ID" prop="supplierId" width="100" />
+          <el-table-column label="供应商名称" min-width="160" show-overflow-tooltip>
+            <template slot-scope="scope">{{ displaySupplierName(scope.row) }}</template>
+          </el-table-column>
           <el-table-column label="收款方名称" prop="payeeName" min-width="140" show-overflow-tooltip />
           <el-table-column label="金额" width="120">
             <template slot-scope="scope">¥{{ amountText(scope.row.amount) }}</template>
@@ -160,9 +166,6 @@
           <el-form-item label="提现单号" prop="withdrawNo">
             <el-input v-model="withdrawQueryParams.withdrawNo" placeholder="请输入提现单号" clearable @keyup.enter.native="handleWithdrawQuery" />
           </el-form-item>
-          <el-form-item label="供应商ID" prop="supplierId">
-            <el-input v-model="withdrawQueryParams.supplierId" placeholder="请输入供应商ID" clearable @keyup.enter.native="handleWithdrawQuery" />
-          </el-form-item>
           <el-form-item label="供应商名称" prop="supplierName">
             <el-input v-model="withdrawQueryParams.supplierName" placeholder="请输入供应商名称" clearable @keyup.enter.native="handleWithdrawQuery" />
           </el-form-item>
@@ -174,6 +177,33 @@
               <el-option label="已打款" value="3" />
               <el-option label="已取消" value="4" />
             </el-select>
+          </el-form-item>
+          <el-form-item label="申请时间" prop="applyTime">
+            <el-date-picker
+              v-model="withdrawQueryParams.applyTime"
+              type="date"
+              value-format="yyyy-MM-dd"
+              clearable
+              placeholder="请选择申请时间"
+            />
+          </el-form-item>
+          <el-form-item label="审核时间" prop="auditTime">
+            <el-date-picker
+              v-model="withdrawQueryParams.auditTime"
+              type="date"
+              value-format="yyyy-MM-dd"
+              clearable
+              placeholder="请选择审核时间"
+            />
+          </el-form-item>
+          <el-form-item label="打款时间" prop="payTime">
+            <el-date-picker
+              v-model="withdrawQueryParams.payTime"
+              type="date"
+              value-format="yyyy-MM-dd"
+              clearable
+              placeholder="请选择打款时间"
+            />
           </el-form-item>
           <el-form-item>
             <el-button type="primary" icon="el-icon-search" size="mini" @click="handleWithdrawQuery">搜索</el-button>
@@ -193,7 +223,6 @@
 
         <el-table v-loading="withdrawLoading" :data="withdrawApplyList" border>
           <el-table-column label="提现单号" prop="withdrawNo" min-width="180" show-overflow-tooltip />
-          <el-table-column label="供应商ID" prop="supplierId" width="100" />
           <el-table-column label="供应商名称" prop="supplierName" min-width="140" show-overflow-tooltip />
           <el-table-column label="申请金额" width="120">
             <template slot-scope="scope">¥{{ amountText(scope.row.applyAmount) }}</template>
@@ -205,8 +234,12 @@
             <template slot-scope="scope">{{ parseTime(scope.row.applyTime, "{y}-{m}-{d}") }}</template>
           </el-table-column>
           <el-table-column label="审核人" prop="auditUserName" min-width="120" />
-          <el-table-column label="关联资金流水ID" prop="financeFlowId" width="120" />
-          <el-table-column label="审核备注" prop="auditRemark" min-width="160" show-overflow-tooltip />
+          <el-table-column label="审核时间" width="120">
+            <template slot-scope="scope">{{ formatDate(scope.row.auditTime) }}</template>
+          </el-table-column>
+          <el-table-column label="打款时间" width="120">
+            <template slot-scope="scope">{{ formatDate(scope.row.payTime) }}</template>
+          </el-table-column>
         </el-table>
 
         <pagination
@@ -224,28 +257,29 @@
         <el-form-item label="提现单号">
           <el-input v-model="withdrawForm.withdrawNo" disabled />
         </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="withdrawForm.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
         <el-form-item label="供应商名称" prop="supplierName">
           <el-input v-model="withdrawForm.supplierName" placeholder="请输入供应商名称" />
         </el-form-item>
         <el-form-item label="申请金额" prop="applyAmount">
-          <el-input-number v-model="withdrawForm.applyAmount" :min="0.01" :precision="2" :step="100" />
-        </el-form-item>
-        <el-form-item label="关联资金流水ID" prop="financeFlowId">
-          <el-input v-model="withdrawForm.financeFlowId" placeholder="选填" />
+          <el-input-number v-model="withdrawForm.applyAmount" :min="0.01" :precision="2" :step="100" class="full-width" />
         </el-form-item>
         <el-form-item label="银行卡信息JSON" prop="bankInfoJson">
           <el-input
             v-model="withdrawForm.bankInfoJson"
             type="textarea"
             :rows="4"
-            placeholder='请输入如 {"accountName":"张三","bankName":"建设银行","bankNo":"6222..."} 的JSON'
+            placeholder="请输入如 {&quot;accountName&quot;:&quot;张三&quot;,&quot;bankName&quot;:&quot;建设银行&quot;,&quot;bankNo&quot;:&quot;6222...&quot;} 的JSON"
           />
         </el-form-item>
         <el-form-item label="备注" prop="remark">
           <el-input v-model="withdrawForm.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+        </el-form-item>
+        <el-divider content-position="left">内部信息</el-divider>
+        <el-form-item label="供应商ID" prop="supplierId">
+          <el-input v-model="withdrawForm.supplierId" placeholder="请输入供应商ID" />
+        </el-form-item>
+        <el-form-item label="关联资金流水ID" prop="financeFlowId">
+          <el-input v-model="withdrawForm.financeFlowId" placeholder="选填" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -257,18 +291,18 @@
 </template>
 
 <script>
-import auth from "@/plugins/auth";
+import auth from '@/plugins/auth'
 import {
   createAccountBalanceWithdraw,
   listAccountBalanceFinance,
-  listAccountBalanceWithdraw,
-} from "@/api/school/accountBalance";
+  listAccountBalanceWithdraw
+} from '@/api/school/accountBalance'
 
 export default {
-  name: "AccountBalance",
+  name: 'AccountBalance',
   data() {
     return {
-      activeTab: "finance",
+      activeTab: 'finance',
       financeLoading: false,
       withdrawLoading: false,
       withdrawSubmitting: false,
@@ -282,209 +316,217 @@ export default {
         pageNum: 1,
         pageSize: 10,
         flowNo: undefined,
-        supplierId: undefined,
-        userId: undefined,
+        orderNo: undefined,
         payeeName: undefined,
         flowDirection: undefined,
         status: undefined,
+        tradeTime: undefined
       },
       withdrawQueryParams: {
         pageNum: 1,
         pageSize: 10,
         withdrawNo: undefined,
-        supplierId: undefined,
         supplierName: undefined,
         status: undefined,
+        applyTime: undefined,
+        auditTime: undefined,
+        payTime: undefined
       },
       withdrawForm: {
-        withdrawNo: "",
+        withdrawNo: '',
         supplierId: undefined,
-        supplierName: "",
+        supplierName: '',
         applyAmount: undefined,
         financeFlowId: undefined,
-        bankInfoJson: "",
-        remark: "",
+        bankInfoJson: '',
+        remark: ''
       },
       withdrawRules: {
-        supplierId: [{ required: true, message: "请输入供应商ID", trigger: "blur" }],
-        supplierName: [{ required: true, message: "请输入供应商名称", trigger: "blur" }],
-        applyAmount: [{ required: true, message: "请输入申请金额", trigger: "change" }],
-      },
-    };
+        supplierId: [{ required: true, message: '请输入供应商ID', trigger: 'blur' }],
+        supplierName: [{ required: true, message: '请输入供应商名称', trigger: 'blur' }],
+        applyAmount: [{ required: true, message: '请输入申请金额', trigger: 'change' }]
+      }
+    }
   },
   computed: {
     canViewWithdrawList() {
-      return auth.hasPermi("school:withdrawApply:list");
+      return auth.hasPermi('school:withdrawApply:list')
     },
     canCreateWithdraw() {
-      return auth.hasPermi("school:withdrawApply:add");
+      return auth.hasPermi('school:withdrawApply:add')
     },
     availableFinanceList() {
-      return this.financeFlowList.filter(this.isWithdrawableFlow);
+      return this.financeFlowList.filter(this.isWithdrawableFlow)
     },
     summary() {
-      const financeRows = this.financeFlowList || [];
-      const withdrawRows = this.withdrawApplyList || [];
-      const incomeRows = financeRows.filter((item) => String(item.flowDirection) === "1");
-      const outcomeRows = financeRows.filter((item) => String(item.flowDirection) === "2");
-      const pendingRows = withdrawRows.filter((item) => String(item.status) === "0");
+      const financeRows = this.financeFlowList || []
+      const withdrawRows = this.withdrawApplyList || []
+      const incomeRows = financeRows.filter((item) => String(item.flowDirection) === '1')
+      const outcomeRows = financeRows.filter((item) => String(item.flowDirection) === '2')
+      const pendingRows = withdrawRows.filter((item) => String(item.status) === '0')
       return {
-        incomeAmount: this.sumAmount(incomeRows, "amount"),
+        incomeAmount: this.sumAmount(incomeRows, 'amount'),
         incomeCount: incomeRows.length,
-        outcomeAmount: this.sumAmount(outcomeRows, "amount"),
+        outcomeAmount: this.sumAmount(outcomeRows, 'amount'),
         outcomeCount: outcomeRows.length,
-        withdrawableAmount: this.sumAmount(this.availableFinanceList, "amount"),
-        pendingWithdrawAmount: this.sumAmount(pendingRows, "applyAmount"),
-        pendingWithdrawCount: pendingRows.length,
-      };
-    },
+        withdrawableAmount: this.sumAmount(this.availableFinanceList, 'amount'),
+        pendingWithdrawAmount: this.sumAmount(pendingRows, 'applyAmount'),
+        pendingWithdrawCount: pendingRows.length
+      }
+    }
   },
   created() {
-    this.getFinanceList();
+    this.getFinanceList()
     if (this.canViewWithdrawList) {
-      this.getWithdrawList();
+      this.getWithdrawList()
     }
   },
   methods: {
     getFinanceList() {
-      this.financeLoading = true;
+      this.financeLoading = true
       listAccountBalanceFinance(this.financeQueryParams)
         .then((response) => {
-          this.financeFlowList = response.rows || [];
-          this.financeTotal = response.total || 0;
+          this.financeFlowList = response.rows || []
+          this.financeTotal = response.total || 0
         })
         .finally(() => {
-          this.financeLoading = false;
-        });
+          this.financeLoading = false
+        })
     },
     getWithdrawList() {
       if (!this.canViewWithdrawList) {
-        this.withdrawApplyList = [];
-        this.withdrawTotal = 0;
-        return;
+        this.withdrawApplyList = []
+        this.withdrawTotal = 0
+        return
       }
-      this.withdrawLoading = true;
+      this.withdrawLoading = true
       listAccountBalanceWithdraw(this.withdrawQueryParams)
         .then((response) => {
-          this.withdrawApplyList = response.rows || [];
-          this.withdrawTotal = response.total || 0;
+          this.withdrawApplyList = response.rows || []
+          this.withdrawTotal = response.total || 0
         })
         .finally(() => {
-          this.withdrawLoading = false;
-        });
+          this.withdrawLoading = false
+        })
     },
     handleFinanceQuery() {
-      this.financeQueryParams.pageNum = 1;
-      this.getFinanceList();
+      this.financeQueryParams.pageNum = 1
+      this.getFinanceList()
     },
     handleWithdrawQuery() {
       if (!this.canViewWithdrawList) {
-        return;
+        return
       }
-      this.withdrawQueryParams.pageNum = 1;
-      this.getWithdrawList();
+      this.withdrawQueryParams.pageNum = 1
+      this.getWithdrawList()
     },
     resetFinanceQuery() {
-      this.resetForm("financeQueryForm");
-      this.handleFinanceQuery();
+      this.resetForm('financeQueryForm')
+      this.handleFinanceQuery()
     },
     resetWithdrawQuery() {
       if (!this.canViewWithdrawList) {
-        return;
+        return
       }
-      this.resetForm("withdrawQueryForm");
-      this.handleWithdrawQuery();
+      this.resetForm('withdrawQueryForm')
+      this.handleWithdrawQuery()
     },
     exportFinanceList() {
-      this.download("school/financeFlow/export", { ...this.financeQueryParams }, `financeFlow_${new Date().getTime()}.xlsx`);
+      this.download('school/financeFlow/export', { ...this.financeQueryParams }, `financeFlow_${new Date().getTime()}.xlsx`)
     },
     exportWithdrawList() {
       if (!this.canViewWithdrawList) {
-        return;
+        return
       }
-      this.download("school/withdrawApply/export", { ...this.withdrawQueryParams }, `withdrawApply_${new Date().getTime()}.xlsx`);
+      this.download('school/withdrawApply/export', { ...this.withdrawQueryParams }, `withdrawApply_${new Date().getTime()}.xlsx`)
     },
     handleAvailableSelectionChange(selection) {
-      this.selectedAvailableRows = selection;
+      this.selectedAvailableRows = selection
     },
     isWithdrawableFlow(row) {
-      return String(row.flowDirection) === "1" && String(row.status) === "2" && (String(row.payeeType) === "2" || !!row.supplierId);
+      return String(row.flowDirection) === '1' && String(row.status) === '2' && (String(row.payeeType) === '2' || !!row.supplierId)
     },
     openWithdrawDialog(row) {
       if (!this.canCreateWithdraw) {
-        return;
+        return
       }
-      const rows = row ? [row] : this.selectedAvailableRows;
-      const firstRow = rows[0] || {};
+      const rows = row ? [row] : this.selectedAvailableRows
+      const firstRow = rows[0] || {}
       this.withdrawForm = {
         withdrawNo: this.generateWithdrawNo(),
         supplierId: firstRow.supplierId,
-        supplierName: firstRow.payeeName || firstRow.supplierName || "",
-        applyAmount: rows.length ? this.sumAmount(rows, "amount") : undefined,
+        supplierName: firstRow.payeeName || firstRow.supplierName || '',
+        applyAmount: rows.length ? this.sumAmount(rows, 'amount') : undefined,
         financeFlowId: firstRow.id,
-        bankInfoJson: "",
-        remark: rows.length > 1 ? `关联 ${rows.length} 条资金流水` : "",
-      };
-      this.withdrawDialogOpen = true;
+        bankInfoJson: '',
+        remark: rows.length > 1 ? `关联 ${rows.length} 条资金流水` : ''
+      }
+      this.withdrawDialogOpen = true
       this.$nextTick(() => {
         if (this.$refs.withdrawForm) {
-          this.$refs.withdrawForm.clearValidate();
+          this.$refs.withdrawForm.clearValidate()
         }
-      });
+      })
     },
     submitWithdraw() {
       if (!this.canCreateWithdraw) {
-        return;
+        return
       }
       this.$refs.withdrawForm.validate((valid) => {
-        if (!valid) return;
+        if (!valid) return
         const submitData = {
           ...this.withdrawForm,
           withdrawNo: this.withdrawForm.withdrawNo || this.generateWithdrawNo(),
-          status: "0",
-          applyTime: this.parseTime(new Date(), "{y}-{m}-{d}"),
-        };
-        this.withdrawSubmitting = true;
+          status: '0',
+          applyTime: this.parseTime(new Date(), '{y}-{m}-{d}')
+        }
+        this.withdrawSubmitting = true
         createAccountBalanceWithdraw(submitData)
           .then(() => {
-            this.$modal.msgSuccess("提交成功");
-            this.withdrawDialogOpen = false;
-            this.getWithdrawList();
+            this.$modal.msgSuccess('提交成功')
+            this.withdrawDialogOpen = false
+            this.getWithdrawList()
           })
           .finally(() => {
-            this.withdrawSubmitting = false;
-          });
-      });
+            this.withdrawSubmitting = false
+          })
+      })
     },
     sumAmount(list, field) {
-      return (list || []).reduce((sum, item) => sum + Number(item[field] || 0), 0);
+      return (list || []).reduce((sum, item) => sum + Number(item[field] || 0), 0)
     },
     amountText(value) {
-      return Number(value || 0).toFixed(2);
+      return Number(value || 0).toFixed(2)
+    },
+    formatDate(value) {
+      return this.parseTime(value, '{y}-{m}-{d}') || '--'
+    },
+    displaySupplierName(row = {}) {
+      return row.supplierName || row.payeeName || '--'
     },
     businessTypeText(value) {
-      const map = { 1: "支付", 2: "退款", 3: "提现", 4: "结算" };
-      return map[String(value)] || value || "-";
+      const map = { 1: '支付', 2: '退款', 3: '提现', 4: '结算' }
+      return map[String(value)] || value || '-'
     },
     flowDirectionText(value) {
-      const map = { 1: "收入", 2: "支出" };
-      return map[String(value)] || value || "-";
+      const map = { 1: '收入', 2: '支出' }
+      return map[String(value)] || value || '-'
     },
     flowStatusText(value) {
-      const map = { 0: "未支付", 1: "到账学校", 2: "到账供应商" };
-      return map[String(value)] || value || "-";
+      const map = { 0: '未支付', 1: '到账学校', 2: '到账供应商' }
+      return map[String(value)] || value || '-'
     },
     withdrawStatusText(value) {
-      const map = { 0: "待审核", 1: "审核通过", 2: "已拒绝", 3: "已打款", 4: "已取消" };
-      return map[String(value)] || value || "-";
+      const map = { 0: '待审核', 1: '审核通过', 2: '已拒绝', 3: '已打款', 4: '已取消' }
+      return map[String(value)] || value || '-'
     },
     generateWithdrawNo() {
-      const now = new Date();
-      const pad = (num) => String(num).padStart(2, "0");
-      return `WD${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`;
-    },
-  },
-};
+      const now = new Date()
+      const pad = (num) => String(num).padStart(2, '0')
+      return `WD${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}${pad(now.getHours())}${pad(now.getMinutes())}${pad(now.getSeconds())}`
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -545,5 +587,9 @@ export default {
 .toolbar-actions {
   margin-top: 12px;
   text-align: right;
+}
+
+.full-width {
+  width: 100%;
 }
 </style>

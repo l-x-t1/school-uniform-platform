@@ -90,7 +90,6 @@
 
       <el-table v-loading="loading" :data="withdrawApplyList" border class="record-table">
         <el-table-column label="提现单号" prop="withdrawNo" min-width="180" show-overflow-tooltip />
-        <el-table-column label="供应商ID" prop="supplierId" width="100" align="center" />
         <el-table-column label="供应商名称" prop="supplierName" min-width="170" show-overflow-tooltip />
         <el-table-column label="申请金额" width="120" align="right">
           <template slot-scope="scope">
@@ -115,7 +114,6 @@
             {{ parseTime(scope.row.payTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}
           </template>
         </el-table-column>
-        <el-table-column label="关联流水" prop="financeFlowId" width="100" align="center" />
         <el-table-column v-if="canQueryWithdrawDetail" label="详情" width="100" align="center" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" size="mini" @click="openDetail(scope.row)">
@@ -135,41 +133,56 @@
     </div>
 
     <el-dialog title="供应商提现记录详情" :visible.sync="detailOpen" width="760px" append-to-body>
-      <el-descriptions :column="2" border size="small">
-        <el-descriptions-item label="提现单号">{{ detail.withdrawNo || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="提现状态">
-          <el-tag size="mini" :type="statusTagType(detail.status)">
-            {{ formatStatus(detail.status) }}
-          </el-tag>
-        </el-descriptions-item>
-        <el-descriptions-item label="供应商ID">{{ detail.supplierId || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="供应商名称">{{ detail.supplierName || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="申请金额">¥{{ formatMoney(detail.applyAmount) }}</el-descriptions-item>
-        <el-descriptions-item label="关联流水">{{ detail.financeFlowId || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="申请时间">{{ parseTime(detail.applyTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="审核时间">{{ parseTime(detail.auditTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="审核人">{{ detail.auditUserName || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="打款时间">{{ parseTime(detail.payTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="审核备注" :span="2">{{ detail.auditRemark || "-" }}</el-descriptions-item>
-        <el-descriptions-item label="收款信息" :span="2">
-          <div class="bank-info">
-            <div>收款户名：{{ formatBankInfo(detail.bankInfoJson).accountName }}</div>
-            <div>开户银行：{{ formatBankInfo(detail.bankInfoJson).bankName }}</div>
-            <div>银行账号：{{ formatBankInfo(detail.bankInfoJson).accountNo }}</div>
-          </div>
-        </el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ detail.remark || "-" }}</el-descriptions-item>
-      </el-descriptions>
+      <div class="detail-section">
+        <div class="section-title">业务信息</div>
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="提现单号">{{ formatValue(detail.withdrawNo) }}</el-descriptions-item>
+          <el-descriptions-item label="提现状态">
+            <el-tag size="mini" :type="statusTagType(detail.status)">
+              {{ formatStatus(detail.status) }}
+            </el-tag>
+          </el-descriptions-item>
+          <el-descriptions-item label="供应商名称">{{ formatValue(detail.supplierName) }}</el-descriptions-item>
+          <el-descriptions-item label="申请金额">¥{{ formatMoney(detail.applyAmount) }}</el-descriptions-item>
+          <el-descriptions-item label="申请时间">{{ parseTime(detail.applyTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="审核时间">{{ parseTime(detail.auditTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}</el-descriptions-item>
+          <el-descriptions-item label="审核人">{{ formatValue(detail.auditUserName) }}</el-descriptions-item>
+          <el-descriptions-item label="打款时间">{{ parseTime(detail.payTime, "{y}-{m}-{d} {h}:{i}:{s}") || "-" }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <div class="detail-section">
+        <div class="section-title">补充信息</div>
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="审核备注" :span="2">{{ formatValue(detail.auditRemark) }}</el-descriptions-item>
+          <el-descriptions-item label="收款信息" :span="2">
+            <div class="bank-info">
+              <div>收款户名：{{ formatBankInfo(detail.bankInfoJson).accountName }}</div>
+              <div>开户银行：{{ formatBankInfo(detail.bankInfoJson).bankName }}</div>
+              <div>银行账号：{{ formatBankInfo(detail.bankInfoJson).accountNo }}</div>
+            </div>
+          </el-descriptions-item>
+          <el-descriptions-item label="备注" :span="2">{{ formatValue(detail.remark) }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
+
+      <div class="detail-section">
+        <div class="section-title">内部字段</div>
+        <el-descriptions :column="2" border size="small">
+          <el-descriptions-item label="供应商ID">{{ formatValue(detail.supplierId) }}</el-descriptions-item>
+          <el-descriptions-item label="关联流水ID">{{ formatValue(detail.financeFlowId) }}</el-descriptions-item>
+        </el-descriptions>
+      </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import auth from "@/plugins/auth";
-import { getWithdrawApply, listWithdrawApply } from "@/api/school/withdrawApply";
+import auth from '@/plugins/auth'
+import { getWithdrawApply, listWithdrawApply } from '@/api/school/withdrawApply'
 
 export default {
-  name: "SupplierWithdrawRecord",
+  name: 'SupplierWithdrawRecord',
   data() {
     return {
       loading: false,
@@ -183,122 +196,125 @@ export default {
         withdrawNo: undefined,
         supplierName: undefined,
         status: undefined,
-        applyTime: undefined,
-      },
-    };
+        applyTime: undefined
+      }
+    }
   },
   computed: {
     canViewWithdrawList() {
-      return auth.hasPermi("school:withdrawApply:list");
+      return auth.hasPermi('school:withdrawApply:list')
     },
     canQueryWithdrawDetail() {
-      return auth.hasPermi("school:withdrawApply:query");
+      return auth.hasPermi('school:withdrawApply:query')
     },
     pageSummary() {
-      const rows = this.withdrawApplyList || [];
-      const pendingRows = rows.filter((item) => String(item.status) === "0");
-      const paidRows = rows.filter((item) => String(item.status) === "3");
-      const closedRows = rows.filter((item) => ["2", "4"].includes(String(item.status)));
+      const rows = this.withdrawApplyList || []
+      const pendingRows = rows.filter((item) => String(item.status) === '0')
+      const paidRows = rows.filter((item) => String(item.status) === '3')
+      const closedRows = rows.filter((item) => ['2', '4'].includes(String(item.status)))
       return {
-        applyAmount: this.sumAmount(rows, "applyAmount"),
-        pendingAmount: this.sumAmount(pendingRows, "applyAmount"),
+        applyAmount: this.sumAmount(rows, 'applyAmount'),
+        pendingAmount: this.sumAmount(pendingRows, 'applyAmount'),
         pendingCount: pendingRows.length,
-        paidAmount: this.sumAmount(paidRows, "applyAmount"),
+        paidAmount: this.sumAmount(paidRows, 'applyAmount'),
         paidCount: paidRows.length,
-        closedCount: closedRows.length,
-      };
-    },
+        closedCount: closedRows.length
+      }
+    }
   },
   created() {
     if (this.canViewWithdrawList) {
-      this.getList();
+      this.getList()
     }
   },
   methods: {
     getList() {
       if (!this.canViewWithdrawList) {
-        this.withdrawApplyList = [];
-        this.total = 0;
-        return;
+        this.withdrawApplyList = []
+        this.total = 0
+        return
       }
-      this.loading = true;
+      this.loading = true
       listWithdrawApply(this.queryParams)
         .then((response) => {
-          this.withdrawApplyList = response.rows || [];
-          this.total = response.total || 0;
+          this.withdrawApplyList = response.rows || []
+          this.total = response.total || 0
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.handleQuery()
     },
     openDetail(row) {
       if (!this.canQueryWithdrawDetail) {
-        return;
+        return
       }
       getWithdrawApply(row.id).then((response) => {
-        this.detail = response.data || {};
-        this.detailOpen = true;
-      });
+        this.detail = response.data || {}
+        this.detailOpen = true
+      })
     },
     sumAmount(list, field) {
       return list.reduce((sum, item) => {
-        const value = Number(item[field] || 0);
-        return sum + (Number.isNaN(value) ? 0 : value);
-      }, 0);
+        const value = Number(item[field] || 0)
+        return sum + (Number.isNaN(value) ? 0 : value)
+      }, 0)
     },
     formatMoney(value) {
-      return Number(value || 0).toFixed(2);
+      return Number(value || 0).toFixed(2)
+    },
+    formatValue(value) {
+      return value === undefined || value === null || value === '' ? '-' : value
     },
     formatStatus(value) {
       const textMap = {
-        "0": "待审核",
-        "1": "审核通过",
-        "2": "审核拒绝",
-        "3": "已打款",
-        "4": "已取消",
-      };
-      return textMap[String(value)] || value || "-";
+        '0': '待审核',
+        '1': '审核通过',
+        '2': '审核拒绝',
+        '3': '已打款',
+        '4': '已取消'
+      }
+      return textMap[String(value)] || value || '-'
     },
     statusTagType(value) {
       const typeMap = {
-        "0": "warning",
-        "1": "success",
-        "2": "danger",
-        "3": "success",
-        "4": "info",
-      };
-      return typeMap[String(value)] || "info";
+        '0': 'warning',
+        '1': 'success',
+        '2': 'danger',
+        '3': 'success',
+        '4': 'info'
+      }
+      return typeMap[String(value)] || 'info'
     },
     formatBankInfo(bankInfoJson) {
       const emptyInfo = {
-        accountName: "-",
-        bankName: "-",
-        accountNo: "-",
-      };
+        accountName: '-',
+        bankName: '-',
+        accountNo: '-'
+      }
       if (!bankInfoJson) {
-        return emptyInfo;
+        return emptyInfo
       }
       try {
-        const bankInfo = JSON.parse(bankInfoJson);
+        const bankInfo = JSON.parse(bankInfoJson)
         return {
-          accountName: bankInfo.accountName || "-",
-          bankName: bankInfo.bankName || "-",
-          accountNo: bankInfo.accountNo || bankInfo.bankNo || bankInfo.bankAccountNo || "-",
-        };
+          accountName: bankInfo.accountName || '-',
+          bankName: bankInfo.bankName || '-',
+          accountNo: bankInfo.accountNo || bankInfo.bankNo || bankInfo.bankAccountNo || '-'
+        }
       } catch (error) {
-        return emptyInfo;
+        return emptyInfo
       }
-    },
-  },
-};
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -375,6 +391,17 @@ export default {
 
 .record-table {
   margin-top: 8px;
+}
+
+.detail-section + .detail-section {
+  margin-top: 20px;
+}
+
+.section-title {
+  margin-bottom: 12px;
+  color: #303133;
+  font-size: 15px;
+  font-weight: 600;
 }
 
 .bank-info {
