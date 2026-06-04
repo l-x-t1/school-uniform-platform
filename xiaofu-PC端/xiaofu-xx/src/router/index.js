@@ -182,6 +182,7 @@ export const constantRoutes = [
   {
     path: "/schoolGroupNoticeEntry",
     component: Layout,
+    hidden: true,
     children: [
       {
         path: "index",

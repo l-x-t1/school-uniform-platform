@@ -1,11 +1,8 @@
 package com.xfgl.school.service.impl;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
-import java.util.Map;
 import com.xfgl.school.mapper.XfptSupplierApplyMapper;
 import com.xfgl.school.domain.XfptSupplierApply;
 import com.xfgl.school.service.IXfptSupplierApplyService;
@@ -34,5 +31,10 @@ public class XfptSupplierApplyServiceImpl extends ServiceImpl<XfptSupplierApplyM
         return xfptSupplierApplyMapper.selectXfptSupplierApplyList(xfptSupplierApply);
     }
 
+    @Override
+    public XfptSupplierApply selectXfptSupplierApplyById(Long id)
+    {
+        return xfptSupplierApplyMapper.selectXfptSupplierApplyById(id);
+    }
 
 }

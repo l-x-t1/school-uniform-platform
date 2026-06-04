@@ -17,4 +17,12 @@ public interface XfptGroupNoticeItemMapper extends BaseMapper<XfptGroupNoticeIte
      * @return 统购公告商品集合
      */
     public List<XfptGroupNoticeItem> selectXfptGroupNoticeItemList(XfptGroupNoticeItem xfptGroupNoticeItem);
+
+    /**
+     * 查询统购公告商品详情
+     *
+     * @param id 主键
+     * @return 统购公告商品
+     */
+    public XfptGroupNoticeItem selectXfptGroupNoticeItemById(Long id);
 }

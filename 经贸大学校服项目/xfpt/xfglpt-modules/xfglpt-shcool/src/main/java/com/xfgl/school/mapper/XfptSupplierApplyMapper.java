@@ -17,4 +17,12 @@ public interface XfptSupplierApplyMapper extends BaseMapper<XfptSupplierApply> {
      * @return 供应商报名集合
      */
     public List<XfptSupplierApply> selectXfptSupplierApplyList(XfptSupplierApply xfptSupplierApply);
+
+    /**
+     * 查询供应商报名详情
+     *
+     * @param id 主键
+     * @return 供应商报名
+     */
+    public XfptSupplierApply selectXfptSupplierApplyById(Long id);
 }

@@ -37,7 +37,7 @@ public class XfptDeliveryStatisticsController extends BaseController {
      * 查询发货单统计列表
      */
     @Operation(summary = "查询发货单统计列表")
-    @RequiresPermissions("school:deliveryStatistics:list")
+    @RequiresPermissions("school:tgfh:list")
     @GetMapping("/list")
     public TableDataInfo list(XfptDeliveryStatisticsVo query) {
         if (query == null) {

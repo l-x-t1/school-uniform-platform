@@ -35,17 +35,14 @@ private static final long serialVersionUID = 1L;
     private Long id;
 
     /** 公告ID */
-            @Excel(name = "公告ID")
     @Schema(description = "公告ID")
     private Long noticeId;
 
     /** 学校ID */
-            @Excel(name = "学校ID")
     @Schema(description = "学校ID")
     private Long schoolId;
 
     /** 供应商ID */
-            @Excel(name = "供应商ID")
     @Schema(description = "供应商ID")
     private Long supplierId;
 
@@ -105,8 +102,25 @@ private static final long serialVersionUID = 1L;
     private String compareFilesJson;
 
     /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
     @Schema(description = "当前归属部门/学校")
     private Long deptId;
+
+    /** 公告标题 */
+    @TableField(exist = false)
+    @Excel(name = "公告标题")
+    @Schema(description = "公告标题")
+    private String noticeTitle;
+
+    /** 公告编号 */
+    @TableField(exist = false)
+    @Excel(name = "公告编号")
+    @Schema(description = "公告编号")
+    private String noticeCode;
+
+    /** 学校名称 */
+    @TableField(exist = false)
+    @Excel(name = "学校名称")
+    @Schema(description = "学校名称")
+    private String schoolName;
 
         }
