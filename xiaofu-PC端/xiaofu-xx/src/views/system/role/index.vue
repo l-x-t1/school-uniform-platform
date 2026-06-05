@@ -168,7 +168,7 @@
             </el-tooltip>
             权限字符
           </span>
-          <el-input v-model="form.roleKey" placeholder="请输入权限字符" />
+          <el-input v-model="form.roleKey" placeholder="请输入权限字符" @input="handleRoleKeyInput" />
         </el-form-item>
         <el-form-item label="角色顺序" prop="roleSort">
           <el-input-number v-model="form.roleSort" controls-position="right" :min="0" />
@@ -280,6 +280,7 @@ export default {
       open: false,
       // 是否显示弹出层（数据权限）
       openDataScope: false,
+      currentMenuScene: "admin",
       menuExpand: false,
       menuNodeAll: false,
       deptExpand: true,
@@ -356,9 +357,44 @@ export default {
       );
     },
     /** 查询菜单树结构 */
-    getMenuTreeselect() {
-      menuTreeselect().then(response => {
+    getMenuTreeselect(query) {
+      return menuTreeselect(query).then(response => {
         this.menuOptions = response.data;
+        return response;
+      });
+    },
+    resolveMenuScene(roleKey) {
+      const normalizedRoleKey = (roleKey || "").trim().toLowerCase();
+      if (["xuexiao", "ceshixuexiao"].includes(normalizedRoleKey)) {
+        return "school";
+      }
+      if (["jyj", "sjyj"].includes(normalizedRoleKey)) {
+        return "education";
+      }
+      return "admin";
+    },
+    loadMenuTreeByRoleKey(roleKey) {
+      this.currentMenuScene = this.resolveMenuScene(roleKey);
+      return this.getMenuTreeselect({ targetRoleKey: roleKey });
+    },
+    resetMenuTreeChecks() {
+      this.menuNodeAll = false;
+      if (this.$refs.menu) {
+        this.$refs.menu.setCheckedKeys([]);
+      }
+    },
+    handleRoleKeyInput(value) {
+      if (!this.open) {
+        return;
+      }
+      const nextScene = this.resolveMenuScene(value);
+      if (nextScene === this.currentMenuScene) {
+        return;
+      }
+      this.loadMenuTreeByRoleKey(value).then(() => {
+        this.$nextTick(() => {
+          this.resetMenuTreeChecks();
+        });
       });
     },
     // 所有菜单节点数据
@@ -435,6 +471,7 @@ export default {
         deptCheckStrictly: true,
         remark: undefined
       };
+      this.currentMenuScene = "admin";
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -500,9 +537,9 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
-      this.getMenuTreeselect();
       this.open = true;
       this.title = "添加角色";
+      this.loadMenuTreeByRoleKey(this.form.roleKey);
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
@@ -511,6 +548,7 @@ export default {
       const roleMenu = this.getRoleMenuTreeselect(roleId);
       getRole(roleId).then(response => {
         this.form = response.data;
+        this.currentMenuScene = this.resolveMenuScene(this.form.roleKey);
         this.open = true;
         this.$nextTick(() => {
           roleMenu.then(res => {

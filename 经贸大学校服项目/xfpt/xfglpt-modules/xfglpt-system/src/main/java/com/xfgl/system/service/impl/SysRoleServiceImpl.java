@@ -232,6 +232,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Transactional(rollbackFor = Exception.class)
     public int insertRole(SysRole role) {
         ensureDefaultDataScope(role);
+        sanitizeRoleMenuIds(role);
         //完整性
         String mac = getMac(role);
         role.setIntegrity(mac);
@@ -321,6 +322,13 @@ public class SysRoleServiceImpl implements ISysRoleService {
         role.setIntegrity(getMac(role));
     }
 
+    private void sanitizeRoleMenuIds(SysRole role) {
+        List<Long> filteredMenuIds = menuService.filterMenuIdsByRoleKey(
+                role.getMenuIds() == null ? new ArrayList<Long>() : Arrays.asList(role.getMenuIds()),
+                role.getRoleKey());
+        role.setMenuIds(filteredMenuIds.toArray(new Long[0]));
+    }
+
     /**
      * 修改保存角色信息
      *
@@ -331,6 +339,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
     @Transactional(rollbackFor = Exception.class)
     public int updateRole(SysRole role) {
         ensureDefaultDataScope(role);
+        sanitizeRoleMenuIds(role);
         String mac = getMac(role);
         role.setIntegrity(mac);
         // 修改角色信息
