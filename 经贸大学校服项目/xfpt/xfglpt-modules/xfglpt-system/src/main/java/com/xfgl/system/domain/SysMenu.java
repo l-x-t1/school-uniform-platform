@@ -24,6 +24,12 @@ public class SysMenu extends BaseEntity
     /** 菜单名称 */
     private String menuName;
 
+    /** Display-only menu name used by management pages */
+    private String displayMenuName;
+
+    /** Menu ownership for management display */
+    private String menuOwnership;
+
     /** 父菜单名称 */
     private String parentName;
 
@@ -99,6 +105,26 @@ public class SysMenu extends BaseEntity
     public void setMenuName(String menuName)
     {
         this.menuName = menuName;
+    }
+
+    public String getDisplayMenuName()
+    {
+        return displayMenuName;
+    }
+
+    public void setDisplayMenuName(String displayMenuName)
+    {
+        this.displayMenuName = displayMenuName;
+    }
+
+    public String getMenuOwnership()
+    {
+        return menuOwnership;
+    }
+
+    public void setMenuOwnership(String menuOwnership)
+    {
+        this.menuOwnership = menuOwnership;
     }
 
     public String getParentName()
@@ -261,6 +287,8 @@ public class SysMenu extends BaseEntity
         return new ToStringBuilder(this,ToStringStyle.MULTI_LINE_STYLE)
             .append("menuId", getMenuId())
             .append("menuName", getMenuName())
+            .append("displayMenuName", getDisplayMenuName())
+            .append("menuOwnership", getMenuOwnership())
             .append("parentId", getParentId())
             .append("orderNum", getOrderNum())
             .append("path", getPath())
