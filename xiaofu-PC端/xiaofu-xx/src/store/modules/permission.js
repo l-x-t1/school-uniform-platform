@@ -341,6 +341,48 @@ function ensureVoteResultMenu(routes = []) {
   return routes;
 }
 
+function ensureAdminSchoolSettlementApplyMenu(routes = []) {
+  const targetTitle = "新增功能";
+  const exists = (children = []) =>
+    children.some(
+      (item) =>
+        item.path === "schoolSettlementApply" ||
+        item.path === "/newFeature/schoolSettlementApply"
+    );
+
+  const appendMenu = (route) => {
+    if (!route.children) {
+      route.children = [];
+    }
+    if (exists(route.children)) {
+      return;
+    }
+    route.children.push({
+      name: "SchoolSettlementApplyAdmin",
+      path: "schoolSettlementApply",
+      component: "school/settlementApply/index",
+      meta: {
+        title: "学校端申请结算列表",
+        icon: "form",
+        settlementViewMode: "school",
+        requiresSchoolSelector: true,
+      },
+    });
+  };
+
+  routes.forEach((route) => {
+    const title = route.meta && route.meta.title ? route.meta.title : route.name;
+    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
+      appendMenu(route);
+    }
+    if (route.children && route.children.length) {
+      ensureAdminSchoolSettlementApplyMenu(route.children);
+    }
+  });
+
+  return routes;
+}
+
 function normalizeGroupNoticeMenus(routes = []) {
   return routes.map((route) => {
     const current = { ...route };
@@ -632,10 +674,56 @@ function normalizeSchoolSettlementApplyMenu(routes = []) {
       (currentPath === "settlementApply" || currentTitle === "申请结算列表")
     ) {
       current.component = "school/settlementApply/index";
+      current.meta = {
+        ...(current.meta || {}),
+        title: "学校端申请结算列表",
+        settlementViewMode: "school",
+        requiresSchoolSelector: false,
+      };
     }
 
     if (current.children && current.children.length) {
       current.children = normalizeSchoolSettlementApplyMenu(current.children);
+    }
+
+    return current;
+  });
+}
+
+function normalizeAdminSettlementMenus(routes = []) {
+  return routes.map((route) => {
+    const current = { ...route };
+    const currentPath = String(current.path || "").replace(/^\/+/, "");
+    const currentComponent = current.component || "";
+    const currentTitle = getRouteTitle(current);
+
+    if (
+      currentPath === "settlementApply" ||
+      currentComponent === "jsgl/index" ||
+      currentTitle === "申请结算列表"
+    ) {
+      current.meta = {
+        ...(current.meta || {}),
+        title: "教育局端申请结算列表",
+        settlementViewMode: "education",
+        requiresSchoolSelector: false,
+      };
+    }
+
+    if (
+      currentPath === "schoolSettlementApply" ||
+      currentTitle === "学校端申请结算列表"
+    ) {
+      current.meta = {
+        ...(current.meta || {}),
+        title: "学校端申请结算列表",
+        settlementViewMode: "school",
+        requiresSchoolSelector: true,
+      };
+    }
+
+    if (current.children && current.children.length) {
+      current.children = normalizeAdminSettlementMenus(current.children);
     }
 
     return current;
@@ -677,7 +765,8 @@ const adminNewFeatureMenuTitles = new Set([
   "统购管理",
   "评价管理",
   "结算管理",
-  "申请结算列表",
+  "教育局端申请结算列表",
+  "学校端申请结算列表",
   "每日入账金额",
 ]);
 
@@ -688,6 +777,7 @@ const adminNewFeatureLeafPaths = new Set([
   "evaluation",
   "settlementManage",
   "settlementApply",
+  "schoolSettlementApply",
   "dailyIncome",
 ]);
 
@@ -831,12 +921,16 @@ function nestAdminNewFeatureMenus(routes = []) {
 
 function normalizeNonSchoolRoutes(routes = []) {
   return normalizeGroupNoticeMenus(
-    ensureSupplierSettleMenu(
-      ensureSupplierSettleAuditMenu(
-        ensureVoteResultMenu(
-          ensureUsageMenu(
-            ensureSupplierMessageMenu(
-              ensureSupplierGroupNoticeMenu(normalizeUsageMenus(routes))
+    normalizeAdminSettlementMenus(
+      ensureAdminSchoolSettlementApplyMenu(
+        ensureSupplierSettleMenu(
+          ensureSupplierSettleAuditMenu(
+            ensureVoteResultMenu(
+              ensureUsageMenu(
+                ensureSupplierMessageMenu(
+                  ensureSupplierGroupNoticeMenu(normalizeUsageMenus(routes))
+                )
+              )
             )
           )
         )

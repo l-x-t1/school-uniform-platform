@@ -19,4 +19,6 @@ public interface IXfptWithdrawApplyService extends IService<XfptWithdrawApply> {
      */
     public List<XfptWithdrawApply> selectXfptWithdrawApplyList(XfptWithdrawApply xfptWithdrawApply);
 
+    public XfptWithdrawApply selectXfptWithdrawApplyDetail(XfptWithdrawApply xfptWithdrawApply);
+
 }

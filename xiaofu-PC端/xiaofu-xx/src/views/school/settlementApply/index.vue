@@ -1,7 +1,7 @@
 <template>
   <div class="app-container school-settlement-audit-page">
     <el-card shadow="never" class="hero-card">
-      <div class="hero-title">申请结算列表</div>
+      <div class="hero-title">学校端申请结算列表</div>
       <div class="hero-subtitle">
         学校端统一查看并审核供应商提交的结算申请，仅处理待审核记录的审核通过与驳回。
       </div>
@@ -41,7 +41,7 @@
     <div class="panel-card">
       <div class="table-header">
         <div>
-          <div class="table-title">学校结算审核</div>
+          <div class="table-title">学校端结算审核</div>
           <div class="table-desc">学校端仅保留审核视角，不再展示供应商内部维护操作。</div>
         </div>
         <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
@@ -55,6 +55,22 @@
         :inline="true"
         label-width="86px"
       >
+        <el-form-item v-if="requiresSchoolSelector" label="学校" prop="scopeSchoolId">
+          <el-select
+            v-model="queryParams.scopeSchoolId"
+            filterable
+            clearable
+            :loading="schoolLoading"
+            placeholder="请先选择学校"
+          >
+            <el-option
+              v-for="item in schoolOptions"
+              :key="getSchoolId(item)"
+              :label="getSchoolName(item)"
+              :value="getSchoolId(item)"
+            />
+          </el-select>
+        </el-form-item>
         <el-form-item label="提现单号" prop="withdrawNo">
           <el-input
             v-model="queryParams.withdrawNo"
@@ -105,9 +121,18 @@
         </el-form-item>
       </el-form>
 
+      <el-alert
+        v-if="requiresSchoolSelector && !selectedSchoolId"
+        class="selector-tip"
+        title="请先选择学校，再查看该学校合作供应商的提现申请记录。"
+        type="info"
+        :closable="false"
+      />
+
       <el-table v-loading="loading" :data="withdrawApplyList" border class="record-table">
         <el-table-column label="提现单号" prop="withdrawNo" min-width="180" show-overflow-tooltip />
         <el-table-column label="供应商名称" prop="supplierName" min-width="180" show-overflow-tooltip />
+        <el-table-column v-if="showSchoolColumn" label="学校名称" prop="schoolName" min-width="180" show-overflow-tooltip />
         <el-table-column label="申请金额" width="120" align="right">
           <template slot-scope="scope">
             ¥{{ formatMoney(scope.row.applyAmount) }}
@@ -168,7 +193,7 @@
       />
     </div>
 
-    <el-dialog title="申请结算详情" :visible.sync="detailOpen" width="820px" append-to-body>
+    <el-dialog title="学校端申请结算详情" :visible.sync="detailOpen" width="860px" append-to-body>
       <div v-loading="detailLoading">
         <div class="detail-section">
           <div class="section-title">业务信息</div>
@@ -180,7 +205,10 @@
               </el-tag>
             </el-descriptions-item>
             <el-descriptions-item label="供应商名称">{{ formatValue(detail.supplierName) }}</el-descriptions-item>
+            <el-descriptions-item label="学校名称">{{ formatValue(detail.schoolName) }}</el-descriptions-item>
             <el-descriptions-item label="申请金额">¥{{ formatMoney(detail.applyAmount) }}</el-descriptions-item>
+            <el-descriptions-item label="关联流水号">{{ formatValue(detail.flowNo) }}</el-descriptions-item>
+            <el-descriptions-item label="订单号">{{ formatValue(detail.orderNo) }}</el-descriptions-item>
             <el-descriptions-item label="申请时间">{{ formatDateTime(detail.applyTime) }}</el-descriptions-item>
             <el-descriptions-item label="审核人">{{ formatValue(detail.auditUserName) }}</el-descriptions-item>
             <el-descriptions-item label="审核时间">{{ formatDateTime(detail.auditTime) }}</el-descriptions-item>
@@ -216,8 +244,11 @@
       </div>
     </el-dialog>
 
-    <el-dialog title="审核结算申请" :visible.sync="auditOpen" width="560px" append-to-body>
+    <el-dialog title="学校端审核结算申请" :visible.sync="auditOpen" width="560px" append-to-body>
       <el-form ref="auditForm" :model="auditForm" :rules="auditRules" label-width="96px">
+        <el-form-item v-if="showSchoolColumn" label="学校名称">
+          <el-input :value="formatValue(currentAuditRow.schoolName)" disabled />
+        </el-form-item>
         <el-form-item label="提现单号">
           <el-input :value="formatValue(currentAuditRow.withdrawNo)" disabled />
         </el-form-item>
@@ -261,6 +292,7 @@ import {
   getWithdrawApply,
   listWithdrawApply
 } from '@/api/school/withdrawApply'
+import { getSchoolListCompleteDetail } from '@/api/jiaoyuju/schoolManagement'
 
 const statusOptions = [
   { label: '待审核', value: '0' },
@@ -276,6 +308,17 @@ const createAuditForm = () => ({
   auditRemark: ''
 })
 
+const createQueryParams = () => ({
+  pageNum: 1,
+  pageSize: 10,
+  withdrawNo: undefined,
+  supplierName: undefined,
+  status: undefined,
+  applyTime: undefined,
+  auditTime: undefined,
+  scopeSchoolId: undefined
+})
+
 export default {
   name: 'SettlementApplyPage',
   data() {
@@ -283,23 +326,17 @@ export default {
       loading: false,
       detailLoading: false,
       auditSubmitting: false,
+      schoolLoading: false,
       showSearch: true,
       total: 0,
       detailOpen: false,
       auditOpen: false,
       withdrawApplyList: [],
+      schoolOptions: [],
       detail: {},
       currentAuditRow: {},
       statusOptions,
-      queryParams: {
-        pageNum: 1,
-        pageSize: 10,
-        withdrawNo: undefined,
-        supplierName: undefined,
-        status: undefined,
-        applyTime: undefined,
-        auditTime: undefined
-      },
+      queryParams: createQueryParams(),
       auditForm: createAuditForm(),
       auditRules: {
         status: [
@@ -312,6 +349,18 @@ export default {
     }
   },
   computed: {
+    settlementViewMode() {
+      return (this.$route.meta && this.$route.meta.settlementViewMode) || 'school'
+    },
+    requiresSchoolSelector() {
+      return !!(this.$route.meta && this.$route.meta.requiresSchoolSelector)
+    },
+    selectedSchoolId() {
+      return this.queryParams.scopeSchoolId
+    },
+    showSchoolColumn() {
+      return this.requiresSchoolSelector
+    },
     pageSummary() {
       const rows = this.withdrawApplyList || []
       const pendingRows = rows.filter((item) => String(item.status) === '0')
@@ -328,12 +377,53 @@ export default {
     }
   },
   created() {
+    if (this.requiresSchoolSelector) {
+      this.loadSchoolOptions()
+      return
+    }
     this.getList()
   },
   methods: {
-    getList() {
+    buildQueryParams() {
+      const params = {
+        ...this.queryParams,
+        viewMode: this.settlementViewMode
+      }
+      if (!this.requiresSchoolSelector) {
+        delete params.scopeSchoolId
+      }
+      return params
+    },
+    buildActionPayload(payload = {}) {
+      const data = {
+        ...payload,
+        viewMode: this.settlementViewMode
+      }
+      if (this.requiresSchoolSelector) {
+        data.scopeSchoolId = this.selectedSchoolId
+      }
+      return data
+    },
+    ensureSchoolSelected(showMessage = false) {
+      if (!this.requiresSchoolSelector) {
+        return true
+      }
+      if (this.selectedSchoolId) {
+        return true
+      }
+      if (showMessage) {
+        this.$modal.msgWarning('请先选择学校')
+      }
+      return false
+    },
+    getList(showMessage = false) {
+      if (!this.ensureSchoolSelected(showMessage)) {
+        this.withdrawApplyList = []
+        this.total = 0
+        return
+      }
       this.loading = true
-      listWithdrawApply(this.queryParams)
+      listWithdrawApply(this.buildQueryParams())
         .then((response) => {
           this.withdrawApplyList = response.rows || []
           this.total = response.total || 0
@@ -343,17 +433,29 @@ export default {
         })
     },
     handleQuery() {
+      if (!this.ensureSchoolSelected(true)) {
+        return
+      }
       this.queryParams.pageNum = 1
       this.getList()
     },
     resetQuery() {
       this.resetForm('queryForm')
-      this.handleQuery()
+      this.queryParams = createQueryParams()
+      if (this.requiresSchoolSelector) {
+        this.withdrawApplyList = []
+        this.total = 0
+        return
+      }
+      this.getList()
     },
     handleView(row) {
+      if (!this.ensureSchoolSelected(true)) {
+        return
+      }
       this.detailOpen = true
       this.detailLoading = true
-      getWithdrawApply(row.id)
+      getWithdrawApply(row.id, this.buildQueryParams())
         .then((response) => {
           this.detail = response.data || {}
         })
@@ -362,6 +464,9 @@ export default {
         })
     },
     handleAudit(row) {
+      if (!this.ensureSchoolSelected(true)) {
+        return
+      }
       if (!this.canAudit(row)) {
         this.$modal.msgWarning('当前记录不支持审核')
         return
@@ -377,12 +482,15 @@ export default {
       })
     },
     submitAudit() {
+      if (!this.ensureSchoolSelected(true)) {
+        return
+      }
       this.$refs.auditForm.validate((valid) => {
         if (!valid) {
           return
         }
         this.auditSubmitting = true
-        auditWithdrawApply(this.auditForm)
+        auditWithdrawApply(this.buildActionPayload(this.auditForm))
           .then(() => {
             this.$modal.msgSuccess('审核成功')
             this.auditOpen = false
@@ -398,7 +506,7 @@ export default {
     },
     refreshDetail(id) {
       this.detailLoading = true
-      getWithdrawApply(id)
+      getWithdrawApply(id, this.buildQueryParams())
         .then((response) => {
           this.detail = response.data || {}
         })
@@ -406,8 +514,35 @@ export default {
           this.detailLoading = false
         })
     },
+    loadSchoolOptions() {
+      this.schoolLoading = true
+      getSchoolListCompleteDetail({
+        pageNum: 1,
+        pageSize: 1000,
+        parentId: this.$store.getters.deptId,
+        isSchool: '1'
+      })
+        .then((response) => {
+          this.schoolOptions = response.rows || response.data || []
+        })
+        .finally(() => {
+          this.schoolLoading = false
+        })
+    },
+    getSchoolName(item = {}) {
+      return item.schoolName || item.deptName || item.name || item.label || ''
+    },
+    getSchoolId(item = {}) {
+      if (item.schoolId != null) {
+        return item.schoolId
+      }
+      if (item.deptId != null) {
+        return item.deptId
+      }
+      return item.id
+    },
     canAudit(row = {}) {
-      return String(row.status) === '0'
+      return this.settlementViewMode === 'school' && String(row.status) === '0'
     },
     sumAmount(list, field) {
       return (list || []).reduce((sum, item) => {
@@ -552,6 +687,10 @@ export default {
   margin-top: 4px;
   color: #64748b;
   font-size: 13px;
+}
+
+.selector-tip {
+  margin-bottom: 16px;
 }
 
 .record-table {

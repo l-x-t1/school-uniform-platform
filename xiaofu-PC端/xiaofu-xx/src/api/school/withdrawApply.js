@@ -10,10 +10,11 @@ export function listWithdrawApply(query) {
 }
 
 // 查询供应商提现申请详细
-export function getWithdrawApply(id) {
+export function getWithdrawApply(id, params) {
   return request({
     url: '/school/withdrawApply/' + id,
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 

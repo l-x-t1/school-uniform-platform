@@ -34,5 +34,11 @@ public class XfptWithdrawApplyServiceImpl extends ServiceImpl<XfptWithdrawApplyM
         return xfptWithdrawApplyMapper.selectXfptWithdrawApplyList(xfptWithdrawApply);
     }
 
+    @Override
+    public XfptWithdrawApply selectXfptWithdrawApplyDetail(XfptWithdrawApply xfptWithdrawApply)
+    {
+        return xfptWithdrawApplyMapper.selectXfptWithdrawApplyDetail(xfptWithdrawApply);
+    }
+
 
 }
