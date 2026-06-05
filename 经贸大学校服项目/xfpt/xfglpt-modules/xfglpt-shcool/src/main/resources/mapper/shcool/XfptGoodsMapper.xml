@@ -111,6 +111,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where g.id = #{id}
     </select>
 
+    <select id="selectXfptGoodsByIdAndSupplierId" resultMap="XfptGoodsXfptGoodsSizeResult">
+        <include refid="selectXfptGoodsVo"/>
+        where g.id = #{id}
+          and g.supplier_id = #{supplierId}
+    </select>
+
     <select id="selectXfptGoodsSizeById" resultMap="XfptGoodsSizeResult">
         select id, goods_id, size_code, sort_num, gender_type, measure_json, retail_price, group_price, stock_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_goods_size

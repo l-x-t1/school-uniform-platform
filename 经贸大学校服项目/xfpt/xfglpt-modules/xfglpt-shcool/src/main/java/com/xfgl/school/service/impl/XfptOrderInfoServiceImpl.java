@@ -8,14 +8,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.Collections;
+import java.util.Objects;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
+import com.xfgl.common.security.utils.SecurityUtils;
 import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.XfptOrderItem;
 import com.xfgl.school.mapper.XfptOrderInfoMapper;
 import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.service.IXfptOrderInfoService;
+import com.xfgl.school.support.SchoolAccessSupport;
+import com.xfgl.system.api.domain.SysUser;
 
 /**
  * 订单信息Service业务层处理
@@ -28,6 +34,8 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
 
     @Autowired
     private XfptOrderInfoMapper xfptOrderInfoMapper;
+    @Autowired
+    private SchoolAccessSupport schoolAccessSupport;
 
     /**
      * 查询订单信息列表
@@ -38,6 +46,17 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
     @Override
     public List<XfptOrderInfo> selectXfptOrderInfoList(XfptOrderInfo xfptOrderInfo)
     {
+        if (xfptOrderInfo == null) {
+            xfptOrderInfo = new XfptOrderInfo();
+        }
+        XfptSchoolMessage currentSchool = getCurrentSchoolIfScoped();
+        if (isSchoolScopedUser() && currentSchool == null) {
+            return Collections.emptyList();
+        }
+        if (currentSchool != null) {
+            xfptOrderInfo.setSchoolId(currentSchool.getId());
+            xfptOrderInfo.setDeptId(currentSchool.getDeptId());
+        }
         return xfptOrderInfoMapper.selectXfptOrderInfoList(xfptOrderInfo);
     }
 
@@ -50,7 +69,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public XfptOrderInfo selectXfptOrderInfoById(Long id)
         {
-            XfptOrderInfo xfptOrderInfo = xfptOrderInfoMapper.selectById(id);
+            XfptOrderInfo xfptOrderInfo = requireAccessibleOrder(xfptOrderInfoMapper.selectById(id));
             List<XfptOrderItem> xfptOrderItemList = xfptOrderInfoMapper.selectXfptOrderItemList(id);
             xfptOrderInfo.setXfptOrderItemList(xfptOrderItemList);
             return xfptOrderInfo;
@@ -66,6 +85,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public int insertXfptOrderInfo(XfptOrderInfo xfptOrderInfo)
         {
+            applyCurrentSchoolScopeForWrite(xfptOrderInfo, null);
             validateGroupPurchaseOrder(xfptOrderInfo);
             int rows = xfptOrderInfoMapper.insert(xfptOrderInfo);
             insertXfptOrderItem(xfptOrderInfo);
@@ -82,7 +102,9 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public int updateXfptOrderInfo(XfptOrderInfo xfptOrderInfo)
         {
-                xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(xfptOrderInfo.getId());
+            XfptOrderInfo existing = requireAccessibleOrder(xfptOrderInfoMapper.selectById(xfptOrderInfo.getId()));
+            applyCurrentSchoolScopeForWrite(xfptOrderInfo, existing);
+            xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(xfptOrderInfo.getId());
             insertXfptOrderItem(xfptOrderInfo);
             return xfptOrderInfoMapper.updateById(xfptOrderInfo);
         }
@@ -99,6 +121,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         {
             List<Long> idList = Arrays.asList(ids);
             for (Long id : idList) {
+                requireAccessibleOrder(xfptOrderInfoMapper.selectById(id));
                 xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(id);
         }
             return xfptOrderInfoMapper.deleteBatchIds(idList);
@@ -114,7 +137,8 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         @Override
         public int deleteXfptOrderInfoById(Long id)
         {
-                xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(id);
+            requireAccessibleOrder(xfptOrderInfoMapper.selectById(id));
+            xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(id);
             return xfptOrderInfoMapper.deleteById(id);
         }
 
@@ -190,6 +214,60 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
                     throw new ServiceException("订单商品不属于当前统购公告，不能下单");
                 }
             }
+        }
+
+        private void applyCurrentSchoolScopeForWrite(XfptOrderInfo xfptOrderInfo, XfptOrderInfo existing)
+        {
+            if (!isSchoolScopedUser()) {
+                return;
+            }
+            XfptSchoolMessage currentSchool = getCurrentSchoolIfScoped();
+            if (currentSchool == null) {
+                throw new ServiceException("当前登录学校信息不存在，无法保存订单");
+            }
+            xfptOrderInfo.setSchoolId(currentSchool.getId());
+            xfptOrderInfo.setSchoolName(currentSchool.getSchoolName());
+            xfptOrderInfo.setDeptId(currentSchool.getDeptId());
+            if (existing != null && !Objects.equals(existing.getSchoolId(), currentSchool.getId())) {
+                throw new ServiceException("只能操作当前学校的订单");
+            }
+        }
+
+        private XfptOrderInfo requireAccessibleOrder(XfptOrderInfo orderInfo)
+        {
+            if (orderInfo == null || !"0".equals(orderInfo.getDelFlag())) {
+                throw new ServiceException("订单不存在");
+            }
+            XfptSchoolMessage currentSchool = getCurrentSchoolIfScoped();
+            if (isSchoolScopedUser()) {
+                if (currentSchool == null) {
+                    throw new ServiceException("当前登录学校信息不存在，无法操作订单");
+                }
+                if (!Objects.equals(orderInfo.getSchoolId(), currentSchool.getId())
+                        || !Objects.equals(orderInfo.getDeptId(), currentSchool.getDeptId())) {
+                    throw new ServiceException("只能操作当前学校的订单");
+                }
+            }
+            return orderInfo;
+        }
+
+        private XfptSchoolMessage getCurrentSchoolIfScoped()
+        {
+            SysUser currentUser = getCurrentUser();
+            if (!schoolAccessSupport.isSchoolUser(currentUser)) {
+                return null;
+            }
+            return schoolAccessSupport.resolveCurrentSchool(currentUser);
+        }
+
+        private boolean isSchoolScopedUser()
+        {
+            return schoolAccessSupport.isSchoolUser(getCurrentUser()) && !SecurityUtils.isAdmin(SecurityUtils.getUserId());
+        }
+
+        private SysUser getCurrentUser()
+        {
+            return SecurityUtils.getLoginUser() == null ? null : SecurityUtils.getLoginUser().getSysUser();
         }
 
 }

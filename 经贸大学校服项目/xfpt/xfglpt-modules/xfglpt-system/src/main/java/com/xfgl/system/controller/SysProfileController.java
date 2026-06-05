@@ -41,6 +41,8 @@ import com.xfgl.system.service.ISysUserService;
 @RequestMapping("/user/profile")
 public class SysProfileController extends BaseController
 {
+    private static final String[] BCRYPT_PREFIXES = {"$2a$", "$2b$", "$2y$"};
+
     @Autowired
     private ISysUserService userService;
 
@@ -137,10 +139,11 @@ public class SysProfileController extends BaseController
         String username = SecurityUtils.getUsername();
         SysUser user = userService.selectUserByUserName(username);
         String password = user.getPassword();
-        //解密
-        password = mpUtil.decrypt(password, mpUtil.getToken());
-        if(StrUtil.isEmpty(password)){
-            return AjaxResult.error("解密失败");
+        if (!isBcryptPassword(password)) {
+            password = mpUtil.decrypt(password, mpUtil.getToken());
+            if(StrUtil.isEmpty(password)){
+                return AjaxResult.error("解密失败");
+            }
         }
         if (!SecurityUtils.matchesPassword(oldPassword, password))
         {
@@ -200,5 +203,21 @@ public class SysProfileController extends BaseController
             }
         }
         return error("上传图片异常，请联系管理员");
+    }
+
+    private boolean isBcryptPassword(String password)
+    {
+        if (StringUtils.isBlank(password))
+        {
+            return false;
+        }
+        for (String prefix : BCRYPT_PREFIXES)
+        {
+            if (password.startsWith(prefix))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 }

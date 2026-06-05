@@ -45,344 +45,6 @@ function normalizeUsageMenus(routes = []) {
   });
 }
 
-function ensureSupplierMessageMenu(routes = []) {
-  const targetTitle = "新增功能";
-  const exists = (children = []) =>
-    children.some((item) => item.path === "supplierMessage" || item.path === "/newFeature/supplierMessage");
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "SupplierMessage",
-      path: "supplierMessage",
-      component: "school/supplierMessage/index",
-      meta: {
-        title: "供应商信息",
-        icon: "tree-table",
-      },
-    });
-  };
-
-  routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (
-      route.path === "newFeature" ||
-      route.path === "/newFeature" ||
-      title === targetTitle ||
-      (route.children &&
-        route.children.some(
-          (item) =>
-            item.path === "supplierMessage" ||
-            item.path === "/newFeature/supplierMessage" ||
-            item.path === "accountBalance" ||
-            item.path === "/newFeature/accountBalance" ||
-            item.path === "platformUsage" ||
-            item.path === "/newFeature/platformUsage" ||
-            item.path === "voteResult" ||
-            item.path === "/newFeature/voteResult"
-        ))
-    ) {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureSupplierMessageMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
-function ensureSupplierSettleMenu(routes = []) {
-  const targetTitle = "新增功能";
-  const exists = (children = []) =>
-    children.some((item) => item.path === "supplierSettle" || item.path === "/newFeature/supplierSettle");
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "SupplierSettle",
-      path: "supplierSettle",
-      component: "supplier-settle/index",
-      meta: {
-        title: "供应商入驻申请",
-        icon: "form",
-      },
-    });
-  };
-
-  routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (
-      route.path === "newFeature" ||
-      route.path === "/newFeature" ||
-      title === targetTitle ||
-      (route.children &&
-        route.children.some(
-          (item) =>
-            item.path === "supplierMessage" ||
-            item.path === "/newFeature/supplierMessage" ||
-            item.path === "accountBalance" ||
-            item.path === "/newFeature/accountBalance" ||
-            item.path === "platformUsage" ||
-            item.path === "/newFeature/platformUsage" ||
-            item.path === "voteResult" ||
-            item.path === "/newFeature/voteResult"
-        ))
-    ) {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureSupplierSettleMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
-function ensureSupplierSettleAuditMenu(routes = []) {
-  const targetTitle = "新增功能";
-  const exists = (children = []) =>
-    children.some((item) => item.path === "supplierSettleAudit" || item.path === "/newFeature/supplierSettleAudit");
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "SupplierSettleAudit",
-      path: "supplierSettleAudit",
-      component: "jiaoyuju/supplierSettleAudit/index",
-      meta: {
-        title: "供应商入驻审核",
-        icon: "edit",
-      },
-    });
-  };
-
-  routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (
-      route.path === "newFeature" ||
-      route.path === "/newFeature" ||
-      title === targetTitle ||
-      (route.children &&
-        route.children.some(
-          (item) =>
-            item.path === "supplierMessage" ||
-            item.path === "/newFeature/supplierMessage" ||
-            item.path === "accountBalance" ||
-            item.path === "/newFeature/accountBalance" ||
-            item.path === "platformUsage" ||
-            item.path === "/newFeature/platformUsage" ||
-            item.path === "voteResult" ||
-            item.path === "/newFeature/voteResult" ||
-            item.path === "supplierSettle" ||
-            item.path === "/newFeature/supplierSettle"
-        ))
-    ) {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureSupplierSettleAuditMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
-function ensureSupplierGroupNoticeMenu(routes = []) {
-  const targetTitle = "新增功能";
-  const groupNoticeTitle = "瀛︽牎缁熻喘鍏憡鏌ヨ";
-  const isGroupNoticeMenu = (item = {}) =>
-    item.path === "supplierGroupNotice" ||
-    item.path === "/newFeature/supplierGroupNotice" ||
-    item.path === "adminGroupNoticeQuery" ||
-    item.path === "/newFeature/adminGroupNoticeQuery" ||
-    item.component === "supplier/groupNotice/index" ||
-    item.component === "school/groupNotice/index" ||
-    item.component === "school/groupNoticeReadonly/index" ||
-    (item.meta && item.meta.title === groupNoticeTitle);
-  const ensureChild = (item) => {
-    item.name = "SupplierGroupNotice";
-    item.path = "supplierGroupNotice";
-    item.component = "school/groupNotice/index";
-    item.hidden = false;
-    item.meta = {
-      ...(item.meta || {}),
-      title: "瀛︽牎缁熻喘鍏憡鏌ヨ",
-      icon: (item.meta && item.meta.icon) || "message",
-    };
-    return item;
-  };
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    const existingMenu = route.children.find(isGroupNoticeMenu);
-    if (existingMenu) {
-      ensureChild(existingMenu);
-      return;
-    }
-    route.children.push(ensureChild({
-      name: "SupplierGroupNotice",
-      path: "supplierGroupNotice",
-      component: "school/groupNotice/index",
-      meta: {
-        title: "学校统购公告查询",
-        icon: "message",
-      },
-    }));
-  };
-
-  routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureSupplierGroupNoticeMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
-function ensureUsageMenu(routes = []) {
-  const exists = (children = []) =>
-    children.some(
-      (item) =>
-        item.path === "platformUsage" ||
-        item.path === "/newFeature/platformUsage" ||
-        item.component === "school/platformUsage/index"
-    );
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "PlatformUsage",
-      path: "platformUsage",
-      component: "school/platformUsage/index",
-      meta: {
-        title: "教育局监管统计",
-        icon: "chart",
-      },
-    });
-  };
-
-  routes.forEach((route) => {
-    if (route.path === "newFeature" || route.path === "/newFeature") {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureUsageMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
-function ensureVoteResultMenu(routes = []) {
-  const targetTitle = "鏂板鍔熻兘";
-  const exists = (children = []) =>
-    children.some(
-      (item) =>
-        item.path === "voteResult" ||
-        item.path === "/newFeature/voteResult" ||
-        item.component === "school/voteResult/index"
-    );
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "VoteResult",
-      path: "voteResult",
-      component: "school/voteResult/index",
-      meta: {
-        title: "投票结果",
-        icon: "form",
-      },
-    });
-  };
-
-  routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureVoteResultMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
-function ensureAdminSchoolSettlementApplyMenu(routes = []) {
-  const targetTitle = "新增功能";
-  const exists = (children = []) =>
-    children.some(
-      (item) =>
-        item.path === "schoolSettlementApply" ||
-        item.path === "/newFeature/schoolSettlementApply"
-    );
-
-  const appendMenu = (route) => {
-    if (!route.children) {
-      route.children = [];
-    }
-    if (exists(route.children)) {
-      return;
-    }
-    route.children.push({
-      name: "SchoolSettlementApplyAdmin",
-      path: "schoolSettlementApply",
-      component: "school/settlementApply/index",
-      meta: {
-        title: "学校端申请结算列表",
-        icon: "form",
-        settlementViewMode: "school",
-        requiresSchoolSelector: true,
-      },
-    });
-  };
-
-  routes.forEach((route) => {
-    const title = route.meta && route.meta.title ? route.meta.title : route.name;
-    if (route.path === "newFeature" || route.path === "/newFeature" || title === targetTitle) {
-      appendMenu(route);
-    }
-    if (route.children && route.children.length) {
-      ensureAdminSchoolSettlementApplyMenu(route.children);
-    }
-  });
-
-  return routes;
-}
-
 function normalizeGroupNoticeMenus(routes = []) {
   return routes.map((route) => {
     const current = { ...route };
@@ -558,19 +220,6 @@ const schoolRetiredMenuTitles = new Set([
   "订单明细",
 ]);
 
-const schoolOnlyRetiredMenuPaths = new Set([
-  "settlementManage",
-]);
-
-const schoolOnlyRetiredMenuComponents = new Set([
-  "school/settlementManage/index",
-  "school/eduSettlementManage/index",
-]);
-
-const schoolOnlyRetiredMenuTitles = new Set([
-  "结算管理",
-]);
-
 function isSchoolRetiredRoute(route = {}) {
   const normalizedPath = String(route.path || "").replace(/^\/+/, "");
   const title = getRouteTitle(route);
@@ -592,17 +241,6 @@ function shouldPruneEmptySchoolRoute(route = {}) {
     route.component === "Layout" ||
     route.component === "ParentView" ||
     route.path === "/"
-  );
-}
-
-function isSchoolOnlyRetiredRoute(route = {}) {
-  const normalizedPath = String(route.path || "").replace(/^\/+/, "");
-  const title = getRouteTitle(route);
-
-  return (
-    schoolOnlyRetiredMenuPaths.has(normalizedPath) ||
-    schoolOnlyRetiredMenuComponents.has(route.component || "") ||
-    schoolOnlyRetiredMenuTitles.has(title)
   );
 }
 
@@ -630,104 +268,6 @@ function filterSchoolRetiredMenus(routes = []) {
     result.push(current);
     return result;
   }, []);
-}
-
-function filterSchoolOnlyRetiredMenus(routes = []) {
-  return routes.reduce((result, route) => {
-    const current = { ...route };
-
-    if (current.children && current.children.length) {
-      current.children = filterSchoolOnlyRetiredMenus(current.children);
-    }
-
-    if (isSchoolOnlyRetiredRoute(current)) {
-      return result;
-    }
-
-    if (shouldPruneEmptySchoolRoute(current)) {
-      return result;
-    }
-
-    if (Array.isArray(current.children) && current.children.length === 0) {
-      delete current.children;
-      delete current.redirect;
-    }
-
-    result.push(current);
-    return result;
-  }, []);
-}
-
-function normalizeSchoolSettlementApplyMenu(routes = []) {
-  return routes.map((route) => {
-    const current = { ...route };
-    const currentPath = String(current.path || "").replace(/^\/+/, "");
-    const currentTitle = getRouteTitle(current);
-    const isLeafView =
-      current.component &&
-      current.component !== "Layout" &&
-      current.component !== "ParentView" &&
-      current.component !== "InnerLink";
-
-    if (
-      isLeafView &&
-      (currentPath === "settlementApply" || currentTitle === "申请结算列表")
-    ) {
-      current.component = "school/settlementApply/index";
-      current.meta = {
-        ...(current.meta || {}),
-        title: "学校端申请结算列表",
-        settlementViewMode: "school",
-        requiresSchoolSelector: false,
-      };
-    }
-
-    if (current.children && current.children.length) {
-      current.children = normalizeSchoolSettlementApplyMenu(current.children);
-    }
-
-    return current;
-  });
-}
-
-function normalizeAdminSettlementMenus(routes = []) {
-  return routes.map((route) => {
-    const current = { ...route };
-    const currentPath = String(current.path || "").replace(/^\/+/, "");
-    const currentComponent = current.component || "";
-    const currentTitle = getRouteTitle(current);
-
-    if (
-      currentPath === "settlementApply" ||
-      currentComponent === "jsgl/index" ||
-      currentTitle === "申请结算列表"
-    ) {
-      current.meta = {
-        ...(current.meta || {}),
-        title: "教育局端申请结算列表",
-        settlementViewMode: "education",
-        requiresSchoolSelector: false,
-      };
-    }
-
-    if (
-      currentPath === "schoolSettlementApply" ||
-      currentTitle === "学校端申请结算列表"
-    ) {
-      current.meta = {
-        ...(current.meta || {}),
-        title: "学校端申请结算列表",
-        settlementViewMode: "school",
-        requiresSchoolSelector: true,
-      };
-    }
-
-    if (current.children && current.children.length) {
-      current.children = normalizeAdminSettlementMenus(current.children);
-    }
-
-    return current;
-  });
 }
 
 function renameSchoolCommentMenu(routes = []) {
@@ -765,8 +305,7 @@ const adminNewFeatureMenuTitles = new Set([
   "统购管理",
   "评价管理",
   "结算管理",
-  "教育局端申请结算列表",
-  "学校端申请结算列表",
+  "申请结算列表",
   "每日入账金额",
 ]);
 
@@ -777,7 +316,6 @@ const adminNewFeatureLeafPaths = new Set([
   "evaluation",
   "settlementManage",
   "settlementApply",
-  "schoolSettlementApply",
   "dailyIncome",
 ]);
 
@@ -920,23 +458,7 @@ function nestAdminNewFeatureMenus(routes = []) {
 }
 
 function normalizeNonSchoolRoutes(routes = []) {
-  return normalizeGroupNoticeMenus(
-    normalizeAdminSettlementMenus(
-      ensureAdminSchoolSettlementApplyMenu(
-        ensureSupplierSettleMenu(
-          ensureSupplierSettleAuditMenu(
-            ensureVoteResultMenu(
-              ensureUsageMenu(
-                ensureSupplierMessageMenu(
-                  ensureSupplierGroupNoticeMenu(normalizeUsageMenus(routes))
-                )
-              )
-            )
-          )
-        )
-      )
-    )
-  );
+  return normalizeGroupNoticeMenus(normalizeUsageMenus(routes));
 }
 
 const permission = {
@@ -977,12 +499,8 @@ const permission = {
 
         getRouters().then((res) => {
           const serverRoutes = JSON.parse(JSON.stringify(res.data || []));
-          const schoolRoutes = filterSchoolOnlyRetiredMenus(
-            filterSchoolRetiredMenus(
-              normalizeSchoolSettlementApplyMenu(
-                promoteSchoolTonggouMenus(serverRoutes)
-              )
-            )
+          const schoolRoutes = filterSchoolRetiredMenus(
+            promoteSchoolTonggouMenus(serverRoutes)
           );
           const nonSchoolRoutes = filterSchoolRetiredMenus(
             normalizeNonSchoolRoutes(serverRoutes)

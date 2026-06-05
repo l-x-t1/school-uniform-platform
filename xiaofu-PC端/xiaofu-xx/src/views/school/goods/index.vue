@@ -413,12 +413,20 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="供应商ID" prop="supplierId">
-                  <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
+                  <el-input
+                    v-model="form.supplierId"
+                    :disabled="supplierFieldsLocked"
+                    :placeholder="supplierFieldsLocked ? '系统将自动带出当前供应商ID' : '请输入供应商ID'"
+                  />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
                 <el-form-item label="供应商名称" prop="supplierName">
-                  <el-input v-model="form.supplierName" placeholder="请输入供应商名称" />
+                  <el-input
+                    v-model="form.supplierName"
+                    :disabled="supplierFieldsLocked"
+                    :placeholder="supplierFieldsLocked ? '系统将自动带出当前供应商名称' : '请输入供应商名称'"
+                  />
                 </el-form-item>
               </el-col>
             </el-row>
@@ -651,6 +659,7 @@
 
 <script>
 import { listGoods, getGoods, delGoods, addGoods, updateGoods } from '@/api/school/goods'
+import { getCurrentSupplier } from '@/api/supplier/feature'
 import { getToken } from '@/utils/auth'
 
 const SALE_TYPE_OPTIONS = [
@@ -702,6 +711,7 @@ export default {
       title: '',
       open: false,
       pageActivated: false,
+      currentSupplier: null,
       saleTypeOptions: SALE_TYPE_OPTIONS,
       goodsStatusOptions: GOODS_STATUS_OPTIONS,
       publishStatusOptions: PUBLISH_STATUS_OPTIONS,
@@ -755,7 +765,13 @@ export default {
       }
     }
   },
+  computed: {
+    supplierFieldsLocked() {
+      return !!(this.currentSupplier && this.currentSupplier.id != null)
+    }
+  },
   created() {
+    this.loadCurrentSupplier()
     this.getList()
   },
   activated() {
@@ -821,6 +837,24 @@ export default {
       this.xfptGoodsSizeList = []
       this.checkedXfptGoodsSize = []
       this.resetForm('form')
+      this.applyCurrentSupplierToForm()
+    },
+    loadCurrentSupplier() {
+      getCurrentSupplier().then(response => {
+        const supplier = response && response.data ? response.data : null
+        this.currentSupplier = supplier && supplier.id != null ? supplier : null
+        this.applyCurrentSupplierToForm()
+      }).catch(() => {
+        this.currentSupplier = null
+      })
+    },
+    applyCurrentSupplierToForm(targetForm) {
+      const form = targetForm || this.form
+      if (!form || !this.supplierFieldsLocked) {
+        return
+      }
+      form.supplierId = this.currentSupplier.id
+      form.supplierName = this.currentSupplier.supplierName || ''
     },
     /** 搜索按钮操作 */
     handleQuery() {
@@ -841,6 +875,7 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset()
+      this.applyCurrentSupplierToForm()
       this.open = true
       this.title = '新增商品'
     },
@@ -876,6 +911,7 @@ export default {
         const data = response.data || {}
         const formData = Object.assign(this.getDefaultForm(), data)
         formData.detailImagesJson = this.normalizeDetailImagesValue(formData.detailImagesJson)
+        this.applyCurrentSupplierToForm(formData)
         this.form = formData
         this.xfptGoodsSizeList = this.decorateSizeList(data.xfptGoodsSizeList || [])
         this.open = true
@@ -895,6 +931,7 @@ export default {
           return
         }
         this.xfptGoodsSizeList = this.decorateSizeList(normalizedSizeList)
+        this.applyCurrentSupplierToForm()
         const payload = Object.assign({}, this.form, {
           detailImagesJson: this.normalizeDetailImagesValue(this.form.detailImagesJson),
           xfptGoodsSizeList: normalizedSizeList

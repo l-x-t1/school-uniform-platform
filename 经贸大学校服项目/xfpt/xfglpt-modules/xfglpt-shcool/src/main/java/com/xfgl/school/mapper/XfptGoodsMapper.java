@@ -22,6 +22,8 @@ public interface XfptGoodsMapper extends BaseMapper<XfptGoods> {
 
         XfptGoods selectXfptGoodsById(@Param("id") Long id);
 
+        XfptGoods selectXfptGoodsByIdAndSupplierId(@Param("id") Long id, @Param("supplierId") Long supplierId);
+
         /**
          * 查询商品信息
          *

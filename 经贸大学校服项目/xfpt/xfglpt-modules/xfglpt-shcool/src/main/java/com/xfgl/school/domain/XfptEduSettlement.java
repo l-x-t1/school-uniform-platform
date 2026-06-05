@@ -62,6 +62,9 @@ public class XfptEduSettlement extends BaseEntity {
     @Schema(description = "供应商名称")
     private String supplierName;
 
+    @Schema(description = "供应商ID")
+    private Long supplierId;
+
     @Schema(description = "申请金额")
     private BigDecimal applyAmount;
 

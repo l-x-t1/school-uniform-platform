@@ -18,11 +18,15 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.domain.XfptGoods;
+import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptGoodsService;
+import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.utils.poi.ExcelUtil;
+import com.xfgl.system.api.domain.SysUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
@@ -39,6 +43,10 @@ import com.xfgl.common.core.web.page.TableDataInfo;
 public class XfptGoodsController extends BaseController {
     @Autowired
     private IXfptGoodsService xfptGoodsService;
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
+    @Autowired
+    private ISupplierMessageService supplierMessageService;
 
 /**
  * 查询商品信息列表
@@ -117,6 +125,7 @@ public class XfptGoodsController extends BaseController {
     @Log(title = "商品信息" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptGoods xfptGoods) {
+            fillCurrentSupplierIfNecessary(xfptGoods);
             return toAjax(xfptGoodsService.insertXfptGoods(xfptGoods));
     }
 
@@ -128,6 +137,7 @@ public class XfptGoodsController extends BaseController {
     @Log(title = "商品信息" , businessType = BusinessType.UPDATE)
     @PutMapping
     public AjaxResult edit(@RequestBody XfptGoods xfptGoods) {
+            fillCurrentSupplierIfNecessary(xfptGoods);
             return toAjax(xfptGoodsService.updateXfptGoods(xfptGoods));
     }
 
@@ -141,5 +151,19 @@ public class XfptGoodsController extends BaseController {
     @DeleteMapping("/{ids}")
     public AjaxResult remove(@PathVariable Long[] ids) {
             return toAjax(xfptGoodsService.deleteXfptGoodsByIds(ids));
+    }
+
+    private void fillCurrentSupplierIfNecessary(XfptGoods xfptGoods) {
+        SysUser currentUser = SecurityUtils.getLoginUser().getSysUser();
+        Long supplierId = supplierAccessSupport.resolveSupplierId(currentUser);
+        if (supplierId == null) {
+            return;
+        }
+        SupplierMessage supplier = supplierMessageService.getById(supplierId);
+        if (supplier == null) {
+            return;
+        }
+        xfptGoods.setSupplierId(supplier.getId());
+        xfptGoods.setSupplierName(supplier.getSupplierName());
     }
 }

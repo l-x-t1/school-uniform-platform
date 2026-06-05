@@ -131,6 +131,12 @@ public class SupplierFeatureController extends BaseController {
         return getDataTable(list);
     }
 
+    @GetMapping("/currentSupplier")
+    @RequiresPermissions("school:goods:list")
+    public AjaxResult currentSupplierInfo() {
+        return success(currentSupplier(currentUser()));
+    }
+
     private boolean reportBelongsToSupplier(String reportId, SupplierMessage supplier) {
         if (StringUtils.isEmpty(reportId)) {
             return false;

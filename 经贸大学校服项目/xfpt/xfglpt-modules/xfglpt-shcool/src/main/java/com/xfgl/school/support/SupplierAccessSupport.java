@@ -1,5 +1,7 @@
 package com.xfgl.school.support;
 
+import com.github.pagehelper.Page;
+import com.github.pagehelper.page.PageMethod;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.service.ISupplierMessageService;
@@ -46,25 +48,33 @@ public class SupplierAccessSupport {
         if (!isSupplierUser(sysUser)) {
             return null;
         }
-        // 优先从关联表查找厂商ID
-        Long supplierIdFromRel = supplierUserRelService.findFirstSupplierIdByUserId(sysUser.getUserId());
-        if (supplierIdFromRel != null) {
-            return supplierIdFromRel;
-        }
-        // 兜底：按名称或手机号查找厂商
+        Page<?> currentPage = PageMethod.getLocalPage();
+        try {
+            // 避免在列表分页请求中，内部厂商解析查询抢占或污染主查询分页上下文
+            PageMethod.clearPage();
 
-        Set<String> candidateNames = new LinkedHashSet<>();
-        addCandidate(candidateNames, sysUser.getUserName());
-        addCandidate(candidateNames, sysUser.getNickName());
-        for (String candidate : candidateNames) {
-            SupplierMessage matchedSupplier = findSupplierByName(candidate);
-            if (matchedSupplier != null) {
-                return matchedSupplier.getId();
+            Long supplierIdFromRel = supplierUserRelService.findFirstSupplierIdByUserId(sysUser.getUserId());
+            if (supplierIdFromRel != null) {
+                return supplierIdFromRel;
+            }
+
+            Set<String> candidateNames = new LinkedHashSet<>();
+            addCandidate(candidateNames, sysUser.getUserName());
+            addCandidate(candidateNames, sysUser.getNickName());
+            for (String candidate : candidateNames) {
+                SupplierMessage matchedSupplier = findSupplierByName(candidate);
+                if (matchedSupplier != null) {
+                    return matchedSupplier.getId();
+                }
+            }
+
+            SupplierMessage matchedByPhone = findSupplierByPhone(sysUser.getPhonenumber());
+            return matchedByPhone == null ? null : matchedByPhone.getId();
+        } finally {
+            if (currentPage != null) {
+                PageMethod.setLocalPage(currentPage);
             }
         }
-
-        SupplierMessage matchedByPhone = findSupplierByPhone(sysUser.getPhonenumber());
-        return matchedByPhone == null ? null : matchedByPhone.getId();
     }
 
     private void addCandidate(Set<String> candidateNames, String value) {

@@ -17,7 +17,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="供应商名称" prop="supplierName">
+      <el-form-item v-if="!isSupplierUser" label="供应商名称" prop="supplierName">
         <el-input
           v-model="queryParams.supplierName"
           placeholder="请输入供应商名称"
@@ -635,6 +635,15 @@ export default {
           { required: true, message: '删除标记，0正常 1删除不能为空', trigger: 'blur' }
         ]
       }
+    }
+  },
+  computed: {
+    isSupplierUser() {
+      const roles = this.$store.getters.roles || []
+      return roles.some(role => {
+        const roleKey = String(role || '')
+        return roleKey.includes('gys') || roleKey.includes('ceshigongying')
+      })
     }
   },
   created() {

@@ -12,12 +12,17 @@ import org.springframework.transaction.annotation.Transactional;
 import com.xfgl.school.domain.XfptCommentReply;
 import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.XfptOrderItem;
+import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.mapper.XfptCommentMapper;
 import com.xfgl.school.mapper.XfptOrderInfoMapper;
 import com.xfgl.school.domain.XfptComment;
 import com.xfgl.school.service.IXfptCommentService;
+import com.xfgl.school.support.SchoolAccessSupport;
+import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysUser;
 import com.xfgl.system.api.model.LoginUser;
+import java.util.Collections;
+import java.util.Objects;
 
 /**
  * 商品评价Service业务层处理
@@ -45,6 +50,11 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
     @Autowired
     private XfptOrderInfoMapper xfptOrderInfoMapper;
 
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
+    @Autowired
+    private SchoolAccessSupport schoolAccessSupport;
+
     /**
      * 查询商品评价列表
      *
@@ -54,6 +64,20 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
     @Override
     public List<XfptComment> selectXfptCommentList(XfptComment xfptComment)
     {
+        if (xfptComment == null) {
+            xfptComment = new XfptComment();
+        }
+        XfptSchoolMessage currentSchool = getCurrentSchoolIfScoped();
+        if (isSchoolScopedUser() && currentSchool == null) {
+            return Collections.emptyList();
+        }
+        if (currentSchool != null) {
+            xfptComment.getParams().put("schoolId", currentSchool.getId());
+        }
+        if (isSupplierScopedUser() && getCurrentSupplierIdIfScoped() == null) {
+            return Collections.emptyList();
+        }
+        applyCurrentSupplierScope(xfptComment);
         return xfptCommentMapper.selectXfptCommentList(xfptComment);
     }
 
@@ -168,7 +192,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         @Override
         public XfptComment selectXfptCommentById(Long id)
         {
-            XfptComment xfptComment = xfptCommentMapper.selectById(id);
+            XfptComment xfptComment = requireAccessibleComment(id);
             List<XfptCommentReply> xfptCommentReplyList = xfptCommentMapper.selectXfptCommentReplyById(id);
             xfptComment.setXfptCommentReplyList(xfptCommentReplyList);
             return xfptComment;
@@ -200,6 +224,8 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         @Override
         public int updateXfptComment(XfptComment xfptComment)
         {
+                requireAccessibleComment(xfptComment.getId());
+                applyCurrentSupplierScope(xfptComment);
                 xfptCommentMapper.deleteXfptCommentReplyByCommentId(xfptComment.getId());
             insertXfptCommentReply(xfptComment);
             return xfptCommentMapper.updateById(xfptComment);
@@ -217,6 +243,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         {
             List<Long> idList = Arrays.asList(ids);
             for (Long id : idList) {
+                requireAccessibleComment(id);
                 xfptCommentMapper.deleteXfptCommentReplyByCommentId(id);
         }
             return xfptCommentMapper.deleteBatchIds(idList);
@@ -232,6 +259,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
         @Override
         public int deleteXfptCommentById(Long id)
         {
+                requireAccessibleComment(id);
                 xfptCommentMapper.deleteXfptCommentReplyByCommentId(id);
             return xfptCommentMapper.deleteById(id);
         }
@@ -270,6 +298,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             if (orderInfo == null || !"0".equals(orderInfo.getDelFlag())) {
                 throw new ServiceException("订单不存在");
             }
+            validateSchoolAccessByOrder(orderInfo);
             if (!"4".equals(orderInfo.getOrderStatus())) {
                 throw new ServiceException("订单完成后才可评价");
             }
@@ -329,6 +358,98 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             xfptComment.setDelFlag(StringUtils.isEmpty(xfptComment.getDelFlag()) ? "0" : xfptComment.getDelFlag());
             xfptComment.setCreateBy(displayName);
             xfptComment.setUpdateBy(displayName);
+        }
+
+        private void applyCurrentSupplierScope(XfptComment xfptComment)
+        {
+            if (xfptComment == null) {
+                return;
+            }
+            Long currentSupplierId = getCurrentSupplierIdIfScoped();
+            if (isSupplierScopedUser() && currentSupplierId == null) {
+                throw new ServiceException("当前登录账号未关联厂商，无法操作评价");
+            }
+            if (currentSupplierId != null) {
+                xfptComment.setSupplierId(currentSupplierId);
+            }
+        }
+
+        private XfptComment requireAccessibleComment(Long id)
+        {
+            if (id == null) {
+                throw new ServiceException("评价不存在");
+            }
+            Long currentSupplierId = getCurrentSupplierIdIfScoped();
+            if (isSupplierScopedUser() && currentSupplierId == null) {
+                throw new ServiceException("当前登录账号未关联厂商，无法操作评价");
+            }
+            XfptComment comment = xfptCommentMapper.selectById(id);
+            if (comment == null || !"0".equals(comment.getDelFlag())) {
+                throw new ServiceException("评价不存在");
+            }
+            validateSchoolAccessByOrder(resolveOrderInfo(comment.getOrderId()));
+            if (currentSupplierId != null && !currentSupplierId.equals(comment.getSupplierId())) {
+                throw new ServiceException("无权操作其他厂商的评价");
+            }
+            return comment;
+        }
+
+        private XfptOrderInfo resolveOrderInfo(Long orderId)
+        {
+            XfptOrderInfo orderInfo = xfptOrderInfoMapper.selectById(orderId);
+            if (orderInfo == null || !"0".equals(orderInfo.getDelFlag())) {
+                throw new ServiceException("评价对应订单不存在");
+            }
+            return orderInfo;
+        }
+
+        private void validateSchoolAccessByOrder(XfptOrderInfo orderInfo)
+        {
+            XfptSchoolMessage currentSchool = getCurrentSchoolIfScoped();
+            if (!isSchoolScopedUser()) {
+                return;
+            }
+            if (currentSchool == null) {
+                throw new ServiceException("当前登录学校信息不存在，无法操作评价");
+            }
+            if (!Objects.equals(currentSchool.getId(), orderInfo.getSchoolId())
+                    || !Objects.equals(currentSchool.getDeptId(), orderInfo.getDeptId())) {
+                throw new ServiceException("无权操作其他学校的评价");
+            }
+        }
+
+        private Long getCurrentSupplierIdIfScoped()
+        {
+            SysUser currentUser = getCurrentUser();
+            if (!supplierAccessSupport.isSupplierUser(currentUser)) {
+                return null;
+            }
+            return supplierAccessSupport.resolveSupplierId(currentUser);
+        }
+
+        private XfptSchoolMessage getCurrentSchoolIfScoped()
+        {
+            SysUser currentUser = getCurrentUser();
+            if (!schoolAccessSupport.isSchoolUser(currentUser)) {
+                return null;
+            }
+            return schoolAccessSupport.resolveCurrentSchool(currentUser);
+        }
+
+        private boolean isSchoolScopedUser()
+        {
+            return schoolAccessSupport.isSchoolUser(getCurrentUser()) && !SecurityUtils.isAdmin(SecurityUtils.getUserId());
+        }
+
+        private boolean isSupplierScopedUser()
+        {
+            return supplierAccessSupport.isSupplierUser(getCurrentUser()) && !SecurityUtils.isAdmin(SecurityUtils.getUserId());
+        }
+
+        private SysUser getCurrentUser()
+        {
+            LoginUser loginUser = SecurityUtils.getLoginUser();
+            return loginUser == null ? null : loginUser.getSysUser();
         }
 
 }
