@@ -44,9 +44,25 @@ public class IgnoreWhiteProperties
         {
             whites.add("/school/supplierSettleApply/public/**");
         }
+        if (!whites.contains("/school/supplierSettleApply/checkBinding"))
+        {
+            whites.add("/school/supplierSettleApply/checkBinding");
+        }
+        if (!whites.contains("/school/supplierSettleApply/loginBound"))
+        {
+            whites.add("/school/supplierSettleApply/loginBound");
+        }
         if (!whites.contains("/supplierSettleApply/public/**"))
         {
             whites.add("/supplierSettleApply/public/**");
+        }
+        if (!whites.contains("/supplierSettleApply/checkBinding"))
+        {
+            whites.add("/supplierSettleApply/checkBinding");
+        }
+        if (!whites.contains("/supplierSettleApply/loginBound"))
+        {
+            whites.add("/supplierSettleApply/loginBound");
         }
     }
 

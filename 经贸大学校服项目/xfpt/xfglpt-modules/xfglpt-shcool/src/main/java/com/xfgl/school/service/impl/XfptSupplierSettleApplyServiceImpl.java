@@ -19,6 +19,7 @@ import com.xfgl.school.service.ISupplierUserRelService;
 import com.xfgl.school.service.IXfptHmdService;
 import com.xfgl.school.service.IXfptNoticeSupplierRelService;
 import com.xfgl.school.service.IXfptSupplierSettleApplyService;
+import com.xfgl.school.mp.MpUtil;
 import com.xfgl.school.utils.MailUtils;
 import com.xfgl.system.api.RemoteNoticService;
 import com.xfgl.system.api.RemoteUserService;
@@ -73,6 +74,9 @@ public class XfptSupplierSettleApplyServiceImpl
 
     @Autowired
     private IXfptNoticeSupplierRelService noticeSupplierRelService;
+
+    @Autowired
+    private MpUtil mpUtil;
 
     @Autowired
     private MailUtils mailUtils;
@@ -277,7 +281,17 @@ public class XfptSupplierSettleApplyServiceImpl
             return vo;
         }
         SysUser sysUser = userResult.getData().getSysUser();
-        if (!SecurityUtils.matchesPassword(password, sysUser.getPassword())) {
+        String storedPassword = sysUser.getPassword();
+        // 如果存储密码不是 BCrypt 格式，则需要先通过 mpUtil 解密
+        if (StringUtils.isNotEmpty(storedPassword) && !storedPassword.startsWith("$2a$") && !storedPassword.startsWith("$2b$") && !storedPassword.startsWith("$2y$")) {
+            try {
+                String token = mpUtil.getToken();
+                storedPassword = mpUtil.decrypt(storedPassword, token);
+            } catch (Exception e) {
+                log.warn("checkBinding: 密码解密失败, username={}", username, e);
+            }
+        }
+        if (!SecurityUtils.matchesPassword(password, storedPassword)) {
             vo.setCanSubmit(false);
             vo.setMessage("密码错误");
             return vo;
