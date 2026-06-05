@@ -1,6 +1,8 @@
 package com.xfgl.school.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.github.pagehelper.Page;
+import com.github.pagehelper.page.PageMethod;
 import com.xfgl.school.domain.SupplierUserRel;
 import com.xfgl.school.mapper.SupplierUserRelMapper;
 import com.xfgl.school.service.ISupplierUserRelService;
@@ -38,7 +40,19 @@ public class SupplierUserRelServiceImpl
 
     @Override
     public Long findFirstSupplierIdByUserId(Long userId) {
-        return baseMapper.findFirstSupplierIdByUserId(userId);
+        if (userId == null) {
+            return null;
+        }
+        Page<?> currentPage = PageMethod.getLocalPage();
+        try {
+            PageMethod.clearPage();
+            List<Long> supplierIds = baseMapper.findSupplierIdsByUserId(userId);
+            return supplierIds == null || supplierIds.isEmpty() ? null : supplierIds.get(0);
+        } finally {
+            if (currentPage != null) {
+                PageMethod.setLocalPage(currentPage);
+            }
+        }
     }
 
     @Override

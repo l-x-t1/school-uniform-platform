@@ -13,6 +13,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="settlementAmount" column="settlement_amount" />
         <result property="withdrawNo" column="withdraw_no" />
         <result property="supplierName" column="supplier_name" />
+        <result property="supplierId" column="supplier_id" />
         <result property="applyAmount" column="apply_amount" />
         <result property="applyTime" column="apply_time" />
         <result property="taxAmount" column="tax_amount" />
@@ -52,6 +53,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             w.apply_amount as settlement_amount,
             w.withdraw_no,
             w.supplier_name,
+            w.supplier_id,
             w.apply_amount,
             w.apply_time,
             0 as tax_amount,
@@ -83,7 +85,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                     else '0'
                 end = #{status}
             </if>
-            <if test="deptId != null"> and (ff.dept_id = #{deptId} or w.finance_flow_id is null)</if>
+            <if test="deptId != null"> and ff.dept_id = #{deptId}</if>
+            <if test="params != null and params.schoolId != null">
+                and exists (
+                    select 1
+                    from xfpt_school_supplier_rel sr
+                    where sr.school_id = #{params.schoolId}
+                      and sr.supplier_id = w.supplier_id
+                      and sr.cooperate_status = '1'
+                      and sr.del_flag = 0
+                )
+            </if>
         </where>
     </sql>
 

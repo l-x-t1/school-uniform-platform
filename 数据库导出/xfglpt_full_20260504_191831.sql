@@ -1497,6 +1497,7 @@ CREATE TABLE `xfpt_after_sale` (
   `apply_type` char(1) NOT NULL COMMENT '申请类型，1仅退款 2退货退款 3换货',
   `target_size_id` bigint DEFAULT NULL COMMENT '换货目标尺码ID',
   `target_size_name` varchar(50) DEFAULT NULL COMMENT '换货目标尺码名称',
+  `return_tracking_no` varchar(100) DEFAULT NULL COMMENT '退货物流单号',
   `reason` varchar(500) DEFAULT NULL COMMENT '申请原因',
   `images_json` longtext COMMENT '图片凭证JSON文本',
   `apply_num` int NOT NULL DEFAULT '1' COMMENT '申请数量',
@@ -1532,7 +1533,7 @@ CREATE TABLE `xfpt_after_sale` (
 
 LOCK TABLES `xfpt_after_sale` WRITE;
 /*!40000 ALTER TABLE `xfpt_after_sale` DISABLE KEYS */;
-INSERT INTO `xfpt_after_sale` VALUES (1,'DEMO-AS-20260504185529-4-4',4,4,'DEMO-ORDER-20260504185529-2-46-4','2',298,8,42,'李蒙莎','张栩睿','2',NULL,NULL,'尺码不合适，申请售后处理。','[\"/profile/upload/demo/after_sale.jpg\"]',1,150.00,NULL,'0',NULL,'3','admin','2026-05-04 16:55:30','已受理','测试售后处理备注',NULL,298,'admin','2026-05-04 18:55:30',NULL,NULL,'测试售后','0'),(2,'DEMO-AS-20260504185529-3-3',3,3,'DEMO-ORDER-20260504185529-2-42-3','2',274,2,38,'魏鹏远','魏佳霖','3',12,'170','尺码不合适，申请售后处理。','[\"/profile/upload/demo/after_sale.jpg\"]',1,151.00,NULL,'0',NULL,'0','admin',NULL,NULL,'测试售后处理备注',NULL,274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试售后','0');
+INSERT INTO `xfpt_after_sale` VALUES (1,'DEMO-AS-20260504185529-4-4',4,4,'DEMO-ORDER-20260504185529-2-46-4','2',298,8,42,'李蒙莎','张栩睿','2',NULL,NULL,NULL,'尺码不合适，申请售后处理。','[\"/profile/upload/demo/after_sale.jpg\"]',1,150.00,NULL,'0',NULL,'3','admin','2026-05-04 16:55:30','已受理','测试售后处理备注',NULL,298,'admin','2026-05-04 18:55:30',NULL,NULL,'测试售后','0'),(2,'DEMO-AS-20260504185529-3-3',3,3,'DEMO-ORDER-20260504185529-2-42-3','2',274,2,38,'魏鹏远','魏佳霖','3',12,'170',NULL,'尺码不合适，申请售后处理。','[\"/profile/upload/demo/after_sale.jpg\"]',1,151.00,NULL,'0',NULL,'0','admin',NULL,NULL,'测试售后处理备注',NULL,274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试售后','0');
 /*!40000 ALTER TABLE `xfpt_after_sale` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -6882,5 +6883,802 @@ SET oi.`progress_status` = CASE
 END
 WHERE oi.`del_flag` = '0'
   AND oi.`order_type` = '1';
+
+-- 补充管理员侧边栏“新增功能”中前端硬挂但导出库缺失的 3 个菜单：
+-- 1. 供应商入驻申请
+-- 2. 供应商入驻审核
+-- 3. 投票结果
+SET @new_feature_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'newFeature'
+    AND `MENU_TYPE` = 'M'
+  ORDER BY `MENU_ID`
+  LIMIT 1
+);
+
+SET @admin_role_id := 1;
+
+SET @supplier_settle_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierSettle'
+     OR `COMPONENT` = 'supplier-settle/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_settle_menu_id := IFNULL(
+  @supplier_settle_menu_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_settle_menu_id, '供应商入驻申请', @new_feature_menu_id, 130,
+       'supplierSettle', 'supplier-settle/index', NULL, 'SupplierSettle',
+       1, 0, 'C', '0', '0', 'school:supplierSettleApply:entry', 'form',
+       'codex', NOW(), 'codex', NOW(), '供应商入驻申请菜单', NULL
+WHERE @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PATH` = 'supplierSettle'
+       OR `COMPONENT` = 'supplier-settle/index'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '供应商入驻申请',
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 130,
+    `PATH` = 'supplierSettle',
+    `COMPONENT` = 'supplier-settle/index',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = 'SupplierSettle',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:supplierSettleApply:entry',
+    `ICON` = 'form',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '供应商入驻申请菜单',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @supplier_settle_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @supplier_settle_menu_id
+FROM DUAL
+WHERE @supplier_settle_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @supplier_settle_menu_id
+  );
+
+SET @supplier_settle_audit_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'supplierSettleAudit'
+     OR `COMPONENT` = 'jiaoyuju/supplierSettleAudit/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @supplier_settle_audit_menu_id := IFNULL(
+  @supplier_settle_audit_menu_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_settle_audit_menu_id, '供应商入驻审核', @new_feature_menu_id, 131,
+       'supplierSettleAudit', 'jiaoyuju/supplierSettleAudit/index', NULL, 'SupplierSettleAudit',
+       1, 0, 'C', '0', '0', 'school:supplierSettleAudit:list', 'edit',
+       'codex', NOW(), 'codex', NOW(), '供应商入驻审核菜单', NULL
+WHERE @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PATH` = 'supplierSettleAudit'
+       OR `COMPONENT` = 'jiaoyuju/supplierSettleAudit/index'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '供应商入驻审核',
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 131,
+    `PATH` = 'supplierSettleAudit',
+    `COMPONENT` = 'jiaoyuju/supplierSettleAudit/index',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = 'SupplierSettleAudit',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:supplierSettleAudit:list',
+    `ICON` = 'edit',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '供应商入驻审核菜单',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @supplier_settle_audit_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @supplier_settle_audit_menu_id
+FROM DUAL
+WHERE @supplier_settle_audit_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @supplier_settle_audit_menu_id
+  );
+
+SET @supplier_settle_audit_query_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:supplierSettleAudit:query'
+  LIMIT 1
+);
+SET @supplier_settle_audit_query_id := IFNULL(
+  @supplier_settle_audit_query_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_settle_audit_query_id, '供应商入驻审核查询', @supplier_settle_audit_menu_id, 1,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierSettleAudit:query', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:supplierSettleAudit:query'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '供应商入驻审核查询',
+    `PARENT_ID` = @supplier_settle_audit_menu_id,
+    `ORDER_NUM` = 1,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:query';
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @supplier_settle_audit_query_id
+FROM DUAL
+WHERE @supplier_settle_audit_query_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @supplier_settle_audit_query_id
+  );
+
+SET @supplier_settle_audit_approve_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:supplierSettleAudit:approve'
+  LIMIT 1
+);
+SET @supplier_settle_audit_approve_id := IFNULL(
+  @supplier_settle_audit_approve_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_settle_audit_approve_id, '供应商入驻审核通过', @supplier_settle_audit_menu_id, 2,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierSettleAudit:approve', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:supplierSettleAudit:approve'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '供应商入驻审核通过',
+    `PARENT_ID` = @supplier_settle_audit_menu_id,
+    `ORDER_NUM` = 2,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:approve';
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @supplier_settle_audit_approve_id
+FROM DUAL
+WHERE @supplier_settle_audit_approve_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @supplier_settle_audit_approve_id
+  );
+
+SET @supplier_settle_audit_reject_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:supplierSettleAudit:reject'
+  LIMIT 1
+);
+SET @supplier_settle_audit_reject_id := IFNULL(
+  @supplier_settle_audit_reject_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_settle_audit_reject_id, '供应商入驻审核驳回', @supplier_settle_audit_menu_id, 3,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierSettleAudit:reject', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:supplierSettleAudit:reject'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '供应商入驻审核驳回',
+    `PARENT_ID` = @supplier_settle_audit_menu_id,
+    `ORDER_NUM` = 3,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:reject';
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @supplier_settle_audit_reject_id
+FROM DUAL
+WHERE @supplier_settle_audit_reject_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @supplier_settle_audit_reject_id
+  );
+
+SET @supplier_settle_audit_export_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:supplierSettleAudit:export'
+  LIMIT 1
+);
+SET @supplier_settle_audit_export_id := IFNULL(
+  @supplier_settle_audit_export_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @supplier_settle_audit_export_id, '供应商入驻审核导出', @supplier_settle_audit_menu_id, 4,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierSettleAudit:export', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:supplierSettleAudit:export'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '供应商入驻审核导出',
+    `PARENT_ID` = @supplier_settle_audit_menu_id,
+    `ORDER_NUM` = 4,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:export';
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @supplier_settle_audit_export_id
+FROM DUAL
+WHERE @supplier_settle_audit_export_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @supplier_settle_audit_export_id
+  );
+
+SET @vote_result_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PATH` = 'voteResult'
+     OR `COMPONENT` = 'school/voteResult/index'
+  ORDER BY `MENU_ID` DESC
+  LIMIT 1
+);
+SET @vote_result_menu_id := IFNULL(
+  @vote_result_menu_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @vote_result_menu_id, '投票结果', @new_feature_menu_id, 132,
+       'voteResult', 'school/voteResult/index', NULL, 'VoteResult',
+       1, 0, 'C', '0', '0', 'school:voteResult:list', 'form',
+       'codex', NOW(), 'codex', NOW(), '投票结果菜单', NULL
+WHERE @new_feature_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PATH` = 'voteResult'
+       OR `COMPONENT` = 'school/voteResult/index'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '投票结果',
+    `PARENT_ID` = @new_feature_menu_id,
+    `ORDER_NUM` = 132,
+    `PATH` = 'voteResult',
+    `COMPONENT` = 'school/voteResult/index',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = 'VoteResult',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'C',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:voteResult:list',
+    `ICON` = 'form',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '投票结果菜单',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @vote_result_menu_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @vote_result_menu_id
+FROM DUAL
+WHERE @vote_result_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @vote_result_menu_id
+  );
+
+SET @vote_result_query_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:voteResult:query'
+  LIMIT 1
+);
+SET @vote_result_query_id := IFNULL(
+  @vote_result_query_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @vote_result_query_id, '投票结果查询', @vote_result_menu_id, 1,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:voteResult:query', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:voteResult:query'
+);
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '投票结果查询',
+    `PARENT_ID` = @vote_result_menu_id,
+    `ORDER_NUM` = 1,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:voteResult:query';
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @admin_role_id, @vote_result_query_id
+FROM DUAL
+WHERE @vote_result_query_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @admin_role_id
+      AND `MENU_ID` = @vote_result_query_id
+  );
+
+-- 修正新增功能菜单名称在错误客户端编码执行后可能被写成问号的问题
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE794B3E8AFB7 USING utf8mb4),
+    `REMARK` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE794B3E8AFB7E88F9CE58D95 USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleApply:entry';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE5AEA1E6A0B8 USING utf8mb4),
+    `REMARK` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE5AEA1E6A0B8E88F9CE58D95 USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:list';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE5AEA1E6A0B8E69FA5E8AFA2 USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:query';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE5AEA1E6A0B8E9809AE8BF87 USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:approve';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE5AEA1E6A0B8E9A9B3E59B9E USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:reject';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE4BE9BE5BA94E59586E585A5E9A9BBE5AEA1E6A0B8E5AFBCE587BA USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:supplierSettleAudit:export';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE68A95E7A5A8E7BB93E69E9C USING utf8mb4),
+    `REMARK` = CONVERT(0xE68A95E7A5A8E7BB93E69E9CE88F9CE58D95 USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:voteResult:list';
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = CONVERT(0xE68A95E7A5A8E7BB93E69E9CE69FA5E8AFA2 USING utf8mb4),
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW()
+WHERE `PERMS` = 'school:voteResult:query';
+
+-- 给市教育局补充“教育局监管统计”页面实际依赖的查询权限，避免额外挂出独立菜单
+SET @city_edu_role_id := (
+  SELECT `ROLE_ID`
+  FROM `sys_role`
+  WHERE `ROLE_KEY` = 'sjyj'
+  ORDER BY `ROLE_ID`
+  LIMIT 1
+);
+
+SET @platform_usage_menu_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PERMS` = 'school:platformUsage:list'
+     OR `PATH` = 'platformUsage'
+     OR `COMPONENT` = 'school/platformUsage/index'
+  ORDER BY `MENU_ID`
+  LIMIT 1
+);
+
+SET @platform_usage_finance_perm_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PARENT_ID` = @platform_usage_menu_id
+    AND `MENU_TYPE` = 'F'
+    AND `PERMS` = 'school:financeFlow:list'
+  ORDER BY `MENU_ID`
+  LIMIT 1
+);
+SET @platform_usage_finance_perm_id := IFNULL(
+  @platform_usage_finance_perm_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @platform_usage_finance_perm_id, '监管统计-资金流水查询', @platform_usage_menu_id, 1,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:financeFlow:list', '#',
+       'codex', NOW(), 'codex', NOW(), '给市教育局放行监管统计页面的资金流水接口', NULL
+WHERE @platform_usage_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PARENT_ID` = @platform_usage_menu_id
+      AND `MENU_TYPE` = 'F'
+      AND `PERMS` = 'school:financeFlow:list'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '监管统计-资金流水查询',
+    `PARENT_ID` = @platform_usage_menu_id,
+    `ORDER_NUM` = 1,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:financeFlow:list',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '给市教育局放行监管统计页面的资金流水接口',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @platform_usage_finance_perm_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @city_edu_role_id, @platform_usage_finance_perm_id
+FROM DUAL
+WHERE @city_edu_role_id IS NOT NULL
+  AND @platform_usage_finance_perm_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @city_edu_role_id
+      AND `MENU_ID` = @platform_usage_finance_perm_id
+  );
+
+SET @platform_usage_settlement_perm_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PARENT_ID` = @platform_usage_menu_id
+    AND `MENU_TYPE` = 'F'
+    AND `PERMS` = 'school:eduSettlementManage:list'
+  ORDER BY `MENU_ID`
+  LIMIT 1
+);
+SET @platform_usage_settlement_perm_id := IFNULL(
+  @platform_usage_settlement_perm_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @platform_usage_settlement_perm_id, '监管统计-结算管理查询', @platform_usage_menu_id, 2,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:eduSettlementManage:list', '#',
+       'codex', NOW(), 'codex', NOW(), '给市教育局放行监管统计页面的结算管理接口', NULL
+WHERE @platform_usage_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PARENT_ID` = @platform_usage_menu_id
+      AND `MENU_TYPE` = 'F'
+      AND `PERMS` = 'school:eduSettlementManage:list'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '监管统计-结算管理查询',
+    `PARENT_ID` = @platform_usage_menu_id,
+    `ORDER_NUM` = 2,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:eduSettlementManage:list',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '给市教育局放行监管统计页面的结算管理接口',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @platform_usage_settlement_perm_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @city_edu_role_id, @platform_usage_settlement_perm_id
+FROM DUAL
+WHERE @city_edu_role_id IS NOT NULL
+  AND @platform_usage_settlement_perm_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @city_edu_role_id
+      AND `MENU_ID` = @platform_usage_settlement_perm_id
+  );
+
+SET @platform_usage_order_info_perm_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PARENT_ID` = @platform_usage_menu_id
+    AND `MENU_TYPE` = 'F'
+    AND `PERMS` = 'school:orderInfo:list'
+  ORDER BY `MENU_ID`
+  LIMIT 1
+);
+SET @platform_usage_order_info_perm_id := IFNULL(
+  @platform_usage_order_info_perm_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @platform_usage_order_info_perm_id, '监管统计-订单信息查询', @platform_usage_menu_id, 3,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:orderInfo:list', '#',
+       'codex', NOW(), 'codex', NOW(), '给市教育局放行监管统计页面的订单信息接口', NULL
+WHERE @platform_usage_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PARENT_ID` = @platform_usage_menu_id
+      AND `MENU_TYPE` = 'F'
+      AND `PERMS` = 'school:orderInfo:list'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '监管统计-订单信息查询',
+    `PARENT_ID` = @platform_usage_menu_id,
+    `ORDER_NUM` = 3,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:orderInfo:list',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '给市教育局放行监管统计页面的订单信息接口',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @platform_usage_order_info_perm_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @city_edu_role_id, @platform_usage_order_info_perm_id
+FROM DUAL
+WHERE @city_edu_role_id IS NOT NULL
+  AND @platform_usage_order_info_perm_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @city_edu_role_id
+      AND `MENU_ID` = @platform_usage_order_info_perm_id
+  );
+
+SET @platform_usage_order_item_perm_id := (
+  SELECT `MENU_ID`
+  FROM `sys_menu`
+  WHERE `PARENT_ID` = @platform_usage_menu_id
+    AND `MENU_TYPE` = 'F'
+    AND `PERMS` = 'school:orderItem:list'
+  ORDER BY `MENU_ID`
+  LIMIT 1
+);
+SET @platform_usage_order_item_perm_id := IFNULL(
+  @platform_usage_order_item_perm_id,
+  (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
+  `IS_FRAME`, `IS_CACHE`, `MENU_TYPE`, `VISIBLE`, `STATUS`, `PERMS`, `ICON`,
+  `CREATE_BY`, `CREATE_TIME`, `UPDATE_BY`, `UPDATE_TIME`, `REMARK`, `TYPE`
+)
+SELECT @platform_usage_order_item_perm_id, '监管统计-订单明细查询', @platform_usage_menu_id, 4,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:orderItem:list', '#',
+       'codex', NOW(), 'codex', NOW(), '给市教育局放行监管统计页面的订单明细接口', NULL
+WHERE @platform_usage_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_menu`
+    WHERE `PARENT_ID` = @platform_usage_menu_id
+      AND `MENU_TYPE` = 'F'
+      AND `PERMS` = 'school:orderItem:list'
+  );
+
+UPDATE `sys_menu`
+SET `MENU_NAME` = '监管统计-订单明细查询',
+    `PARENT_ID` = @platform_usage_menu_id,
+    `ORDER_NUM` = 4,
+    `PATH` = '#',
+    `COMPONENT` = '',
+    `QUERY` = NULL,
+    `ROUTE_NAME` = '',
+    `IS_FRAME` = 1,
+    `IS_CACHE` = 0,
+    `MENU_TYPE` = 'F',
+    `VISIBLE` = '0',
+    `STATUS` = '0',
+    `PERMS` = 'school:orderItem:list',
+    `ICON` = '#',
+    `UPDATE_BY` = 'codex',
+    `UPDATE_TIME` = NOW(),
+    `REMARK` = '给市教育局放行监管统计页面的订单明细接口',
+    `TYPE` = NULL
+WHERE `MENU_ID` = @platform_usage_order_item_perm_id;
+
+INSERT INTO `sys_role_menu` (`ROLE_ID`, `MENU_ID`)
+SELECT @city_edu_role_id, @platform_usage_order_item_perm_id
+FROM DUAL
+WHERE @city_edu_role_id IS NOT NULL
+  AND @platform_usage_order_item_perm_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu`
+    WHERE `ROLE_ID` = @city_edu_role_id
+      AND `MENU_ID` = @platform_usage_order_item_perm_id
+  );
 
 -- Dump completed on 2026-05-04 19:18:33

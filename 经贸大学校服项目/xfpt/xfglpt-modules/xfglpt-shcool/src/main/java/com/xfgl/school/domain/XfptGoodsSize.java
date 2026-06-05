@@ -1,6 +1,7 @@
 package com.xfgl.school.domain;
 import java.math.BigDecimal;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -36,6 +37,21 @@ private static final long serialVersionUID = 1L;
             @Excel(name = "关联商品")
     @Schema(description = "关联商品")
     private Long goodsId;
+
+    /** 关联商品名称 */
+    @TableField(exist = false)
+    @Schema(description = "关联商品名称")
+    private String goodsName;
+
+    /** 关联商品编码 */
+    @TableField(exist = false)
+    @Schema(description = "关联商品编码")
+    private String goodsCode;
+
+    /** 供应商ID，仅用于列表筛选 */
+    @TableField(exist = false)
+    @Schema(description = "供应商ID，仅用于列表筛选")
+    private Long supplierId;
 
     /** 尺码编码 */
             @Excel(name = "尺码编码")

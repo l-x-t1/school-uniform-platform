@@ -38,3 +38,10 @@ export function listSupplierServiceSchool(query) {
     params: query
   })
 }
+
+export function getCurrentSupplier() {
+  return request({
+    url: '/school/supplierFeature/currentSupplier',
+    method: 'get'
+  })
+}

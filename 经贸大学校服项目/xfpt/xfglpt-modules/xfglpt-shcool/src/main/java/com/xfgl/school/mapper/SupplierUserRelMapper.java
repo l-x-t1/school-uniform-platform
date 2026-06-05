@@ -24,7 +24,7 @@ public interface SupplierUserRelMapper extends BaseMapper<SupplierUserRel> {
     @Select("SELECT user_id FROM xfpt_supplier_user_rel WHERE supplier_id = #{supplierId}")
     List<Long> findUserIdsBySupplierId(@Param("supplierId") Long supplierId);
 
-    @Select("SELECT supplier_id FROM xfpt_supplier_user_rel WHERE user_id = #{userId} LIMIT 1")
+    @Select("SELECT supplier_id FROM xfpt_supplier_user_rel WHERE user_id = #{userId}")
     Long findFirstSupplierIdByUserId(@Param("userId") Long userId);
 
     @Select("SELECT u.user_id, u.user_name, u.nick_name, u.phonenumber FROM xfpt_supplier_user_rel r JOIN sys_user u ON r.user_id = u.user_id WHERE r.supplier_id = #{supplierId}")

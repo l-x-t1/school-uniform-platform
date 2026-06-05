@@ -77,6 +77,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="userId != null "> and c.user_id = #{userId}</if>
             <if test="userName != null  and userName != ''"> and c.user_name like concat('%', #{userName}, '%')</if>
             <if test="supplierId != null "> and c.supplier_id = #{supplierId}</if>
+            <if test="params != null and params.schoolId != null"> and o.school_id = #{params.schoolId}</if>
             <if test="score != null "> and c.score = #{score}</if>
             <if test="replyTime != null "> and c.reply_time = #{replyTime}</if>
             <if test="status != null  and status != ''"> and c.status = #{status}</if>

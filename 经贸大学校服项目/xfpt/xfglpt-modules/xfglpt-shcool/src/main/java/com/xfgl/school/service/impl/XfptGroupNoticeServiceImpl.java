@@ -12,11 +12,15 @@ import com.xfgl.school.domain.XfptGroupNoticeItem;
 import com.xfgl.school.domain.XfptGroupNoticeSupplier;
 import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.XfptSchoolMessage;
+import com.xfgl.school.domain.XfptSchoolSupplierGoodsRel;
+import com.xfgl.school.domain.XfptSchoolSupplierRel;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
 import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
 import com.xfgl.school.mapper.XfptGroupNoticeMapper;
+import com.xfgl.school.mapper.XfptSchoolSupplierGoodsRelMapper;
+import com.xfgl.school.mapper.XfptSchoolSupplierRelMapper;
 import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptGroupNoticeService;
 import com.xfgl.school.service.IXfptSchoolMessageService;
@@ -64,6 +68,12 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
 
     @Autowired
     private XfptDeliveryOrderMapper xfptDeliveryOrderMapper;
+
+    @Autowired
+    private XfptSchoolSupplierRelMapper xfptSchoolSupplierRelMapper;
+
+    @Autowired
+    private XfptSchoolSupplierGoodsRelMapper xfptSchoolSupplierGoodsRelMapper;
 
     /**
      * 鏌ヨ缁熻喘鍏憡鍒楄〃
@@ -135,6 +145,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
     {
         fillGroupNoticeDefaults(xfptGroupNotice);
         fillNoticeSchoolInfo(xfptGroupNotice, null);
+        validateNoticeItemsAgainstActiveCooperation(xfptGroupNotice);
         int rows = xfptGroupNoticeMapper.insert(xfptGroupNotice);
         insertXfptGroupNoticeItem(xfptGroupNotice);
         if (isAdminUser()) {
@@ -161,6 +172,7 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         }
         fillGroupNoticeDefaults(xfptGroupNotice);
         fillNoticeSchoolInfo(xfptGroupNotice, oldNotice);
+        validateNoticeItemsAgainstActiveCooperation(xfptGroupNotice);
         xfptGroupNoticeMapper.deleteXfptGroupNoticeItemByNoticeId(xfptGroupNotice.getId());
         insertXfptGroupNoticeItem(xfptGroupNotice);
         if (isAdminUser()) {
@@ -399,6 +411,72 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
             }
             xfptGroupNoticeMapper.batchInsertXfptGroupNoticeItem(xfptGroupNoticeItemList);
         }
+    }
+
+    private void validateNoticeItemsAgainstActiveCooperation(XfptGroupNotice xfptGroupNotice)
+    {
+        if (xfptGroupNotice == null || xfptGroupNotice.getSchoolId() == null) {
+            return;
+        }
+        List<XfptGroupNoticeItem> noticeItems = xfptGroupNotice.getXfptGroupNoticeItemList();
+        if (noticeItems == null || noticeItems.isEmpty()) {
+            return;
+        }
+        Set<Long> goodsIds = noticeItems.stream()
+                .map(XfptGroupNoticeItem::getGoodsId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (goodsIds.isEmpty()) {
+            throw new ServiceException("公告商品不能为空");
+        }
+        if (goodsIds.size() != noticeItems.size()) {
+            throw new ServiceException("公告商品不能重复");
+        }
+
+        List<XfptSchoolSupplierRel> schoolSupplierRels = xfptSchoolSupplierRelMapper.selectList(
+                Wrappers.<XfptSchoolSupplierRel>lambdaQuery()
+                        .eq(XfptSchoolSupplierRel::getSchoolId, xfptGroupNotice.getSchoolId())
+                        .eq(XfptSchoolSupplierRel::getCooperateStatus, "1")
+                        .eq(XfptSchoolSupplierRel::getDelFlag, "0"));
+        if (schoolSupplierRels == null || schoolSupplierRels.isEmpty()) {
+            throw new ServiceException("当前学校没有合作中的供应商商品，无法创建统购公告");
+        }
+        Set<Long> relIds = schoolSupplierRels.stream()
+                .map(XfptSchoolSupplierRel::getId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (relIds.isEmpty()) {
+            throw new ServiceException("当前学校没有有效的合作商品，无法创建统购公告");
+        }
+        List<XfptSchoolSupplierGoodsRel> goodsRelList = xfptSchoolSupplierGoodsRelMapper.selectList(
+                Wrappers.<XfptSchoolSupplierGoodsRel>lambdaQuery()
+                        .in(XfptSchoolSupplierGoodsRel::getRelId, relIds)
+                        .eq(XfptSchoolSupplierGoodsRel::getSchoolId, xfptGroupNotice.getSchoolId())
+                        .eq(XfptSchoolSupplierGoodsRel::getStatus, "1")
+                        .eq(XfptSchoolSupplierGoodsRel::getDelFlag, "0"));
+        Set<Long> allowedGoodsIds = goodsRelList.stream()
+                .map(XfptSchoolSupplierGoodsRel::getGoodsId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+        if (allowedGoodsIds.isEmpty()) {
+            throw new ServiceException("当前学校没有启用中的合作商品，无法创建统购公告");
+        }
+        for (XfptGroupNoticeItem noticeItem : noticeItems) {
+            if (noticeItem.getGoodsId() == null) {
+                throw new ServiceException("公告商品不能为空");
+            }
+            if (!allowedGoodsIds.contains(noticeItem.getGoodsId())) {
+                throw new ServiceException("商品【" + defaultGoodsName(noticeItem.getGoodsName(), noticeItem.getGoodsId()) + "】不属于当前学校合作中的启用商品");
+            }
+        }
+    }
+
+    private String defaultGoodsName(String goodsName, Long goodsId)
+    {
+        if (StringUtils.isNotBlank(goodsName)) {
+            return goodsName;
+        }
+        return String.valueOf(goodsId);
     }
 
     private void fillNoticeSupplierIds(XfptGroupNotice xfptGroupNotice)

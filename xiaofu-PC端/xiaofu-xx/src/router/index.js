@@ -165,7 +165,7 @@ export const constantRoutes = [
     children: [
       {
         path: "index",
-        component: () => import("@/views/school/groupNotice/index"),
+        component: () => import("@/views/school/groupNoticeReadonly/index"),
         name: "SupplierGroupNoticeEntry",
         meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
       },

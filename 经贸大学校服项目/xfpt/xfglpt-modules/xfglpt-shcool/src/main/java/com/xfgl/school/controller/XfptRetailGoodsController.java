@@ -18,8 +18,10 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.vo.XfptRetailGoodsVo;
 import com.xfgl.school.service.IXfptRetailGoodsService;
+import com.xfgl.school.support.SchoolAccessSupport;
 import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysRole;
 import com.xfgl.system.api.domain.SysUser;
@@ -41,6 +43,8 @@ public class XfptRetailGoodsController extends BaseController {
 
     @Autowired
     private SupplierAccessSupport supplierAccessSupport;
+    @Autowired
+    private SchoolAccessSupport schoolAccessSupport;
 
     /**
      * 查询学校端零售商品列表
@@ -99,8 +103,12 @@ public class XfptRetailGoodsController extends BaseController {
                 return RetailGoodsScope.supplier(supplierId);
             }
         }
-        if (sysUser.getDeptId() != null) {
-            return RetailGoodsScope.school(sysUser.getDeptId());
+        if (schoolAccessSupport.isSchoolUser(sysUser)) {
+            XfptSchoolMessage currentSchool = schoolAccessSupport.resolveCurrentSchool(sysUser);
+            if (currentSchool == null) {
+                throw new ServiceException("当前登录学校信息不存在");
+            }
+            return RetailGoodsScope.school(currentSchool.getId());
         }
         return RetailGoodsScope.global();
     }

@@ -1,14 +1,14 @@
 <template>
-  <SchoolGroupNoticePage />
+  <SupplierGroupNoticeReadonlyPage />
 </template>
 
 <script>
-import SchoolGroupNoticePage from "@/views/school/groupNotice/index";
+import SupplierGroupNoticeReadonlyPage from "@/views/school/groupNoticeReadonly/index";
 
 export default {
   name: "SupplierGroupNoticeCompatPage",
   components: {
-    SchoolGroupNoticePage,
+    SupplierGroupNoticeReadonlyPage,
   },
 };
 </script>

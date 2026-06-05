@@ -18,8 +18,10 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.vo.XfptTonggouGoodsVo;
 import com.xfgl.school.service.IXfptTonggouGoodsService;
+import com.xfgl.school.support.SchoolAccessSupport;
 import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysRole;
 import com.xfgl.system.api.domain.SysUser;
@@ -41,6 +43,8 @@ public class XfptTonggouGoodsController extends BaseController {
 
     @Autowired
     private SupplierAccessSupport supplierAccessSupport;
+    @Autowired
+    private SchoolAccessSupport schoolAccessSupport;
 
     @Operation(summary = "查询学校端统购商品列表")
     @RequiresPermissions("school:tonggouGoods:list")
@@ -90,8 +94,12 @@ public class XfptTonggouGoodsController extends BaseController {
                 return TonggouGoodsScope.supplier(supplierId);
             }
         }
-        if (sysUser.getDeptId() != null) {
-            return TonggouGoodsScope.school(sysUser.getDeptId());
+        if (schoolAccessSupport.isSchoolUser(sysUser)) {
+            XfptSchoolMessage currentSchool = schoolAccessSupport.resolveCurrentSchool(sysUser);
+            if (currentSchool == null) {
+                throw new ServiceException("当前登录学校信息不存在");
+            }
+            return TonggouGoodsScope.school(currentSchool.getId());
         }
         return TonggouGoodsScope.global();
     }

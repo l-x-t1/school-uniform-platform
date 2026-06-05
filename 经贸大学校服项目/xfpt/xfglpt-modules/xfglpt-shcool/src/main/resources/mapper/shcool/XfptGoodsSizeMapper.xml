@@ -7,6 +7,9 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     <resultMap type="XfptGoodsSize" id="XfptGoodsSizeResult">
         <result property="id"    column="id"    />
         <result property="goodsId"    column="goods_id"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="goodsCode"    column="goods_code"    />
+        <result property="supplierId"    column="supplier_id"    />
         <result property="sizeCode"    column="size_code"    />
         <result property="sortNum"    column="sort_num"    />
         <result property="genderType"    column="gender_type"    />
@@ -24,26 +27,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptGoodsSizeVo">
-        select id, goods_id, size_code, sort_num, gender_type, measure_json, retail_price, group_price, stock_num, status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_goods_size
+        select gs.id, gs.goods_id, g.goods_name, g.goods_code, g.supplier_id, gs.size_code, gs.sort_num, gs.gender_type, gs.measure_json, gs.retail_price, gs.group_price, gs.stock_num, gs.status, gs.create_by, gs.create_time, gs.update_by, gs.update_time, gs.remark, gs.del_flag
+        from xfpt_goods_size gs
+        left join xfpt_goods g on gs.goods_id = g.id and g.del_flag = '0'
     </sql>
 
     <select id="selectXfptGoodsSizeList" parameterType="XfptGoodsSize" resultMap="XfptGoodsSizeResult">
         <include refid="selectXfptGoodsSizeVo"/>
         <include refid="search"/>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="sizeCode != null  and sizeCode != ''"> and size_code like concat('%', #{sizeCode}, '%')</if>
-            <if test="sortNum != null "> and sort_num = #{sortNum}</if>
-            <if test="genderType != null  and genderType != ''"> and gender_type = #{genderType}</if>
-            <if test="retailPrice != null "> and retail_price = #{retailPrice}</if>
-            <if test="groupPrice != null "> and group_price = #{groupPrice}</if>
-            <if test="stockNum != null "> and stock_num = #{stockNum}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="supplierId != null "> and g.supplier_id = #{supplierId}</if>
+            <if test="goodsId != null "> and gs.goods_id = #{goodsId}</if>
+            <if test="sizeCode != null  and sizeCode != ''"> and gs.size_code like concat('%', #{sizeCode}, '%')</if>
+            <if test="sortNum != null "> and gs.sort_num = #{sortNum}</if>
+            <if test="genderType != null  and genderType != ''"> and gs.gender_type = #{genderType}</if>
+            <if test="retailPrice != null "> and gs.retail_price = #{retailPrice}</if>
+            <if test="groupPrice != null "> and gs.group_price = #{groupPrice}</if>
+            <if test="stockNum != null "> and gs.stock_num = #{stockNum}</if>
+            <if test="status != null  and status != ''"> and gs.status = #{status}</if>
 
     </select>
 
     <select id="selectXfptGoodsSizeById" parameterType="Long" resultMap="XfptGoodsSizeResult">
         <include refid="selectXfptGoodsSizeVo"/>
-        where id = #{id}
+        where gs.id = #{id}
     </select>
 
     <insert id="insertXfptGoodsSize" parameterType="XfptGoodsSize" useGeneratedKeys="true" keyProperty="id">
@@ -117,6 +123,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where gs.del_flag = 0
     </sql>
 </mapper>

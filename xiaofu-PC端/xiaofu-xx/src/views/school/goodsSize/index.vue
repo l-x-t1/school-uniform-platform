@@ -126,7 +126,7 @@
       <el-table-column label="关联商品" prop="goodsId" min-width="240" show-overflow-tooltip>
         <template slot-scope="scope">
           <div class="goods-info-cell">
-            <div class="goods-title">{{ getGoodsName(scope.row.goodsId) }}</div>
+            <div class="goods-title">{{ getGoodsDisplayName(scope.row) }}</div>
           </div>
         </template>
       </el-table-column>
@@ -560,12 +560,18 @@ export default {
       }, `goodsSize_${new Date().getTime()}.xlsx`)
     },
     getGoodsOptions() {
-      listGoods({ pageNum: 1, pageSize: 1000, status: '1' }).then(response => {
+      listGoods({ pageNum: 1, pageSize: 1000 }).then(response => {
         this.goodsOptions = response.rows || []
       })
     },
     formatGoodsOption(item) {
       return item.goodsCode ? `${item.goodsName}（${item.goodsCode}）` : item.goodsName
+    },
+    getGoodsDisplayName(row) {
+      if (row && row.goodsName) {
+        return row.goodsCode ? `${row.goodsName}（${row.goodsCode}）` : row.goodsName
+      }
+      return this.getGoodsName(row ? row.goodsId : null)
     },
     getGoodsName(goodsId) {
       const goods = this.goodsOptions.find(item => String(item.id) === String(goodsId))

@@ -317,9 +317,10 @@
                   <el-select
                     v-model="form.supplierId"
                     filterable
-                    clearable
+                    :clearable="!supplierScoped"
                     placeholder="请选择供应商"
                     style="width: 100%"
+                    :disabled="supplierScoped"
                     @change="handleSupplierChange"
                   >
                     <el-option
@@ -531,6 +532,7 @@ import { listSchoolSupplierGoodsRel } from '@/api/school/schoolSupplierGoodsRel'
 import { listGoods } from '@/api/school/goods'
 import { listSupplierMessage } from '@/api/school/supplierMessage'
 import { getSchoolListCompleteDetail } from '@/api/jiaoyuju/schoolManagement'
+import { getCurrentSupplier } from '@/api/supplier/feature'
 
 export default {
   name: 'SchoolSupplierRel',
@@ -553,6 +555,8 @@ export default {
       schoolOptions: [],
       supplierOptions: [],
       goodsOptions: [],
+      supplierScoped: false,
+      currentSupplier: null,
       cooperateStatusOptions: [
         { value: '1', label: '合作中' },
         { value: '2', label: '已取消' },
@@ -604,12 +608,31 @@ export default {
     }
   },
   created() {
-    this.getSchoolOptions()
-    this.getSupplierOptions()
-    this.getGoodsOptions()
-    this.getList()
+    this.initializePage()
   },
   methods: {
+    async initializePage() {
+      await this.initSupplierScope()
+      this.getSchoolOptions()
+      this.getSupplierOptions()
+      this.getGoodsOptions()
+      this.getList()
+    },
+    async initSupplierScope() {
+      const roles = (this.$store.getters.roles || []).map(item => String(item).toLowerCase())
+      const isAdmin = roles.includes('admin')
+      this.supplierScoped = !isAdmin && roles.some(item => item === 'gys' || item === 'ceshigongying' || item.includes('gys'))
+      if (!this.supplierScoped) {
+        this.currentSupplier = null
+        return
+      }
+      try {
+        const response = await getCurrentSupplier()
+        this.currentSupplier = response.data || null
+      } catch (error) {
+        this.currentSupplier = null
+      }
+    },
     getDefaultForm() {
       return {
         id: null,
@@ -650,6 +673,7 @@ export default {
       this.xfptSchoolSupplierGoodsRelList = []
       this.checkedXfptSchoolSupplierGoodsRel = []
       this.resetForm('form')
+      this.applyCurrentSupplierToForm()
     },
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -781,9 +805,21 @@ export default {
       })
     },
     getSupplierOptions() {
+      if (this.supplierScoped) {
+        this.supplierOptions = this.currentSupplier ? [this.currentSupplier] : []
+        this.applyCurrentSupplierToForm()
+        return
+      }
       listSupplierMessage({ pageNum: 1, pageSize: 1000 }).then(response => {
         this.supplierOptions = response.rows || []
       })
+    },
+    applyCurrentSupplierToForm() {
+      if (!this.supplierScoped || !this.currentSupplier) {
+        return
+      }
+      this.form.supplierId = this.getSupplierId(this.currentSupplier)
+      this.form.supplierName = this.getSupplierName(this.currentSupplier)
     },
     getGoodsOptions() {
       listGoods({ pageNum: 1, pageSize: 1000, status: '1' }).then(response => {
