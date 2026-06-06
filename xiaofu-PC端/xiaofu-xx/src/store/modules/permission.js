@@ -461,6 +461,25 @@ function normalizeNonSchoolRoutes(routes = []) {
   return normalizeGroupNoticeMenus(normalizeUsageMenus(routes));
 }
 
+function normalizeRuntimeRoutes(
+  routes = [],
+  { useSchoolTonggouLayout = false, nestAdminNewFeature = false } = {}
+) {
+  let normalizedRoutes = filterSchoolRetiredMenus(
+    renameSchoolCommentMenu(normalizeNonSchoolRoutes(routes))
+  );
+
+  if (useSchoolTonggouLayout) {
+    normalizedRoutes = promoteSchoolTonggouMenus(normalizedRoutes);
+  }
+
+  if (nestAdminNewFeature) {
+    normalizedRoutes = nestAdminNewFeatureMenus(normalizedRoutes);
+  }
+
+  return normalizedRoutes;
+}
+
 const permission = {
   state: {
     routes: [],
@@ -499,20 +518,11 @@ const permission = {
 
         getRouters().then((res) => {
           const serverRoutes = JSON.parse(JSON.stringify(res.data || []));
-          const schoolRoutes = filterSchoolRetiredMenus(
-            promoteSchoolTonggouMenus(serverRoutes)
-          );
-          const nonSchoolRoutes = filterSchoolRetiredMenus(
-            normalizeNonSchoolRoutes(serverRoutes)
-          );
-          const normalizedRoutes = hasXuexiaoRole
-            ? renameSchoolCommentMenu(schoolRoutes)
-            : nonSchoolRoutes;
-          const roleAdjustedRoutes =
-            !hasXuexiaoRole && hasAdminRole
-              ? nestAdminNewFeatureMenus(normalizedRoutes)
-              : normalizedRoutes;
-          const dedupedRoutes = dedupeRouteNames(roleAdjustedRoutes);
+          const normalizedRoutes = normalizeRuntimeRoutes(serverRoutes, {
+            useSchoolTonggouLayout: hasXuexiaoRole,
+            nestAdminNewFeature: hasAdminRole && !hasXuexiaoRole,
+          });
+          const dedupedRoutes = dedupeRouteNames(normalizedRoutes);
           const sdata = JSON.parse(JSON.stringify(dedupedRoutes));
           const rdata = JSON.parse(JSON.stringify(dedupedRoutes));
           const sidebarRoutes = filterAsyncRouter(sdata);

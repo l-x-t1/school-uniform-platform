@@ -19,10 +19,9 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
-import com.xfgl.system.api.domain.SysRole;
 import com.xfgl.system.domain.SysMenu;
 import com.xfgl.system.service.ISysMenuService;
-import com.xfgl.system.service.ISysRoleService;
+import com.xfgl.system.service.support.RoleMenuSceneSupport;
 
 /**
  * 菜单信息
@@ -35,9 +34,6 @@ public class SysMenuController extends BaseController
 {
     @Autowired
     private ISysMenuService menuService;
-
-    @Autowired
-    private ISysRoleService roleService;
 
     /**
      * 获取菜单列表
@@ -76,8 +72,7 @@ public class SysMenuController extends BaseController
     @GetMapping(value = "/roleMenuTreeselect/{roleId}")
     public AjaxResult roleMenuTreeselect(@PathVariable("roleId") Long roleId)
     {
-        SysRole role = roleService.selectRoleById(roleId);
-        String menuScene = menuService.resolveMenuSceneByRoleKey(role == null ? null : role.getRoleKey());
+        String menuScene = RoleMenuSceneSupport.MENU_SCENE_ASSIGNABLE_ALL;
         List<SysMenu> menus = menuService.selectMenuListByScene(new SysMenu(), null, menuScene);
         AjaxResult ajax = AjaxResult.success();
         ajax.put("checkedKeys", menuService.filterMenuIdsByScene(menuService.selectMenuListByRoleId(roleId), menuScene));

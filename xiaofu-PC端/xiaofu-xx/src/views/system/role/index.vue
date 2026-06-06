@@ -156,7 +156,7 @@
     />
 
     <!-- 添加或修改角色配置对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body destroy-on-close>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-form-item label="角色名称" prop="roleName">
           <el-input v-model="form.roleName" placeholder="请输入角色名称" />
@@ -168,7 +168,7 @@
             </el-tooltip>
             权限字符
           </span>
-          <el-input v-model="form.roleKey" placeholder="请输入权限字符" @input="handleRoleKeyInput" />
+          <el-input v-model="form.roleKey" placeholder="请输入权限字符" />
         </el-form-item>
         <el-form-item label="角色顺序" prop="roleSort">
           <el-input-number v-model="form.roleSort" controls-position="right" :min="0" />
@@ -187,6 +187,7 @@
           <el-checkbox v-model="menuNodeAll" @change="handleCheckedTreeNodeAll($event, 'menu')">全选/全不选</el-checkbox>
           <el-checkbox v-model="form.menuCheckStrictly" @change="handleCheckedTreeConnect($event, 'menu')">父子联动</el-checkbox>
           <el-tree
+            :key="menuTreeKey"
             class="tree-border"
             :data="menuOptions"
             show-checkbox
@@ -208,7 +209,7 @@
     </el-dialog>
 
     <!-- 分配角色数据权限对话框 -->
-    <el-dialog :title="title" :visible.sync="openDataScope" width="500px" append-to-body>
+    <el-dialog :title="title" :visible.sync="openDataScope" width="500px" append-to-body destroy-on-close>
       <el-form :model="form" label-width="80px">
         <el-form-item label="角色名称">
           <el-input v-model="form.roleName" :disabled="true" />
@@ -231,6 +232,7 @@
           <el-checkbox v-model="deptNodeAll" @change="handleCheckedTreeNodeAll($event, 'dept')">全选/全不选</el-checkbox>
           <el-checkbox v-model="form.deptCheckStrictly" @change="handleCheckedTreeConnect($event, 'dept')">父子联动</el-checkbox>
           <el-tree
+            :key="deptTreeKey"
             class="tree-border"
             :data="deptOptions"
             show-checkbox
@@ -254,6 +256,8 @@
 <script>
 import { listRole, getRole, delRole, addRole, updateRole, dataScope, changeRoleStatus, deptTreeSelect } from "@/api/system/role";
 import { treeselect as menuTreeselect, roleMenuTreeselect } from "@/api/system/menu";
+
+const ASSIGNABLE_ALL_MENU_SCENE = "assignableAll";
 
 export default {
   name: "Role",
@@ -280,7 +284,8 @@ export default {
       open: false,
       // 是否显示弹出层（数据权限）
       openDataScope: false,
-      currentMenuScene: "admin",
+      menuTreeKey: 0,
+      deptTreeKey: 0,
       menuExpand: false,
       menuNodeAll: false,
       deptExpand: true,
@@ -358,43 +363,12 @@ export default {
     },
     /** 查询菜单树结构 */
     getMenuTreeselect(query) {
-      return menuTreeselect(query).then(response => {
+      return menuTreeselect({
+        ...(query || {}),
+        menuScene: ASSIGNABLE_ALL_MENU_SCENE
+      }).then(response => {
         this.menuOptions = response.data;
         return response;
-      });
-    },
-    resolveMenuScene(roleKey) {
-      const normalizedRoleKey = (roleKey || "").trim().toLowerCase();
-      if (["xuexiao", "ceshixuexiao"].includes(normalizedRoleKey)) {
-        return "school";
-      }
-      if (["jyj", "sjyj"].includes(normalizedRoleKey)) {
-        return "education";
-      }
-      return "admin";
-    },
-    loadMenuTreeByRoleKey(roleKey) {
-      this.currentMenuScene = this.resolveMenuScene(roleKey);
-      return this.getMenuTreeselect({ targetRoleKey: roleKey });
-    },
-    resetMenuTreeChecks() {
-      this.menuNodeAll = false;
-      if (this.$refs.menu) {
-        this.$refs.menu.setCheckedKeys([]);
-      }
-    },
-    handleRoleKeyInput(value) {
-      if (!this.open) {
-        return;
-      }
-      const nextScene = this.resolveMenuScene(value);
-      if (nextScene === this.currentMenuScene) {
-        return;
-      }
-      this.loadMenuTreeByRoleKey(value).then(() => {
-        this.$nextTick(() => {
-          this.resetMenuTreeChecks();
-        });
       });
     },
     // 所有菜单节点数据
@@ -417,7 +391,9 @@ export default {
     },
     /** 根据角色ID查询菜单树结构 */
     getRoleMenuTreeselect(roleId) {
-      return roleMenuTreeselect(roleId).then(response => {
+      return roleMenuTreeselect(roleId, {
+        menuScene: ASSIGNABLE_ALL_MENU_SCENE
+      }).then(response => {
         this.menuOptions = response.menus;
         return response;
       });
@@ -471,7 +447,6 @@ export default {
         deptCheckStrictly: true,
         remark: undefined
       };
-      this.currentMenuScene = "admin";
       this.resetForm("form");
     },
     /** 搜索按钮操作 */
@@ -507,16 +482,38 @@ export default {
     // 树权限（展开/折叠）
     handleCheckedTreeExpand(value, type) {
       if (type == 'menu') {
-        let treeList = this.menuOptions;
-        for (let i = 0; i < treeList.length; i++) {
-          this.$refs.menu.store.nodesMap[treeList[i].id].expanded = value;
-        }
+        this.setTreeExpanded(this.$refs.menu, value);
       } else if (type == 'dept') {
-        let treeList = this.deptOptions;
-        for (let i = 0; i < treeList.length; i++) {
-          this.$refs.dept.store.nodesMap[treeList[i].id].expanded = value;
-        }
+        this.setTreeExpanded(this.$refs.dept, value);
       }
+    },
+    setTreeExpanded(treeRef, value) {
+      if (!treeRef || !treeRef.store || !treeRef.store.nodesMap) {
+        return;
+      }
+      Object.keys(treeRef.store.nodesMap).forEach(key => {
+        treeRef.store.nodesMap[key].expanded = value;
+      });
+    },
+    resetMenuTreeViewport() {
+      this.$nextTick(() => {
+        if (this.$refs.menu && this.$refs.menu.$el) {
+          this.$refs.menu.$el.scrollTop = 0;
+        }
+      });
+    },
+    applyRoleMenuCheckedKeys(checkedKeys) {
+      this.$nextTick(() => {
+        if (!this.$refs.menu) {
+          return;
+        }
+        this.$refs.menu.setCheckedKeys([]);
+        (checkedKeys || []).forEach((key) => {
+          this.$refs.menu.setChecked(key, true, false);
+        });
+        this.handleCheckedTreeExpand(this.menuExpand, "menu");
+        this.resetMenuTreeViewport();
+      });
     },
     // 树权限（全选/全不选）
     handleCheckedTreeNodeAll(value, type) {
@@ -537,27 +534,23 @@ export default {
     /** 新增按钮操作 */
     handleAdd() {
       this.reset();
+      this.menuTreeKey += 1;
       this.open = true;
       this.title = "添加角色";
-      this.loadMenuTreeByRoleKey(this.form.roleKey);
+      this.getMenuTreeselect();
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
       this.reset();
+      this.menuTreeKey += 1;
       const roleId = row.roleId || this.ids
       const roleMenu = this.getRoleMenuTreeselect(roleId);
       getRole(roleId).then(response => {
         this.form = response.data;
-        this.currentMenuScene = this.resolveMenuScene(this.form.roleKey);
         this.open = true;
         this.$nextTick(() => {
           roleMenu.then(res => {
-            let checkedKeys = res.checkedKeys
-            checkedKeys.forEach((v) => {
-                this.$nextTick(()=>{
-                    this.$refs.menu.setChecked(v, true ,false);
-                })
-            })
+            this.applyRoleMenuCheckedKeys(res.checkedKeys);
           });
         });
       });
@@ -572,6 +565,7 @@ export default {
     /** 分配数据权限操作 */
     handleDataScope(row) {
       this.reset();
+      this.deptTreeKey += 1;
       const deptTreeSelect = this.getDeptTree(row.roleId);
       getRole(row.roleId).then(response => {
         this.form = response.data;

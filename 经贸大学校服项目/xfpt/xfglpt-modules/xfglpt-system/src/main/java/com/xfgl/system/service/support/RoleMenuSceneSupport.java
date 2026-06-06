@@ -21,6 +21,7 @@ import com.xfgl.system.domain.SysMenu;
 @Component
 public class RoleMenuSceneSupport
 {
+    public static final String MENU_SCENE_ASSIGNABLE_ALL = "assignableAll";
     public static final String MENU_SCENE_SCHOOL = "school";
     public static final String MENU_SCENE_EDUCATION = "education";
     public static final String MENU_SCENE_ADMIN = "admin";
@@ -103,10 +104,8 @@ public class RoleMenuSceneSupport
     {
         if (StringUtils.isNotEmpty(menuScene))
         {
-            String normalizedMenuScene = menuScene.trim().toLowerCase(Locale.ROOT);
-            if (MENU_SCENE_SCHOOL.equals(normalizedMenuScene)
-                    || MENU_SCENE_EDUCATION.equals(normalizedMenuScene)
-                    || MENU_SCENE_ADMIN.equals(normalizedMenuScene))
+            String normalizedMenuScene = normalizeMenuScene(menuScene);
+            if (StringUtils.isNotEmpty(normalizedMenuScene))
             {
                 return normalizedMenuScene;
             }
@@ -144,7 +143,7 @@ public class RoleMenuSceneSupport
         {
             promoteSchoolTonggouMenus(menus);
         }
-        else if (isAdminScene(resolvedScene))
+        else if (isAdminLikeScene(resolvedScene))
         {
             nestAdminTonggouMenus(menus);
         }
@@ -629,6 +628,38 @@ public class RoleMenuSceneSupport
     private boolean isAdminScene(String menuScene)
     {
         return MENU_SCENE_ADMIN.equals(menuScene);
+    }
+
+    private boolean isAssignableAllScene(String menuScene)
+    {
+        return MENU_SCENE_ASSIGNABLE_ALL.equals(menuScene);
+    }
+
+    private boolean isAdminLikeScene(String menuScene)
+    {
+        return isAdminScene(menuScene) || isAssignableAllScene(menuScene);
+    }
+
+    private String normalizeMenuScene(String menuScene)
+    {
+        String normalizedMenuScene = menuScene.trim();
+        if (StringUtils.isEmpty(normalizedMenuScene))
+        {
+            return null;
+        }
+        if (MENU_SCENE_ASSIGNABLE_ALL.equalsIgnoreCase(normalizedMenuScene))
+        {
+            return MENU_SCENE_ASSIGNABLE_ALL;
+        }
+
+        normalizedMenuScene = normalizedMenuScene.toLowerCase(Locale.ROOT);
+        if (MENU_SCENE_SCHOOL.equals(normalizedMenuScene)
+                || MENU_SCENE_EDUCATION.equals(normalizedMenuScene)
+                || MENU_SCENE_ADMIN.equals(normalizedMenuScene))
+        {
+            return normalizedMenuScene;
+        }
+        return null;
     }
 
     private String normalizePath(String path)

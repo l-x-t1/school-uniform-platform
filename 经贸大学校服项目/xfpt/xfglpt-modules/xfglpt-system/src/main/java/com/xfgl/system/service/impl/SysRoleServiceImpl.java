@@ -30,6 +30,7 @@ import com.xfgl.system.mapper.SysRoleMapper;
 import com.xfgl.system.mapper.SysRoleMenuMapper;
 import com.xfgl.system.mapper.SysUserRoleMapper;
 import com.xfgl.system.service.ISysRoleService;
+import com.xfgl.system.service.support.RoleMenuSceneSupport;
 
 /**
  * 角色 业务层处理
@@ -323,9 +324,9 @@ public class SysRoleServiceImpl implements ISysRoleService {
     }
 
     private void sanitizeRoleMenuIds(SysRole role) {
-        List<Long> filteredMenuIds = menuService.filterMenuIdsByRoleKey(
+        List<Long> filteredMenuIds = menuService.filterMenuIdsByScene(
                 role.getMenuIds() == null ? new ArrayList<Long>() : Arrays.asList(role.getMenuIds()),
-                role.getRoleKey());
+                RoleMenuSceneSupport.MENU_SCENE_ASSIGNABLE_ALL);
         role.setMenuIds(filteredMenuIds.toArray(new Long[0]));
     }
 
