@@ -135,7 +135,15 @@
         FROM SYS_DEPT dept LEFT JOIN XFPT_SCHOOL_MESSAGE mes on dept.dept_id=mes.dept_id where mes.dept_id=#{id}
     </select>
     <select id="getSchoolByName" resultType="com.xfgl.system.domain.vo.SchoolNameVo">
-        select * from sys_dept where dept_name like concat('%', #{name}, '%') and is_school='1';
+        select dept_id, dept_name
+        from sys_dept
+        where is_school = '1'
+          and del_flag = '0'
+          and status = '0'
+        <if test="name != null and name != ''">
+            and dept_name like concat('%', #{name}, '%')
+        </if>
+        order by parent_id, order_num, dept_name
     </select>
     <select id="selectDeptList3" resultType="com.xfgl.system.api.domain.SysDept">
         <include refid="selectDeptVo"/>

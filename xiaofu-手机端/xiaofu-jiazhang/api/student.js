@@ -14,7 +14,10 @@ function normalizeStudent(item = {}) {
     schoolName: item.school || item.schoolName || item.sysDepts?.deptName || '',
     grade: item.grade || item.gradeName || '',
     gradeName: item.grade || item.gradeName || '',
+    classId: item.classId || item.className || '',
     className: item.className || item.class || '',
+    birthday: item.birthday || '',
+    idNumber: item.idNumber || '',
     sex: item.sex || item.gender || '0',
     gender: item.sex || item.gender || '0'
   }
@@ -30,11 +33,16 @@ function buildStudentForm(data = {}) {
 
   append('id', data.id)
   append('name', data.name || data.studentName)
-  append('sex', data.sex || (data.gender === '女' ? '1' : data.gender === '1' ? '1' : '0'))
+  append('sex', data.sex || (data.gender === '1' ? '1' : '0'))
   append('studentId', data.studentId || data.code)
+  append('shcoolId', data.shcoolId || data.schoolId || data.deptId)
   append('schoolName', data.school || data.schoolName)
+  append('grade', data.grade || data.gradeName)
   append('gradeName', data.grade || data.gradeName)
+  append('classId', data.classId || data.className)
   append('className', data.className)
+  append('birthday', data.birthday)
+  append('idNumber', data.idNumber)
   append('simId', uni.getStorageSync('simId') || '')
   return parts.join('&')
 }
@@ -67,6 +75,20 @@ export function getStudent(id) {
   }))
 }
 
+export function listSchoolOptions(name = '') {
+  return request({
+    url: '/system/open/link/getSchoolByName',
+    method: 'GET',
+    params: { name }
+  }).then((res) => {
+    const rows = Array.isArray(res?.data) ? res.data : Array.isArray(res) ? res : []
+    return rows.map((item) => ({
+      name: item.deptName,
+      value: Number(item.deptId)
+    }))
+  })
+}
+
 export function addStudent(data) {
   return request({
     url: '/school/schoolStudentInfo',
@@ -85,11 +107,16 @@ export function updateStudent(data) {
     data: {
       id: data.id,
       name: data.name || data.studentName,
-      sex: data.sex || (data.gender === '女' ? '1' : data.gender === '1' ? '1' : '0'),
+      sex: data.sex || (data.gender === '1' ? '1' : '0'),
       studentId: data.studentId || data.code,
+      shcoolId: data.shcoolId || data.schoolId || data.deptId,
       schoolName: data.school || data.schoolName,
+      grade: data.grade || data.gradeName,
       gradeName: data.grade || data.gradeName,
-      className: data.className
+      classId: data.classId || data.className,
+      className: data.className,
+      birthday: data.birthday,
+      idNumber: data.idNumber
     }
   })
 }
