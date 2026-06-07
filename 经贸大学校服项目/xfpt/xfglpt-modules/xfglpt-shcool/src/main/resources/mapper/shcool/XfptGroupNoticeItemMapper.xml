@@ -50,7 +50,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             n.notice_code as notice_code,
             n.school_name as school_name
         from xfpt_group_notice_item i
-        left join xfpt_group_notice n on n.id = i.notice_id and n.del_flag = '0'
+        inner join xfpt_group_notice n on n.id = i.notice_id and n.del_flag = '0'
     </sql>
 
     <select id="selectXfptGroupNoticeItemList" parameterType="XfptGroupNoticeItem" resultMap="XfptGroupNoticeItemResult">

@@ -267,6 +267,9 @@ export default {
       if (/^https?:\/\//i.test(url)) {
         return url;
       }
+      if (url.indexOf('/filestatics/') === 0) {
+        return `http://127.0.0.1:9300${url}`;
+      }
       if (url.indexOf('/profile/upload/') === 0) {
         return url.replace('/profile/upload/', 'http://127.0.0.1:9300/filestatics/upload/');
       }
@@ -286,6 +289,27 @@ export default {
       } catch (error) {
         return fallback;
       }
+    },
+
+    parseImageList(value) {
+      if (!value) {
+        return [];
+      }
+      if (Array.isArray(value)) {
+        return value.map((item) => `${item || ''}`.trim()).filter(Boolean);
+      }
+      if (typeof value === 'object') {
+        return Object.values(value).map((item) => `${item || ''}`.trim()).filter(Boolean);
+      }
+      const text = `${value}`.trim();
+      if (!text) {
+        return [];
+      }
+      const parsed = this.safeParseJson(text, null);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => `${item || ''}`.trim()).filter(Boolean);
+      }
+      return text.split(',').map((item) => item.trim()).filter(Boolean);
     },
 
     formatPrice(value) {
@@ -345,10 +369,7 @@ export default {
     },
 
     normalizeUniform(data = {}) {
-      const detailImages = this.safeParseJson(data.detailImagesJson, []);
-      const imageList = Array.isArray(detailImages) && detailImages.length
-        ? detailImages.map((item) => this.resolveImage(item))
-        : [];
+      const imageList = this.parseImageList(data.detailImagesJson).map((item) => this.resolveImage(item));
       const mainImage = this.resolveImage(data.image || data.coverImage || data.mainImage);
       const rawSizes = Array.isArray(data.xfptGoodsSizeList) ? data.xfptGoodsSizeList : [];
       const sizes = rawSizes
@@ -386,9 +407,10 @@ export default {
         brandName: data.brandName || '未设置品牌',
         supplierId: data.supplierId || '',
         supplierName: data.supplierName || '未设置供应商',
-        schoolId: data.schoolId || data.deptId || '',
+        schoolId: data.schoolId || data.shcoolId || data.deptId || '',
+        shcoolId: data.shcoolId || data.schoolId || data.deptId || '',
         schoolName: data.schoolName || '',
-        deptId: data.deptId || data.schoolId || '',
+        deptId: data.deptId || data.schoolId || data.shcoolId || '',
         noticeId: data.noticeId || null,
         purchaseStartTime: data.purchaseStartTime || '',
         purchaseEndTime: data.purchaseEndTime || '',
@@ -398,7 +420,7 @@ export default {
         genderTypeText,
         totalStock,
         images: imageList.length ? [mainImage, ...imageList.filter((item) => item !== mainImage)] : [mainImage],
-        displayImages: imageList.length ? imageList : [mainImage],
+        displayImages: imageList,
         sizes,
         specs: this.buildSpecs(data, sizes),
         detailContent: data.detailContent || ''
@@ -502,9 +524,9 @@ export default {
         color: selectedSku.genderTypeText || '通用',
         spec: selectedSku.name || '',
         studentId: selectedStudent.id || selectedStudent.studentId || 0,
-        schoolId: this.uniform.schoolId || selectedStudent.schoolId || selectedStudent.deptId || 0,
+        schoolId: this.uniform.schoolId || this.uniform.shcoolId || selectedStudent.schoolId || selectedStudent.shcoolId || selectedStudent.deptId || 0,
         schoolName: this.uniform.schoolName || selectedStudent.school || selectedStudent.schoolName || '',
-        deptId: this.uniform.deptId || this.uniform.schoolId || selectedStudent.schoolId || selectedStudent.deptId || 0,
+        deptId: this.uniform.deptId || this.uniform.schoolId || this.uniform.shcoolId || selectedStudent.schoolId || selectedStudent.shcoolId || selectedStudent.deptId || 0,
         supplierId: this.uniform.supplierId || 1,
         supplierName: this.uniform.supplierName || '',
         selected: true,

@@ -4,7 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.xfgl.common.core.constant.CacheConstants;
 import com.xfgl.common.core.web.domain.AjaxResult;
+import com.xfgl.common.redis.service.RedisService;
 import com.xfgl.school.controller.util.SimRequestUtil;
 import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.XfptSimUser;
@@ -18,6 +20,8 @@ import com.xfgl.system.api.model.LoginUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -26,15 +30,18 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * 对接石i民登录
  */
 @RestController
-@RequestMapping("/simOpen")
+@RequestMapping({"/simOpen", "/mobile"})
 @Slf4j
 public class SimController {
     private static final String PARENT_APP_ROLE_KEY = "parent_app";
+    private static final String PARENT_APP_SMS_CACHE_PREFIX = CacheConstants.SMS + "parent_app:";
+    private static final String LOCAL_DEBUG_SMS_CODE = "123456";
     private static final Set<String> PARENT_APP_PERMISSIONS = Collections.unmodifiableSet(new LinkedHashSet<String>() {{
         add("system:xfptnotice:list");
         add("system:xfptnotice:query");
@@ -91,6 +98,8 @@ public class SimController {
     private IXfptStudentInfoService iXfptStudentInfoService;
     @Autowired
     private IXfptSchoolMessageService iXfptSchoolMessageService;
+    @Autowired
+    private RedisService redisService;
 
     /**
      * 本地开发登录。只用于绕过石i民真实授权，方便本机调试 H5。
@@ -172,6 +181,59 @@ public class SimController {
         return buildLoginResult(list);
     }
 
+    @PostMapping("/sendSmsCode")
+    public AjaxResult sendMobileSmsCode(@RequestBody(required = false) Map<String, Object> body) {
+        String phone = normalizePhone(body == null ? null : body.get("phone"));
+        if (StrUtil.isBlank(phone)) {
+            return AjaxResult.error("手机号不能为空");
+        }
+
+        XfptSimUser simUser = findSimUserByPhone(phone);
+        if (simUser == null) {
+            return AjaxResult.error("该手机号未绑定家长信息");
+        }
+
+        String cacheKey = buildParentSmsCacheKey(phone);
+        String code = LOCAL_DEBUG_SMS_CODE;
+        redisService.setCacheObject(cacheKey, code, 10L, TimeUnit.MINUTES);
+        log.info("家长端手机号验证码已生成, phone={}, code={}", phone, code);
+        return AjaxResult.success("验证码已发送", Collections.singletonMap("devCode", code));
+    }
+
+    @PostMapping("/login")
+    public AjaxResult mobileLogin(@RequestBody(required = false) Map<String, Object> body) {
+        String phone = normalizePhone(body == null ? null : body.get("phone"));
+        String code = body == null ? null : StrUtil.trimToEmpty(String.valueOf(body.get("code")));
+        if (StrUtil.isBlank(phone)) {
+            return AjaxResult.error("手机号不能为空");
+        }
+        if (StrUtil.isBlank(code)) {
+            return AjaxResult.error("验证码不能为空");
+        }
+
+        String cacheKey = buildParentSmsCacheKey(phone);
+        String cacheCode = redisService.getCacheObject(cacheKey);
+        if (StrUtil.isBlank(cacheCode)) {
+            return AjaxResult.error("验证码已过期");
+        }
+        if (!StrUtil.equals(cacheCode, code)) {
+            return AjaxResult.error("验证码错误");
+        }
+
+        XfptSimUser simUser = findSimUserByPhone(phone);
+        if (simUser == null) {
+            return AjaxResult.error("该手机号未绑定家长信息");
+        }
+
+        redisService.deleteObject(cacheKey);
+        return buildLoginResult(Collections.singletonList(simUser));
+    }
+
+    @PostMapping("/wechat-phone-login")
+    public AjaxResult wechatPhoneLogin(@RequestBody(required = false) Map<String, Object> body) {
+        return AjaxResult.error("当前环境暂未开通微信一键登录，请使用手机号验证码登录");
+    }
+
     private AjaxResult buildLoginResult(List<XfptSimUser> list) {
         if (CollUtil.isEmpty(list)) {
             return AjaxResult.error("登录失败");
@@ -214,6 +276,37 @@ public class SimController {
         token.put("roles", loginUser.getRoles());
         token.put("permissions", loginUser.getPermissions());
         return AjaxResult.success(token);
+    }
+
+    private XfptSimUser findSimUserByPhone(String phone) {
+        if (StrUtil.isBlank(phone)) {
+            return null;
+        }
+        List<XfptSimUser> list = iXfptSimUserService.lambdaQuery()
+                .eq(XfptSimUser::getParm1, phone)
+                .eq(XfptSimUser::getDelFlag, "0")
+                .orderByAsc(XfptSimUser::getId)
+                .list();
+        if (CollUtil.isEmpty(list)) {
+            return null;
+        }
+        for (XfptSimUser simUser : list) {
+            if (resolveSchoolForSimUser(simUser) != null) {
+                return simUser;
+            }
+        }
+        return list.get(0);
+    }
+
+    private String buildParentSmsCacheKey(String phone) {
+        return PARENT_APP_SMS_CACHE_PREFIX + phone;
+    }
+
+    private String normalizePhone(Object phoneValue) {
+        if (phoneValue == null) {
+            return "";
+        }
+        return StrUtil.trimToEmpty(String.valueOf(phoneValue)).replace(" ", "");
     }
 
     private XfptSimUser findFirstAvailableParentUser() {

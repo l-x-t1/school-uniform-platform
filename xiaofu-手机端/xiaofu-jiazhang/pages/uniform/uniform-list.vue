@@ -141,6 +141,7 @@
 <script>
 import config from '@/config'
 import { listUniforms } from '@/api/uniform'
+import { listMyStudents } from '@/api/student'
 
 const DEFAULT_IMAGE = '/static/qjxf.png';
 
@@ -185,15 +186,51 @@ export default {
     }
   },
   onLoad() {
-    this.fetchUniformList();
+    this.initializeUniformPage();
+  },
+  onShow() {
+    this.initializeUniformPage();
   },
   methods: {
+    async initializeUniformPage() {
+      await this.refreshStudentContext();
+      this.fetchUniformList(true);
+    },
+
+    async refreshStudentContext() {
+      const simId = uni.getStorageSync('simId');
+      if (!simId) {
+        return;
+      }
+      try {
+        const res = await listMyStudents({ simId, pageNum: 1, pageSize: 50 });
+        const rows = res.rows || [];
+        if (!rows.length) {
+          uni.removeStorageSync('studentList');
+          uni.removeStorageSync('selectedStudent');
+          return;
+        }
+        uni.setStorageSync('studentList', rows);
+        const selectedStudent = uni.getStorageSync('selectedStudent') || {};
+        const selectedStudentId = selectedStudent.id || selectedStudent.studentId || '';
+        const matchedStudent = rows.find((item) =>
+          String(item.id || item.studentId || '') === String(selectedStudentId)
+        );
+        uni.setStorageSync('selectedStudent', matchedStudent || rows[0]);
+      } catch (error) {
+        console.warn('刷新学生上下文失败', error);
+      }
+    },
+
     resolveImage(url) {
       if (!url) {
         return DEFAULT_IMAGE;
       }
       if (/^https?:\/\//i.test(url)) {
         return url;
+      }
+      if (url.indexOf('/filestatics/') === 0) {
+        return `http://127.0.0.1:9300${url}`;
       }
       if (url.indexOf('/profile/upload/') === 0) {
         return url.replace('/profile/upload/', 'http://127.0.0.1:9300/filestatics/upload/');

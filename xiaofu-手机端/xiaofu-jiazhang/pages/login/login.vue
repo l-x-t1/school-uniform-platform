@@ -77,7 +77,7 @@
 <script>
 import config from '@/config'
 import { mobileLogin, sendSmsCode, wechatPhoneLogin } from '@/api/auth'
-import { setToken, setUserInfo } from '@/utils/auth'
+import { clearLoginState, setToken, setUserInfo } from '@/utils/auth'
 
 export default {
   data() {
@@ -115,10 +115,14 @@ export default {
       });
       
       sendSmsCode({ phone: this.phone, scene: 'parent_login' })
-        .then(() => {
+        .then((res) => {
           uni.hideLoading();
+          const devCode = res?.data?.devCode || res?.devCode || '';
+          if (devCode) {
+            this.verifyCode = String(devCode);
+          }
           uni.showToast({
-            title: '验证码已发送',
+            title: devCode ? `验证码：${devCode}` : '验证码已发送',
             icon: 'success'
           });
           this.startCountdown();
@@ -144,13 +148,17 @@ export default {
     },
 
     completeLogin(payload = {}) {
-      uni.removeStorageSync('devOrders');
-      uni.removeStorageSync('pendingCommentOrder');
-      uni.removeStorageSync('selectedOrder');
-
-      if (payload.token) {
-        setToken(payload.token);
+      if (!payload.token) {
+        uni.showToast({
+          title: '登录失败，未获取到令牌',
+          icon: 'none'
+        });
+        return;
       }
+
+      clearLoginState();
+
+      setToken(payload.token);
 
       setUserInfo({
         phone: this.phone,
@@ -249,7 +257,6 @@ export default {
             });
           });
       } else {
-        uni.hideLoading();
         uni.showToast({
           title: '获取手机号失败',
           icon: 'none'

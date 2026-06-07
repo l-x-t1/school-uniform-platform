@@ -17,6 +17,22 @@ export function getProductionOrder(id) {
   })
 }
 
+// query production order selectable notices
+export function listProductionNoticeOptions() {
+  return request({
+    url: '/school/productionOrder/noticeOptions',
+    method: 'get'
+  })
+}
+
+// query production order notice detail
+export function getProductionNoticeDetail(noticeId) {
+  return request({
+    url: '/school/productionOrder/noticeDetail/' + noticeId,
+    method: 'get'
+  })
+}
+
 // add production order
 export function addProductionOrder(data) {
   return request({
@@ -51,7 +67,7 @@ export function finishProductionOrder(id) {
   })
 }
 
-// generate delivery order
+// build delivery order draft from production order
 export function generateDeliveryOrder(id) {
   return request({
     url: '/school/productionOrder/generateDelivery/' + id,

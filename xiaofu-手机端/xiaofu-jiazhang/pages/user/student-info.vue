@@ -96,7 +96,11 @@ export default {
         gender: item.gender || item.sex || '0',
         grade: item.grade || item.gradeName || '',
         className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
-        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || ''
+        schoolId: item.schoolId || item.shcoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        shcoolId: item.shcoolId || item.schoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        deptId: item.deptId || item.schoolId || item.shcoolId || (item.sysDepts && item.sysDepts.deptId) || '',
+        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || '',
+        schoolName: item.schoolName || item.school || (item.sysDepts && item.sysDepts.deptName) || ''
       };
     },
     getLocalStudents() {
@@ -113,6 +117,12 @@ export default {
           if (rows.length) {
             this.studentList = rows.map(this.normalizeStudent);
             this.saveLocalStudents(this.studentList);
+            const selectedStudent = uni.getStorageSync('selectedStudent') || {};
+            const selectedStudentId = selectedStudent.id || selectedStudent.studentId || '';
+            const matchedStudent = this.studentList.find((item) =>
+              String(item.id || item.studentId || '') === String(selectedStudentId)
+            );
+            uni.setStorageSync('selectedStudent', matchedStudent || this.studentList[0]);
             return;
           }
           this.studentList = config.enableMockFallback ? this.getLocalStudents().map(this.normalizeStudent) : [];

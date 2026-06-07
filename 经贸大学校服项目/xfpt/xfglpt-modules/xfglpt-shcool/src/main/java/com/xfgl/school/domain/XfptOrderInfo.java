@@ -159,6 +159,7 @@ private static final long serialVersionUID = 1L;
     /** 物流单号 */
     @Excel(name = "物流单号")
     @Schema(description = "物流单号")
+    @TableField(exist = false)
     private String logisticsNo;
 
     /** 支付时间 */

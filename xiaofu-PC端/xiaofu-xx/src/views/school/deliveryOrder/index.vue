@@ -63,6 +63,16 @@
           <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
           <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
           <el-button
+            v-hasPermi="['school:deliveryOrder:add']"
+            type="primary"
+            plain
+            icon="el-icon-plus"
+            size="mini"
+            @click="handleAdd"
+          >
+            新增
+          </el-button>
+          <el-button
             v-hasPermi="['school:deliveryOrder:export']"
             type="warning"
             plain
@@ -276,11 +286,162 @@
         <el-button size="small" @click="shipOpen = false">取消</el-button>
       </div>
     </el-dialog>
+
+    <el-dialog
+      :title="dialogTitle"
+      :visible.sync="open"
+      width="1080px"
+      append-to-body
+      :close-on-click-modal="false"
+      @close="resetFormDialog"
+    >
+      <div class="dialog-scroll">
+        <el-form ref="form" :model="form" :rules="rules" label-width="98px" size="small">
+          <el-row :gutter="20">
+            <el-col :span="12">
+              <el-form-item label="发货单号" prop="deliveryNo">
+                <el-input v-model="form.deliveryNo" placeholder="请输入发货单号" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="订单编号">
+                <el-input v-model="form.orderNo" placeholder="自动带出" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="订单类型" prop="orderType">
+                <el-select v-model="form.orderType" placeholder="请选择订单类型" style="width: 100%">
+                  <el-option label="统购" value="1" />
+                  <el-option label="零售" value="2" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="发货状态" prop="deliveryStatus">
+                <el-select v-model="form.deliveryStatus" placeholder="请选择发货状态" style="width: 100%">
+                  <el-option label="待发货" value="0" />
+                  <el-option label="已发货" value="1" />
+                  <el-option label="已签收" value="2" />
+                </el-select>
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="学校名称">
+                <el-input v-model="form.schoolName" placeholder="自动带出" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="供应商名称">
+                <el-input v-model="form.supplierName" placeholder="自动带出" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="收货人" prop="receiverName">
+                <el-input v-model="form.receiverName" placeholder="请输入收货人" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="收货电话" prop="receiverPhone">
+                <el-input v-model="form.receiverPhone" placeholder="请输入收货电话" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="收货地址" prop="receiverAddress">
+                <el-input v-model="form.receiverAddress" type="textarea" :rows="2" placeholder="请输入收货地址" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="物流公司">
+                <el-input v-model="form.logisticsCompany" placeholder="请输入物流公司" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="物流单号">
+                <el-input v-model="form.logisticsNo" placeholder="请输入物流单号" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="运费">
+                <el-input v-model="form.carriageFee" placeholder="请输入运费" />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="发货时间">
+                <el-date-picker
+                  v-model="form.deliveryTime"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="请选择发货时间"
+                  clearable
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="12">
+              <el-form-item label="签收时间">
+                <el-date-picker
+                  v-model="form.signTime"
+                  type="date"
+                  value-format="yyyy-MM-dd"
+                  placeholder="请选择签收时间"
+                  clearable
+                  style="width: 100%"
+                />
+              </el-form-item>
+            </el-col>
+            <el-col :span="24">
+              <el-form-item label="备注">
+                <el-input v-model="form.remark" type="textarea" :rows="2" placeholder="请输入备注" />
+              </el-form-item>
+            </el-col>
+          </el-row>
+
+          <div class="detail-section">
+            <div class="section-title">发货明细</div>
+            <el-table :data="form.xfptDeliveryOrderItemList" border size="small">
+              <el-table-column label="商品名称" prop="goodsName" min-width="180" show-overflow-tooltip />
+              <el-table-column label="尺码名称" prop="sizeName" min-width="120" show-overflow-tooltip />
+              <el-table-column label="发货数量" min-width="120">
+                <template slot-scope="scope">
+                  <el-input-number v-model="scope.row.deliveryNum" :min="0" :controls="false" style="width: 100%" />
+                </template>
+              </el-table-column>
+              <el-table-column label="签收数量" min-width="120">
+                <template slot-scope="scope">
+                  <el-input-number v-model="scope.row.signNum" :min="0" :controls="false" style="width: 100%" />
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" min-width="120">
+                <template slot-scope="scope">
+                  <el-select v-model="scope.row.status" placeholder="请选择状态" style="width: 100%">
+                    <el-option label="待发货" value="0" />
+                    <el-option label="已发货" value="1" />
+                    <el-option label="已签收" value="2" />
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column label="备注" min-width="180">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.remark" placeholder="请输入备注" />
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-form>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button type="primary" size="small" @click="submitForm">确定</el-button>
+        <el-button size="small" @click="open = false">取消</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getDeliveryOrder, listDeliveryOrder, updateDeliveryOrder } from '@/api/school/deliveryOrder'
+import { addDeliveryOrder, getDeliveryOrder, listDeliveryOrder, updateDeliveryOrder } from '@/api/school/deliveryOrder'
+import cache from '@/plugins/cache'
+
+const DELIVERY_ORDER_DRAFT_CACHE_KEY = 'production_delivery_order_draft'
 
 const createShipForm = () => ({
   id: null,
@@ -311,6 +472,48 @@ const createDetailForm = () => ({
   remark: null
 })
 
+const createDeliveryItem = () => ({
+  id: null,
+  deliveryId: null,
+  orderItemId: null,
+  goodsId: null,
+  sizeId: null,
+  goodsName: null,
+  sizeName: null,
+  deliveryNum: 0,
+  signNum: 0,
+  status: '0',
+  remark: null,
+  delFlag: '0'
+})
+
+const createForm = () => ({
+  id: null,
+  deliveryNo: null,
+  noticeId: null,
+  orderId: null,
+  orderNo: null,
+  orderType: '1',
+  productionId: null,
+  schoolId: null,
+  schoolName: null,
+  supplierId: null,
+  supplierName: null,
+  receiverName: null,
+  receiverPhone: null,
+  receiverAddress: null,
+  logisticsCompany: null,
+  logisticsNo: null,
+  deliveryStatus: '0',
+  deliveryTime: null,
+  signTime: null,
+  carriageFee: null,
+  deptId: null,
+  remark: null,
+  delFlag: '0',
+  xfptDeliveryOrderItemList: []
+})
+
 export default {
   name: 'DeliveryOrder',
   data() {
@@ -323,6 +526,29 @@ export default {
       total: 0,
       deliveryOrderList: [],
       activeOrderType: '1',
+      open: false,
+      dialogTitle: '新增发货单',
+      form: createForm(),
+      rules: {
+        deliveryNo: [
+          { required: true, message: '发货单号不能为空', trigger: 'blur' }
+        ],
+        orderType: [
+          { required: true, message: '订单类型不能为空', trigger: 'change' }
+        ],
+        receiverName: [
+          { required: true, message: '收货人不能为空', trigger: 'blur' }
+        ],
+        receiverPhone: [
+          { required: true, message: '收货电话不能为空', trigger: 'blur' }
+        ],
+        receiverAddress: [
+          { required: true, message: '收货地址不能为空', trigger: 'blur' }
+        ],
+        deliveryStatus: [
+          { required: true, message: '发货状态不能为空', trigger: 'change' }
+        ]
+      },
       detailOpen: false,
       detailLoading: false,
       detailForm: createDetailForm(),
@@ -353,10 +579,68 @@ export default {
       }
     }
   },
+  watch: {
+    '$route.query.autoOpenAdd': {
+      handler() {
+        this.tryOpenDraftFromRoute()
+      }
+    }
+  },
   created() {
     this.getList()
+    this.tryOpenDraftFromRoute()
   },
   methods: {
+    tryOpenDraftFromRoute() {
+      if (this.$route.query.autoOpenAdd !== '1') {
+        return
+      }
+      const draft = cache.session.getJSON(DELIVERY_ORDER_DRAFT_CACHE_KEY)
+      if (!draft) {
+        return
+      }
+      cache.session.remove(DELIVERY_ORDER_DRAFT_CACHE_KEY)
+      this.handleAdd(draft)
+      const query = { ...this.$route.query }
+      delete query.autoOpenAdd
+      delete query.fromProductionOrder
+      this.$router.replace({ path: this.$route.path, query }).catch(() => {})
+    },
+    handleAdd(draft) {
+      this.dialogTitle = '新增发货单'
+      this.open = true
+      this.form = this.normalizeForm(draft)
+      this.$nextTick(() => {
+        if (this.$refs.form) {
+          this.$refs.form.clearValidate()
+        }
+      })
+    },
+    normalizeForm(data) {
+      const source = data || {}
+      const itemList = Array.isArray(source.xfptDeliveryOrderItemList)
+        ? source.xfptDeliveryOrderItemList.map(item => ({
+          ...createDeliveryItem(),
+          ...item,
+          deliveryNum: Number(item && item.deliveryNum != null ? item.deliveryNum : 0),
+          signNum: Number(item && item.signNum != null ? item.signNum : 0),
+          status: item && item.status != null ? String(item.status) : '0'
+        }))
+        : []
+      return {
+        ...createForm(),
+        ...source,
+        orderType: source.orderType != null ? String(source.orderType) : '1',
+        deliveryStatus: source.deliveryStatus != null ? String(source.deliveryStatus) : '0',
+        xfptDeliveryOrderItemList: itemList
+      }
+    },
+    resetFormDialog() {
+      this.form = createForm()
+      if (this.$refs.form) {
+        this.$refs.form.clearValidate()
+      }
+    },
     getList() {
       this.loading = true
       this.queryParams.orderType = this.activeOrderType
@@ -394,12 +678,18 @@ export default {
       getDeliveryOrder(row.id)
         .then((response) => {
           const data = response.data || {}
+          const mergedData = {
+            ...data,
+            orderType: data.orderType != null ? data.orderType : row.orderType,
+            schoolName: data.schoolName || row.schoolName,
+            supplierName: data.supplierName || row.supplierName
+          }
           this.detailForm = {
             ...createDetailForm(),
             ...row,
-            ...data
+            ...mergedData
           }
-          this.detailItemList = data.xfptDeliveryOrderItemList || []
+          this.detailItemList = mergedData.xfptDeliveryOrderItemList || []
         })
         .finally(() => {
           this.detailLoading = false
@@ -444,6 +734,31 @@ export default {
         }).then(() => {
           this.$modal.msgSuccess('发货成功')
           this.shipOpen = false
+          this.getList()
+        })
+      })
+    },
+    submitForm() {
+      this.$refs.form.validate((valid) => {
+        if (!valid) {
+          return
+        }
+        if (!this.form.xfptDeliveryOrderItemList.length) {
+          this.$modal.msgError('发货明细不能为空')
+          return
+        }
+        const payload = {
+          ...this.form,
+          orderType: this.form.orderType,
+          deliveryStatus: this.form.deliveryStatus,
+          xfptDeliveryOrderItemList: this.form.xfptDeliveryOrderItemList.map(item => ({
+            ...item,
+            status: item.status != null ? String(item.status) : '0'
+          }))
+        }
+        addDeliveryOrder(payload).then(() => {
+          this.$modal.msgSuccess('新增发货单成功')
+          this.open = false
           this.getList()
         })
       })

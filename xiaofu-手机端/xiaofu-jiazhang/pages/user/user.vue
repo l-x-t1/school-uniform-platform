@@ -269,6 +269,10 @@ export default {
         name: item.name || item.studentName || '',
         sex: item.sex || item.gender || '0',
         className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
+        schoolId: item.schoolId || item.shcoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        shcoolId: item.shcoolId || item.schoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        deptId: item.deptId || item.schoolId || item.shcoolId || (item.sysDepts && item.sysDepts.deptId) || '',
+        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || '',
         schoolName: item.schoolName || item.school || (item.sysDepts && item.sysDepts.deptName) || ''
       };
     },

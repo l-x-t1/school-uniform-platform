@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
+import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptProductionOrder;
 import com.xfgl.school.service.IXfptProductionOrderService;
 import com.xfgl.common.core.web.controller.BaseController;
@@ -71,6 +72,27 @@ public class XfptProductionOrderController extends BaseController {
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptProductionOrderService.selectXfptProductionOrderById(id));
+    }
+
+    /**
+     * 获取可用于创建生产单的统购公告列表
+     */
+    @Operation(summary = "获取可用于创建生产单的统购公告列表")
+    @RequiresPermissions("school:productionOrder:query")
+    @GetMapping("/noticeOptions")
+    public AjaxResult noticeOptions() {
+        List<XfptGroupNotice> list = xfptProductionOrderService.selectProductionNoticeOptions();
+        return success(list);
+    }
+
+    /**
+     * 获取可用于创建生产单的统购公告详情
+     */
+    @Operation(summary = "获取可用于创建生产单的统购公告详情")
+    @RequiresPermissions("school:productionOrder:query")
+    @GetMapping("/noticeDetail/{noticeId}")
+    public AjaxResult noticeDetail(@PathVariable("noticeId") Long noticeId) {
+        return success(xfptProductionOrderService.selectProductionNoticeDetail(noticeId));
     }
 
     /**

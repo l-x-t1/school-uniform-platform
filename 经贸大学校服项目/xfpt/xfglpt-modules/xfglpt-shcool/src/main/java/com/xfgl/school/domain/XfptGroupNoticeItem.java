@@ -95,4 +95,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "学校名称")
     private String schoolName;
 
+    /** 当前商品所属供应商ID */
+    @TableField(exist = false)
+    @Schema(description = "当前商品所属供应商ID")
+    private Long supplierId;
+
+    /** 当前商品所属供应商名称 */
+    @TableField(exist = false)
+    @Schema(description = "当前商品所属供应商名称")
+    private String supplierName;
+
+    /** 商品编码 */
+    @TableField(exist = false)
+    @Schema(description = "商品编码")
+    private String goodsCode;
+
 }

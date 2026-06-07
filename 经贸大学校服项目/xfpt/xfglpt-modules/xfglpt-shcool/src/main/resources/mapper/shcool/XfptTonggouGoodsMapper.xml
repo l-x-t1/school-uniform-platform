@@ -46,11 +46,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             g.detail_images_json,
             g.detail_content,
             g.sale_type,
-            rel.status,
+            CASE
+                WHEN rel.update_time IS NULL THEN '0'
+                ELSE rel.status
+            END AS status,
             g.status AS goods_status,
             g.publish_status,
-            COALESCE(rel.update_by, rel.create_by) AS operate_by,
-            COALESCE(rel.update_time, rel.create_time) AS operate_time,
+            CASE
+                WHEN rel.update_time IS NULL THEN NULL
+                ELSE rel.update_by
+            END AS operate_by,
+            COALESCE(rel.update_time, delivered.latest_delivery_time, rel.create_time) AS operate_time,
             size_stat.group_min_price,
             size_stat.group_max_price,
             size_stat.stock_total,
@@ -60,6 +66,31 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                 ELSE CONCAT(CAST(size_stat.group_min_price AS CHAR), '-', CAST(size_stat.group_max_price AS CHAR))
             END AS group_price_range
         FROM xfpt_school_supplier_goods_rel rel
+        INNER JOIN (
+            SELECT
+                d.school_id,
+                d.supplier_id,
+                item.goods_id,
+                MAX(COALESCE(d.delivery_time, d.create_time)) AS latest_delivery_time
+            FROM xfpt_delivery_order d
+            INNER JOIN xfpt_delivery_order_item item
+                ON item.delivery_id = d.id
+               AND item.del_flag = 0
+            LEFT JOIN xfpt_order_info o
+                ON o.id = d.order_id
+               AND o.del_flag = 0
+            LEFT JOIN xfpt_production_order p
+                ON p.id = d.production_id
+               AND p.del_flag = 0
+            WHERE d.del_flag = 0
+              AND d.delivery_status IN ('1', '2')
+              AND COALESCE(o.order_type, p.order_type) = '1'
+              AND item.goods_id IS NOT NULL
+            GROUP BY d.school_id, d.supplier_id, item.goods_id
+        ) delivered
+            ON delivered.school_id = rel.school_id
+           AND delivered.supplier_id = rel.supplier_id
+           AND delivered.goods_id = rel.goods_id
         INNER JOIN xfpt_school_supplier_rel sr
             ON sr.id = rel.rel_id
            AND sr.school_id = rel.school_id
@@ -98,12 +129,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <include refid="selectTonggouGoodsVo"/>
         WHERE rel.del_flag = 0
         <include refid="tonggouGoodsScope"/>
-        <if test="status != null and status != ''"> AND rel.status = #{status}</if>
+        <if test="status != null and status != ''"> AND (CASE WHEN rel.update_time IS NULL THEN '0' ELSE rel.status END) = #{status}</if>
         <if test="goodsName != null and goodsName != ''"> AND g.goods_name LIKE concat('%', #{goodsName}, '%')</if>
         <if test="goodsCode != null and goodsCode != ''"> AND g.goods_code LIKE concat('%', #{goodsCode}, '%')</if>
         <if test="categoryName != null and categoryName != ''"> AND g.category_name LIKE concat('%', #{categoryName}, '%')</if>
         <if test="supplierName != null and supplierName != ''"> AND sr.supplier_name LIKE concat('%', #{supplierName}, '%')</if>
-        ORDER BY COALESCE(rel.update_time, rel.create_time) DESC, rel.id DESC
+        ORDER BY delivered.latest_delivery_time DESC, rel.id DESC
     </select>
 
     <select id="selectXfptTonggouGoodsById" resultMap="XfptTonggouGoodsResult">
@@ -116,6 +147,29 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <update id="updateXfptTonggouGoodsStatus">
         UPDATE xfpt_school_supplier_goods_rel rel
+        INNER JOIN (
+            SELECT DISTINCT
+                d.school_id,
+                d.supplier_id,
+                item.goods_id
+            FROM xfpt_delivery_order d
+            INNER JOIN xfpt_delivery_order_item item
+                ON item.delivery_id = d.id
+               AND item.del_flag = 0
+            LEFT JOIN xfpt_order_info o
+                ON o.id = d.order_id
+               AND o.del_flag = 0
+            LEFT JOIN xfpt_production_order p
+                ON p.id = d.production_id
+               AND p.del_flag = 0
+            WHERE d.del_flag = 0
+              AND d.delivery_status IN ('1', '2')
+              AND COALESCE(o.order_type, p.order_type) = '1'
+              AND item.goods_id IS NOT NULL
+        ) delivered
+            ON delivered.school_id = rel.school_id
+           AND delivered.supplier_id = rel.supplier_id
+           AND delivered.goods_id = rel.goods_id
         INNER JOIN xfpt_school_supplier_rel sr
             ON sr.id = rel.rel_id
            AND sr.school_id = rel.school_id

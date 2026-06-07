@@ -137,6 +137,23 @@
           <el-descriptions-item label="发布时间">{{ formatDate(detail.publishTime) }}</el-descriptions-item>
         </el-descriptions>
         <el-card shadow="never" class="detail-section">
+          <div slot="header">关联商品</div>
+          <div v-if="detail.xfptGroupNoticeItemList && detail.xfptGroupNoticeItemList.length">
+            <el-table :data="detail.xfptGroupNoticeItemList" size="mini" border>
+              <el-table-column label="商品名称" prop="goodsName" min-width="220" />
+              <el-table-column label="尺码与数量" min-width="220">
+                <template slot-scope="scope">
+                  {{ formatSizeRuleJson(scope.row.sizeRuleJson) }}
+                </template>
+              </el-table-column>
+              <el-table-column label="采购数量" prop="buyNum" width="100" />
+              <el-table-column label="适用年级" prop="gradeNames" min-width="160" show-overflow-tooltip />
+              <el-table-column label="价格说明" prop="priceDesc" min-width="180" show-overflow-tooltip />
+            </el-table>
+          </div>
+          <div v-else class="notice-content">暂无关联商品</div>
+        </el-card>
+        <el-card shadow="never" class="detail-section">
           <div slot="header">公告正文</div>
           <div class="notice-content">{{ detail.content || "暂无公告正文" }}</div>
         </el-card>
@@ -153,15 +170,15 @@ import {
   listGroupNotice,
   getGroupNotice,
   listSupplierGroupNotice,
-  getSupplierGroupNotice,
-} from "@/api/school/groupNotice";
+  getSupplierGroupNotice
+} from '@/api/school/groupNotice'
 import {
   listSchoolMessage,
-  getSchoolMessageByDeptId,
-} from "@/api/school/schoolMessage";
+  getSchoolMessageByDeptId
+} from '@/api/school/schoolMessage'
 
 export default {
-  name: "GroupNoticeReadonly",
+  name: 'GroupNoticeReadonly',
   data() {
     return {
       loading: false,
@@ -179,130 +196,158 @@ export default {
         noticeCode: null,
         schoolId: null,
         noticeType: null,
-        status: null,
+        status: null
       },
       noticeTypeOptions: [
-        { label: "选购公告", value: "1" },
-        { label: "结果公告", value: "2" },
+        { label: '选购公告', value: '1' },
+        { label: '结果公告', value: '2' }
       ],
       statusOptions: [
-        { label: "草稿", value: "0" },
-        { label: "已发布", value: "1" },
-        { label: "已结束", value: "2" },
-        { label: "已撤回", value: "3" },
+        { label: '草稿', value: '0' },
+        { label: '已发布', value: '1' },
+        { label: '已结束', value: '2' },
+        { label: '已撤回', value: '3' }
       ],
       applyStatusOptions: [
-        { label: "未开放", value: "0" },
-        { label: "报名中", value: "1" },
-        { label: "报名结束", value: "2" },
-      ],
-    };
+        { label: '未开放', value: '0' },
+        { label: '报名中', value: '1' },
+        { label: '报名结束', value: '2' }
+      ]
+    }
   },
   computed: {
     isAdmin() {
-      const roles = this.$store.getters.roles || [];
-      return roles.includes("admin");
+      const roles = this.$store.getters.roles || []
+      return roles.includes('admin')
     },
     isSupplier() {
-      const roles = this.$store.getters.roles || [];
+      const roles = this.$store.getters.roles || []
       return roles.some((role) => {
-        const roleKey = (role || "").toLowerCase();
-        return roleKey.includes("gys") || roleKey.includes("changshang");
-      });
-    },
+        const roleKey = (role || '').toLowerCase()
+        return roleKey.includes('gys') || roleKey.includes('changshang')
+      })
+    }
   },
   created() {
-    this.loadSchoolContext();
-    this.getList();
+    this.loadSchoolContext()
+    this.getList()
   },
   methods: {
     loadSchoolContext() {
       if (this.isAdmin) {
         listSchoolMessage({ pageNum: 1, pageSize: 1000 }).then((res) => {
-          this.schoolOptions = res.rows || [];
-        });
-        return;
+          this.schoolOptions = res.rows || []
+        })
+        return
       }
       if (this.isSupplier) {
-        this.currentSchool = {};
-        this.queryParams.schoolId = null;
-        return;
+        this.currentSchool = {}
+        this.queryParams.schoolId = null
+        return
       }
-      const deptId = this.$store.getters.deptId;
+      const deptId = this.$store.getters.deptId
       if (!deptId) {
-        return;
+        return
       }
       getSchoolMessageByDeptId(deptId).then((res) => {
-        this.currentSchool = res.data || {};
+        this.currentSchool = res.data || {}
         if (this.currentSchool && this.currentSchool.id) {
-          this.queryParams.schoolId = this.currentSchool.id;
+          this.queryParams.schoolId = this.currentSchool.id
         }
-      });
+      })
     },
     getList() {
-      this.loading = true;
+      this.loading = true
       const request = this.isSupplier
         ? listSupplierGroupNotice(this.queryParams)
-        : listGroupNotice(this.queryParams);
+        : listGroupNotice(this.queryParams)
       request
         .then((response) => {
-          this.groupNoticeList = response.rows || [];
-          this.total = response.total || 0;
+          this.groupNoticeList = response.rows || []
+          this.total = response.total || 0
         })
         .finally(() => {
-          this.loading = false;
-        });
+          this.loading = false
+        })
     },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
     resetQuery() {
-      this.resetForm("queryForm");
+      this.resetForm('queryForm')
       if (!this.isAdmin && !this.isSupplier && this.currentSchool && this.currentSchool.id) {
-        this.queryParams.schoolId = this.currentSchool.id;
+        this.queryParams.schoolId = this.currentSchool.id
       }
-      this.handleQuery();
+      this.handleQuery()
     },
     handleView(row) {
       if (!row.id) {
-        this.$message.error("当前公告缺少主键，无法查看详情");
-        return;
+        this.$message.error('当前公告缺少主键，无法查看详情')
+        return
       }
-      this.detailOpen = true;
-      this.detailLoading = true;
+      this.detailOpen = true
+      this.detailLoading = true
       const request = this.isSupplier
         ? getSupplierGroupNotice(row.id)
-        : getGroupNotice(row.id);
+        : getGroupNotice(row.id)
       request
         .then((response) => {
-          this.detail = response.data || {};
+          this.detail = response.data || {}
         })
         .finally(() => {
-          this.detailLoading = false;
-        });
+          this.detailLoading = false
+        })
     },
     formatOption(options, value) {
-      const match = options.find((item) => String(item.value) === String(value));
-      return match ? match.label : value || "-";
+      const match = options.find((item) => String(item.value) === String(value))
+      return match ? match.label : value || '-'
     },
     getStatusTagType(value) {
       const map = {
-        0: "info",
-        1: "success",
-        2: "warning",
-        3: "danger",
-      };
-      return map[value] || "info";
+        0: 'info',
+        1: 'success',
+        2: 'warning',
+        3: 'danger'
+      }
+      return map[value] || 'info'
     },
     formatDate(value) {
       if (!value) {
-        return "-";
+        return '-'
       }
-      return this.parseTime(value, "{y}-{m}-{d}");
+      return this.parseTime(value, '{y}-{m}-{d}')
     },
-  },
-};
+    parseSizeRuleJson(sizeRuleJson) {
+      if (!sizeRuleJson) {
+        return []
+      }
+      try {
+        const parsed = JSON.parse(sizeRuleJson)
+        return Array.isArray(parsed) ? parsed : []
+      } catch (error) {
+        return []
+      }
+    },
+    formatSizeRuleJson(sizeRuleJson) {
+      const rules = this.parseSizeRuleJson(sizeRuleJson)
+      if (!rules.length) {
+        return '-'
+      }
+      return rules
+        .map((item) => {
+          if (!item) {
+            return null
+          }
+          const sizeName = item.sizeCode || `尺码${item.id || ''}`
+          const buyNum = Number(item.buyNum)
+          return !Number.isNaN(buyNum) && buyNum > 0 ? `${sizeName} x ${buyNum}` : sizeName
+        })
+        .filter((item) => item)
+        .join('、') || '-'
+    }
+  }
+}
 </script>
 
 <style lang="scss" scoped>

@@ -28,6 +28,16 @@ public interface IXfptGoodsService extends IService<XfptGoods> {
         public XfptGoods selectXfptGoodsById(Long id);
 
         /**
+         * 按家长学校范围查询商品信息
+         *
+         * @param id 商品信息主键
+         * @param schoolId 学校ID
+         * @param simId 家长绑定标识
+         * @return 商品信息
+         */
+        public XfptGoods selectXfptGoodsById(Long id, Long schoolId, String simId);
+
+        /**
          * 新增商品信息
          *
          * @param xfptGoods 商品信息

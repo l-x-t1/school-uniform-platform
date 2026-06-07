@@ -6,10 +6,12 @@ import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.XfptDeliveryOrder;
 import com.xfgl.school.domain.XfptDeliveryOrderItem;
+import com.xfgl.school.domain.XfptProductionOrder;
 import com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery;
 import com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo;
 import com.xfgl.school.domain.vo.SupplierOptionVo;
 import com.xfgl.school.mapper.XfptDeliveryOrderMapper;
+import com.xfgl.school.mapper.XfptProductionOrderMapper;
 import com.xfgl.school.service.IXfptDeliveryOrderService;
 import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysUser;
@@ -35,6 +37,9 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
     @Autowired
     private SupplierAccessSupport supplierAccessSupport;
 
+    @Autowired
+    private XfptProductionOrderMapper xfptProductionOrderMapper;
+
     @Override
     public List<XfptDeliveryOrder> selectXfptDeliveryOrderList(XfptDeliveryOrder xfptDeliveryOrder) {
         if (isSupplierScopedUser() && getCurrentSupplierIdIfScoped() == null) {
@@ -46,7 +51,11 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
 
     @Override
     public XfptDeliveryOrder selectXfptDeliveryOrderById(Long id) {
-        XfptDeliveryOrder xfptDeliveryOrder = requireAccessibleDeliveryOrder(id);
+        requireAccessibleDeliveryOrder(id);
+        XfptDeliveryOrder xfptDeliveryOrder = xfptDeliveryOrderMapper.selectXfptDeliveryOrderById(id);
+        if (xfptDeliveryOrder == null) {
+            throw new ServiceException("发货单不存在");
+        }
         List<XfptDeliveryOrderItem> xfptDeliveryOrderItemList = xfptDeliveryOrderMapper.selectXfptDeliveryOrderItemById(id);
         xfptDeliveryOrder.setXfptDeliveryOrderItemList(xfptDeliveryOrderItemList);
         return xfptDeliveryOrder;
@@ -61,9 +70,11 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
                 && !xfptDeliveryOrder.getDeliveryTime().before(xfptDeliveryOrder.getSignTime())) {
             throw new ServiceException("发货时间必须早于签收时间");
         }
+        validateProductionDeliveryCreation(xfptDeliveryOrder);
         fillDeliveryOrderDefaults(xfptDeliveryOrder);
         int rows = xfptDeliveryOrderMapper.insert(xfptDeliveryOrder);
         insertXfptDeliveryOrderItem(xfptDeliveryOrder);
+        markProductionOrderGenerated(xfptDeliveryOrder.getProductionId());
         return rows;
     }
 
@@ -73,8 +84,10 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         requireAccessibleDeliveryOrder(xfptDeliveryOrder.getId());
         applyCurrentSupplierScope(xfptDeliveryOrder);
         fillDeliveryOrderDefaults(xfptDeliveryOrder);
-        xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(xfptDeliveryOrder.getId());
-        insertXfptDeliveryOrderItem(xfptDeliveryOrder);
+        if (xfptDeliveryOrder.getXfptDeliveryOrderItemList() != null) {
+            xfptDeliveryOrderMapper.deleteXfptDeliveryOrderItemByDeliveryId(xfptDeliveryOrder.getId());
+            insertXfptDeliveryOrderItem(xfptDeliveryOrder);
+        }
         return xfptDeliveryOrderMapper.updateById(xfptDeliveryOrder);
     }
 
@@ -145,6 +158,31 @@ public class XfptDeliveryOrderServiceImpl extends ServiceImpl<XfptDeliveryOrderM
         if (StringUtils.isEmpty(xfptDeliveryOrder.getDelFlag())) {
             xfptDeliveryOrder.setDelFlag("0");
         }
+    }
+
+    private void validateProductionDeliveryCreation(XfptDeliveryOrder xfptDeliveryOrder) {
+        if (xfptDeliveryOrder == null || xfptDeliveryOrder.getProductionId() == null) {
+            return;
+        }
+        XfptDeliveryOrder existsDeliveryOrder = xfptDeliveryOrderMapper.selectOne(com.baomidou.mybatisplus.core.toolkit.Wrappers.<XfptDeliveryOrder>lambdaQuery()
+                .eq(XfptDeliveryOrder::getProductionId, xfptDeliveryOrder.getProductionId())
+                .eq(XfptDeliveryOrder::getDelFlag, "0")
+                .last("limit 1"));
+        if (existsDeliveryOrder != null) {
+            throw new ServiceException("该生产单已生成发货单，请勿重复创建");
+        }
+    }
+
+    private void markProductionOrderGenerated(Long productionId) {
+        if (productionId == null) {
+            return;
+        }
+        XfptProductionOrder productionOrder = xfptProductionOrderMapper.selectById(productionId);
+        if (productionOrder == null) {
+            return;
+        }
+        productionOrder.setStatus("3");
+        xfptProductionOrderMapper.updateById(productionOrder);
     }
 
     private void applyCurrentSupplierScope(XfptDeliveryOrder xfptDeliveryOrder) {

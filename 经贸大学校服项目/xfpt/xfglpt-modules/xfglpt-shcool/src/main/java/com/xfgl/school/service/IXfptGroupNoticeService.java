@@ -1,8 +1,11 @@
 package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xfgl.school.domain.XfptGoods;
+import com.xfgl.school.domain.XfptGoodsSize;
 import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptOrderInfo;
+import com.xfgl.school.domain.XfptSchoolSupplierRel;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
@@ -38,6 +41,15 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
          * @return 统购公告
          */
         public XfptGroupNotice selectXfptGroupNoticeById(Long id);
+
+        /**
+         * 家长端按绑定学生学校查询统购公告详情
+         *
+         * @param id 统购公告主键
+         * @param simId 家长绑定标识
+         * @return 统购公告
+         */
+        public XfptGroupNotice selectXfptGroupNoticeById(Long id, String simId);
 
         /**
          * 供应商查询学校发布的统购公告详情
@@ -90,4 +102,10 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
         public int finishGroupNoticeOrder(Long orderId);
 
         public int fillGroupNoticeOrderLogistics(Long orderId, String logisticsNo);
+
+        public List<XfptSchoolSupplierRel> selectNoticeSupplierOptions(Long schoolId);
+
+        public List<XfptGoods> selectNoticeGoodsOptions(Long schoolId, String supplierIds);
+
+        public List<XfptGoodsSize> selectNoticeGoodsSizeOptions(Long schoolId, String supplierIds);
 }

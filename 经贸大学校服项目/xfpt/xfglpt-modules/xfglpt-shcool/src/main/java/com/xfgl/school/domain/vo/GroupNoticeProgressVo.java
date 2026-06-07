@@ -15,6 +15,8 @@ public class GroupNoticeProgressVo {
     private String progressStatus;
     private String progressStatusName;
     private String logisticsNo;
+    private String productionNo;
+    private String deliveryNo;
     private String noticeName;
     private String manufacturerName;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
@@ -114,6 +116,22 @@ public class GroupNoticeProgressVo {
 
     public void setNoticeName(String noticeName) {
         this.noticeName = noticeName;
+    }
+
+    public String getProductionNo() {
+        return productionNo;
+    }
+
+    public void setProductionNo(String productionNo) {
+        this.productionNo = productionNo;
+    }
+
+    public String getDeliveryNo() {
+        return deliveryNo;
+    }
+
+    public void setDeliveryNo(String deliveryNo) {
+        this.deliveryNo = deliveryNo;
     }
 
     public String getManufacturerName() {

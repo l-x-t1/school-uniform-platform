@@ -73,15 +73,14 @@
       <el-table-column label="商品信息" min-width="320">
         <template slot-scope="scope">
           <div class="goods-cell">
-            <el-image
+            <image-preview
               v-if="scope.row.mainImage"
               class="goods-cover"
               :src="scope.row.mainImage"
-              fit="cover"
-              :preview-src-list="[scope.row.mainImage]"
-            >
-              <div slot="error" class="goods-cover-placeholder">无图</div>
-            </el-image>
+              :width="56"
+              :height="56"
+              :hover-scale="false"
+            />
             <div v-else class="goods-cover goods-cover-placeholder">无图</div>
             <div class="goods-meta">
               <div class="goods-name">{{ scope.row.goodsName || '-' }}</div>
@@ -162,7 +161,14 @@
     >
       <div v-if="detail" v-loading="detailLoading" class="detail-drawer">
         <div class="detail-header">
-          <el-image v-if="detail.mainImage" class="detail-cover" :src="detail.mainImage" fit="cover" />
+          <image-preview
+            v-if="detail.mainImage"
+            class="detail-cover"
+            :src="detail.mainImage"
+            :width="96"
+            :height="96"
+            :hover-scale="false"
+          />
           <div v-else class="detail-cover detail-cover-placeholder">无图</div>
           <div>
             <div class="detail-title">{{ detail.goodsName || '-' }}</div>
@@ -240,7 +246,7 @@ export default {
       },
       shelfStatusOptions: [
         { value: '1', label: '已上架' },
-        { value: '0', label: '已下架' }
+        { value: '0', label: '待上架/已下架' }
       ],
       saleTypeOptions: [
         { value: '1', label: '统购' },
@@ -300,8 +306,10 @@ export default {
       return item ? item.label : '-'
     },
     getShelfStatusLabel(value) {
-      const item = this.shelfStatusOptions.find(option => option.value === value)
-      return item ? item.label : '-'
+      if (value === '1') {
+        return '已上架'
+      }
+      return '待上架/已下架'
     },
     formatGroupPrice(row) {
       if (!row) {

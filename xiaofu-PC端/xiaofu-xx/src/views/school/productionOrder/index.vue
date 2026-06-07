@@ -404,37 +404,72 @@
           <div class="form-section">
             <div class="section-head">
               <div class="section-title">基础信息</div>
-              <div class="section-desc">新增/编辑时仍保留原有内部字段录入方式</div>
+              <div class="section-desc">供应商可按统购公告自动带出关联商品，再补充生产信息</div>
             </div>
             <el-row :gutter="20">
               <el-col :span="12">
                 <el-form-item label="生产单号" prop="productionNo">
-                  <el-input v-model="form.productionNo" placeholder="请输入生产单号" />
+                  <el-input v-model="form.productionNo" placeholder="可自动生成或手动填写" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="统购公告ID" prop="noticeId">
-                  <el-input v-model="form.noticeId" placeholder="请输入统购公告ID" />
+                <el-form-item label="统购公告" prop="noticeId">
+                  <el-select
+                    v-model="form.noticeId"
+                    filterable
+                    clearable
+                    :loading="noticeLoading"
+                    placeholder="请选择统购公告"
+                    style="width: 100%"
+                    @change="handleNoticeChange"
+                  >
+                    <el-option
+                      v-for="item in noticeOptions"
+                      :key="item.id"
+                      :label="getNoticeOptionLabel(item)"
+                      :value="item.id"
+                    />
+                  </el-select>
                 </el-form-item>
               </el-col>
-              <el-col :span="12">
+              <el-col v-if="!isSupplierUser" :span="12">
                 <el-form-item label="订单ID" prop="orderId">
                   <el-input v-model="form.orderId" placeholder="请输入订单ID" />
                 </el-form-item>
               </el-col>
-              <el-col :span="12">
+              <el-col v-if="!isSupplierUser" :span="12">
                 <el-form-item label="订单号" prop="orderNo">
                   <el-input v-model="form.orderNo" placeholder="请输入订单号" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
-                <el-form-item label="学校ID" prop="schoolId">
-                  <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
+                <el-form-item label="公告编号">
+                  <el-input v-model="form.noticeCode" placeholder="选择公告后自动带出，也可手动填写" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
+                <el-form-item label="公告标题">
+                  <el-input v-model="form.noticeTitle" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="学校名称">
+                  <el-input v-model="form.schoolName" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="供应商名称">
+                  <el-input v-model="form.supplierName" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
+                <el-form-item label="学校ID" prop="schoolId">
+                  <el-input v-model="form.schoolId" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
                 <el-form-item label="供应商ID" prop="supplierId">
-                  <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
+                  <el-input v-model="form.supplierId" placeholder="选择公告后自动带出，也可手动填写" />
                 </el-form-item>
               </el-col>
               <el-col :span="12">
@@ -475,7 +510,7 @@
               </el-col>
               <el-col :span="12">
                 <el-form-item label="部门/学校ID" prop="deptId">
-                  <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
+                  <el-input v-model="form.deptId" placeholder="选择公告后自动带出，也可手动填写" />
                 </el-form-item>
               </el-col>
               <el-col :span="24">
@@ -483,7 +518,7 @@
                   <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
                 </el-form-item>
               </el-col>
-              <el-col :span="12">
+              <el-col v-if="!isSupplierUser" :span="12">
                 <el-form-item label="删除标记" prop="delFlag">
                   <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
                 </el-form-item>
@@ -494,7 +529,7 @@
           <div class="form-section">
             <div class="section-head">
               <div class="section-title">生产单明细</div>
-              <div class="section-desc">保留内部维护方式，便于生成发货单时使用</div>
+              <div class="section-desc">选择统购公告后会自动带入关联商品，仍可补充尺码和备注</div>
             </div>
             <div class="size-toolbar">
               <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAddXfptProductionOrderItem">添加明细</el-button>
@@ -502,6 +537,7 @@
             </div>
             <el-table
               ref="xfptProductionOrderItem"
+              v-loading="noticeItemLoading"
               :data="xfptProductionOrderItemList"
               border
               size="mini"
@@ -510,21 +546,6 @@
             >
               <el-table-column type="selection" width="50" align="center" />
               <el-table-column label="序号" align="center" prop="index" width="60" />
-              <el-table-column label="订单明细ID" prop="orderItemId" width="140">
-                <template slot-scope="scope">
-                  <el-input v-model="scope.row.orderItemId" placeholder="请输入订单明细ID" />
-                </template>
-              </el-table-column>
-              <el-table-column label="商品ID" prop="goodsId" width="120">
-                <template slot-scope="scope">
-                  <el-input v-model="scope.row.goodsId" placeholder="请输入商品ID" />
-                </template>
-              </el-table-column>
-              <el-table-column label="尺码ID" prop="sizeId" width="120">
-                <template slot-scope="scope">
-                  <el-input v-model="scope.row.sizeId" placeholder="请输入尺码ID" />
-                </template>
-              </el-table-column>
               <el-table-column label="商品名称" prop="goodsName" min-width="140">
                 <template slot-scope="scope">
                   <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称" />
@@ -575,7 +596,10 @@
 </template>
 
 <script>
-import { listProductionOrder, getProductionOrder, delProductionOrder, addProductionOrder, updateProductionOrder, finishProductionOrder, generateDeliveryOrder } from '@/api/school/productionOrder'
+import { listProductionOrder, getProductionOrder, delProductionOrder, addProductionOrder, updateProductionOrder, finishProductionOrder, generateDeliveryOrder, listProductionNoticeOptions, getProductionNoticeDetail } from '@/api/school/productionOrder'
+import cache from '@/plugins/cache'
+
+const DELIVERY_ORDER_DRAFT_CACHE_KEY = 'production_delivery_order_draft'
 
 const STATUS_OPTIONS = [
   { label: '待生产', value: '0', tagType: 'info' },
@@ -593,6 +617,17 @@ const ITEM_STATUS_OPTIONS = [
 export default {
   name: 'ProductionOrder',
   data() {
+    const validateSupplierId = (rule, value, callback) => {
+      if (this.isSupplierUser) {
+        callback()
+        return
+      }
+      if (value === undefined || value === null || value === '') {
+        callback(new Error('供应商ID不能为空'))
+        return
+      }
+      callback()
+    }
     return {
       loading: true,
       ids: [],
@@ -604,6 +639,9 @@ export default {
       total: 0,
       productionOrderList: [],
       xfptProductionOrderItemList: [],
+      noticeOptions: [],
+      noticeLoading: false,
+      noticeItemLoading: false,
       title: '',
       open: false,
       detailOpen: false,
@@ -634,14 +672,14 @@ export default {
       },
       form: {},
       rules: {
-        productionNo: [
-          { required: true, message: '生产单号不能为空', trigger: 'blur' }
+        noticeId: [
+          { required: true, message: '请选择统购公告', trigger: 'change' }
         ],
         orderType: [
           { required: true, message: '订单类型不能为空', trigger: 'change' }
         ],
         supplierId: [
-          { required: true, message: '供应商ID不能为空', trigger: 'blur' }
+          { validator: validateSupplierId, trigger: 'blur' }
         ],
         status: [
           { required: true, message: '状态不能为空', trigger: 'change' }
@@ -658,10 +696,18 @@ export default {
     },
     selectedCanGenerateDelivery() {
       return this.selectedRow ? this.canGenerateDelivery(this.selectedRow) : false
+    },
+    isSupplierUser() {
+      const roles = this.$store.getters.roles || []
+      return roles.some(role => {
+        const roleKey = String(role || '').toLowerCase()
+        return roleKey.includes('gys') || roleKey.includes('ceshigongying') || roleKey.includes('changshang')
+      })
     }
   },
   created() {
     this.getList()
+    this.loadNoticeOptions()
   },
   methods: {
     getDefaultForm() {
@@ -693,9 +739,8 @@ export default {
     },
     getDefaultItemRow() {
       return {
-        orderItemId: '',
-        goodsId: '',
-        sizeId: '',
+        goodsId: null,
+        sizeId: null,
         goodsName: '',
         sizeName: '',
         buyNum: '',
@@ -703,6 +748,78 @@ export default {
         status: '0',
         remark: ''
       }
+    },
+    getNoticeOptionLabel(item) {
+      if (!item) {
+        return ''
+      }
+      const parts = []
+      if (item.noticeCode) {
+        parts.push(item.noticeCode)
+      }
+      if (item.title) {
+        parts.push(item.title)
+      }
+      if (item.schoolName) {
+        parts.push(item.schoolName)
+      }
+      return parts.join(' / ')
+    },
+    parseNoticeItemSizeRules(sizeRuleJson) {
+      if (!sizeRuleJson) {
+        return []
+      }
+      try {
+        const parsed = JSON.parse(sizeRuleJson)
+        return Array.isArray(parsed) ? parsed : []
+      } catch (error) {
+        return []
+      }
+    },
+    buildProductionItemsFromNoticeItems(noticeItems, currentSupplierId) {
+      const scopedItems = this.isSupplierUser && currentSupplierId
+        ? noticeItems.filter(item => String(item.supplierId) === String(currentSupplierId))
+        : noticeItems
+
+      const result = []
+      scopedItems.forEach(item => {
+        const sizeRules = this.parseNoticeItemSizeRules(item.sizeRuleJson)
+        if (sizeRules.length) {
+          sizeRules.forEach(size => {
+            const sizeBuyNum = Number(size && size.buyNum)
+            result.push({
+              goodsId: item.goodsId || null,
+              sizeId: size && size.id != null ? size.id : null,
+              goodsName: item.goodsName || '',
+              sizeName: size && size.sizeCode ? size.sizeCode : '',
+              buyNum: !Number.isNaN(sizeBuyNum) && sizeBuyNum > 0 ? sizeBuyNum : (item.buyNum || 1),
+              finishNum: 0,
+              status: '0',
+              remark: ''
+            })
+          })
+          return
+        }
+        result.push({
+          goodsId: item.goodsId || null,
+          sizeId: null,
+          goodsName: item.goodsName || '',
+          sizeName: '',
+          buyNum: item.buyNum || 1,
+          finishNum: 0,
+          status: '0',
+          remark: ''
+        })
+      })
+      return result
+    },
+    loadNoticeOptions() {
+      this.noticeLoading = true
+      listProductionNoticeOptions().then(response => {
+        this.noticeOptions = response.data || []
+      }).finally(() => {
+        this.noticeLoading = false
+      })
     },
     getList() {
       this.loading = true
@@ -722,6 +839,7 @@ export default {
       this.form = this.getDefaultForm()
       this.xfptProductionOrderItemList = []
       this.checkedXfptProductionOrderItem = []
+      this.noticeItemLoading = false
       this.resetForm('form')
     },
     resetDetail() {
@@ -779,10 +897,53 @@ export default {
         this.title = '修改生产单'
       })
     },
+    handleNoticeChange(noticeId) {
+      if (!noticeId) {
+        this.form.noticeTitle = null
+        this.form.noticeCode = null
+        this.form.schoolId = null
+        this.form.schoolName = null
+        this.form.supplierId = null
+        this.form.supplierName = null
+        this.form.deptId = null
+        this.xfptProductionOrderItemList = []
+        return
+      }
+      this.noticeItemLoading = true
+      getProductionNoticeDetail(noticeId).then(response => {
+        const notice = response.data || {}
+        this.form.noticeId = notice.id
+        this.form.noticeTitle = notice.title
+        this.form.noticeCode = notice.noticeCode
+        this.form.schoolId = notice.schoolId
+        this.form.schoolName = notice.schoolName
+        this.form.deptId = notice.deptId
+        const items = notice.xfptGroupNoticeItemList || []
+        const firstSupplier = items.find(item => item && item.supplierId != null)
+        if (firstSupplier) {
+          this.form.supplierId = firstSupplier.supplierId
+          this.form.supplierName = firstSupplier.supplierName
+        }
+        const currentSupplierId = this.form.supplierId
+        this.xfptProductionOrderItemList = this.buildProductionItemsFromNoticeItems(items, currentSupplierId)
+        if (!this.xfptProductionOrderItemList.length) {
+          this.$modal.msgWarning('该统购公告下暂无可带入的关联商品')
+        }
+      }).finally(() => {
+        this.noticeItemLoading = false
+      })
+    },
     submitForm() {
       this.$refs.form.validate(valid => {
         if (!valid) {
           return
+        }
+        if (!this.xfptProductionOrderItemList.length) {
+          this.$modal.msgError('请先选择统购公告并带入商品明细')
+          return
+        }
+        if (this.form.productionNo != null && String(this.form.productionNo).trim() === '') {
+          this.form.productionNo = null
         }
         this.form.xfptProductionOrderItemList = this.xfptProductionOrderItemList
         const request = this.form.id != null ? updateProductionOrder(this.form) : addProductionOrder(this.form)
@@ -823,10 +984,19 @@ export default {
     },
     handleGenerateDelivery(row) {
       const id = row.id
-      this.$modal.confirm('是否确认根据该生产单生成发货单？').then(() => {
+      this.$modal.confirm('是否根据该生产单带出发货单信息，并跳转到发货单页面继续填写？').then(() => {
         return generateDeliveryOrder(id)
-      }).then(() => {
-        this.$modal.msgSuccess('生成发货单成功')
+      }).then((response) => {
+        const draft = response.data || {}
+        cache.session.setJSON(DELIVERY_ORDER_DRAFT_CACHE_KEY, draft)
+        this.$router.push({
+          path: '/newFeature/deliveryOrder',
+          query: {
+            fromProductionOrder: String(id),
+            autoOpenAdd: '1'
+          }
+        })
+        this.$modal.msgSuccess('已带出发货单预填信息，请继续补充后提交')
         this.getList()
       }).catch(() => {})
     },

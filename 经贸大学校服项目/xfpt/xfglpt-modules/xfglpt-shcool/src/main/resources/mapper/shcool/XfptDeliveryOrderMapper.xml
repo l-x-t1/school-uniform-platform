@@ -75,9 +75,38 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptDeliveryOrderVo">
-        select d.id, d.delivery_no, d.notice_id, d.order_id, d.order_no, o.order_type, d.production_id, d.school_id, o.school_name, d.supplier_id, o.supplier_name, d.receiver_name, d.receiver_phone, d.receiver_address, d.logistics_company, d.logistics_no, d.delivery_status, d.delivery_time, d.sign_time, d.carriage_fee, d.dept_id, d.create_by, d.create_time, d.update_by, d.update_time, d.remark, d.del_flag
+        select d.id,
+               d.delivery_no,
+               d.notice_id,
+               d.order_id,
+               d.order_no,
+               coalesce(o.order_type, p.order_type) as order_type,
+               d.production_id,
+               d.school_id,
+               coalesce(o.school_name, smsg.school_name) as school_name,
+               d.supplier_id,
+               coalesce(o.supplier_name, supp.supplier_name) as supplier_name,
+               coalesce(nullif(nullif(d.receiver_name, ''), 'school receiver'), o.receiver_name, smsg.principal_name, smsg.school_name) as receiver_name,
+               coalesce(nullif(nullif(d.receiver_phone, ''), 'pending'), o.receiver_phone, smsg.principal_phone) as receiver_phone,
+               coalesce(nullif(nullif(d.receiver_address, ''), 'school address pending'), o.receiver_address, smsg.detailed_address) as receiver_address,
+               d.logistics_company,
+               d.logistics_no,
+               d.delivery_status,
+               d.delivery_time,
+               d.sign_time,
+               d.carriage_fee,
+               d.dept_id,
+               d.create_by,
+               d.create_time,
+               d.update_by,
+               d.update_time,
+               d.remark,
+               d.del_flag
         from xfpt_delivery_order d
         left join xfpt_order_info o on o.id = d.order_id and o.del_flag = 0
+        left join xfpt_production_order p on p.id = d.production_id and p.del_flag = 0
+        left join xfpt_school_message smsg on smsg.id = d.school_id
+        left join xfpt_supplier_message supp on supp.id = d.supplier_id and supp.del_flag = 0
     </sql>
 
     <select id="selectXfptDeliveryOrderList" parameterType="XfptDeliveryOrder" resultMap="XfptDeliveryOrderResult">
@@ -87,7 +116,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeId != null "> and d.notice_id = #{noticeId}</if>
             <if test="orderId != null "> and d.order_id = #{orderId}</if>
             <if test="orderNo != null  and orderNo != ''"> and d.order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderType != null  and orderType != ''"> and o.order_type = #{orderType}</if>
+            <if test="orderType != null  and orderType != ''"> and coalesce(o.order_type, p.order_type) = #{orderType}</if>
             <if test="productionId != null "> and d.production_id = #{productionId}</if>
             <if test="schoolId != null "> and d.school_id = #{schoolId}</if>
             <if test="supplierId != null "> and d.supplier_id = #{supplierId}</if>
@@ -105,9 +134,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectXfptDeliveryOrderById" parameterType="Long" resultMap="XfptDeliveryOrderXfptDeliveryOrderItemResult">
-        select id, delivery_no, notice_id, order_id, order_no, production_id, school_id, supplier_id, receiver_name, receiver_phone, receiver_address, logistics_company, logistics_no, delivery_status, delivery_time, sign_time, carriage_fee, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_delivery_order
-        where id = #{id}
+        <include refid="selectXfptDeliveryOrderVo"/>
+        where d.id = #{id}
     </select>
 
     <select id="selectXfptDeliveryOrderItemById" resultMap="XfptDeliveryOrderItemResult">

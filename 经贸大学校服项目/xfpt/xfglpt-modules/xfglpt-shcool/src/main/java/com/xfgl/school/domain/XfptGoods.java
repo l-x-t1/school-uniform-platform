@@ -125,6 +125,14 @@ private List<XfptGoodsSize> xfptGoodsSizeList;
 private Long noticeId;
 
 @TableField(exist = false)
+@Schema(description = "学校ID")
+private Long schoolId;
+
+@TableField(exist = false)
+@Schema(description = "学校名称")
+private String schoolName;
+
+@TableField(exist = false)
 @Schema(description = "统购开始时间")
 private Date purchaseStartTime;
 

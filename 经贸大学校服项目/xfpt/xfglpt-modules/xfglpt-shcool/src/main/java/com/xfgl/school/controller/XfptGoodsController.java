@@ -55,7 +55,10 @@ public class XfptGoodsController extends BaseController {
 @Operation(summary = "查询商品信息列表")
 @RequiresPermissions("school:goods:list")
 @GetMapping("/list")
-    public TableDataInfo list(XfptGoods xfptGoods) {
+    public TableDataInfo list(XfptGoods xfptGoods, String simId) {
+        if (simId != null && !"".equals(simId.trim())) {
+            xfptGoods.getParams().put("simId", simId.trim());
+        }
         startPage();
         List<XfptGoods> list = xfptGoodsService.selectXfptGoodsList(xfptGoods);
         return getDataTable(list);
@@ -113,8 +116,8 @@ public class XfptGoodsController extends BaseController {
     @Operation(summary = "获取商品信息详细信息")
     @RequiresPermissions("school:goods:query")
     @GetMapping(value = "/{id}")
-    public AjaxResult getInfo(@PathVariable("id") Long id) {
-            return success(xfptGoodsService.selectXfptGoodsById(id));
+    public AjaxResult getInfo(@PathVariable("id") Long id, Long schoolId, String simId) {
+            return success(xfptGoodsService.selectXfptGoodsById(id, schoolId, simId));
     }
 
     /**

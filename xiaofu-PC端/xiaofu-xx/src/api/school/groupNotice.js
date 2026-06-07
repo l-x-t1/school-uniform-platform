@@ -34,6 +34,33 @@ export function getSupplierGroupNotice(id) {
   })
 }
 
+// 查询统购公告可选合作供应商
+export function listGroupNoticeSupplierOptions(query) {
+  return request({
+    url: '/school/groupNotice/supplierOptions',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询统购公告可选合作商品
+export function listGroupNoticeGoodsOptions(query) {
+  return request({
+    url: '/school/groupNotice/goodsOptions',
+    method: 'get',
+    params: query
+  })
+}
+
+// 查询统购公告可选商品尺码
+export function listGroupNoticeGoodsSizeOptions(query) {
+  return request({
+    url: '/school/groupNotice/goodsSizeOptions',
+    method: 'get',
+    params: query
+  })
+}
+
 // 新增统购公告
 export function addGroupNotice(data) {
   return request({

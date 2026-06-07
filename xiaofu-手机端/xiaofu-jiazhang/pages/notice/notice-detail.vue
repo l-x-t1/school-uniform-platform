@@ -150,6 +150,9 @@ export default {
       uni.request({
         url: `${this.baseUrl}/school/groupNotice/${encodeURIComponent(id)}`,
         method: "GET",
+        data: {
+          simId: uni.getStorageSync("simId"),
+        },
         header: {
           Authorization: uni.getStorageSync("token"),
         },
@@ -236,12 +239,31 @@ export default {
     },
     parseSizeRule(value) {
       if (!value) return "";
+      const normalizeSizeText = (item) => {
+        if (item === null || item === undefined) return "";
+        if (typeof item === "string" || typeof item === "number") {
+          return String(item).trim();
+        }
+        if (typeof item === "object") {
+          return String(
+            item.sizeCode ||
+              item.sizeName ||
+              item.name ||
+              item.label ||
+              item.value ||
+              ""
+          ).trim();
+        }
+        return "";
+      };
+      const buildSizeText = (list) =>
+        list.map(normalizeSizeText).filter(Boolean).join("、");
       if (Array.isArray(value)) {
-        return value.join("、");
+        return buildSizeText(value);
       }
       try {
         const parsed = JSON.parse(value);
-        return Array.isArray(parsed) ? parsed.join("、") : String(value);
+        return Array.isArray(parsed) ? buildSizeText(parsed) : String(value);
       } catch (error) {
         return String(value);
       }
@@ -333,7 +355,7 @@ export default {
       return Array.isArray(ids) ? ids : [];
     },
     getStatusText(notice) {
-      return String(notice.noticeType || notice.type) === "2" ? "成交公告" : "采购公告";
+      return String(notice.noticeType || notice.type) === "2" ? "结果公告" : "公告";
     },
     getApplyStatusText(status) {
       const map = {

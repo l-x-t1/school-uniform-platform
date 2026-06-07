@@ -73,10 +73,11 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             n.title as notice_title,
             n.notice_code as notice_code,
             coalesce(o.school_name, n.school_name) as school_name,
-            o.supplier_name as supplier_name
+            coalesce(o.supplier_name, s.supplier_name) as supplier_name
         from xfpt_production_order p
         left join xfpt_order_info o on o.id = p.order_id and o.del_flag = '0'
         left join xfpt_group_notice n on n.id = p.notice_id and n.del_flag = '0'
+        left join xfpt_supplier_message s on s.id = p.supplier_id
     </sql>
 
     <select id="selectXfptProductionOrderList" parameterType="XfptProductionOrder" resultMap="XfptProductionOrderResult">

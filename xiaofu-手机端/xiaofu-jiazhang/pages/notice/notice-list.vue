@@ -21,23 +21,6 @@
       </view>
     </view>
 
-    <view class="tabs">
-      <view
-        class="tab-item"
-        :class="{ active: currentTab === 0 }"
-        @click="switchTab(0)"
-      >
-        采购公告
-      </view>
-      <view
-        class="tab-item"
-        :class="{ active: currentTab === 1 }"
-        @click="switchTab(1)"
-      >
-        成交公告
-      </view>
-    </view>
-
     <scroll-view
       scroll-y
       class="notice-list"
@@ -86,7 +69,6 @@ export default {
     return {
       baseUrl: getApp().globalData.baseUrl,
       notices: [],
-      currentTab: 0,
       page: 1,
       limit: 10,
       isLoading: false,
@@ -112,8 +94,7 @@ export default {
         simId: uni.getStorageSync("simId"),
         pageNum: this.page,
         pageSize: this.limit,
-        status: this.currentTab === 0 ? "1" : "2",
-        noticeType: this.currentTab === 0 ? "1" : "2",
+        noticeType: "2",
       };
 
       if (this.searchKeyword && this.searchKeyword.trim()) {
@@ -170,12 +151,6 @@ export default {
       this.isRefreshing = false;
       uni.stopPullDownRefresh();
     },
-    switchTab(index) {
-      if (this.currentTab === index) return;
-      this.currentTab = index;
-      this.resetList();
-      this.getList();
-    },
     loadMore() {
       if (this.isLoading || !this.hasMore) return;
       this.getList();
@@ -197,7 +172,7 @@ export default {
       });
     },
     getStatusText(item) {
-      return String(item.noticeType) === "2" ? "成交公告" : "采购公告";
+      return String(item.noticeType) === "2" ? "结果公告" : "公告";
     },
     formatDate(value) {
       if (!value) return "暂无时间";
@@ -258,42 +233,8 @@ export default {
   color: #20242c;
 }
 
-.tabs {
-  display: flex;
-  height: 88rpx;
-  background-color: #ffffff;
-  border-bottom: 1rpx solid #eef0f4;
-}
-
-.tab-item {
-  flex: 1;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28rpx;
-  color: #5f6673;
-}
-
-.tab-item.active {
-  color: #2f7df6;
-  font-weight: 600;
-}
-
-.tab-item.active::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  bottom: 0;
-  width: 52rpx;
-  height: 5rpx;
-  transform: translateX(-50%);
-  background-color: #2f7df6;
-  border-radius: 4rpx;
-}
-
 .notice-list {
-  height: calc(100vh - 176rpx);
+  height: calc(100vh - 88rpx);
 }
 
 .list-content {

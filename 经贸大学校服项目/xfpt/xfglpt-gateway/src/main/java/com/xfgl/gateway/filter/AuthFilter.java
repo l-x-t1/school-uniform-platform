@@ -30,6 +30,13 @@ import reactor.core.publisher.Mono;
 public class AuthFilter implements GlobalFilter, Ordered
 {
     private static final Logger log = LoggerFactory.getLogger(AuthFilter.class);
+    private static final String[] LOCAL_LOGIN_WHITES = {
+            "/school/mobile/sendSmsCode",
+            "/school/mobile/login",
+            "/school/mobile/wechat-phone-login",
+            "/school/simOpen/devLogin",
+            "/school/simOpen/redirecturi"
+    };
 
     // 排除过滤的 uri 地址，nacos自行添加
     @Autowired
@@ -47,7 +54,7 @@ public class AuthFilter implements GlobalFilter, Ordered
 
         String url = request.getURI().getPath();
         // 跳过不需要验证的路径
-        if (StringUtils.matches(url, ignoreWhite.getWhites()))
+        if (StringUtils.matches(url, ignoreWhite.getWhites()) || isLocalLoginWhite(url))
         {
             return chain.filter(exchange);
         }
@@ -103,6 +110,22 @@ public class AuthFilter implements GlobalFilter, Ordered
     {
         log.error("[鉴权异常处理]请求路径:{},错误信息:{}", exchange.getRequest().getPath(), msg);
         return ServletUtils.webFluxResponseWriter(exchange.getResponse(), msg, HttpStatus.UNAUTHORIZED);
+    }
+
+    private boolean isLocalLoginWhite(String url)
+    {
+        if (StringUtils.isEmpty(url))
+        {
+            return false;
+        }
+        for (String white : LOCAL_LOGIN_WHITES)
+        {
+            if (url.equals(white))
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**

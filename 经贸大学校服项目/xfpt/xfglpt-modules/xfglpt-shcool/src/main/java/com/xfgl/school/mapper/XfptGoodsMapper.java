@@ -20,9 +20,9 @@ public interface XfptGoodsMapper extends BaseMapper<XfptGoods> {
      */
     public List<XfptGoods> selectXfptGoodsList(XfptGoods xfptGoods);
 
-        XfptGoods selectXfptGoodsById(@Param("id") Long id);
+        XfptGoods selectXfptGoodsById(@Param("id") Long id, @Param("schoolId") Long schoolId);
 
-        XfptGoods selectXfptGoodsByIdAndSupplierId(@Param("id") Long id, @Param("supplierId") Long supplierId);
+        XfptGoods selectXfptGoodsByIdAndSupplierId(@Param("id") Long id, @Param("supplierId") Long supplierId, @Param("schoolId") Long schoolId);
 
         /**
          * 查询商品信息

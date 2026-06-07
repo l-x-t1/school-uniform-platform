@@ -136,6 +136,10 @@ public class XfptGroupNoticeItemServiceImpl extends ServiceImpl<XfptGroupNoticeI
         if (item == null || !"0".equals(item.getDelFlag())) {
             throw new ServiceException("统购公告商品不存在");
         }
+        XfptGroupNotice notice = xfptGroupNoticeMapper.selectById(item.getNoticeId());
+        if (notice == null || !"0".equals(notice.getDelFlag())) {
+            throw new ServiceException("统购公告商品所属公告不存在");
+        }
         XfptSchoolMessage currentSchool = getCurrentSchoolIfScoped();
         if (isSchoolScopedUser() && currentSchool == null) {
             throw new ServiceException("当前登录学校信息不存在");

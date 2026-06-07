@@ -141,7 +141,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectGroupNoticeForPurchase" resultMap="GroupNoticePurchaseResult">
-        select id, null as purchase_start_time, null as purchase_end_time, status, del_flag
+        select id, purchase_start_time, purchase_end_time, status, del_flag
         from xfpt_group_notice
         where id = #{noticeId}
           and del_flag = '0'
