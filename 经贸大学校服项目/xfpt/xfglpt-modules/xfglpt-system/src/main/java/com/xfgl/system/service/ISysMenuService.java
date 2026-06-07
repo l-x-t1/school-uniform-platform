@@ -1,5 +1,6 @@
 package com.xfgl.system.service;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 import com.xfgl.system.domain.SysMenu;
@@ -29,6 +30,16 @@ public interface ISysMenuService
      * @return 菜单列表
      */
     public List<SysMenu> selectMenuList(SysMenu menu, Long userId);
+
+    /**
+     * 按角色场景查询菜单列表
+     *
+     * @param menu 查询条件
+     * @param targetRoleKey 目标角色标识
+     * @param menuScene 菜单场景
+     * @return 菜单列表
+     */
+    public List<SysMenu> selectMenuListByScene(SysMenu menu, String targetRoleKey, String menuScene);
 
     /**
      * 根据用户ID查询权限
@@ -141,4 +152,30 @@ public interface ISysMenuService
      * @return 结果
      */
     public boolean checkMenuNameUnique(SysMenu menu);
+
+    /**
+     * 按目标角色过滤可分配菜单ID
+     *
+     * @param menuIds 待过滤菜单ID
+     * @param roleKey 角色标识
+     * @return 合法菜单ID
+     */
+    public List<Long> filterMenuIdsByRoleKey(Collection<Long> menuIds, String roleKey);
+
+    /**
+     * 按场景过滤可分配菜单ID
+     *
+     * @param menuIds 待过滤菜单ID
+     * @param menuScene 菜单场景
+     * @return 合法菜单ID
+     */
+    public List<Long> filterMenuIdsByScene(Collection<Long> menuIds, String menuScene);
+
+    /**
+     * 解析角色对应菜单场景
+     *
+     * @param roleKey 角色标识
+     * @return 菜单场景
+     */
+    public String resolveMenuSceneByRoleKey(String roleKey);
 }

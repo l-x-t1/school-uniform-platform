@@ -56,7 +56,11 @@
       :default-expand-all="isExpandAll"
       :tree-props="{children: 'children', hasChildren: 'hasChildren'}"
     >
-      <el-table-column prop="menuName" label="菜单名称" :show-overflow-tooltip="true" width="160"></el-table-column>
+      <el-table-column label="菜单名称" :show-overflow-tooltip="true" width="220">
+        <template slot-scope="scope">
+          <span>{{ scope.row.displayMenuName || scope.row.menuName }}</span>
+        </template>
+      </el-table-column>
       <el-table-column prop="icon" label="图标" align="center" width="100">
         <template slot-scope="scope">
           <svg-icon :icon-class="scope.row.icon" />
@@ -370,7 +374,7 @@ export default {
       }
       return {
         id: node.menuId,
-        label: node.menuName,
+        label: node.displayMenuName || node.menuName,
         children: node.children
       };
     },
@@ -378,7 +382,7 @@ export default {
     getTreeselect() {
       listMenu().then(response => {
         this.menuOptions = [];
-        const menu = { menuId: 0, menuName: '主类目', children: [] };
+        const menu = { menuId: 0, menuName: '主类目', displayMenuName: '主类目', children: [] };
         menu.children = this.handleTree(response.data, "menuId");
         this.menuOptions.push(menu);
       });
@@ -465,7 +469,8 @@ export default {
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      this.$modal.confirm('是否确认删除名称为"' + row.menuName + '"的数据项？').then(function() {
+      const displayMenuName = row.displayMenuName || row.menuName;
+      this.$modal.confirm('是否确认删除名称为"' + displayMenuName + '"的数据项？').then(function() {
         return delMenu(row.menuId);
       }).then(() => {
         this.getList();

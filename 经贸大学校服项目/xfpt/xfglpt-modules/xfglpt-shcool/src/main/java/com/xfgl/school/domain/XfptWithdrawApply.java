@@ -1,6 +1,7 @@
 package com.xfgl.school.domain;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
@@ -101,5 +102,33 @@ private static final long serialVersionUID = 1L;
             @Excel(name = "关联资金流水ID")
     @Schema(description = "关联资金流水ID")
     private Long financeFlowId;
+
+    @TableField(exist = false)
+    @Schema(description = "瑙嗗浘妯″紡")
+    private String viewMode;
+
+    @TableField(exist = false)
+    @Schema(description = "绠＄悊鍛樻ā鎷熷鏍℃椂鐨勫鏍D")
+    private Long scopeSchoolId;
+
+    @TableField(exist = false)
+    @Schema(description = "鏁欒偛灞€鍙瀛︽牎ID闆嗗悎")
+    private List<Long> scopeSchoolIds;
+
+    @TableField(exist = false)
+    @Schema(description = "褰掑睘瀛︽牎ID")
+    private Long schoolId;
+
+    @TableField(exist = false)
+    @Schema(description = "褰掑睘瀛︽牎鍚嶇О")
+    private String schoolName;
+
+    @TableField(exist = false)
+    @Schema(description = "鍏宠仈娴佹按鍗曞彿")
+    private String flowNo;
+
+    @TableField(exist = false)
+    @Schema(description = "鍏宠仈璁㈠崟鍙?")
+    private String orderNo;
 
         }

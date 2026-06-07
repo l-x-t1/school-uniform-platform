@@ -21,6 +21,7 @@ import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.system.domain.SysMenu;
 import com.xfgl.system.service.ISysMenuService;
+import com.xfgl.system.service.support.RoleMenuSceneSupport;
 
 /**
  * 菜单信息
@@ -39,10 +40,9 @@ public class SysMenuController extends BaseController
      */
     @RequiresPermissions("system:menu:list")
     @GetMapping("/list")
-    public AjaxResult list(SysMenu menu)
+    public AjaxResult list(SysMenu menu, String targetRoleKey, String menuScene)
     {
-        Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuList(menu, userId);
+        List<SysMenu> menus = menuService.selectMenuListByScene(menu, targetRoleKey, menuScene);
         return success(menus);
     }
 
@@ -60,10 +60,9 @@ public class SysMenuController extends BaseController
      * 获取菜单下拉树列表
      */
     @GetMapping("/treeselect")
-    public AjaxResult treeselect(SysMenu menu)
+    public AjaxResult treeselect(SysMenu menu, String targetRoleKey, String menuScene)
     {
-        Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuList(menu, userId);
+        List<SysMenu> menus = menuService.selectMenuListByScene(menu, targetRoleKey, menuScene);
         return success(menuService.buildMenuTreeSelect(menus));
     }
 
@@ -73,10 +72,10 @@ public class SysMenuController extends BaseController
     @GetMapping(value = "/roleMenuTreeselect/{roleId}")
     public AjaxResult roleMenuTreeselect(@PathVariable("roleId") Long roleId)
     {
-        Long userId = SecurityUtils.getUserId();
-        List<SysMenu> menus = menuService.selectMenuList(userId);
+        String menuScene = RoleMenuSceneSupport.MENU_SCENE_ASSIGNABLE_ALL;
+        List<SysMenu> menus = menuService.selectMenuListByScene(new SysMenu(), null, menuScene);
         AjaxResult ajax = AjaxResult.success();
-        ajax.put("checkedKeys", menuService.selectMenuListByRoleId(roleId));
+        ajax.put("checkedKeys", menuService.filterMenuIdsByScene(menuService.selectMenuListByRoleId(roleId), menuScene));
         ajax.put("menus", menuService.buildMenuTreeSelect(menus));
         return ajax;
     }
