@@ -8,6 +8,14 @@ export function sendSmsCode(data) {
   })
 }
 
+export function registerParent(data) {
+  return request({
+    url: '/school/mobile/register',
+    method: 'POST',
+    data
+  })
+}
+
 function normalizeLoginResult(res) {
   const data = res.data || res
   return {
