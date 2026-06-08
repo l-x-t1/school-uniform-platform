@@ -33,6 +33,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="supplierId"    column="supplier_id"    />
         <result property="goodsId"    column="goods_id"    />
         <result property="status"    column="status"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="supplierName"    column="supplier_name"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="goodsCode"    column="goods_code"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -66,18 +70,43 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <sql id="selectXfptSchoolSupplierGoodsRelVo">
-        select id, rel_id, school_id, supplier_id, goods_id, status, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_school_supplier_goods_rel
+        select gsr.id,
+               gsr.rel_id,
+               gsr.school_id,
+               gsr.supplier_id,
+               gsr.goods_id,
+               gsr.status,
+               coalesce(nullif(rel.school_name, ''), school.school_name) as school_name,
+               coalesce(nullif(rel.supplier_name, ''), supplier.supplier_name) as supplier_name,
+               goods.goods_name,
+               goods.goods_code,
+               gsr.create_by,
+               gsr.create_time,
+               gsr.update_by,
+               gsr.update_time,
+               gsr.remark,
+               gsr.del_flag
+        from xfpt_school_supplier_goods_rel gsr
+        left join xfpt_school_supplier_rel rel
+            on rel.id = gsr.rel_id
+        left join xfpt_school_message school
+            on school.id = gsr.school_id
+        left join xfpt_supplier_message supplier
+            on supplier.id = gsr.supplier_id
+        left join xfpt_goods goods
+            on goods.id = gsr.goods_id
     </sql>
 
     <select id="selectXfptSchoolSupplierGoodsRelList" resultMap="XfptSchoolSupplierGoodsRelResult">
         <include refid="selectXfptSchoolSupplierGoodsRelVo"/>
-        where rel_id = #{id}
+        where gsr.rel_id = #{id}
+          and gsr.del_flag = '0'
     </select>
 
     <select id="selectXfptSchoolSupplierGoodsRelById" resultMap="XfptSchoolSupplierGoodsRelResult">
         <include refid="selectXfptSchoolSupplierGoodsRelVo"/>
-        where rel_id = #{id}
+        where gsr.rel_id = #{id}
+          and gsr.del_flag = '0'
     </select>
 
     <insert id="insertXfptSchoolSupplierRel" parameterType="XfptSchoolSupplierRel" useGeneratedKeys="true" keyProperty="id">

@@ -1,5 +1,6 @@
 package com.xfgl.school.domain;
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -56,4 +57,19 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "状态，0停用 1启用")
     private String status;
 
+    @TableField(exist = false)
+    @Schema(description = "瀛︽牎鍚嶇О")
+    private String schoolName;
+
+    @TableField(exist = false)
+    @Schema(description = "渚涘簲鍟嗗悕绉?")
+    private String supplierName;
+
+    @TableField(exist = false)
+    @Schema(description = "鍟嗗搧鍚嶇О")
+    private String goodsName;
+
+    @TableField(exist = false)
+    @Schema(description = "鍟嗗搧缂栫爜")
+    private String goodsCode;
 }

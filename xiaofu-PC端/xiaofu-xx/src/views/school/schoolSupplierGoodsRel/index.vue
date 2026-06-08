@@ -121,17 +121,17 @@
           <div class="rel-parties-cell">
             <div class="party-row">
               <span class="party-label">学校</span>
-              <span class="party-name">{{ getRelSchoolName(scope.row.relId, scope.row.schoolId) }}</span>
+              <span class="party-name">{{ getDisplaySchoolName(scope.row) }}</span>
             </div>
             <div class="party-row">
               <span class="party-label supplier">供应商</span>
-              <span class="party-name">{{ getRelSupplierName(scope.row.relId, scope.row.supplierId) }}</span>
+              <span class="party-name">{{ getDisplaySupplierName(scope.row) }}</span>
             </div>
           </div>
         </template>
       </el-table-column>
       <el-table-column label="商品" min-width="240" show-overflow-tooltip>
-        <template slot-scope="scope">{{ getGoodsName(scope.row.goodsId) }}</template>
+        <template slot-scope="scope">{{ getDisplayGoodsName(scope.row) }}</template>
       </el-table-column>
       <el-table-column label="状态" width="110" align="center">
         <template slot-scope="scope">
@@ -196,12 +196,12 @@
           <div class="detail-parties">
             <div class="detail-party-card school">
               <div class="detail-party-label">学校</div>
-              <div class="detail-party-name">{{ getRelSchoolName(detailForm.relId, detailForm.schoolId) }}</div>
+              <div class="detail-party-name">{{ getDisplaySchoolName(detailForm) }}</div>
             </div>
             <i class="el-icon-right detail-arrow" />
             <div class="detail-party-card supplier">
               <div class="detail-party-label">供应商</div>
-              <div class="detail-party-name">{{ getRelSupplierName(detailForm.relId, detailForm.supplierId) }}</div>
+              <div class="detail-party-name">{{ getDisplaySupplierName(detailForm) }}</div>
             </div>
           </div>
         </div>
@@ -213,7 +213,7 @@
           <div class="detail-kv-grid">
             <div class="detail-kv">
               <span class="detail-label">商品</span>
-              <span class="detail-value">{{ getGoodsName(detailForm.goodsId) }}</span>
+              <span class="detail-value">{{ getDisplayGoodsName(detailForm) }}</span>
             </div>
             <div class="detail-kv">
               <span class="detail-label">状态</span>
@@ -394,6 +394,10 @@ export default {
         schoolId: null,
         supplierId: null,
         goodsId: null,
+        schoolName: null,
+        supplierName: null,
+        goodsName: null,
+        goodsCode: null,
         status: '1',
         createBy: null,
         createTime: null,
@@ -446,6 +450,7 @@ export default {
         this.$modal.msgError('请选择要查看的合作商品')
         return
       }
+      this.ensureOptionsForRow(data)
       this.detailForm = Object.assign(this.getDefaultForm(), data)
       this.detailOpen = true
       this.detailLoading = false
@@ -461,6 +466,7 @@ export default {
         this.$modal.msgError('请选择要修改的合作商品')
         return
       }
+      this.ensureOptionsForRow(data)
       this.form = Object.assign(this.getDefaultForm(), data)
       this.open = true
       this.title = '修改学校供应商合作商品'
@@ -504,12 +510,12 @@ export default {
     },
     getRelOptions() {
       listSchoolSupplierRel({ pageNum: 1, pageSize: 1000 }).then(response => {
-        this.relOptions = response.rows || []
+        this.relOptions = this.mergeOptionsById(this.relOptions, response.rows || [])
       })
     },
     getGoodsOptions() {
       listGoods({ pageNum: 1, pageSize: 1000, status: '1' }).then(response => {
-        this.goodsOptions = response.rows || []
+        this.goodsOptions = this.mergeOptionsById(this.goodsOptions, response.rows || [])
       })
     },
     handleRelChange(value) {
@@ -521,8 +527,30 @@ export default {
     formatRelOption(item) {
       return `${this.formatValue(item.schoolName)} / ${this.formatValue(item.supplierName)}`
     },
+    mergeOptionsById(existing, incoming) {
+      const optionMap = new Map()
+      ;[...(existing || []), ...(incoming || [])].forEach(item => {
+        if (!item || item.id == null) {
+          return
+        }
+        optionMap.set(String(item.id), Object.assign({}, optionMap.get(String(item.id)) || {}, item))
+      })
+      return Array.from(optionMap.values())
+    },
     getRelOption(relId) {
       return this.relOptions.find(item => String(item.id) === String(relId))
+    },
+    ensureRelOption(row) {
+      if (!row || row.relId == null || this.getRelOption(row.relId)) {
+        return
+      }
+      this.relOptions = this.mergeOptionsById(this.relOptions, [{
+        id: row.relId,
+        schoolId: row.schoolId,
+        supplierId: row.supplierId,
+        schoolName: row.schoolName,
+        supplierName: row.supplierName
+      }])
     },
     getRelSchoolName(relId, fallbackId) {
       const option = this.getRelOption(relId)
@@ -538,6 +566,42 @@ export default {
     getGoodsName(goodsId) {
       const option = this.goodsOptions.find(item => String(item.id) === String(goodsId))
       return option ? this.formatGoodsOption(option) : this.formatFallback('商品', goodsId)
+    },
+    formatGoodsLabel(goodsName, goodsCode) {
+      if (!goodsName) {
+        return ''
+      }
+      return goodsCode ? `${goodsName}（${goodsCode}）` : goodsName
+    },
+    ensureGoodsOption(row) {
+      if (!row || row.goodsId == null) {
+        return
+      }
+      const exists = this.goodsOptions.find(item => String(item.id) === String(row.goodsId))
+      if (exists) {
+        return
+      }
+      this.goodsOptions = this.mergeOptionsById(this.goodsOptions, [{
+        id: row.goodsId,
+        goodsName: row.goodsName,
+        goodsCode: row.goodsCode
+      }])
+    },
+    ensureOptionsForRow(row) {
+      this.ensureRelOption(row)
+      this.ensureGoodsOption(row)
+    },
+    getDisplaySchoolName(row) {
+      const directName = row && row.schoolName ? row.schoolName : ''
+      return directName ? this.formatValue(directName) : this.getRelSchoolName(row ? row.relId : null, row ? row.schoolId : null)
+    },
+    getDisplaySupplierName(row) {
+      const directName = row && row.supplierName ? row.supplierName : ''
+      return directName ? this.formatValue(directName) : this.getRelSupplierName(row ? row.relId : null, row ? row.supplierId : null)
+    },
+    getDisplayGoodsName(row) {
+      const directLabel = this.formatGoodsLabel(row && row.goodsName, row && row.goodsCode)
+      return directLabel || this.getGoodsName(row ? row.goodsId : null)
     },
     getOptionLabel(options, value) {
       const option = options.find(item => item.value === String(value))

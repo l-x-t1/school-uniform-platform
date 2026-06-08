@@ -11,6 +11,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="supplierId"    column="supplier_id"    />
         <result property="goodsId"    column="goods_id"    />
         <result property="status"    column="status"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="supplierName"    column="supplier_name"    />
+        <result property="goodsName"    column="goods_name"    />
+        <result property="goodsCode"    column="goods_code"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -20,23 +24,48 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptSchoolSupplierGoodsRelVo">
-        select id, rel_id, school_id, supplier_id, goods_id, status, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_school_supplier_goods_rel
+        select gsr.id,
+               gsr.rel_id,
+               gsr.school_id,
+               gsr.supplier_id,
+               gsr.goods_id,
+               gsr.status,
+               coalesce(nullif(rel.school_name, ''), school.school_name) as school_name,
+               coalesce(nullif(rel.supplier_name, ''), supplier.supplier_name) as supplier_name,
+               goods.goods_name,
+               goods.goods_code,
+               gsr.create_by,
+               gsr.create_time,
+               gsr.update_by,
+               gsr.update_time,
+               gsr.remark,
+               gsr.del_flag
+        from xfpt_school_supplier_goods_rel gsr
+        left join xfpt_school_supplier_rel rel
+            on rel.id = gsr.rel_id
+        left join xfpt_school_message school
+            on school.id = gsr.school_id
+        left join xfpt_supplier_message supplier
+            on supplier.id = gsr.supplier_id
+        left join xfpt_goods goods
+            on goods.id = gsr.goods_id
     </sql>
 
     <select id="selectXfptSchoolSupplierGoodsRelList" parameterType="XfptSchoolSupplierGoodsRel" resultMap="XfptSchoolSupplierGoodsRelResult">
         <include refid="selectXfptSchoolSupplierGoodsRelVo"/>
         <include refid="search"/>
-            <if test="relId != null "> and rel_id = #{relId}</if>
-            <if test="schoolId != null "> and school_id = #{schoolId}</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
+            <if test="relId != null "> and gsr.rel_id = #{relId}</if>
+            <if test="schoolId != null "> and gsr.school_id = #{schoolId}</if>
+            <if test="supplierId != null "> and gsr.supplier_id = #{supplierId}</if>
+            <if test="goodsId != null "> and gsr.goods_id = #{goodsId}</if>
+            <if test="status != null  and status != ''"> and gsr.status = #{status}</if>
 
     </select>
 
     <select id="selectXfptSchoolSupplierGoodsRelById" parameterType="Long" resultMap="XfptSchoolSupplierGoodsRelResult">
         <include refid="selectXfptSchoolSupplierGoodsRelVo"/>
-        where id = #{id}
+        where gsr.id = #{id}
+          and gsr.del_flag = '0'
     </select>
 
     <insert id="insertXfptSchoolSupplierGoodsRel" parameterType="XfptSchoolSupplierGoodsRel" useGeneratedKeys="true" keyProperty="id">
@@ -98,6 +127,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where gsr.del_flag = '0'
     </sql>
 </mapper>

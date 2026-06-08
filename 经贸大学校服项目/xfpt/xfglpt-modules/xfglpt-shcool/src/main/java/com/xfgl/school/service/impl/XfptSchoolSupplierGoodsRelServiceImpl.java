@@ -4,9 +4,11 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.school.domain.XfptGoods;
 import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.XfptSchoolSupplierGoodsRel;
 import com.xfgl.school.domain.XfptSchoolSupplierRel;
+import com.xfgl.school.mapper.XfptGoodsMapper;
 import com.xfgl.school.mapper.XfptSchoolSupplierGoodsRelMapper;
 import com.xfgl.school.service.IXfptSchoolSupplierGoodsRelService;
 import com.xfgl.school.service.IXfptSchoolSupplierRelService;
@@ -30,6 +32,8 @@ public class XfptSchoolSupplierGoodsRelServiceImpl extends ServiceImpl<XfptSchoo
 
     @Autowired
     private XfptSchoolSupplierGoodsRelMapper xfptSchoolSupplierGoodsRelMapper;
+    @Autowired
+    private XfptGoodsMapper xfptGoodsMapper;
     @Autowired
     private IXfptSchoolSupplierRelService schoolSupplierRelService;
     @Autowired
@@ -66,7 +70,11 @@ public class XfptSchoolSupplierGoodsRelServiceImpl extends ServiceImpl<XfptSchoo
     @Override
     public XfptSchoolSupplierGoodsRel getById(java.io.Serializable id)
     {
-        XfptSchoolSupplierGoodsRel goodsRel = super.getById(id);
+        if (id == null) {
+            return null;
+        }
+        XfptSchoolSupplierGoodsRel goodsRel = xfptSchoolSupplierGoodsRelMapper
+                .selectXfptSchoolSupplierGoodsRelById(Long.valueOf(String.valueOf(id)));
         requireAccessibleGoodsRel(goodsRel);
         return goodsRel;
     }
@@ -118,6 +126,7 @@ public class XfptSchoolSupplierGoodsRelServiceImpl extends ServiceImpl<XfptSchoo
         if (StringUtils.isNull(rel)) {
             throw new ServiceException("学校供应商合作关系不存在");
         }
+        validateGoodsOwnership(entity.getGoodsId(), rel.getSupplierId());
         entity.setSchoolId(rel.getSchoolId());
         entity.setSupplierId(rel.getSupplierId());
         if (StringUtils.isEmpty(entity.getStatus())) {
@@ -125,6 +134,20 @@ public class XfptSchoolSupplierGoodsRelServiceImpl extends ServiceImpl<XfptSchoo
         }
         if (StringUtils.isEmpty(entity.getDelFlag())) {
             entity.setDelFlag(existing == null ? "0" : existing.getDelFlag());
+        }
+    }
+
+    private void validateGoodsOwnership(Long goodsId, Long supplierId)
+    {
+        if (goodsId == null) {
+            throw new ServiceException("鍚堜綔鍟嗗搧涓嶈兘涓虹┖");
+        }
+        XfptGoods goods = xfptGoodsMapper.selectById(goodsId);
+        if (StringUtils.isNull(goods) || "1".equals(goods.getDelFlag())) {
+            throw new ServiceException("鍚堜綔鍟嗗搧涓嶅瓨鍦ㄦ垨宸插垹闄?");
+        }
+        if (supplierId != null && !supplierId.equals(goods.getSupplierId())) {
+            throw new ServiceException("鍚堜綔鍟嗗搧蹇呴』灞炰簬褰撳墠鍚堜綔渚涘簲鍟?");
         }
     }
 

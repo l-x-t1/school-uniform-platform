@@ -5,9 +5,11 @@ import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import com.xfgl.common.security.utils.SecurityUtils;
 import com.xfgl.school.domain.SupplierMessage;
+import com.xfgl.school.domain.XfptGoods;
 import com.xfgl.school.domain.XfptSchoolMessage;
 import com.xfgl.school.domain.XfptSchoolSupplierGoodsRel;
 import com.xfgl.school.domain.XfptSchoolSupplierRel;
+import com.xfgl.school.mapper.XfptGoodsMapper;
 import com.xfgl.school.mapper.XfptSchoolSupplierRelMapper;
 import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptSchoolSupplierRelService;
@@ -34,6 +36,8 @@ public class XfptSchoolSupplierRelServiceImpl extends ServiceImpl<XfptSchoolSupp
 
     @Autowired
     private XfptSchoolSupplierRelMapper xfptSchoolSupplierRelMapper;
+    @Autowired
+    private XfptGoodsMapper xfptGoodsMapper;
     @Autowired
     private SupplierAccessSupport supplierAccessSupport;
     @Autowired
@@ -170,7 +174,7 @@ public class XfptSchoolSupplierRelServiceImpl extends ServiceImpl<XfptSchoolSupp
         public int replaceGoodsRel(Long id, List<XfptSchoolSupplierGoodsRel> goodsRelList)
         {
             XfptSchoolSupplierRel rel = requireAccessibleRel(id);
-            validateGoodsRelList(goodsRelList);
+            validateGoodsRelList(goodsRelList, rel.getSupplierId());
             xfptSchoolSupplierRelMapper.deleteXfptSchoolSupplierGoodsRelByRelId(id);
             if (StringUtils.isNotEmpty(goodsRelList)) {
                 for (XfptSchoolSupplierGoodsRel goodsRel : goodsRelList) {
@@ -233,7 +237,7 @@ public class XfptSchoolSupplierRelServiceImpl extends ServiceImpl<XfptSchoolSupp
             List<XfptSchoolSupplierGoodsRel> xfptSchoolSupplierGoodsRelList = xfptSchoolSupplierRel.getXfptSchoolSupplierGoodsRelList();
             Long id = xfptSchoolSupplierRel.getId();
             if (StringUtils.isNotNull(xfptSchoolSupplierGoodsRelList) && !xfptSchoolSupplierGoodsRelList.isEmpty()) {
-                validateGoodsRelList(xfptSchoolSupplierGoodsRelList);
+                validateGoodsRelList(xfptSchoolSupplierGoodsRelList, xfptSchoolSupplierRel.getSupplierId());
                 for (XfptSchoolSupplierGoodsRel xfptSchoolSupplierGoodsRel : xfptSchoolSupplierGoodsRelList) {
                     xfptSchoolSupplierGoodsRel.setRelId(id);
                     xfptSchoolSupplierGoodsRel.setSchoolId(xfptSchoolSupplierRel.getSchoolId());
@@ -259,7 +263,7 @@ public class XfptSchoolSupplierRelServiceImpl extends ServiceImpl<XfptSchoolSupp
             }
         }
 
-        private void validateGoodsRelList(List<XfptSchoolSupplierGoodsRel> goodsRelList)
+        private void validateGoodsRelList(List<XfptSchoolSupplierGoodsRel> goodsRelList, Long supplierId)
         {
             if (StringUtils.isEmpty(goodsRelList)) {
                 return;
@@ -269,9 +273,21 @@ public class XfptSchoolSupplierRelServiceImpl extends ServiceImpl<XfptSchoolSupp
                 if (StringUtils.isNull(goodsRel.getGoodsId())) {
                     throw new ServiceException("合作商品不能为空");
                 }
+                validateGoodsOwnership(goodsRel.getGoodsId(), supplierId);
                 if (!goodsIds.add(goodsRel.getGoodsId())) {
                     throw new ServiceException("合作商品不能重复关联");
                 }
+            }
+        }
+
+        private void validateGoodsOwnership(Long goodsId, Long supplierId)
+        {
+            XfptGoods goods = xfptGoodsMapper.selectById(goodsId);
+            if (StringUtils.isNull(goods) || "1".equals(goods.getDelFlag())) {
+                throw new ServiceException("鍚堜綔鍟嗗搧涓嶅瓨鍦ㄦ垨宸插垹闄?");
+            }
+            if (supplierId != null && !supplierId.equals(goods.getSupplierId())) {
+                throw new ServiceException("鍚堜綔鍟嗗搧蹇呴』灞炰簬褰撳墠鍚堜綔渚涘簲鍟?");
             }
         }
 
