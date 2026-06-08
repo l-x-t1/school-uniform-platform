@@ -46,6 +46,11 @@ public interface IXfptSupplierSettleApplyService extends IService<XfptSupplierSe
     SupplierSettleEntryContextVo checkBinding(String username, String password);
 
     /**
+     * 查询当前公告发布人名下待审核的入驻记录
+     */
+    List<XfptSupplierSettleApply> listPendingByPublisher(XfptSupplierSettleApply query);
+
+    /**
      * 查询当前公告发布人名下已审核通过的入驻记录
      */
     List<XfptSupplierSettleApply> listApprovedByPublisher(XfptSupplierSettleApply query);

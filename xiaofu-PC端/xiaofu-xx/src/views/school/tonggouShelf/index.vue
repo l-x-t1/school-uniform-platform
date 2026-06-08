@@ -212,9 +212,29 @@
           </el-table>
         </div>
 
-        <div v-if="detail.detailContent" class="detail-section">
+        <div class="detail-section">
           <div class="section-title">商品详情</div>
-          <div class="detail-content" v-html="detail.detailContent" />
+          <div v-if="detail.detailContent" class="detail-content" v-html="detail.detailContent" />
+          <div v-else class="detail-empty">暂无详情内容</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-title">详情图片</div>
+          <div v-if="getImageList(detail.detailImagesJson).length" class="detail-image-grid">
+            <div
+              v-for="(image, index) in getImageList(detail.detailImagesJson)"
+              :key="image + index"
+              class="detail-image-item"
+            >
+              <image-preview :src="image" :width="120" :height="120" :hover-scale="false" />
+            </div>
+          </div>
+          <div v-else class="detail-empty">暂无详情图片</div>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-title">补充说明</div>
+          <div class="detail-content">{{ detail.remark || '-' }}</div>
         </div>
       </div>
     </el-drawer>
@@ -322,6 +342,60 @@ export default {
         return '¥' + row.groupMinPrice
       }
       return '-'
+    },
+    getImageList(detailImagesJson) {
+      const normalizedValue = this.normalizeDetailImagesValue(detailImagesJson)
+      if (!normalizedValue) {
+        return []
+      }
+      return normalizedValue.split(',').map(item => item.trim()).filter(Boolean)
+    },
+    normalizeDetailImagesValue(value) {
+      if (!value) {
+        return null
+      }
+      if (Array.isArray(value)) {
+        const paths = this.extractDetailImagePaths(value)
+        return paths.length > 0 ? paths.join(',') : null
+      }
+      const text = String(value).trim()
+      if (!text) {
+        return null
+      }
+      if (text.startsWith('[') || text.startsWith('{')) {
+        try {
+          const paths = this.extractDetailImagePaths(JSON.parse(text))
+          return paths.length > 0 ? paths.join(',') : text
+        } catch (error) {
+          return text
+        }
+      }
+      return text
+    },
+    extractDetailImagePaths(value) {
+      if (!value) {
+        return []
+      }
+      if (typeof value === 'string') {
+        return value.trim() ? [value.trim()] : []
+      }
+      if (Array.isArray(value)) {
+        return value.reduce((list, item) => list.concat(this.extractDetailImagePaths(item)), [])
+      }
+      if (typeof value === 'object') {
+        const imageKeys = ['url', 'path', 'src', 'image', 'imageUrl', 'fileUrl', 'filePath']
+        const images = imageKeys.reduce((list, key) => {
+          return value[key] ? list.concat(this.extractDetailImagePaths(value[key])) : list
+        }, [])
+        if (images.length > 0) {
+          return images
+        }
+        const listKeys = ['images', 'imageList', 'detailImages', 'urls', 'list']
+        return listKeys.reduce((list, key) => {
+          return value[key] ? list.concat(this.extractDetailImagePaths(value[key])) : list
+        }, [])
+      }
+      return []
     }
   }
 }
@@ -435,5 +509,25 @@ export default {
   line-height: 1.8;
   color: #4e5969;
   word-break: break-word;
+}
+
+.detail-empty {
+  color: #909399;
+  line-height: 1.8;
+}
+
+.detail-image-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.detail-image-item {
+  width: 120px;
+  height: 120px;
+  overflow: hidden;
+  border: 1px solid #e8edf5;
+  border-radius: 10px;
+  background: #f6f8fb;
 }
 </style>

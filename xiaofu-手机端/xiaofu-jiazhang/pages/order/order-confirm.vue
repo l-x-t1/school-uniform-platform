@@ -322,6 +322,14 @@ export default {
         return;
       }
 
+      if (this.items.some((item) => !item.supplierId)) {
+        uni.showToast({
+          title: '商品供应商信息缺失，请重新选择商品后再提交',
+          icon: 'none'
+        });
+        return;
+      }
+
       this.submitting = true;
       uni.showLoading({ title: '提交中...' });
 
@@ -350,11 +358,11 @@ export default {
           mainImage: item.mainImage || item.image || '',
           name: item.name,
           goodsName: item.name || item.goodsName,
-          supplierId: item.supplierId || 1,
-          supplierName: item.supplierName || '测试供应商',
-          schoolId: item.schoolId || 1,
+          supplierId: item.supplierId || null,
+          supplierName: item.supplierName || '',
+          schoolId: item.schoolId || null,
           schoolName: item.schoolName || this.student.school,
-          deptId: item.deptId || item.schoolId || 1,
+          deptId: item.deptId || item.schoolId || null,
           noticeId: item.noticeId || null,
           orderType: item.orderType || item.saleType || '1',
           saleType: item.orderType || item.saleType || '1'
@@ -387,10 +395,10 @@ export default {
             orderTypeText: this.currentOrderTypeText,
             payStatus: '0',
             orderStatus: '0',
-            schoolId: payload.items[0]?.schoolId || 1,
+            schoolId: payload.items[0]?.schoolId || '',
             schoolName: payload.items[0]?.schoolName || this.student.school,
-            supplierId: payload.items[0]?.supplierId || 1,
-            supplierName: payload.items[0]?.supplierName || '测试供应商',
+            supplierId: payload.items[0]?.supplierId || null,
+            supplierName: payload.items[0]?.supplierName || '',
             studentId: this.student.id,
             studentName: this.student.name,
             gradeName: this.student.grade,

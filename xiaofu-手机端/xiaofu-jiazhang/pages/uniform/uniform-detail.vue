@@ -527,7 +527,7 @@ export default {
         schoolId: this.uniform.schoolId || this.uniform.shcoolId || selectedStudent.schoolId || selectedStudent.shcoolId || selectedStudent.deptId || 0,
         schoolName: this.uniform.schoolName || selectedStudent.school || selectedStudent.schoolName || '',
         deptId: this.uniform.deptId || this.uniform.schoolId || this.uniform.shcoolId || selectedStudent.schoolId || selectedStudent.shcoolId || selectedStudent.deptId || 0,
-        supplierId: this.uniform.supplierId || 1,
+        supplierId: this.uniform.supplierId || null,
         supplierName: this.uniform.supplierName || '',
         selected: true,
         checkedFlag: '1',

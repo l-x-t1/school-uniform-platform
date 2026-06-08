@@ -24,7 +24,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item v-if="isAdmin" label="所属学校" prop="schoolId">
+      <el-form-item v-if="isAdmin || isSupplier" label="所属学校" prop="schoolId">
         <el-select
           v-model="queryParams.schoolId"
           placeholder="请选择学校"
@@ -169,13 +169,14 @@
 import {
   listGroupNotice,
   getGroupNotice,
-  listSupplierGroupNotice,
-  getSupplierGroupNotice
+  listSupplierCooperationGroupNotice,
+  getSupplierCooperationGroupNotice
 } from '@/api/school/groupNotice'
 import {
   listSchoolMessage,
   getSchoolMessageByDeptId
 } from '@/api/school/schoolMessage'
+import { listSchoolSupplierRel } from '@/api/school/schoolSupplierRel'
 
 export default {
   name: 'GroupNoticeReadonly',
@@ -243,6 +244,24 @@ export default {
       if (this.isSupplier) {
         this.currentSchool = {}
         this.queryParams.schoolId = null
+        listSchoolSupplierRel({
+          pageNum: 1,
+          pageSize: 1000,
+          cooperateStatus: '1'
+        }).then((res) => {
+          const rows = Array.isArray(res.rows) ? res.rows : []
+          const schoolMap = new Map()
+          rows.forEach((item) => {
+            if (!item || !item.schoolId || schoolMap.has(item.schoolId)) {
+              return
+            }
+            schoolMap.set(item.schoolId, {
+              id: item.schoolId,
+              schoolName: item.schoolName || `学校${item.schoolId}`
+            })
+          })
+          this.schoolOptions = Array.from(schoolMap.values())
+        })
         return
       }
       const deptId = this.$store.getters.deptId
@@ -259,7 +278,7 @@ export default {
     getList() {
       this.loading = true
       const request = this.isSupplier
-        ? listSupplierGroupNotice(this.queryParams)
+        ? listSupplierCooperationGroupNotice(this.queryParams)
         : listGroupNotice(this.queryParams)
       request
         .then((response) => {
@@ -289,7 +308,7 @@ export default {
       this.detailOpen = true
       this.detailLoading = true
       const request = this.isSupplier
-        ? getSupplierGroupNotice(row.id)
+        ? getSupplierCooperationGroupNotice(row.id)
         : getGroupNotice(row.id)
       request
         .then((response) => {

@@ -156,6 +156,34 @@
         g.id desc
     </select>
 
+    <select id="selectSupplierCooperationGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
+        select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
+               g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
+               g.update_time, g.remark, g.del_flag
+        from xfpt_group_notice g
+        where g.del_flag = 0
+          and exists (
+              select 1
+              from xfpt_school_supplier_rel rel
+              where rel.school_id = g.school_id
+                and rel.supplier_id = #{supplierId}
+                and rel.cooperate_status = '1'
+                and rel.del_flag = '0'
+          )
+        <if test="schoolId != null"> and g.school_id = #{schoolId}</if>
+        <if test="schoolName != null and schoolName != ''"> and g.school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="title != null and title != ''"> and g.title like concat('%', #{title}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and g.notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="noticeType != null and noticeType != ''"> and g.notice_type = #{noticeType}</if>
+        <if test="status != null and status != ''"> and g.status = #{status}</if>
+        and g.status in ('1', '2')
+        order by
+        case when g.publish_time is null then 1 else 0 end,
+        g.publish_time desc,
+        g.id desc
+    </select>
+
     <select id="selectXfptGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeXfptGroupNoticeItemResult">
         select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, purchase_start_time, purchase_end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice
@@ -173,6 +201,25 @@
           and g.del_flag = 0
           and g.status in ('1', '2')
           and gns.supplier_id = #{supplierId}
+    </select>
+
+    <select id="selectSupplierCooperationGroupNoticeById" resultMap="XfptGroupNoticeResult">
+        select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
+               g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
+               g.update_time, g.remark, g.del_flag
+        from xfpt_group_notice g
+        where g.id = #{id}
+          and g.del_flag = 0
+          and g.status in ('1', '2')
+          and exists (
+              select 1
+              from xfpt_school_supplier_rel rel
+              where rel.school_id = g.school_id
+                and rel.supplier_id = #{supplierId}
+                and rel.cooperate_status = '1'
+                and rel.del_flag = '0'
+          )
     </select>
 
     <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">

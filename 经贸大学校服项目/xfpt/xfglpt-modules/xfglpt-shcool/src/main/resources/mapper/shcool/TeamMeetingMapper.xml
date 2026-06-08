@@ -263,7 +263,7 @@
             and cggg.del_flag = 0
             and find_in_set(#{parentDeptId},cggg.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
-                and cggg.team_id in
+                and cggg.team_meeting_id in
                 <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
                     #{teamMeetingIdCurr}
                 </foreach>

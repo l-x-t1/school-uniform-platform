@@ -67,6 +67,15 @@ public class XfptGroupNoticeController extends BaseController {
         return getDataTable(list);
     }
 
+@Operation(summary = "供应商查询合作学校发布的选购公告列表")
+@RequiresPermissions("school:groupNotice:list")
+@GetMapping("/supplier/cooperation/list")
+    public TableDataInfo supplierCooperationList(XfptGroupNotice xfptGroupNotice) {
+        startPage();
+        List<XfptGroupNotice> list = xfptGroupNoticeService.selectSupplierCooperationGroupNoticeList(xfptGroupNotice);
+        return getDataTable(list);
+    }
+
 @Operation(summary = "查询统购订购进度列表")
 @RequiresPermissions("school:tgjd:list")
 @GetMapping("/progress/list")
@@ -138,6 +147,13 @@ public class XfptGroupNoticeController extends BaseController {
     @GetMapping(value = "/supplier/{id}")
     public AjaxResult getSupplierInfo(@PathVariable("id") Long id) {
             return success(xfptGroupNoticeService.selectSupplierGroupNoticeById(id));
+    }
+
+    @Operation(summary = "供应商获取合作学校发布的选购公告详细信息")
+    @RequiresPermissions("school:groupNotice:query")
+    @GetMapping(value = "/supplier/cooperation/{id}")
+    public AjaxResult getSupplierCooperationInfo(@PathVariable("id") Long id) {
+            return success(xfptGroupNoticeService.selectSupplierCooperationGroupNoticeById(id));
     }
 
     @Operation(summary = "查询统购公告可选合作供应商")

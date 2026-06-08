@@ -47,4 +47,6 @@ public interface XfptOrderInfoMapper extends BaseMapper<XfptOrderInfo> {
         XfptGroupNotice selectGroupNoticeForPurchase(@Param("noticeId") Long noticeId);
 
         int countGroupNoticeGoods(@Param("noticeId") Long noticeId, @Param("goodsId") Long goodsId);
+
+        int countGoodsSupplierMatch(@Param("goodsId") Long goodsId, @Param("supplierId") Long supplierId);
 }

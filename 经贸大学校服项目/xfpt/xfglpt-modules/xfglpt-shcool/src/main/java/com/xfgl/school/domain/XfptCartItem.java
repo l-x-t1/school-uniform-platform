@@ -93,4 +93,24 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "统购公告ID")
     private Long noticeId;
 
+    /** 供应商ID（商品维度回填） */
+    @TableField(exist = false)
+    @Schema(description = "供应商ID")
+    private Long supplierId;
+
+    /** 供应商名称（商品维度回填） */
+    @TableField(exist = false)
+    @Schema(description = "供应商名称")
+    private String supplierName;
+
+    /** 学校ID（公告维度回填） */
+    @TableField(exist = false)
+    @Schema(description = "学校ID")
+    private Long schoolId;
+
+    /** 学校名称（公告维度回填） */
+    @TableField(exist = false)
+    @Schema(description = "学校名称")
+    private String schoolName;
+
         }

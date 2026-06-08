@@ -155,7 +155,6 @@
             >移除黑名单</el-button
           >
           <el-button
-            v-hasPermi="['school:manufacturers:userManage']"
             icon="el-icon-user"
             type="text"
             @click="handleUserManage(scope.row)"
@@ -165,14 +164,13 @@
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:supplierMessage:edit']"
+            v-hasPermi="['school:manufacturers:edit']"
             >修改</el-button
           >
           <el-button
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['school:supplierMessage:remove']"
             >删除</el-button
           >
         </template>
