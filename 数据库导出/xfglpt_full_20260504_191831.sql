@@ -2764,6 +2764,10 @@ INSERT INTO `xfpt_organization_mode` VALUES (75,'选购公告',NULL,NULL,NULL,NU
 /*!40000 ALTER TABLE `xfpt_organization_mode` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- Sync 2026-06-08: add signup_limit for organization mode
+ALTER TABLE `xfpt_organization_mode`
+  ADD COLUMN `SIGNUP_LIMIT` int DEFAULT NULL COMMENT '报名上限' AFTER `BMJZ_TIME`;
+
 --
 -- Table structure for table `xfpt_parent_mode`
 --
