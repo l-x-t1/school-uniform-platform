@@ -7685,4 +7685,121 @@ WHERE @city_edu_role_id IS NOT NULL
       AND `MENU_ID` = @platform_usage_order_item_perm_id
   );
 
+-- ---------------------------------------------------------------------------
+-- Audit and repair helpers for xfpt_school_supplier_goods_rel
+-- Synced from sql/20260608_school_supplier_goods_rel_audit.sql on 2026-06-08
+-- Review each result set before running any fix statement.
+
+-- 1) Goods relation rows whose rel_id cannot find a valid cooperation record.
+select gsr.id,
+       gsr.rel_id,
+       gsr.school_id,
+       gsr.supplier_id,
+       gsr.goods_id,
+       gsr.status,
+       gsr.del_flag
+from xfpt_school_supplier_goods_rel gsr
+left join xfpt_school_supplier_rel rel
+    on rel.id = gsr.rel_id
+where gsr.del_flag = '0'
+  and (rel.id is null or rel.del_flag <> '0');
+
+-- 2) Goods relation rows whose goods_id cannot find a valid goods record.
+select gsr.id,
+       gsr.rel_id,
+       gsr.school_id,
+       gsr.supplier_id,
+       gsr.goods_id,
+       gsr.status,
+       gsr.del_flag
+from xfpt_school_supplier_goods_rel gsr
+left join xfpt_goods goods
+    on goods.id = gsr.goods_id
+where gsr.del_flag = '0'
+  and (goods.id is null or goods.del_flag <> '0');
+
+-- 3) Snapshot school/supplier ids that are inconsistent with the cooperation record.
+select gsr.id,
+       gsr.rel_id,
+       gsr.school_id as goods_rel_school_id,
+       rel.school_id as rel_school_id,
+       gsr.supplier_id as goods_rel_supplier_id,
+       rel.supplier_id as rel_supplier_id
+from xfpt_school_supplier_goods_rel gsr
+inner join xfpt_school_supplier_rel rel
+    on rel.id = gsr.rel_id
+where gsr.del_flag = '0'
+  and rel.del_flag = '0'
+  and (
+    coalesce(gsr.school_id, -1) <> coalesce(rel.school_id, -1)
+    or coalesce(gsr.supplier_id, -1) <> coalesce(rel.supplier_id, -1)
+  );
+
+-- 4) Goods relation supplier_id that is inconsistent with the goods owner.
+select gsr.id,
+       gsr.rel_id,
+       gsr.supplier_id as goods_rel_supplier_id,
+       goods.supplier_id as goods_supplier_id,
+       gsr.goods_id
+from xfpt_school_supplier_goods_rel gsr
+inner join xfpt_goods goods
+    on goods.id = gsr.goods_id
+where gsr.del_flag = '0'
+  and goods.del_flag = '0'
+  and coalesce(gsr.supplier_id, -1) <> coalesce(goods.supplier_id, -1);
+
+-- 5) Cooperation rows that reference a goods record owned by another supplier.
+select gsr.id,
+       gsr.rel_id,
+       rel.supplier_id as rel_supplier_id,
+       goods.supplier_id as goods_supplier_id,
+       gsr.goods_id
+from xfpt_school_supplier_goods_rel gsr
+inner join xfpt_school_supplier_rel rel
+    on rel.id = gsr.rel_id
+inner join xfpt_goods goods
+    on goods.id = gsr.goods_id
+where gsr.del_flag = '0'
+  and rel.del_flag = '0'
+  and goods.del_flag = '0'
+  and coalesce(rel.supplier_id, -1) <> coalesce(goods.supplier_id, -1);
+
+-- Fix A) Backfill snapshot school_id/supplier_id from the cooperation record.
+-- update xfpt_school_supplier_goods_rel gsr
+-- inner join xfpt_school_supplier_rel rel
+--     on rel.id = gsr.rel_id
+--    and rel.del_flag = '0'
+-- set gsr.school_id = rel.school_id,
+--     gsr.supplier_id = rel.supplier_id
+-- where gsr.del_flag = '0'
+--   and (
+--     coalesce(gsr.school_id, -1) <> coalesce(rel.school_id, -1)
+--     or coalesce(gsr.supplier_id, -1) <> coalesce(rel.supplier_id, -1)
+--   );
+
+-- Fix B) Soft delete rows whose rel_id no longer has a valid cooperation record.
+-- update xfpt_school_supplier_goods_rel gsr
+-- left join xfpt_school_supplier_rel rel
+--     on rel.id = gsr.rel_id
+-- set gsr.del_flag = '1'
+-- where gsr.del_flag = '0'
+--   and (rel.id is null or rel.del_flag <> '0');
+
+-- Fix C) Soft delete rows whose goods_id no longer has a valid goods record.
+-- update xfpt_school_supplier_goods_rel gsr
+-- left join xfpt_goods goods
+--     on goods.id = gsr.goods_id
+-- set gsr.del_flag = '1'
+-- where gsr.del_flag = '0'
+--   and (goods.id is null or goods.del_flag <> '0');
+
+-- Fix D) Align snapshot supplier_id to the current goods owner after manual review.
+-- update xfpt_school_supplier_goods_rel gsr
+-- inner join xfpt_goods goods
+--     on goods.id = gsr.goods_id
+--    and goods.del_flag = '0'
+-- set gsr.supplier_id = goods.supplier_id
+-- where gsr.del_flag = '0'
+--   and coalesce(gsr.supplier_id, -1) <> coalesce(goods.supplier_id, -1);
+
 -- Dump completed on 2026-05-04 19:18:33
