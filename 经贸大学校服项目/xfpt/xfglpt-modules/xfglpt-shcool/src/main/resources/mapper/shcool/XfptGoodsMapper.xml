@@ -69,17 +69,17 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
                    notice.school_id,
                    notice.school_name,
                    min(notice.id) as notice_id,
-                   min(notice.start_time) as purchase_start_time,
-                   max(notice.end_time) as purchase_end_time
+                   min(notice.purchase_start_time) as purchase_start_time,
+                   max(notice.purchase_end_time) as purchase_end_time
             from xfpt_group_notice_item item
             inner join xfpt_group_notice notice on notice.id = item.notice_id
                 and notice.del_flag = '0'
                 and notice.notice_type = '1'
                 and notice.status = '1'
-                and notice.start_time is not null
-                and notice.end_time is not null
-                and notice.start_time &lt;= now()
-                and notice.end_time &gt;= now()
+                and notice.purchase_start_time is not null
+                and notice.purchase_end_time is not null
+                and notice.purchase_start_time &lt;= now()
+                and notice.purchase_end_time &gt;= now()
             where item.del_flag = '0'
             group by item.goods_id, notice.school_id, notice.school_name
         ) active_notice on active_notice.goods_id = g.id

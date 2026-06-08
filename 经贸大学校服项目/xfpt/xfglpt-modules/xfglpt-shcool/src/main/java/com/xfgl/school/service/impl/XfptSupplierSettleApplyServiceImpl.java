@@ -21,11 +21,14 @@ import com.xfgl.school.service.IXfptNoticeSupplierRelService;
 import com.xfgl.school.service.IXfptSupplierSettleApplyService;
 import com.xfgl.school.mp.MpUtil;
 import com.xfgl.school.utils.MailUtils;
+import com.xfgl.system.api.domain.NoticePublisherVo;
 import com.xfgl.system.api.RemoteNoticService;
 import com.xfgl.system.api.RemoteUserService;
 import com.xfgl.system.api.domain.SysUser;
 import com.xfgl.system.api.domain.XfptNotice;
 import com.xfgl.system.api.model.LoginUser;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -309,6 +312,32 @@ public class XfptSupplierSettleApplyServiceImpl
     }
 
     @Override
+    public List<XfptSupplierSettleApply> listPendingByPublisher(XfptSupplierSettleApply query) {
+        String supplierName = query != null ? StringUtils.trimToNull(query.getSupplierName()) : null;
+        String supplierPhone = query != null ? StringUtils.trimToNull(query.getSupplierPhone()) : null;
+        List<XfptSupplierSettleApply> list = lambdaQuery()
+                .eq(XfptSupplierSettleApply::getAuditStatus, AUDIT_STATUS_PENDING)
+                .like(StringUtils.isNotBlank(supplierName),
+                        XfptSupplierSettleApply::getSupplierName, supplierName)
+                .like(StringUtils.isNotBlank(supplierPhone),
+                        XfptSupplierSettleApply::getSupplierPhone, supplierPhone)
+                .orderByDesc(XfptSupplierSettleApply::getCreateTime)
+                .list();
+        if (list == null || list.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        SysUser currentUser = currentLoginUser();
+        List<XfptSupplierSettleApply> result = new ArrayList<>();
+        for (XfptSupplierSettleApply item : list) {
+            if (canCurrentUserAudit(item, null, currentUser, true)) {
+                result.add(item);
+            }
+        }
+        return result;
+    }
+
+    @Override
     public List<XfptSupplierSettleApply> listApprovedByPublisher(XfptSupplierSettleApply query) {
         String supplierName = query != null ? StringUtils.trimToNull(query.getSupplierName()) : null;
         String noticeTitle = query != null ? StringUtils.trimToNull(query.getNoticeTitle()) : null;
@@ -430,39 +459,86 @@ public class XfptSupplierSettleApplyServiceImpl
     }
 
     private void ensureCurrentUserCanAudit(XfptSupplierSettleApply apply, XfptNotice notice) {
-        Long publisherUserId = notice == null ? null : notice.getUserId();
-        if (publisherUserId == null) {
-            publisherUserId = apply.getNoticeUserId();
-        }
         SysUser currentUser = currentLoginUser();
-        Long currentUserId = currentUser.getUserId();
-        if (publisherUserId != null && publisherUserId.equals(currentUserId)) {
-            syncNoticePublisher(apply, notice);
+        if (canCurrentUserAudit(apply, notice, currentUser, true)) {
             return;
         }
 
+        Long publisherUserId = notice == null ? apply.getNoticeUserId() : notice.getUserId();
         String noticeCreator = notice == null ? null : StringUtils.trim(notice.getCreateBy());
+        Long currentUserId = currentUser.getUserId();
         String currentUsername = StringUtils.trim(currentUser.getUserName());
         String currentNickname = StringUtils.trim(currentUser.getNickName());
-        if (StringUtils.isNotBlank(noticeCreator)
-                && (noticeCreator.equals(currentUsername) || noticeCreator.equals(currentNickname))) {
-            log.info("供应商入驻审核命中发布人名称兜底校验, applyId={}, noticeId={}, currentUserId={}, username={}, nickName={}, noticeCreateBy={}, noticeUserId={}",
-                    apply.getId(), apply.getNoticeId(), currentUserId, currentUsername, currentNickname,
-                    noticeCreator, publisherUserId);
-            syncNoticePublisher(apply, notice);
-            return;
-        }
-
         log.warn("供应商入驻审核权限校验失败, applyId={}, noticeId={}, currentUserId={}, username={}, nickName={}, noticeUserId={}, applyNoticeUserId={}, noticeCreateBy={}",
                 apply.getId(), apply.getNoticeId(), currentUserId, currentUsername, currentNickname,
                 publisherUserId, apply.getNoticeUserId(), noticeCreator);
         throw new ServiceException("仅公告发布人可审核该申请");
     }
 
-    private void syncNoticePublisher(XfptSupplierSettleApply apply, XfptNotice notice) {
-        if (notice != null && notice.getUserId() != null && !notice.getUserId().equals(apply.getNoticeUserId())) {
-            apply.setNoticeUserId(notice.getUserId());
+    private boolean canCurrentUserAudit(XfptSupplierSettleApply apply, XfptNotice notice, SysUser currentUser, boolean syncApply) {
+        if (apply == null || currentUser == null) {
+            return false;
         }
+        NoticePublisherVo publisherVo = resolveNoticePublisher(apply, notice);
+        Long publisherUserId = publisherVo == null ? apply.getNoticeUserId() : publisherVo.getUserId();
+        String noticeCreator = publisherVo == null ? null : StringUtils.trim(publisherVo.getCreateBy());
+        Long currentUserId = currentUser.getUserId();
+        String currentUsername = StringUtils.trim(currentUser.getUserName());
+        String currentNickname = StringUtils.trim(currentUser.getNickName());
+
+        if (publisherUserId != null && publisherUserId.equals(currentUserId)) {
+            if (syncApply) {
+                syncNoticePublisher(apply, publisherUserId);
+            }
+            return true;
+        }
+
+        if (StringUtils.isNotBlank(noticeCreator)
+                && (noticeCreator.equals(currentUsername) || noticeCreator.equals(currentNickname))) {
+            log.info("供应商入驻审核命中发布人名称兜底校验, applyId={}, noticeId={}, currentUserId={}, username={}, nickName={}, noticeCreateBy={}, noticeUserId={}",
+                    apply.getId(), apply.getNoticeId(), currentUserId, currentUsername, currentNickname,
+                    noticeCreator, publisherUserId);
+            if (syncApply) {
+                syncNoticePublisher(apply, publisherUserId);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    private NoticePublisherVo resolveNoticePublisher(XfptSupplierSettleApply apply, XfptNotice notice) {
+        Long publisherUserId = notice == null ? null : notice.getUserId();
+        String noticeCreator = notice == null ? null : StringUtils.trim(notice.getCreateBy());
+        if (publisherUserId == null) {
+            publisherUserId = apply.getNoticeUserId();
+        }
+        if (apply.getNoticeId() == null) {
+            return new NoticePublisherVo(publisherUserId, noticeCreator);
+        }
+
+        R<NoticePublisherVo> publisherResult = remoteNoticService.getNoticePublisher(apply.getNoticeId(), SecurityConstants.INNER);
+        if (publisherResult != null && R.isSuccess(publisherResult) && publisherResult.getData() != null) {
+            NoticePublisherVo publisherVo = publisherResult.getData();
+            return new NoticePublisherVo(
+                    publisherVo.getUserId() != null ? publisherVo.getUserId() : publisherUserId,
+                    StringUtils.isNotBlank(publisherVo.getCreateBy()) ? StringUtils.trim(publisherVo.getCreateBy()) : noticeCreator
+            );
+        }
+
+        return new NoticePublisherVo(publisherUserId, noticeCreator);
+    }
+
+    private void syncNoticePublisher(XfptSupplierSettleApply apply, Long publisherUserId) {
+        if (apply == null || publisherUserId == null || publisherUserId.equals(apply.getNoticeUserId())) {
+            return;
+        }
+        apply.setNoticeUserId(publisherUserId);
+        lambdaUpdate()
+                .eq(XfptSupplierSettleApply::getId, apply.getId())
+                .set(XfptSupplierSettleApply::getNoticeUserId, publisherUserId)
+                .set(XfptSupplierSettleApply::getUpdateBy, defaultString(SecurityUtils.getUsername(), "supplier_settle_sync"))
+                .set(XfptSupplierSettleApply::getUpdateTime, new Date())
+                .update();
     }
 
     private XfptNotice validateNoticeOrThrow(Long noticeId, boolean checkExpired) {

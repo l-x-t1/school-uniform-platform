@@ -147,11 +147,19 @@ function buildOrderPayload(data = {}) {
     {}
   const selectedAddress = uni.getStorageSync('selectedAddress') || {}
   const items = Array.isArray(data.items) ? data.items : []
+  const firstItem = items[0] || {}
   const totalAmount = items.reduce((sum, item) => sum + Number(item.price || item.unitPrice || 0) * Number(item.quantity || 1), 0)
 
-  const orderType = String(data.orderType || items[0]?.orderType || items[0]?.saleType || '2')
+  if (!items.length) {
+    throw new Error('订单商品不能为空')
+  }
+  if (!firstItem.supplierId) {
+    throw new Error('商品供应商信息缺失，请重新选择商品后再提交')
+  }
+
+  const orderType = String(data.orderType || firstItem.orderType || firstItem.saleType || '2')
   const noticeId = orderType === '1'
-    ? Number(data.noticeId || items[0]?.noticeId || 0) || null
+    ? Number(data.noticeId || firstItem.noticeId || 0) || null
     : null
   const deptId = Number(selectedStudent.deptId || selectedStudent.schoolId || 1)
   return {
@@ -160,8 +168,8 @@ function buildOrderPayload(data = {}) {
     noticeId,
     schoolId: Number(selectedStudent.schoolId || 1),
     schoolName: selectedStudent.school || selectedStudent.schoolName || '测试学校',
-    supplierId: Number(items[0]?.supplierId || 1),
-    supplierName: items[0]?.supplierName || '测试供应商',
+    supplierId: Number(firstItem.supplierId),
+    supplierName: firstItem.supplierName || '',
     userId,
     userName,
     studentId: Number(data.studentId || selectedStudent.id || 1),

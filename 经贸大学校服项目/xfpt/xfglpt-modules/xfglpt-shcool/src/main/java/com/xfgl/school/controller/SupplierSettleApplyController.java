@@ -5,6 +5,8 @@ import com.xfgl.common.core.utils.poi.ExcelUtil;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
 import com.xfgl.common.core.web.page.TableDataInfo;
+import com.xfgl.common.core.web.page.PageDomain;
+import com.xfgl.common.core.web.page.TableSupport;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.school.domain.XfptSupplierSettleApply;
@@ -13,6 +15,7 @@ import com.xfgl.school.domain.vo.SupplierSettleEntryContextVo;
 import com.xfgl.school.service.IXfptSupplierSettleApplyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
@@ -78,18 +81,21 @@ public class SupplierSettleApplyController extends BaseController {
     @Operation(summary = "查询待审核的入驻申请列表")
     @GetMapping("/audit/list")
     public TableDataInfo auditList(XfptSupplierSettleApply query) {
-        String supplierName = query != null ? StringUtils.trimToNull(query.getSupplierName()) : null;
-        String supplierPhone = query != null ? StringUtils.trimToNull(query.getSupplierPhone()) : null;
-        startPage();
-        List<XfptSupplierSettleApply> list = supplierSettleApplyService.lambdaQuery()
-                .eq(XfptSupplierSettleApply::getAuditStatus, "0")
-                .like(StringUtils.isNotBlank(supplierName),
-                        XfptSupplierSettleApply::getSupplierName, supplierName)
-                .like(StringUtils.isNotBlank(supplierPhone),
-                        XfptSupplierSettleApply::getSupplierPhone, supplierPhone)
-                .orderByDesc(XfptSupplierSettleApply::getCreateTime)
-                .list();
-        return getDataTable(list);
+        List<XfptSupplierSettleApply> list = supplierSettleApplyService.listPendingByPublisher(query);
+        PageDomain pageDomain = TableSupport.buildPageRequest();
+        int pageNum = pageDomain.getPageNum() == null || pageDomain.getPageNum() < 1 ? 1 : pageDomain.getPageNum();
+        int pageSize = pageDomain.getPageSize() == null || pageDomain.getPageSize() < 1 ? 10 : pageDomain.getPageSize();
+        int fromIndex = Math.max((pageNum - 1) * pageSize, 0);
+        List<XfptSupplierSettleApply> pageRows = fromIndex >= list.size()
+                ? Collections.emptyList()
+                : list.subList(fromIndex, Math.min(fromIndex + pageSize, list.size()));
+
+        TableDataInfo rspData = new TableDataInfo();
+        rspData.setCode(200);
+        rspData.setMsg("查询成功");
+        rspData.setRows(pageRows);
+        rspData.setTotal(list.size());
+        return rspData;
     }
 
     @Operation(summary = "查询当前公告发布人已审核通过的入驻申请列表")

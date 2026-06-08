@@ -181,6 +181,9 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
             if (xfptOrderInfo == null || !"1".equals(String.valueOf(xfptOrderInfo.getOrderType()))) {
                 return;
             }
+            if (xfptOrderInfo.getSupplierId() == null) {
+                throw new ServiceException("订单缺少供应商信息，请重新选择商品后再提交");
+            }
             if (xfptOrderInfo.getNoticeId() == null) {
                 throw new ServiceException("统购下单必须携带统购公告ID");
             }
@@ -212,6 +215,10 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
                 int count = xfptOrderInfoMapper.countGroupNoticeGoods(xfptOrderInfo.getNoticeId(), item.getGoodsId());
                 if (count <= 0) {
                     throw new ServiceException("订单商品不属于当前统购公告，不能下单");
+                }
+                int supplierMatched = xfptOrderInfoMapper.countGoodsSupplierMatch(item.getGoodsId(), xfptOrderInfo.getSupplierId());
+                if (supplierMatched <= 0) {
+                    throw new ServiceException("订单供应商与商品所属供应商不一致，请重新选择商品后再提交");
                 }
             }
         }

@@ -1582,6 +1582,29 @@ INSERT INTO `xfpt_anno_results` VALUES (39,'测试',NULL,NULL,'测试',NULL,NULL
 /*!40000 ALTER TABLE `xfpt_anno_results` ENABLE KEYS */;
 UNLOCK TABLES;
 
+-- 为 xfpt_anno_results 补充阶段类型字段，兼容选购结果公示/采购结果公告区分
+SET @stage_type_exists := (
+    SELECT COUNT(*)
+    FROM information_schema.COLUMNS
+    WHERE TABLE_SCHEMA = DATABASE()
+      AND TABLE_NAME = 'xfpt_anno_results'
+      AND COLUMN_NAME = 'stage_type'
+);
+
+SET @stage_type_sql := IF(
+    @stage_type_exists = 0,
+    'ALTER TABLE xfpt_anno_results ADD COLUMN stage_type varchar(10) DEFAULT ''1'' COMMENT ''阶段类型：1选购结果公示，2采购结果公告'' AFTER is_release',
+    'SELECT ''xfpt_anno_results.stage_type already exists'' AS message'
+);
+
+PREPARE stage_type_stmt FROM @stage_type_sql;
+EXECUTE stage_type_stmt;
+DEALLOCATE PREPARE stage_type_stmt;
+
+UPDATE xfpt_anno_results
+SET stage_type = '1'
+WHERE stage_type IS NULL OR stage_type = '';
+
 --
 -- Table structure for table `xfpt_buy_grade_class`
 --
@@ -2181,6 +2204,8 @@ CREATE TABLE `xfpt_group_notice` (
   `purchase_process_id` bigint DEFAULT NULL COMMENT '采购流程ID',
   `start_time` datetime DEFAULT NULL COMMENT '公告开始时间',
   `end_time` datetime DEFAULT NULL COMMENT '公告截止时间',
+  `purchase_start_time` datetime DEFAULT NULL COMMENT '统购开始时间',
+  `purchase_end_time` datetime DEFAULT NULL COMMENT '统购结束时间',
   `status` char(1) NOT NULL COMMENT '状态，0草稿 1已发布 2已结束 3已撤回',
   `apply_status` char(1) NOT NULL COMMENT '报名状态，0未开放 1报名中 2报名结束',
   `publish_time` datetime DEFAULT NULL COMMENT '发布时间',
@@ -2195,6 +2220,7 @@ CREATE TABLE `xfpt_group_notice` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `uk_xfpt_group_notice_code` (`notice_code`),
   KEY `idx_xfpt_group_notice_status` (`school_id`,`status`,`apply_status`),
+  KEY `idx_xfpt_group_notice_purchase_time` (`purchase_start_time`,`purchase_end_time`,`status`,`del_flag`),
   KEY `idx_xfpt_group_notice_dept` (`dept_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='统购公告';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -2205,7 +2231,7 @@ CREATE TABLE `xfpt_group_notice` (
 
 LOCK TABLES `xfpt_group_notice` WRITE;
 /*!40000 ALTER TABLE `xfpt_group_notice` DISABLE KEYS */;
-INSERT INTO `xfpt_group_notice` VALUES (1,165,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30','2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
+INSERT INTO `xfpt_group_notice` VALUES (1,165,'石家庄市第四十七中学','2026春季校服统购公告','DEMO-NOTICE-20260504185529-1','1','2026春季校服统购公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30',NULL,NULL,'1','1','2026-04-26 18:55:30',NULL,237,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0'),(2,274,'石家庄市第八十一中学','2026夏季校服统购结果公告','DEMO-NOTICE-20260504185529-2','2','2026夏季校服统购结果公告，本数据用于本地功能验证。','2025','2025',NULL,NULL,'2026-04-24 18:55:30','2026-05-24 18:55:30',NULL,NULL,'2','2','2026-04-26 18:55:30','2026-05-03 18:55:30',274,'admin','2026-05-04 18:55:30',NULL,NULL,'测试统购公告','0');
 /*!40000 ALTER TABLE `xfpt_group_notice` ENABLE KEYS */;
 UNLOCK TABLES;
 
