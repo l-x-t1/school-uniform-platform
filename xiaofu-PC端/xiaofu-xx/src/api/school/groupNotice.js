@@ -34,6 +34,23 @@ export function getSupplierGroupNotice(id) {
   })
 }
 
+// 供应商查询合作学校发布的选购公告列表
+export function listSupplierCooperationGroupNotice(query) {
+  return request({
+    url: '/school/groupNotice/supplier/cooperation/list',
+    method: 'get',
+    params: query
+  })
+}
+
+// 供应商查询合作学校发布的选购公告详情
+export function getSupplierCooperationGroupNotice(id) {
+  return request({
+    url: '/school/groupNotice/supplier/cooperation/' + id,
+    method: 'get'
+  })
+}
+
 // 查询统购公告可选合作供应商
 export function listGroupNoticeSupplierOptions(query) {
   return request({

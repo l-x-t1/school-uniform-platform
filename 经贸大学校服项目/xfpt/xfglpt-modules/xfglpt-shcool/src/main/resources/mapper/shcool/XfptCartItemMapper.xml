@@ -18,6 +18,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="checkedFlag"    column="checked_flag"    />
         <result property="orderType"    column="order_type"    />
         <result property="noticeId"    column="notice_id"    />
+        <result property="supplierId"    column="supplier_id"    />
+        <result property="supplierName"    column="supplier_name"    />
+        <result property="schoolId"    column="school_id"    />
+        <result property="schoolName"    column="school_name"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -27,30 +31,36 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptCartItemVo">
-        select id, user_id, student_id, goods_id, size_id, goods_name, size_name, main_image, unit_price, buy_num, checked_flag, order_type, notice_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_cart_item
+        select c.id, c.user_id, c.student_id, c.goods_id, c.size_id, c.goods_name, c.size_name, c.main_image,
+               c.unit_price, c.buy_num, c.checked_flag, c.order_type, c.notice_id,
+               g.supplier_id, g.supplier_name, notice.school_id, notice.school_name,
+               c.create_by, c.create_time, c.update_by, c.update_time, c.remark, c.del_flag
+        from xfpt_cart_item c
+        left join xfpt_goods g on g.id = c.goods_id and g.del_flag = '0'
+        left join xfpt_group_notice notice on notice.id = c.notice_id and notice.del_flag = '0'
     </sql>
 
     <select id="selectXfptCartItemList" parameterType="XfptCartItem" resultMap="XfptCartItemResult">
         <include refid="selectXfptCartItemVo"/>
         <include refid="search"/>
-            <if test="userId != null "> and user_id = #{userId}</if>
-            <if test="studentId != null "> and student_id = #{studentId}</if>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="sizeId != null "> and size_id = #{sizeId}</if>
-            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
-            <if test="sizeName != null  and sizeName != ''"> and size_name like concat('%', #{sizeName}, '%')</if>
-            <if test="mainImage != null  and mainImage != ''"> and main_image = #{mainImage}</if>
-            <if test="unitPrice != null "> and unit_price = #{unitPrice}</if>
-            <if test="buyNum != null "> and buy_num = #{buyNum}</if>
-            <if test="checkedFlag != null  and checkedFlag != ''"> and checked_flag = #{checkedFlag}</if>
-            <if test="orderType != null  and orderType != ''"> and order_type = #{orderType}</if>
-            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
+            <if test="userId != null "> and c.user_id = #{userId}</if>
+            <if test="studentId != null "> and c.student_id = #{studentId}</if>
+            <if test="goodsId != null "> and c.goods_id = #{goodsId}</if>
+            <if test="sizeId != null "> and c.size_id = #{sizeId}</if>
+            <if test="goodsName != null  and goodsName != ''"> and c.goods_name like concat('%', #{goodsName}, '%')</if>
+            <if test="sizeName != null  and sizeName != ''"> and c.size_name like concat('%', #{sizeName}, '%')</if>
+            <if test="mainImage != null  and mainImage != ''"> and c.main_image = #{mainImage}</if>
+            <if test="unitPrice != null "> and c.unit_price = #{unitPrice}</if>
+            <if test="buyNum != null "> and c.buy_num = #{buyNum}</if>
+            <if test="checkedFlag != null  and checkedFlag != ''"> and c.checked_flag = #{checkedFlag}</if>
+            <if test="orderType != null  and orderType != ''"> and c.order_type = #{orderType}</if>
+            <if test="noticeId != null "> and c.notice_id = #{noticeId}</if>
 
     </select>
 
     <select id="selectXfptCartItemById" parameterType="Long" resultMap="XfptCartItemResult">
         <include refid="selectXfptCartItemVo"/>
-        where id = #{id}
+        where c.id = #{id}
     </select>
 
     <insert id="insertXfptCartItem" parameterType="XfptCartItem" useGeneratedKeys="true" keyProperty="id">
@@ -133,6 +143,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where c.del_flag = 0
     </sql>
 </mapper>

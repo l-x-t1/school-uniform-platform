@@ -126,6 +126,14 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         return xfptGroupNoticeMapper.selectSupplierGroupNoticeList(xfptGroupNotice);
     }
 
+    @Override
+    public List<XfptGroupNotice> selectSupplierCooperationGroupNoticeList(XfptGroupNotice xfptGroupNotice)
+    {
+        xfptGroupNotice.setNoticeType("1");
+        xfptGroupNotice.setSupplierId(getCurrentSupplierId());
+        return xfptGroupNoticeMapper.selectSupplierCooperationGroupNoticeList(xfptGroupNotice);
+    }
+
     /**
      * 鏌ヨ缁熻喘鍏憡
      *
@@ -171,6 +179,23 @@ public class XfptGroupNoticeServiceImpl extends ServiceImpl<XfptGroupNoticeMappe
         enrichNoticeItems(xfptGroupNoticeItemList);
         xfptGroupNotice.setXfptGroupNoticeItemList(xfptGroupNoticeItemList);
         markSupplierViewedProgress(id, supplierId);
+        return xfptGroupNotice;
+    }
+
+    @Override
+    public XfptGroupNotice selectSupplierCooperationGroupNoticeById(Long id)
+    {
+        Long supplierId = getCurrentSupplierId();
+        XfptGroupNotice xfptGroupNotice = xfptGroupNoticeMapper.selectSupplierCooperationGroupNoticeById(id, supplierId);
+        if (xfptGroupNotice == null) {
+            throw new ServiceException("公告不存在");
+        }
+        if (!"1".equals(xfptGroupNotice.getNoticeType())) {
+            throw new ServiceException("供应商端只能查看学校发布的选购公告");
+        }
+        List<XfptGroupNoticeItem> xfptGroupNoticeItemList = xfptGroupNoticeMapper.selectXfptGroupNoticeItemById(id);
+        enrichNoticeItems(xfptGroupNoticeItemList);
+        xfptGroupNotice.setXfptGroupNoticeItemList(xfptGroupNoticeItemList);
         return xfptGroupNotice;
     }
 
