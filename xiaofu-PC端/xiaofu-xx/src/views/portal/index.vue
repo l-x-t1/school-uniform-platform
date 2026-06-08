@@ -256,6 +256,12 @@
         </div>
 
         <!-- 资讯与知识区域 -->
+        <div class="supplier-entry-section">
+          <div class="supplier-entry-section-header">
+            <div class="supplier-entry-section-tag">供应商专区</div>
+
+            <p>供应商入驻和学校采购报名是两步流程，入驻审核通过后才能参与学校采购项目。</p>
+          </div>
         <div class="supplier-entry-banner">
           <div class="supplier-entry-copy">
             <div class="supplier-entry-eyebrow">供应商参与指引</div>
@@ -268,6 +274,7 @@
             <el-button type="primary" @click="goSupplierSettleChannel">查看入驻公告</el-button>
             <el-button @click="openSupplierSettlePage">我要入驻</el-button>
           </div>
+        </div>
         </div>
 
         <div class="info-knowledge-section">
@@ -1940,8 +1947,49 @@ header {
   }
 }
 
+.supplier-entry-section {
+  margin: 40px 0 56px;
+  padding: 28px 32px 32px;
+  border-radius: 24px;
+  background: linear-gradient(180deg, #ffffff, #f8fbff);
+  border: 1px solid #dbeafe;
+  box-shadow: 0 12px 36px rgba(15, 23, 42, 0.06);
+}
+
+.supplier-entry-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+
+  .supplier-entry-section-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: #e0ecff;
+    color: #2563eb;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 28px;
+    line-height: 1.35;
+    color: #0f172a;
+  }
+
+  p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.7;
+  }
+}
+
 .supplier-entry-banner {
-  margin-top: 28px;
+  margin-top: 0;
   padding: 24px 28px;
   border-radius: 18px;
   background: linear-gradient(135deg, #eff6ff, #f8fafc);
@@ -2656,6 +2704,14 @@ header {
     }
   }
 
+  .supplier-entry-section {
+    padding: 24px 24px 28px;
+  }
+
+  .supplier-entry-section-header h2 {
+    font-size: 24px;
+  }
+
   .sticky-nav .sticky-nav-content {
     max-width: 100%;
     padding: 15px;
@@ -2748,6 +2804,19 @@ header {
       .el-button {
         width: 100%;
       }
+    }
+  }
+
+  .supplier-entry-section {
+    margin: 32px 0 44px;
+    padding: 20px 20px 24px;
+  }
+
+  .supplier-entry-section-header {
+    margin-bottom: 18px;
+
+    h2 {
+      font-size: 20px;
     }
   }
 }
