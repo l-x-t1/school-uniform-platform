@@ -233,7 +233,15 @@
           <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="信用评价" :span="2">
-          {{ currentRow.xypj || "-" }}
+          <template v-if="creditRatingFiles.length > 0">
+            <div v-for="(file, idx) in creditRatingFiles" :key="idx" class="attachment-item">
+              <i :class="getFileIcon(file)"></i>
+              <span class="attachment-name">{{ getFileName(file) }}</span>
+              <el-button type="text" size="mini" icon="el-icon-download" @click="downloadFile(file)">下载</el-button>
+              <el-button v-if="isPreviewable(file)" type="text" size="mini" icon="el-icon-view" @click="handlePreview(file)">预览</el-button>
+            </div>
+          </template>
+          <span v-else>-</span>
         </el-descriptions-item>
         <el-descriptions-item label="审核状态">
           <el-tag v-if="currentRow.auditStatus === '0'" type="warning" size="small">待审核</el-tag>
@@ -310,6 +318,12 @@ export default {
     businessLicenseFiles() {
       if (!this.currentRow.businessLicense) return [];
       return this.currentRow.businessLicense.split(",").filter(function(file) {
+        return file.trim() !== "";
+      });
+    },
+    creditRatingFiles() {
+      if (!this.currentRow.xypj) return [];
+      return this.currentRow.xypj.split(",").filter(function(file) {
         return file.trim() !== "";
       });
     },

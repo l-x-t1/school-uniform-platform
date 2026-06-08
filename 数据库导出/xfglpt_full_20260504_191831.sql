@@ -2187,6 +2187,9 @@ UNLOCK TABLES;
 -- Table structure for table `xfpt_group_notice`
 --
 
+-- 2026-06-08 schema sync note:
+-- parent goods list queries depend on xfpt_group_notice.purchase_start_time / purchase_end_time
+-- this full dump already includes both columns and idx_xfpt_group_notice_purchase_time
 DROP TABLE IF EXISTS `xfpt_group_notice`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
