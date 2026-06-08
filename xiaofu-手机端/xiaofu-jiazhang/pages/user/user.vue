@@ -63,7 +63,7 @@
           ></image>
           <view class="student-info">
             <text class="student-name">{{ student.name }}</text>
-            <text class="student-class">{{ student.className }}</text>
+            <text class="student-class">{{ student.gradeClassText || student.className }}</text>
           </view>
         </view>
       </view>
@@ -264,11 +264,18 @@ export default {
     },
 
     normalizeStudent(item = {}) {
+      const grade = item.grade || item.gradeName || '';
+      const classValue = item.className || item.classId || item.class || '';
+
       return {
         id: item.id || item.studentId,
+        studentId: item.studentId || item.id || '',
         name: item.name || item.studentName || '',
         sex: item.sex || item.gender || '0',
-        className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
+        grade,
+        classId: item.classId || classValue || '',
+        className: classValue,
+        gradeClassText: item.gradeClassText || (classValue.startsWith(grade) ? classValue : `${grade}${classValue}`),
         schoolId: item.schoolId || item.shcoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
         shcoolId: item.shcoolId || item.schoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
         deptId: item.deptId || item.schoolId || item.shcoolId || (item.sysDepts && item.sysDepts.deptId) || '',

@@ -9,16 +9,20 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="classId"    column="class_id"    />
         <result property="shcoolId"    column="shcool_id"    />
         <result property="name"    column="name"    />
+        <result property="studentNo"    column="student_no"    />
         <result property="sex"    column="sex"    />
         <result property="birthday"    column="birthday"    />
         <result property="simId"    column="sim_id"    />
         <result property="idNumber"    column="id_number"    />
         <result property="grade"    column="grade"    />
+        <result property="topSize"    column="top_size"    />
+        <result property="bottomSize"    column="bottom_size"    />
+        <result property="shoesSize"    column="shoes_size"    />
 
     </resultMap>
 
     <sql id="selectXfptStudentInfoVo">
-        select grade,id, class_id, shcool_id, name, sex, birthday, sim_id,id_number from xfpt_student_info
+        select grade,id, class_id, shcool_id, name, student_no, sex, birthday, sim_id, id_number, top_size, bottom_size, shoes_size from xfpt_student_info
     </sql>
 
     <select id="selectXfptStudentInfoList" parameterType="XfptStudentInfo" resultMap="XfptStudentInfoResult">
@@ -45,20 +49,30 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="classId != null">class_id,</if>
             <if test="shcoolId != null">shcool_id,</if>
             <if test="name != null">name,</if>
+            <if test="studentNo != null">student_no,</if>
             <if test="sex != null">sex,</if>
             <if test="birthday != null">birthday,</if>
             <if test="simId != null">sim_id,</if>
             <if test="idNumber != null">id_number,</if>
+            <if test="grade != null">grade,</if>
+            <if test="topSize != null">top_size,</if>
+            <if test="bottomSize != null">bottom_size,</if>
+            <if test="shoesSize != null">shoes_size,</if>
 
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="classId != null">#{classId},</if>
             <if test="shcoolId != null">#{shcoolId},</if>
             <if test="name != null">#{name},</if>
+            <if test="studentNo != null">#{studentNo},</if>
             <if test="sex != null">#{sex},</if>
             <if test="birthday != null">#{birthday},</if>
             <if test="simId != null">#{simId},</if>
             <if test="idNumber != null">#{idNumber},</if>
+            <if test="grade != null">#{grade},</if>
+            <if test="topSize != null">#{topSize},</if>
+            <if test="bottomSize != null">#{bottomSize},</if>
+            <if test="shoesSize != null">#{shoesSize},</if>
 
          </trim>
     </insert>
@@ -69,10 +83,15 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="classId != null">class_id = #{classId},</if>
             <if test="shcoolId != null">shcool_id = #{shcoolId},</if>
             <if test="name != null">name = #{name},</if>
+            <if test="studentNo != null">student_no = #{studentNo},</if>
             <if test="sex != null">sex = #{sex},</if>
             <if test="birthday != null">birthday = #{birthday},</if>
             <if test="simId != null">sim_id = #{simId},</if>
             <if test="idNumber != null">id_number = #{idNumber},</if>
+            <if test="grade != null">grade = #{grade},</if>
+            <if test="topSize != null">top_size = #{topSize},</if>
+            <if test="bottomSize != null">bottom_size = #{bottomSize},</if>
+            <if test="shoesSize != null">shoes_size = #{shoesSize},</if>
 
         </trim>
         where id = #{id}

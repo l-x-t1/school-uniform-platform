@@ -1,23 +1,43 @@
 import request from '@/utils/request'
 
+function formatGradeClassText(grade = '', classValue = '') {
+  const nextGrade = `${grade || ''}`.trim()
+  const nextClass = `${classValue || ''}`.trim()
+
+  if (!nextGrade) return nextClass
+  if (!nextClass) return nextGrade
+  if (nextClass.startsWith(nextGrade)) return nextClass
+  return `${nextGrade}${nextClass}`
+}
+
 function normalizeStudent(item = {}) {
+  const schoolId = item.schoolId || item.shcoolId || item.deptId || item.sysDepts?.deptId || ''
+  const schoolName = item.school || item.schoolName || item.sysDepts?.deptName || ''
+  const grade = item.grade || item.gradeName || ''
+  const classValue = item.className || item.classId || item.class || ''
+
   return {
     ...item,
-    id: item.id || item.studentId,
-    studentId: item.id || item.studentId,
+    id: item.id || '',
+    studentId: item.studentId || item.id || '',
+    studentNo: item.studentNo || item.student_no || item.code || '',
     studentName: item.name || item.studentName || '',
     name: item.name || item.studentName || '',
-    schoolId: item.schoolId || item.shcoolId || item.deptId || item.sysDepts?.deptId || '',
-    shcoolId: item.shcoolId || item.schoolId || item.deptId || item.sysDepts?.deptId || '',
-    deptId: item.deptId || item.schoolId || item.shcoolId || item.sysDepts?.deptId || '',
-    school: item.school || item.schoolName || item.sysDepts?.deptName || '',
-    schoolName: item.school || item.schoolName || item.sysDepts?.deptName || '',
-    grade: item.grade || item.gradeName || '',
-    gradeName: item.grade || item.gradeName || '',
-    classId: item.classId || item.className || '',
-    className: item.className || item.class || '',
+    schoolId,
+    shcoolId: schoolId,
+    deptId: schoolId,
+    school: schoolName,
+    schoolName,
+    grade,
+    gradeName: grade,
+    classId: item.classId || item.class_id || classValue || '',
+    className: classValue,
+    gradeClassText: formatGradeClassText(grade, classValue),
     birthday: item.birthday || '',
     idNumber: item.idNumber || '',
+    topSize: item.topSize || item.top_size || '',
+    bottomSize: item.bottomSize || item.bottom_size || '',
+    shoesSize: item.shoesSize || item.shoes_size || '',
     sex: item.sex || item.gender || '0',
     gender: item.sex || item.gender || '0'
   }
@@ -34,7 +54,7 @@ function buildStudentForm(data = {}) {
   append('id', data.id)
   append('name', data.name || data.studentName)
   append('sex', data.sex || (data.gender === '1' ? '1' : '0'))
-  append('studentId', data.studentId || data.code)
+  append('studentNo', data.studentNo || data.code)
   append('shcoolId', data.shcoolId || data.schoolId || data.deptId)
   append('schoolName', data.school || data.schoolName)
   append('grade', data.grade || data.gradeName)
@@ -43,6 +63,9 @@ function buildStudentForm(data = {}) {
   append('className', data.className)
   append('birthday', data.birthday)
   append('idNumber', data.idNumber)
+  append('topSize', data.topSize)
+  append('bottomSize', data.bottomSize)
+  append('shoesSize', data.shoesSize)
   append('simId', uni.getStorageSync('simId') || '')
   return parts.join('&')
 }
@@ -108,7 +131,7 @@ export function updateStudent(data) {
       id: data.id,
       name: data.name || data.studentName,
       sex: data.sex || (data.gender === '1' ? '1' : '0'),
-      studentId: data.studentId || data.code,
+      studentNo: data.studentNo || data.code,
       shcoolId: data.shcoolId || data.schoolId || data.deptId,
       schoolName: data.school || data.schoolName,
       grade: data.grade || data.gradeName,
@@ -116,7 +139,10 @@ export function updateStudent(data) {
       classId: data.classId || data.className,
       className: data.className,
       birthday: data.birthday,
-      idNumber: data.idNumber
+      idNumber: data.idNumber,
+      topSize: data.topSize,
+      bottomSize: data.bottomSize,
+      shoesSize: data.shoesSize
     }
   })
 }

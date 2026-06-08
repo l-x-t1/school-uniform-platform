@@ -55,7 +55,7 @@
           <input
             class="item-input"
             type="text"
-            v-model="studentInfo.studentId"
+            v-model="studentInfo.studentNo"
             placeholder="请输入学号"
             maxlength="20"
           />
@@ -166,7 +166,7 @@ export default {
         avatar: '/static/nansheng.png',
         name: '',
         gender: '0',
-        studentId: '',
+        studentNo: '',
         school: '',
         schoolName: '',
         schoolId: '',
@@ -196,25 +196,27 @@ export default {
   },
   methods: {
     normalizeStudent(item = {}) {
-      const schoolId = item.schoolId || item.shcoolId || item.deptId || ''
+      const schoolId = item.schoolId || item.shcoolId || item.deptId || item.sysDepts?.deptId || ''
+      const schoolName = item.school || item.schoolName || item.sysDepts?.deptName || ''
+      const classValue = item.className || item.classId || item.class || ''
       return {
         avatar: item.avatar || item.avatarUrl || ((item.gender === '1' || item.sex === '1') ? '/static/nvsheng.png' : '/static/nansheng.png'),
         name: item.name || item.studentName || '',
         gender: item.gender || item.sex || '0',
-        studentId: item.studentId || item.studentNo || item.code || '',
-        school: item.school || item.schoolName || '',
-        schoolName: item.schoolName || item.school || '',
+        studentNo: item.studentNo || item.student_no || item.code || '',
+        school: schoolName,
+        schoolName,
         schoolId,
         shcoolId: schoolId,
         deptId: schoolId,
         grade: item.grade || item.gradeName || '',
-        classId: item.classId || item.className || '',
-        className: item.className || item.class || '',
+        classId: item.classId || item.class_id || classValue || '',
+        className: classValue,
         birthday: item.birthday || '',
         idNumber: item.idNumber || '',
-        topSize: item.topSize || '',
-        bottomSize: item.bottomSize || '',
-        shoesSize: item.shoesSize || ''
+        topSize: item.topSize || item.top_size || '',
+        bottomSize: item.bottomSize || item.bottom_size || '',
+        shoesSize: item.shoesSize || item.shoes_size || ''
       }
     },
     getLocalStudents() {
@@ -226,6 +228,8 @@ export default {
       const nextStudent = {
         ...payload,
         id,
+        studentId: id,
+        studentNo: payload.studentNo || '',
         sex: payload.gender === '1' ? '1' : (payload.sex || '0'),
         gender: payload.gender === '1' ? '1' : '0'
       }
@@ -374,7 +378,7 @@ export default {
         uni.showToast({ title: '请输入学生姓名', icon: 'none' })
         return
       }
-      if (!this.studentInfo.studentId) {
+      if (!this.studentInfo.studentNo) {
         uni.showToast({ title: '请输入学号', icon: 'none' })
         return
       }

@@ -256,6 +256,20 @@
         </div>
 
         <!-- 资讯与知识区域 -->
+        <div class="supplier-entry-banner">
+          <div class="supplier-entry-copy">
+            <div class="supplier-entry-eyebrow">供应商参与指引</div>
+            <h3>未入驻厂商请先完成供应商入驻，审核通过后再报名学校采购项目</h3>
+            <p>
+              学校发布采购公告后，已入驻供应商可参与报名、入围比选，并进入后续家长投票与结果公示流程。
+            </p>
+          </div>
+          <div class="supplier-entry-actions">
+            <el-button type="primary" @click="goSupplierSettleChannel">查看入驻公告</el-button>
+            <el-button @click="openSupplierSettlePage">我要入驻</el-button>
+          </div>
+        </div>
+
         <div class="info-knowledge-section">
           <div class="info-column">
             <div class="column-header" @click="setActiveNav('ZCFG')" style="cursor: pointer;">
@@ -641,6 +655,12 @@
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
+        <template v-if="isPurchaseAnnouncementDialog">
+          <el-button type="primary" icon="el-icon-s-promotion" @click="handlePurchaseApply">
+            立即报名
+          </el-button>
+          <el-button @click="openSupplierSettlePage">先完成供应商入驻</el-button>
+        </template>
         <!-- <el-button @click="announcementDialogVisible = false">关 闭</el-button> -->
       </div>
     </el-dialog>
@@ -902,6 +922,7 @@ export default {
       selectedKnowledge: null,
       announcementDialogVisible: false,
       selectedAnnouncement: null,
+      selectedAnnouncementCategory: "",
       policyDialogVisible: false,
       selectedPolicy: null,
       educationDialogVisible: false,
@@ -933,6 +954,9 @@ export default {
     };
   },
   computed: {
+    isPurchaseAnnouncementDialog() {
+      return this.selectedAnnouncementCategory === "CGGG";
+    },
     // 计算属性
     getCategoryName() {
       const categoryMap = {
@@ -1131,6 +1155,8 @@ export default {
     //阅览查看
     async handleAnnouncementDetails(item) {
       if (item.isEmpty) return;
+      this.selectedAnnouncementCategory =
+        item.catagory || item.category || (this.activeTab === "CJGG" ? "CJGG" : "CGGG");
 
       try {
         // 先调用增加阅读数量接口
@@ -1238,6 +1264,43 @@ export default {
     },
     goLogin() {
       this.$router.push("/login");
+    },
+    isSupplierRole() {
+      const roles = this.$store.getters.roles || [];
+      return roles.some((role) => {
+        const roleKey = String(role || "").toLowerCase();
+        return roleKey.includes("gys") || roleKey.includes("changshang");
+      });
+    },
+    openSupplierSettlePage() {
+      const routeData = this.$router.resolve({
+        path: "/supplier-settle",
+        query: { step: "login" },
+      });
+      window.open(routeData.href, "_blank");
+    },
+    goSupplierSettleChannel() {
+      this.setActiveNav("GYSRZGG");
+    },
+    openPurchaseApplyChannel() {
+      const targetPath = "/supplier/groupNotice/index";
+      if (!getToken()) {
+        this.$router.push({
+          path: "/login",
+          query: { redirect: targetPath },
+        });
+        return;
+      }
+      if (this.isSupplierRole()) {
+        const routeData = this.$router.resolve({ path: targetPath });
+        window.open(routeData.href, "_blank");
+        return;
+      }
+      this.$message.warning("当前账号尚未具备供应商报名资格，请先完成供应商入驻。");
+      this.openSupplierSettlePage();
+    },
+    handlePurchaseApply() {
+      this.openPurchaseApplyChannel();
     },
     //
     //获取栏目列表
@@ -1873,6 +1936,56 @@ header {
         overflow: hidden;
         text-overflow: ellipsis;
       }
+    }
+  }
+}
+
+.supplier-entry-banner {
+  margin-top: 28px;
+  padding: 24px 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  .supplier-entry-copy {
+    .supplier-entry-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+
+    p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+  }
+
+  .supplier-entry-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+
+    .el-button {
+      border-radius: 999px;
+      padding: 12px 22px;
     }
   }
 }
@@ -2532,6 +2645,17 @@ header {
     grid-template-columns: repeat(3, 1fr);
   }
 
+  .supplier-entry-banner {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .supplier-entry-actions {
+      width: 100%;
+      justify-content: flex-start;
+      flex-wrap: wrap;
+    }
+  }
+
   .sticky-nav .sticky-nav-content {
     max-width: 100%;
     padding: 15px;
@@ -2607,6 +2731,22 @@ header {
       .sticky-user-name {
         font-size: 13px;
         padding: 6px 12px;
+      }
+    }
+  }
+
+  .supplier-entry-banner {
+    padding: 20px;
+
+    .supplier-entry-copy h3 {
+      font-size: 18px;
+    }
+
+    .supplier-entry-actions {
+      flex-direction: column;
+
+      .el-button {
+        width: 100%;
       }
     }
   }

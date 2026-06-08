@@ -133,6 +133,10 @@
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
+        <el-button type="primary" icon="el-icon-s-promotion" @click="handleApply">
+          立即报名
+        </el-button>
+        <el-button @click="openSupplierSettlePage">先完成供应商入驻</el-button>
         <!-- <el-button @click="announcementDialogVisible = false">关 闭</el-button> -->
       </div>
     </el-dialog>
@@ -140,6 +144,7 @@
 </template>
 
 <script>
+import { getToken } from "@/utils/auth";
 import { getArticleList, getDeptList, addReadCount, getArticleDetail } from "@/api/publicIndex";
 import { Base64 } from "js-base64";
 
@@ -232,6 +237,37 @@ export default {
     selectItem(id) {
       this.selectedId = id;
       this.goDetail(id);
+    },
+    isSupplierRole() {
+      const roles = this.$store.getters.roles || [];
+      return roles.some((role) => {
+        const roleKey = String(role || "").toLowerCase();
+        return roleKey.includes("gys") || roleKey.includes("changshang");
+      });
+    },
+    openSupplierSettlePage() {
+      const routeData = this.$router.resolve({
+        path: "/supplier-settle",
+        query: { step: "login" },
+      });
+      window.open(routeData.href, "_blank");
+    },
+    handleApply() {
+      const targetPath = "/supplier/groupNotice/index";
+      if (!getToken()) {
+        this.$router.push({
+          path: "/login",
+          query: { redirect: targetPath },
+        });
+        return;
+      }
+      if (this.isSupplierRole()) {
+        const routeData = this.$router.resolve({ path: targetPath });
+        window.open(routeData.href, "_blank");
+        return;
+      }
+      this.$message.warning("当前账号尚未具备供应商报名资格，请先完成供应商入驻。");
+      this.openSupplierSettlePage();
     },
 
     // 跳转详情页
@@ -335,6 +371,55 @@ export default {
   margin-bottom: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
+}
+
+.supplier-entry-banner {
+  margin-top: 28px;
+  padding: 24px 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  .supplier-entry-copy {
+    .supplier-entry-eyebrow {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+
+    p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+  }
+
+  .supplier-entry-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+
+    .el-button {
+      border-radius: 999px;
+      padding: 12px 22px;
+    }
+  }
 }
 
 .section-header {
@@ -538,6 +623,16 @@ export default {
   .announcements-content .announcements-list {
     grid-template-columns: 1fr;
   }
+
+  .supplier-entry-banner {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .supplier-entry-actions {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -565,6 +660,23 @@ export default {
       
       .el-input,
       .el-select {
+        width: 100%;
+      }
+    }
+  }
+
+  .supplier-entry-banner {
+    padding: 20px;
+
+    .supplier-entry-copy h3 {
+      font-size: 18px;
+    }
+
+    .supplier-entry-actions {
+      width: 100%;
+      flex-direction: column;
+
+      .el-button {
         width: 100%;
       }
     }

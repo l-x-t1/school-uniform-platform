@@ -120,7 +120,11 @@ export default {
       });
     },
     getInitText() {
-      this.checkValue = this.modelValue === null ? this.value : this.modelValue;
+      const initialValue =
+        this.modelValue === undefined || this.modelValue === null
+          ? this.value
+          : this.modelValue;
+      this.checkValue = initialValue;
 
       if (!this.list.length) return;
       if (
