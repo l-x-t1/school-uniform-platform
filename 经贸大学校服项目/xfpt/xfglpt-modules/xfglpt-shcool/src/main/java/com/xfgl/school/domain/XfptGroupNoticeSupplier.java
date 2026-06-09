@@ -1,6 +1,7 @@
 package com.xfgl.school.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.xfgl.common.core.web.domain.BaseEntity;
@@ -23,7 +24,7 @@ import lombok.experimental.Accessors;
 @AllArgsConstructor
 @Builder
 @Accessors(chain = true)
-@TableName("xfpt_group_notice_supplier")
+@TableName("xfpt_notice_supplier_rel")
 @Schema(description = "Group notice supplier visibility relation")
 public class XfptGroupNoticeSupplier extends BaseEntity {
     private static final long serialVersionUID = 1L;
@@ -38,6 +39,7 @@ public class XfptGroupNoticeSupplier extends BaseEntity {
     @Schema(description = "Supplier id")
     private Long supplierId;
 
+    @TableField(exist = false)
     @Schema(description = "Supplier name snapshot")
     private String supplierName;
 }

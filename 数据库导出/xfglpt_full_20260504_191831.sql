@@ -6413,6 +6413,156 @@ WHERE r.`role_key` IN ('admin')
       AND rm.`menu_id` = m.`menu_id`
   );
 
+-- Supplier newFeature menu: school group notice readonly
+
+SET @new_feature_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `path` = 'newFeature'
+    AND `menu_type` = 'M'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+SET @supplier_group_notice_menu_name := CONVERT(0xE5ADA6E6A0A1E7BB9FE8B4ADE585ACE5918AE69FA5E8AFA2 USING utf8mb4);
+SET @supplier_group_notice_menu_remark := CONVERT(0xE4BE9BE5BA94E59586E7BB9FE8B4ADE585ACE5918AE58FAAE8AFBBE88F9CE58D95 USING utf8mb4);
+SET @supplier_group_notice_list_name := CONVERT(0xE58897E8A1A8 USING utf8mb4);
+SET @supplier_group_notice_list_remark := CONVERT(0xE69FA5E79C8BE4BE9BE5BA94E59586E7BB9FE8B4ADE585ACE5918AE58897E8A1A8 USING utf8mb4);
+SET @supplier_group_notice_query_name := CONVERT(0xE8AFA6E68385 USING utf8mb4);
+SET @supplier_group_notice_query_remark := CONVERT(0xE69FA5E79C8BE4BE9BE5BA94E59586E7BB9FE8B4ADE585ACE5918AE8AFA6E68385 USING utf8mb4);
+SET @admin_group_notice_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_type` = 'C'
+    AND (
+      `path` = 'adminGroupNoticeQuery'
+      OR `route_name` = 'AdminGroupNoticeQuery'
+      OR (`component` = 'school/groupNoticeReadonly/index' AND `perms` = 'school:groupNotice:list')
+    )
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+SET @supplier_group_notice_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_type` = 'C'
+    AND (
+      `path` = 'supplierGroupNotice'
+      OR `component` = 'supplier/groupNotice/index'
+      OR `route_name` = 'SupplierGroupNoticeMenu'
+      OR `perms` = 'supplier:groupNotice:list'
+    )
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT @supplier_group_notice_menu_name, @new_feature_menu_id, 32,
+       'supplierGroupNotice', 'supplier/groupNotice/index', NULL, 'SupplierGroupNoticeMenu',
+       1, 0, 'C', '0', '0', 'supplier:groupNotice:list', 'message',
+       'admin', NOW(), '', NULL, @supplier_group_notice_menu_remark
+WHERE @supplier_group_notice_menu_id IS NULL
+  AND @new_feature_menu_id IS NOT NULL;
+
+SET @supplier_group_notice_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_type` = 'C'
+    AND (
+      `path` = 'supplierGroupNotice'
+      OR `component` = 'supplier/groupNotice/index'
+      OR `route_name` = 'SupplierGroupNoticeMenu'
+      OR `perms` = 'supplier:groupNotice:list'
+    )
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = @supplier_group_notice_menu_name,
+    `parent_id` = @new_feature_menu_id,
+    `order_num` = 32,
+    `path` = 'supplierGroupNotice',
+    `component` = 'supplier/groupNotice/index',
+    `query` = NULL,
+    `route_name` = 'SupplierGroupNoticeMenu',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'C',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'supplier:groupNotice:list',
+    `icon` = 'message',
+    `update_by` = 'admin',
+    `update_time` = NOW(),
+    `remark` = @supplier_group_notice_menu_remark
+WHERE `menu_id` = @supplier_group_notice_menu_id;
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT @supplier_group_notice_list_name, @supplier_group_notice_menu_id, 1, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'supplier:groupNotice:list', '#',
+       'admin', NOW(), '', NULL, @supplier_group_notice_list_remark
+WHERE @supplier_group_notice_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM `sys_menu`
+    WHERE `parent_id` = @supplier_group_notice_menu_id
+      AND `menu_type` = 'F'
+      AND `perms` = 'supplier:groupNotice:list'
+  );
+
+INSERT INTO `sys_menu` (
+  `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`
+)
+SELECT @supplier_group_notice_query_name, @supplier_group_notice_menu_id, 2, '', NULL, NULL, '',
+       1, 0, 'F', '0', '0', 'supplier:groupNotice:query', '#',
+       'admin', NOW(), '', NULL, @supplier_group_notice_query_remark
+WHERE @supplier_group_notice_menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM `sys_menu`
+    WHERE `parent_id` = @supplier_group_notice_menu_id
+      AND `menu_type` = 'F'
+      AND `perms` = 'supplier:groupNotice:query'
+  );
+
+DELETE rm
+FROM `sys_role_menu` rm
+JOIN `sys_role` r
+  ON r.`role_id` = rm.`role_id`
+WHERE r.`role_key` = 'gys'
+  AND rm.`menu_id` IN (
+    SELECT m.`menu_id`
+    FROM `sys_menu` m
+    WHERE m.`menu_id` = @admin_group_notice_menu_id
+       OR m.`parent_id` = @admin_group_notice_menu_id
+  );
+
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`)
+SELECT r.`role_id`, m.`menu_id`
+FROM `sys_role` r
+JOIN `sys_menu` m
+  ON m.`menu_id` = @new_feature_menu_id
+  OR m.`menu_id` = @supplier_group_notice_menu_id
+  OR m.`parent_id` = @supplier_group_notice_menu_id
+WHERE r.`role_key` IN ('gys')
+  AND r.`del_flag` = '0'
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`role_id` = r.`role_id`
+      AND rm.`menu_id` = m.`menu_id`
+  );
+
 -- ============================================
 -- Merged from xfpt/sql/20260518_fix_new_feature_supplier_usage_menu.sql
 -- 修复：将“供应商信息”“使用情况”补充为新增功能下的正式菜单

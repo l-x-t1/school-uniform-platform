@@ -141,7 +141,7 @@
                g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
                g.update_time, g.remark, g.del_flag
         from xfpt_group_notice g
-        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        inner join xfpt_notice_supplier_rel gns on gns.notice_id = g.id and gns.del_flag = '0'
         where g.del_flag = 0
           and gns.supplier_id = #{supplierId}
         <if test="schoolName != null and schoolName != ''"> and g.school_name like concat('%', #{schoolName}, '%')</if>
@@ -196,7 +196,7 @@
                g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
                g.update_time, g.remark, g.del_flag
         from xfpt_group_notice g
-        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        inner join xfpt_notice_supplier_rel gns on gns.notice_id = g.id and gns.del_flag = '0'
         where g.id = #{id}
           and g.del_flag = 0
           and g.status in ('1', '2')
@@ -332,10 +332,11 @@
         production.production_no as production_no,
         notice_delivery.delivery_no as delivery_no,
         g.title as notice_name,
-        gns.supplier_name as manufacturer_name,
+        sm.supplier_name as manufacturer_name,
         coalesce(order_summary.latest_create_time, production.latest_create_time, notice_delivery.latest_create_time, g.create_time) as create_time
         from xfpt_group_notice g
-        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        inner join xfpt_notice_supplier_rel gns on gns.notice_id = g.id and gns.del_flag = '0'
+        left join xfpt_supplier_message sm on sm.id = gns.supplier_id and sm.del_flag = '0'
         left join (
         <include refid="progressOrderSummaryByNotice"/>
         ) order_summary on order_summary.notice_id = g.id
@@ -604,30 +605,30 @@
 
     <select id="selectSupplierIdsByNoticeId" parameterType="Long" resultType="Long">
         select supplier_id
-        from xfpt_group_notice_supplier
+        from xfpt_notice_supplier_rel
         where notice_id = #{noticeId}
           and del_flag = '0'
         order by id asc
     </select>
 
     <delete id="deleteXfptGroupNoticeSupplierByNoticeId" parameterType="Long">
-        delete from xfpt_group_notice_supplier where notice_id = #{noticeId}
+        delete from xfpt_notice_supplier_rel where notice_id = #{noticeId}
     </delete>
 
     <delete id="deleteXfptGroupNoticeSupplierByNoticeIds">
-        delete from xfpt_group_notice_supplier where notice_id in
+        delete from xfpt_notice_supplier_rel where notice_id in
         <foreach item="noticeId" collection="noticeIds" open="(" separator="," close=")">
             #{noticeId}
         </foreach>
     </delete>
 
     <insert id="batchInsertXfptGroupNoticeSupplier">
-        insert into xfpt_group_notice_supplier(
-            notice_id, supplier_id, supplier_name, create_by, create_time, update_by, update_time, remark, del_flag
+        insert into xfpt_notice_supplier_rel(
+            notice_id, supplier_id, create_by, create_time, update_by, update_time, remark, del_flag
         ) values
         <foreach item="item" index="index" collection="list" separator=",">
             (
-            #{item.noticeId}, #{item.supplierId}, #{item.supplierName}, #{item.createBy}, #{item.createTime},
+            #{item.noticeId}, #{item.supplierId}, #{item.createBy}, #{item.createTime},
             #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag}
             )
         </foreach>
