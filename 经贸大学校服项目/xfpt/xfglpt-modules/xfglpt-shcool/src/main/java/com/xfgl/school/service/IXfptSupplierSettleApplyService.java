@@ -54,4 +54,9 @@ public interface IXfptSupplierSettleApplyService extends IService<XfptSupplierSe
      * 查询当前公告发布人名下已审核通过的入驻记录
      */
     List<XfptSupplierSettleApply> listApprovedByPublisher(XfptSupplierSettleApply query);
+
+    /**
+     * 查询当前公告发布人名下已处理的入驻记录
+     */
+    List<XfptSupplierSettleApply> listProcessedByPublisher(XfptSupplierSettleApply query);
 }

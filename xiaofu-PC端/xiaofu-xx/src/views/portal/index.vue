@@ -1272,17 +1272,26 @@ export default {
     goLogin() {
       this.$router.push("/login");
     },
-    isSupplierRole() {
-      const roles = this.$store.getters.roles || [];
-      return roles.some((role) => {
-        const roleKey = String(role || "").toLowerCase();
-        return roleKey.includes("gys") || roleKey.includes("changshang");
-      });
+    getApplyNoticeId() {
+      const noticeId = this.selectedAnnouncement && this.selectedAnnouncement.enteId;
+      return noticeId ? String(noticeId) : "";
     },
-    openSupplierSettlePage() {
+    buildApplyTargetPath() {
+      const noticeId = this.getApplyNoticeId();
+      if (!noticeId) {
+        return "";
+      }
+      return `/supplier/apply/detail?noticeId=${noticeId}`;
+    },
+    openSupplierSettlePage(targetPath) {
+      const noticeId = this.getApplyNoticeId();
       const routeData = this.$router.resolve({
         path: "/supplier-settle",
-        query: { step: "login" },
+        query: {
+          step: "login",
+          noticeId: noticeId || undefined,
+          redirect: targetPath || undefined,
+        },
       });
       window.open(routeData.href, "_blank");
     },
@@ -1290,7 +1299,11 @@ export default {
       this.setActiveNav("GYSRZGG");
     },
     openPurchaseApplyChannel() {
-      const targetPath = "/supplier/groupNotice/index";
+      const targetPath = this.buildApplyTargetPath();
+      if (!targetPath) {
+        this.$message.warning("当前公告尚未关联采购公告，暂时无法直接报名，请联系管理员补齐 noticeId。");
+        return;
+      }
       if (!getToken()) {
         this.$router.push({
           path: "/login",
@@ -1298,10 +1311,13 @@ export default {
         });
         return;
       }
-      if (this.isSupplierRole()) {
+      if (targetPath) {
         const routeData = this.$router.resolve({ path: targetPath });
         window.open(routeData.href, "_blank");
         return;
+      } else {
+        const routeData = this.$router.resolve({ path: targetPath });
+        window.open(routeData.href, "_blank");
       }
       this.$message.warning("当前账号尚未具备供应商报名资格，请先完成供应商入驻。");
       this.openSupplierSettlePage();

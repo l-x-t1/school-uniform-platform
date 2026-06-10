@@ -123,4 +123,45 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "学校名称")
     private String schoolName;
 
+    /** 报名截止时间 */
+    @TableField(exist = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(description = "报名截止时间")
+    private Date bmjzTime;
+
+    /** 报名上限 */
+    @TableField(exist = false)
+    @Schema(description = "报名上限")
+    private Integer signupLimit;
+
+    /** 是否要求样衣图 */
+    @TableField(exist = false)
+    @Schema(description = "是否要求样衣图")
+    private String isSamplesPic;
+
+    /** 公告样衣图 */
+    @TableField(exist = false)
+    @Schema(description = "公告样衣图")
+    private String samplesPic;
+
+    /** 公告文件 */
+    @TableField(exist = false)
+    @Schema(description = "公告文件")
+    private String noticeFile;
+
+    /** 其他附件 */
+    @TableField(exist = false)
+    @Schema(description = "其他附件")
+    private String otherFile;
+
+    /** 对应发布公告ID */
+    @TableField(exist = false)
+    @Schema(description = "对应发布公告ID")
+    private Long publicNoticeId;
+
+    /** 供应商端/学校端展示状态 */
+    @TableField(exist = false)
+    @Schema(description = "展示状态")
+    private String statusText;
+
         }

@@ -19,10 +19,29 @@
           <i class="el-icon-circle-check"></i>
           <h2>申请已提交</h2>
           <p>请等待教育局审核，审核通过后将完成供应商账号注册和资料入库。</p>
+          <el-alert
+            v-if="redirect"
+            title="当前报名上下文已为您保留。待入驻审核通过后，可返回原采购公告继续报名。"
+            type="info"
+            :closable="false"
+            show-icon
+            style="margin-top: 20px"
+          />
+          <div v-if="redirect" class="success-actions">
+            <el-button @click="openRedirectPage">查看原报名页</el-button>
+          </div>
         </div>
 
         <div v-else class="info-panel">
           <h2 class="info-title">{{ isBound ? "确认厂商信息" : "填写厂商信息" }}</h2>
+          <el-alert
+            v-if="redirect"
+            title="当前采购公告上下文已保留。入驻审核通过后，可回到原报名页继续提交材料。"
+            type="info"
+            :closable="false"
+            show-icon
+            style="margin-bottom: 20px"
+          />
           <el-form ref="settleForm" :model="form" :rules="rules" label-width="120px" class="info-form">
             <div class="form-grid">
               <el-form-item label="厂商名称" prop="supplierName">
@@ -107,6 +126,7 @@ export default {
   components: { Editor, FileUpload },
   props: {
     noticeId: { type: [String, Number], default: null },
+    redirect: { type: String, default: "" },
     accountInfo: { type: Object, default: null },
     supplierData: { type: Object, default: null },
   },
@@ -188,6 +208,13 @@ export default {
     },
     goBack() {
       this.$emit("go-back");
+    },
+    openRedirectPage() {
+      if (!this.redirect) {
+        return;
+      }
+      const routeData = this.$router.resolve(this.redirect);
+      window.open(routeData.href, "_blank");
     },
     submitApply() {
       if (this.submitting) return;
@@ -333,6 +360,10 @@ export default {
     color: #909399;
     font-size: 14px;
   }
+}
+
+.success-actions {
+  margin-top: 20px;
 }
 
 @media (max-width: 900px) {

@@ -77,7 +77,6 @@
                 icon="el-icon-s-check"
                 @click.stop="handleApply(item)"
               >{{ isExpired(item) ? '已过期' : '申请入驻' }}</el-button>
-              >申请入驻</el-button>
             </div>
           </div>
         </div>

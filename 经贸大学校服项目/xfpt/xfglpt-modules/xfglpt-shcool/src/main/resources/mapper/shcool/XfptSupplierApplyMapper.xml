@@ -30,6 +30,33 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="noticeTitle" column="notice_title" />
         <result property="noticeCode" column="notice_code" />
         <result property="schoolName" column="school_name" />
+        <result property="bmjzTime" column="bmjz_time" />
+        <result property="signupLimit" column="signup_limit" />
+        <result property="isSamplesPic" column="is_samples_pic" />
+        <result property="samplesPic" column="samples_pic" />
+        <result property="noticeFile" column="notice_file" />
+        <result property="otherFile" column="other_file" />
+        <result property="publicNoticeId" column="public_notice_id" />
+        <result property="statusText" column="status_text" />
+    </resultMap>
+
+    <resultMap type="com.xfgl.school.domain.vo.SupplierApplyNoticeVo" id="SupplierApplyNoticeVoResult">
+        <result property="noticeId" column="notice_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="noticeTitle" column="notice_title" />
+        <result property="noticeCode" column="notice_code" />
+        <result property="schoolName" column="school_name" />
+        <result property="bmjzTime" column="bmjz_time" />
+        <result property="signupLimit" column="signup_limit" />
+        <result property="signupCount" column="signup_count" />
+        <result property="isSamplesPic" column="is_samples_pic" />
+        <result property="samplesPic" column="samples_pic" />
+        <result property="noticeFile" column="notice_file" />
+        <result property="otherFile" column="other_file" />
+        <result property="applyId" column="apply_id" />
+        <result property="applyStatus" column="apply_status" />
+        <result property="qualificationStatus" column="qualification_status" />
+        <result property="statusText" column="status_text" />
     </resultMap>
 
     <sql id="selectXfptSupplierApplyVo">
@@ -56,11 +83,34 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             a.update_time,
             a.remark,
             a.del_flag,
-            n.title as notice_title,
-            n.notice_code as notice_code,
-            n.school_name as school_name
+            m.title as notice_title,
+            concat('CG-', m.id) as notice_code,
+            d.dept_name as school_name,
+            m.bmjz_time,
+            m.signup_limit,
+            m.is_samples_pic,
+            m.samples_pic,
+            m.notice_file,
+            m.other_file,
+            (
+                select max(n.id)
+                from xfpt_notice n
+                where n.ente_id = a.notice_id
+                  and n.catagory = 'CGGG'
+                  and n.type = '0'
+                  and n.status = '1'
+                  and n.del_flag = '0'
+            ) as public_notice_id,
+            case
+                when a.apply_status = '2' then '已撤回'
+                when a.qualification_status = '1' then '已通过'
+                when a.qualification_status = '2' then '已驳回'
+                when a.apply_status = '1' then '待审核'
+                else '待提交'
+            end as status_text
         from xfpt_supplier_apply a
-        left join xfpt_group_notice n on n.id = a.notice_id and n.del_flag = '0'
+        left join xfpt_organization_mode m on m.id = a.notice_id and m.del_flag = '0'
+        left join sys_dept d on d.dept_id = m.dept_id and d.del_flag = '0'
     </sql>
 
     <select id="selectXfptSupplierApplyList" parameterType="XfptSupplierApply" resultMap="XfptSupplierApplyResult">
@@ -79,15 +129,99 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <if test="auditTime != null"> and date_format(a.audit_time, '%Y-%m-%d') = date_format(#{auditTime}, '%Y-%m-%d')</if>
         <if test="auditRemark != null and auditRemark != ''"> and a.audit_remark like concat('%', #{auditRemark}, '%')</if>
         <if test="deptId != null"> and a.dept_id = #{deptId}</if>
-        <if test="noticeTitle != null and noticeTitle != ''"> and n.title like concat('%', #{noticeTitle}, '%')</if>
-        <if test="noticeCode != null and noticeCode != ''"> and n.notice_code like concat('%', #{noticeCode}, '%')</if>
-        <if test="schoolName != null and schoolName != ''"> and n.school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="noticeTitle != null and noticeTitle != ''"> and m.title like concat('%', #{noticeTitle}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and concat('CG-', m.id) like concat('%', #{noticeCode}, '%')</if>
+        <if test="schoolName != null and schoolName != ''"> and d.dept_name like concat('%', #{schoolName}, '%')</if>
         order by a.create_time desc, a.id desc
     </select>
 
     <select id="selectXfptSupplierApplyById" parameterType="Long" resultMap="XfptSupplierApplyResult">
         <include refid="selectXfptSupplierApplyVo" />
         where a.id = #{id}
+    </select>
+
+    <select id="selectSupplierApplyByNoticeIdAndSupplierId" resultMap="XfptSupplierApplyResult">
+        <include refid="selectXfptSupplierApplyVo" />
+        where a.notice_id = #{noticeId}
+          and a.supplier_id = #{supplierId}
+          and a.del_flag = '0'
+        order by a.id desc
+        limit 1
+    </select>
+
+    <select id="selectNoticeOverviewById" resultMap="SupplierApplyNoticeVoResult">
+        select
+            m.id as notice_id,
+            m.dept_id as school_id,
+            m.title as notice_title,
+            concat('CG-', m.id) as notice_code,
+            d.dept_name as school_name,
+            m.bmjz_time,
+            m.signup_limit,
+            (
+                select count(1)
+                from xfpt_supplier_apply sa
+                where sa.notice_id = m.id
+                  and sa.del_flag = '0'
+                  and sa.apply_status != '2'
+            ) as signup_count,
+            m.is_samples_pic,
+            m.samples_pic,
+            m.notice_file,
+            m.other_file
+        from xfpt_organization_mode m
+        left join sys_dept d on d.dept_id = m.dept_id and d.del_flag = '0'
+        where m.id = #{noticeId}
+          and m.del_flag = '0'
+    </select>
+
+    <select id="selectSupplierNoticeCenterList" resultMap="SupplierApplyNoticeVoResult">
+        select
+            m.id as notice_id,
+            m.dept_id as school_id,
+            m.title as notice_title,
+            concat('CG-', m.id) as notice_code,
+            d.dept_name as school_name,
+            m.bmjz_time,
+            m.signup_limit,
+            (
+                select count(1)
+                from xfpt_supplier_apply sa
+                where sa.notice_id = m.id
+                  and sa.del_flag = '0'
+                  and sa.apply_status != '2'
+            ) as signup_count,
+            m.is_samples_pic,
+            m.samples_pic,
+            m.notice_file,
+            m.other_file,
+            a.id as apply_id,
+            a.apply_status,
+            a.qualification_status,
+            case
+                when a.id is null then '未报名'
+                when a.apply_status = '2' then '已撤回'
+                when a.qualification_status = '1' then '已通过'
+                when a.qualification_status = '2' then '已驳回'
+                when a.apply_status = '1' then '待审核'
+                else '待提交'
+            end as status_text
+        from xfpt_organization_mode m
+        left join sys_dept d on d.dept_id = m.dept_id and d.del_flag = '0'
+        left join xfpt_supplier_apply a
+               on a.notice_id = m.id
+              and a.supplier_id = #{supplierId}
+              and a.del_flag = '0'
+        where m.del_flag = '0'
+          and m.is_release = '1'
+          and (m.bmjz_time is null or date(m.bmjz_time) >= curdate())
+        <if test="query != null and query.noticeTitle != null and query.noticeTitle != ''">
+            and m.title like concat('%', #{query.noticeTitle}, '%')
+        </if>
+        <if test="query != null and query.schoolName != null and query.schoolName != ''">
+            and d.dept_name like concat('%', #{query.schoolName}, '%')
+        </if>
+        order by m.create_time desc, m.id desc
     </select>
 
     <insert id="insertXfptSupplierApply" parameterType="XfptSupplierApply" useGeneratedKeys="true" keyProperty="id">

@@ -1,7 +1,6 @@
 package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 
 import cn.hutool.core.util.StrUtil;
@@ -22,6 +21,8 @@ import com.xfgl.system.api.domain.SysDept;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.school.domain.XfptOrganizationMode;
 import com.xfgl.school.domain.XfptSupplierApply;
+import com.xfgl.school.domain.XfptSupplierApplyLog;
+import com.xfgl.school.domain.vo.SupplierApplyAuditRequest;
 import com.xfgl.school.service.IXfptOrganizationModeService;
 import com.xfgl.school.service.IXfptSupplierApplyService;
 import com.xfgl.common.core.web.controller.BaseController;
@@ -54,6 +55,12 @@ public class XfptSupplierApplyController extends BaseController {
 @RequiresPermissions("school:supplierApply:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptSupplierApply xfptSupplierApply) {
+        if (!SecurityUtils.isAdmin(SecurityUtils.getUserId())) {
+            SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
+            if (dept != null) {
+                xfptSupplierApply.setDeptId(dept.getDeptId());
+            }
+        }
         startPage();
         List<XfptSupplierApply> list = xfptSupplierApplyService.selectXfptSupplierApplyList(xfptSupplierApply);
         return getDataTable(list);
@@ -80,6 +87,41 @@ public class XfptSupplierApplyController extends BaseController {
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
             return success(xfptSupplierApplyService.selectXfptSupplierApplyById(id));
+    }
+
+    @Operation(summary = "获取供应商报名日志")
+    @RequiresPermissions("school:supplierApply:query")
+    @GetMapping("/log/{applyId}")
+    public AjaxResult getLogs(@PathVariable("applyId") Long applyId) {
+        List<XfptSupplierApplyLog> logs = xfptSupplierApplyService.selectApplyLogs(applyId);
+        return success(logs);
+    }
+
+    @Operation(summary = "审核通过供应商报名")
+    @RequiresPermissions("school:supplierApply:edit")
+    @Log(title = "供应商报名审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/audit/pass")
+    public AjaxResult auditPass(@RequestBody SupplierApplyAuditRequest request) {
+        Long deptId = SecurityUtils.isAdmin(SecurityUtils.getUserId())
+                ? null
+                : SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        xfptSupplierApplyService.auditPass(deptId, request);
+        return success();
+    }
+
+    @Operation(summary = "审核驳回供应商报名")
+    @RequiresPermissions("school:supplierApply:edit")
+    @Log(title = "供应商报名审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/audit/reject")
+    public AjaxResult auditReject(@RequestBody SupplierApplyAuditRequest request) {
+        if (request == null || StrUtil.isBlank(request.getAuditRemark())) {
+            throw new ServiceException("驳回时必须填写驳回原因");
+        }
+        Long deptId = SecurityUtils.isAdmin(SecurityUtils.getUserId())
+                ? null
+                : SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        xfptSupplierApplyService.auditReject(deptId, request);
+        return success();
     }
 
     /**

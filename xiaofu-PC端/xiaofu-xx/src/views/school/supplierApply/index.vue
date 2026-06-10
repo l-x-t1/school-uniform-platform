@@ -1,15 +1,14 @@
 <template>
-  <div class="app-container business-page">
+  <div class="app-container audit-page">
     <el-form
       v-show="showSearch"
-      ref="queryForm"
       :model="queryParams"
       :inline="true"
       size="small"
       label-width="96px"
       class="query-form"
     >
-      <el-form-item label="供应商名称" prop="supplierName">
+      <el-form-item label="供应商名称">
         <el-input
           v-model="queryParams.supplierName"
           placeholder="请输入供应商名称"
@@ -18,7 +17,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="报名单号" prop="applyNo">
+      <el-form-item label="报名单号">
         <el-input
           v-model="queryParams.applyNo"
           placeholder="请输入报名单号"
@@ -27,16 +26,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="公告编号" prop="noticeCode">
-        <el-input
-          v-model="queryParams.noticeCode"
-          placeholder="请输入公告编号"
-          clearable
-          style="width: 220px"
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="公告标题" prop="noticeTitle">
+      <el-form-item label="公告标题">
         <el-input
           v-model="queryParams.noticeTitle"
           placeholder="请输入公告标题"
@@ -45,7 +35,7 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="学校名称" prop="schoolName">
+      <el-form-item label="学校名称">
         <el-input
           v-model="queryParams.schoolName"
           placeholder="请输入学校名称"
@@ -54,85 +44,21 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="报名状态" prop="applyStatus">
+      <el-form-item label="报名状态">
         <el-select
-          v-model="queryParams.applyStatus"
+          v-model="queryParams.displayStatus"
           placeholder="请选择报名状态"
           clearable
           style="width: 220px"
+          @change="handleQuery"
         >
           <el-option
-            v-for="item in applyStatusOptions"
+            v-for="item in displayStatusOptions"
             :key="item.value"
             :label="item.label"
             :value="item.value"
           />
         </el-select>
-      </el-form-item>
-      <el-form-item label="资质审查" prop="qualificationStatus">
-        <el-select
-          v-model="queryParams.qualificationStatus"
-          placeholder="请选择资质审查状态"
-          clearable
-          style="width: 220px"
-        >
-          <el-option
-            v-for="item in qualificationStatusOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="比选阶段" prop="bidStageStatus">
-        <el-select
-          v-model="queryParams.bidStageStatus"
-          placeholder="请选择比选阶段"
-          clearable
-          style="width: 220px"
-        >
-          <el-option
-            v-for="item in bidStageStatusOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="比选结果" prop="bidResultStatus">
-        <el-select
-          v-model="queryParams.bidResultStatus"
-          placeholder="请选择比选结果"
-          clearable
-          style="width: 220px"
-        >
-          <el-option
-            v-for="item in bidResultStatusOptions"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value"
-          />
-        </el-select>
-      </el-form-item>
-      <el-form-item label="报名时间" prop="applyTime">
-        <el-date-picker
-          v-model="queryParams.applyTime"
-          clearable
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择报名时间"
-          style="width: 220px"
-        />
-      </el-form-item>
-      <el-form-item label="审核时间" prop="auditTime">
-        <el-date-picker
-          v-model="queryParams.auditTime"
-          clearable
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择审核时间"
-          style="width: 220px"
-        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -141,38 +67,6 @@
     </el-form>
 
     <el-row :gutter="10" class="mb8">
-      <el-col :span="1.5">
-        <el-button
-          v-hasPermi="['school:supplierApply:add']"
-          type="primary"
-          plain
-          icon="el-icon-plus"
-          size="mini"
-          @click="handleAdd"
-        >新增</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          v-hasPermi="['school:supplierApply:edit']"
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          @click="handleUpdate"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
-          v-hasPermi="['school:supplierApply:remove']"
-          type="danger"
-          plain
-          icon="el-icon-delete"
-          size="mini"
-          :disabled="multiple"
-          @click="handleDelete"
-        >删除</el-button>
-      </el-col>
       <el-col :span="1.5">
         <el-button
           v-hasPermi="['school:supplierApply:export']"
@@ -186,14 +80,7 @@
       <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
     </el-row>
 
-    <el-table
-      v-loading="loading"
-      :data="supplierApplyList"
-      border
-      class="business-table"
-      @selection-change="handleSelectionChange"
-    >
-      <el-table-column type="selection" width="55" align="center" />
+    <el-table v-loading="loading" :data="supplierApplyList" border class="audit-table">
       <el-table-column label="供应商信息" min-width="240">
         <template slot-scope="scope">
           <div class="info-cell">
@@ -202,7 +89,7 @@
           </div>
         </template>
       </el-table-column>
-      <el-table-column label="公告信息" min-width="260">
+      <el-table-column label="公告信息" min-width="280">
         <template slot-scope="scope">
           <div class="info-cell">
             <div class="info-title">{{ formatValue(scope.row.noticeTitle) }}</div>
@@ -213,55 +100,41 @@
       <el-table-column label="学校名称" prop="schoolName" min-width="180" show-overflow-tooltip />
       <el-table-column label="报名状态" width="110" align="center">
         <template slot-scope="scope">
-          <el-tag size="mini" :type="getOptionTagType(applyStatusOptions, scope.row.applyStatus)">
-            {{ getOptionLabel(applyStatusOptions, scope.row.applyStatus) }}
+          <el-tag size="mini" :type="getApplyStatusTag(getApplyDisplayStatus(scope.row))">
+            {{ getApplyDisplayStatus(scope.row) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="资质审查" width="110" align="center">
+      <el-table-column label="报名时间" width="160" align="center">
+        <template slot-scope="scope">{{ formatDateTime(scope.row.applyTime) }}</template>
+      </el-table-column>
+      <el-table-column label="审核时间" width="160" align="center">
+        <template slot-scope="scope">{{ formatDateTime(scope.row.auditTime) }}</template>
+      </el-table-column>
+      <el-table-column label="审核意见" min-width="200" show-overflow-tooltip>
         <template slot-scope="scope">
-          <el-tag size="mini" :type="getOptionTagType(qualificationStatusOptions, scope.row.qualificationStatus)">
-            {{ getOptionLabel(qualificationStatusOptions, scope.row.qualificationStatus) }}
-          </el-tag>
+          <span>{{ formatValue(scope.row.auditRemark) }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="比选阶段" width="110" align="center">
-        <template slot-scope="scope">
-          <el-tag size="mini" :type="getOptionTagType(bidStageStatusOptions, scope.row.bidStageStatus)">
-            {{ getOptionLabel(bidStageStatusOptions, scope.row.bidStageStatus) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="比选结果" width="110" align="center">
-        <template slot-scope="scope">
-          <el-tag size="mini" :type="getOptionTagType(bidResultStatusOptions, scope.row.bidResultStatus)">
-            {{ getOptionLabel(bidResultStatusOptions, scope.row.bidResultStatus) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column label="报名时间" width="120" align="center">
-        <template slot-scope="scope">{{ formatDate(scope.row.applyTime) }}</template>
-      </el-table-column>
-      <el-table-column label="审核时间" width="120" align="center">
-        <template slot-scope="scope">{{ formatDate(scope.row.auditTime) }}</template>
-      </el-table-column>
-      <el-table-column label="操作" width="210" align="center" fixed="right" class-name="small-padding fixed-width">
+      <el-table-column label="操作" width="220" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button size="mini" type="text" icon="el-icon-view" @click="handleView(scope.row)">详情</el-button>
           <el-button
+            v-if="canAudit(scope.row)"
             v-hasPermi="['school:supplierApply:edit']"
             size="mini"
             type="text"
-            icon="el-icon-edit"
-            @click="handleUpdate(scope.row)"
-          >修改</el-button>
+            icon="el-icon-circle-check"
+            @click="handlePass(scope.row)"
+          >通过</el-button>
           <el-button
-            v-hasPermi="['school:supplierApply:remove']"
+            v-if="canAudit(scope.row)"
+            v-hasPermi="['school:supplierApply:edit']"
             size="mini"
             type="text"
-            icon="el-icon-delete"
-            @click="handleDelete(scope.row)"
-          >删除</el-button>
+            icon="el-icon-close"
+            @click="openRejectDialog(scope.row)"
+          >驳回</el-button>
         </template>
       </el-table-column>
     </el-table>
@@ -275,18 +148,18 @@
     />
 
     <el-dialog
-      title="供应商报名详情"
+      title="供应商报名审核详情"
       :visible.sync="detailOpen"
-      width="980px"
-      top="6vh"
+      width="1080px"
+      top="5vh"
       append-to-body
       @closed="resetDetail"
     >
       <div v-loading="detailLoading" class="dialog-scroll">
-        <div class="form-section detail-section">
+        <div class="detail-section">
           <div class="section-head">
             <div class="section-title">基础信息</div>
-            <div class="section-desc">展示供应商、公告、学校与状态信息</div>
+            <div class="section-desc">查看供应商、采购公告和当前审核状态</div>
           </div>
           <div class="detail-kv-grid">
             <div class="detail-kv">
@@ -310,284 +183,190 @@
               <span class="detail-value">{{ formatValue(detailForm.schoolName) }}</span>
             </div>
             <div class="detail-kv">
+              <span class="detail-label">当前状态</span>
+              <span class="detail-value">{{ getApplyDisplayStatus(detailForm) }}</span>
+            </div>
+            <div class="detail-kv">
               <span class="detail-label">报名时间</span>
-              <span class="detail-value">{{ formatDate(detailForm.applyTime) }}</span>
+              <span class="detail-value">{{ formatDateTime(detailForm.applyTime) }}</span>
             </div>
             <div class="detail-kv">
               <span class="detail-label">审核时间</span>
-              <span class="detail-value">{{ formatDate(detailForm.auditTime) }}</span>
+              <span class="detail-value">{{ formatDateTime(detailForm.auditTime) }}</span>
             </div>
             <div class="detail-kv">
-              <span class="detail-label">报名状态</span>
-              <span class="detail-value">{{ getOptionLabel(applyStatusOptions, detailForm.applyStatus) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">资质审查</span>
-              <span class="detail-value">{{ getOptionLabel(qualificationStatusOptions, detailForm.qualificationStatus) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">比选阶段</span>
-              <span class="detail-value">{{ getOptionLabel(bidStageStatusOptions, detailForm.bidStageStatus) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">比选结果</span>
-              <span class="detail-value">{{ getOptionLabel(bidResultStatusOptions, detailForm.bidResultStatus) }}</span>
+              <span class="detail-label">审核意见</span>
+              <span class="detail-value">{{ formatValue(detailForm.auditRemark) }}</span>
             </div>
           </div>
         </div>
 
-        <div class="form-section detail-section">
+        <div class="detail-section">
+          <div class="section-head">
+            <div class="section-title">报名材料快照</div>
+            <div class="section-desc">兼容历史数组数据与新版结构化材料快照</div>
+          </div>
+          <el-empty v-if="!detailMaterials.length" description="暂无报名材料" />
+          <div v-else class="material-list">
+            <div v-for="(item, index) in detailMaterials" :key="`${item.type}-${index}`" class="material-card">
+              <div class="material-header">
+                <div>
+                  <div class="material-title">{{ item.label || '附件' }}</div>
+                  <div class="material-meta">
+                    <span>{{ item.required ? '必传材料' : '选传材料' }}</span>
+                    <span>来源：{{ formatMaterialSource(item.source) }}</span>
+                    <span>快照时间：{{ item.snapshotTime || '--' }}</span>
+                  </div>
+                </div>
+                <el-tag size="mini" :type="item.required ? 'danger' : 'info'">
+                  {{ item.required ? '必传' : '选传' }}
+                </el-tag>
+              </div>
+              <image-upload
+                v-if="isImageMaterial(item.type)"
+                :value="joinMaterialUrls(item.fileUrls)"
+                :limit="6"
+                disabled
+              />
+              <file-upload
+                v-else
+                :value="joinMaterialUrls(item.fileUrls)"
+                disabled
+              />
+            </div>
+          </div>
+        </div>
+
+        <div class="detail-section">
           <div class="section-head">
             <div class="section-title">补充说明</div>
-            <div class="section-desc">审核意见、备注和报名资料默认收纳到详情中</div>
+            <div class="section-desc">保留供应商备注、审核意见和历史日志</div>
+          </div>
+          <div class="detail-block">
+            <div class="detail-block-title">供应商备注</div>
+            <div class="detail-text">{{ formatMultiline(detailForm.remark) }}</div>
           </div>
           <div class="detail-block">
             <div class="detail-block-title">审核意见</div>
             <div class="detail-text">{{ formatMultiline(detailForm.auditRemark) }}</div>
           </div>
           <div class="detail-block">
-            <div class="detail-block-title">备注</div>
-            <div class="detail-text">{{ formatMultiline(detailForm.remark) }}</div>
-          </div>
-          <div class="detail-block">
-            <div class="detail-block-title">报名附件 JSON</div>
-            <pre class="detail-pre">{{ formatMultiline(detailForm.applyFilesJson) }}</pre>
-          </div>
-          <div class="detail-block">
-            <div class="detail-block-title">比选资料 JSON</div>
-            <pre class="detail-pre">{{ formatMultiline(detailForm.compareFilesJson) }}</pre>
-          </div>
-        </div>
-
-        <div class="form-section detail-section">
-          <div class="section-head">
-            <div class="section-title">补充字段</div>
-            <div class="section-desc">保留原始主键与关联 ID，主列表中默认不展示</div>
-          </div>
-          <div class="detail-kv-grid">
-            <div class="detail-kv">
-              <span class="detail-label">主键</span>
-              <span class="detail-value">{{ formatValue(detailForm.id) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">公告ID</span>
-              <span class="detail-value">{{ formatValue(detailForm.noticeId) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">学校ID</span>
-              <span class="detail-value">{{ formatValue(detailForm.schoolId) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">供应商ID</span>
-              <span class="detail-value">{{ formatValue(detailForm.supplierId) }}</span>
-            </div>
-            <div class="detail-kv">
-              <span class="detail-label">部门/学校ID</span>
-              <span class="detail-value">{{ formatValue(detailForm.deptId) }}</span>
-            </div>
+            <div class="detail-block-title">操作日志</div>
+            <el-empty v-if="!detailLogs.length" description="暂无日志" />
+            <el-timeline v-else>
+              <el-timeline-item
+                v-for="item in detailLogs"
+                :key="item.id"
+                :timestamp="formatDateTime(item.actionTime)"
+                placement="top"
+              >
+                <div class="timeline-title">{{ actionText(item.actionType) }}</div>
+                <div class="timeline-meta">版本 {{ item.versionNo || '--' }} / 操作人：{{ item.actionUser || '--' }}</div>
+                <div class="timeline-remark">{{ item.actionRemark || '--' }}</div>
+              </el-timeline-item>
+            </el-timeline>
           </div>
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="detailOpen = false">关 闭</el-button>
+        <el-button @click="detailOpen = false">关闭</el-button>
+        <el-button
+          v-if="canAudit(detailForm)"
+          v-hasPermi="['school:supplierApply:edit']"
+          type="warning"
+          @click="openRejectDialog(detailForm)"
+        >驳回</el-button>
+        <el-button
+          v-if="canAudit(detailForm)"
+          v-hasPermi="['school:supplierApply:edit']"
+          type="primary"
+          @click="handlePass(detailForm)"
+        >审核通过</el-button>
       </div>
     </el-dialog>
 
-    <el-dialog :title="title" :visible.sync="open" width="560px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="110px">
-        <el-form-item label="公告ID" prop="noticeId">
-          <el-input v-model="form.noticeId" placeholder="请输入公告ID" />
-        </el-form-item>
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
-        </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
-        <el-form-item label="供应商名称" prop="supplierName">
-          <el-input v-model="form.supplierName" placeholder="请输入供应商名称" />
-        </el-form-item>
-        <el-form-item label="报名单号" prop="applyNo">
-          <el-input v-model="form.applyNo" placeholder="请输入报名单号" />
-        </el-form-item>
-        <el-form-item label="报名状态" prop="applyStatus">
-          <el-select v-model="form.applyStatus" placeholder="请选择报名状态" style="width: 100%">
-            <el-option
-              v-for="item in applyStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="资质审查状态" prop="qualificationStatus">
-          <el-select v-model="form.qualificationStatus" placeholder="请选择资质审查状态" style="width: 100%">
-            <el-option
-              v-for="item in qualificationStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="比选阶段状态" prop="bidStageStatus">
-          <el-select v-model="form.bidStageStatus" placeholder="请选择比选阶段状态" clearable style="width: 100%">
-            <el-option
-              v-for="item in bidStageStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="比选结果状态" prop="bidResultStatus">
-          <el-select v-model="form.bidResultStatus" placeholder="请选择比选结果状态" clearable style="width: 100%">
-            <el-option
-              v-for="item in bidResultStatusOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="报名时间" prop="applyTime">
-          <el-date-picker
-            v-model="form.applyTime"
-            clearable
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择报名时间"
-            style="width: 100%"
+    <el-dialog
+      title="驳回报名"
+      :visible.sync="rejectOpen"
+      width="520px"
+      append-to-body
+      @closed="resetRejectForm"
+    >
+      <el-form ref="rejectFormRef" :model="rejectForm" :rules="rejectRules" label-width="88px">
+        <el-form-item label="驳回原因" prop="auditRemark">
+          <el-input
+            v-model="rejectForm.auditRemark"
+            type="textarea"
+            :rows="4"
+            maxlength="300"
+            show-word-limit
+            placeholder="请填写驳回原因，供应商会在原单上修改后重新提交"
           />
-        </el-form-item>
-        <el-form-item label="审核时间" prop="auditTime">
-          <el-date-picker
-            v-model="form.auditTime"
-            clearable
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择审核时间"
-            style="width: 100%"
-          />
-        </el-form-item>
-        <el-form-item label="审核意见" prop="auditRemark">
-          <el-input v-model="form.auditRemark" type="textarea" :rows="3" placeholder="请输入审核意见" />
-        </el-form-item>
-        <el-form-item label="报名附件JSON" prop="applyFilesJson">
-          <el-input v-model="form.applyFilesJson" type="textarea" :rows="3" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="比选资料JSON" prop="compareFilesJson">
-          <el-input v-model="form.compareFilesJson" type="textarea" :rows="3" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="部门/学校ID" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
-        </el-form-item>
-        <el-form-item label="删除标记" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button type="primary" @click="submitForm">确 定</el-button>
-        <el-button @click="cancel">取 消</el-button>
+        <el-button @click="rejectOpen = false">取消</el-button>
+        <el-button type="primary" :loading="rejectLoading" @click="submitReject">确认驳回</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
-import { listSupplierApply, getSupplierApply, delSupplierApply, addSupplierApply, updateSupplierApply } from '@/api/school/supplierApply'
+import {
+  getSupplierApply,
+  listSupplierApply,
+  listSupplierApplyLogs,
+  passSupplierApplyAudit,
+  rejectSupplierApplyAudit
+} from '@/api/school/supplierApply'
+import {
+  getApplyDisplayStatus,
+  getApplyStatusTag,
+  normalizeApplyMaterials
+} from '@/utils/supplierApply'
 
-const APPLY_STATUS_OPTIONS = [
-  { label: '待提交', value: '0', tagType: 'info' },
-  { label: '已提交', value: '1', tagType: 'primary' },
-  { label: '已撤回', value: '2', tagType: 'warning' }
-]
-
-const QUALIFICATION_STATUS_OPTIONS = [
-  { label: '待审查', value: '0', tagType: 'info' },
-  { label: '通过', value: '1', tagType: 'success' },
-  { label: '不通过', value: '2', tagType: 'danger' }
-]
-
-const BID_STAGE_STATUS_OPTIONS = [
-  { label: '未进入', value: '0', tagType: 'info' },
-  { label: '已进入', value: '1', tagType: 'warning' },
-  { label: '已完成', value: '2', tagType: 'success' }
-]
-
-const BID_RESULT_STATUS_OPTIONS = [
-  { label: '未出结果', value: '0', tagType: 'info' },
-  { label: '已中选', value: '1', tagType: 'success' },
-  { label: '未中选', value: '2', tagType: 'danger' }
+const DISPLAY_STATUS_OPTIONS = [
+  { label: '待审核', value: 'PENDING_REVIEW' },
+  { label: '已通过', value: 'APPROVED' },
+  { label: '已驳回', value: 'REJECTED' },
+  { label: '已撤回', value: 'WITHDRAWN' },
+  { label: '待提交', value: 'DRAFT' }
 ]
 
 export default {
-  name: 'SupplierApply',
+  name: 'SupplierApplyAudit',
   data() {
     return {
-      loading: true,
-      ids: [],
-      single: true,
-      multiple: true,
+      loading: false,
       showSearch: true,
       total: 0,
       supplierApplyList: [],
-      title: '',
-      open: false,
       detailOpen: false,
       detailLoading: false,
       detailForm: {},
-      applyStatusOptions: APPLY_STATUS_OPTIONS,
-      qualificationStatusOptions: QUALIFICATION_STATUS_OPTIONS,
-      bidStageStatusOptions: BID_STAGE_STATUS_OPTIONS,
-      bidResultStatusOptions: BID_RESULT_STATUS_OPTIONS,
+      detailMaterials: [],
+      detailLogs: [],
+      currentDetailId: null,
+      rejectOpen: false,
+      rejectLoading: false,
+      displayStatusOptions: DISPLAY_STATUS_OPTIONS,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
-        supplierName: null,
-        applyNo: null,
-        noticeCode: null,
-        noticeTitle: null,
-        schoolName: null,
-        applyStatus: null,
-        qualificationStatus: null,
-        bidStageStatus: null,
-        bidResultStatus: null,
-        applyTime: null,
-        auditTime: null,
-        noticeId: null,
-        schoolId: null,
-        supplierId: null,
-        deptId: null
+        supplierName: '',
+        applyNo: '',
+        noticeTitle: '',
+        schoolName: '',
+        displayStatus: ''
       },
-      form: {},
-      rules: {
-        noticeId: [
-          { required: true, message: '公告ID不能为空', trigger: 'blur' }
-        ],
-        schoolId: [
-          { required: true, message: '学校ID不能为空', trigger: 'blur' }
-        ],
-        supplierId: [
-          { required: true, message: '供应商ID不能为空', trigger: 'blur' }
-        ],
-        supplierName: [
-          { required: true, message: '供应商名称不能为空', trigger: 'blur' }
-        ],
-        applyNo: [
-          { required: true, message: '报名单号不能为空', trigger: 'blur' }
-        ],
-        applyStatus: [
-          { required: true, message: '报名状态不能为空', trigger: 'change' }
-        ],
-        qualificationStatus: [
-          { required: true, message: '资质审查状态不能为空', trigger: 'change' }
-        ],
-        delFlag: [
-          { required: true, message: '删除标记不能为空', trigger: 'blur' }
+      rejectForm: {
+        applyId: null,
+        auditRemark: ''
+      },
+      rejectRules: {
+        auditRemark: [
+          { required: true, message: '请填写驳回原因', trigger: 'blur' }
         ]
       }
     }
@@ -596,137 +375,190 @@ export default {
     this.getList()
   },
   methods: {
-    getDefaultForm() {
-      return {
-        id: null,
-        noticeId: null,
-        schoolId: null,
-        supplierId: null,
-        supplierName: null,
-        applyNo: null,
-        applyStatus: '0',
-        qualificationStatus: '0',
-        bidStageStatus: null,
-        bidResultStatus: null,
-        applyTime: null,
-        auditTime: null,
-        auditRemark: null,
-        applyFilesJson: null,
-        compareFilesJson: null,
-        deptId: null,
-        createBy: null,
-        createTime: null,
-        updateBy: null,
-        updateTime: null,
-        remark: null,
-        delFlag: null,
-        noticeTitle: null,
-        noticeCode: null,
-        schoolName: null
+    getApplyDisplayStatus,
+    getApplyStatusTag,
+    buildListQuery() {
+      const query = {
+        pageNum: this.queryParams.pageNum,
+        pageSize: this.queryParams.pageSize,
+        supplierName: this.queryParams.supplierName,
+        applyNo: this.queryParams.applyNo,
+        noticeTitle: this.queryParams.noticeTitle,
+        schoolName: this.queryParams.schoolName
       }
+      switch (this.queryParams.displayStatus) {
+        case 'DRAFT':
+          query.applyStatus = '0'
+          break
+        case 'PENDING_REVIEW':
+          query.applyStatus = '1'
+          query.qualificationStatus = '0'
+          break
+        case 'APPROVED':
+          query.applyStatus = '1'
+          query.qualificationStatus = '1'
+          break
+        case 'REJECTED':
+          query.applyStatus = '1'
+          query.qualificationStatus = '2'
+          break
+        case 'WITHDRAWN':
+          query.applyStatus = '2'
+          break
+        default:
+          break
+      }
+      return query
     },
     getList() {
       this.loading = true
-      listSupplierApply(this.queryParams).then(response => {
+      listSupplierApply(this.buildListQuery()).then((response) => {
         this.supplierApplyList = response.rows || []
         this.total = response.total || 0
       }).finally(() => {
         this.loading = false
       })
     },
-    cancel() {
-      this.open = false
-      this.reset()
-    },
-    reset() {
-      this.form = this.getDefaultForm()
-      this.resetForm('form')
-    },
-    resetDetail() {
-      this.detailForm = {}
-      this.detailLoading = false
-    },
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
     },
     resetQuery() {
-      this.resetForm('queryForm')
-      this.handleQuery()
+      this.queryParams = {
+        pageNum: 1,
+        pageSize: 10,
+        supplierName: '',
+        applyNo: '',
+        noticeTitle: '',
+        schoolName: '',
+        displayStatus: ''
+      }
+      this.getList()
     },
-    handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.id)
-      this.single = selection.length !== 1
-      this.multiple = selection.length === 0
+    handleExport() {
+      this.download('school/supplierApply/export', this.buildListQuery(), `supplierApplyAudit_${new Date().getTime()}.xlsx`)
     },
-    handleAdd() {
-      this.reset()
-      this.open = true
-      this.title = '添加供应商报名'
+    canAudit(row = {}) {
+      return String(row.applyStatus) === '1' && String(row.qualificationStatus) === '0'
     },
     handleView(row) {
-      const id = row && row.id ? row.id : this.ids[0]
-      if (!id) {
-        this.$modal.msgError('请选择要查看的报名记录')
+      const applyId = row && row.id
+      if (!applyId) {
+        this.$modal.msgError('未找到报名记录')
         return
       }
+      this.currentDetailId = applyId
       this.detailOpen = true
+      this.loadDetail(applyId)
+    },
+    loadDetail(applyId) {
       this.detailLoading = true
-      getSupplierApply(id).then(response => {
-        this.detailForm = Object.assign(this.getDefaultForm(), response.data || {})
+      Promise.all([
+        getSupplierApply(applyId),
+        listSupplierApplyLogs(applyId)
+      ]).then(([detailResponse, logResponse]) => {
+        this.detailForm = detailResponse.data || {}
+        this.detailMaterials = normalizeApplyMaterials(this.detailForm.applyFilesJson)
+        this.detailLogs = logResponse.data || []
       }).finally(() => {
         this.detailLoading = false
       })
     },
-    handleUpdate(row) {
-      this.reset()
-      const id = row && row.id ? row.id : this.ids[0]
-      getSupplierApply(id).then(response => {
-        this.form = Object.assign(this.getDefaultForm(), response.data || {})
-        this.open = true
-        this.title = '修改供应商报名'
-      })
+    handlePass(row) {
+      const applyId = row && row.id
+      if (!applyId) {
+        this.$modal.msgError('未找到报名记录')
+        return
+      }
+      this.$modal.confirm(`确认通过“${row.supplierName || '当前供应商'}”的报名审核吗？`).then(() => {
+        return passSupplierApplyAudit({ applyId })
+      }).then(() => {
+        this.$modal.msgSuccess('审核已通过')
+        this.refreshAfterAudit(applyId)
+      }).catch(() => {})
     },
-    submitForm() {
-      this.$refs.form.validate(valid => {
+    openRejectDialog(row) {
+      const applyId = row && row.id
+      if (!applyId) {
+        this.$modal.msgError('未找到报名记录')
+        return
+      }
+      this.rejectForm = {
+        applyId,
+        auditRemark: ''
+      }
+      this.rejectOpen = true
+    },
+    submitReject() {
+      this.$refs.rejectFormRef.validate((valid) => {
         if (!valid) {
           return
         }
-        const request = this.form.id != null ? updateSupplierApply(this.form) : addSupplierApply(this.form)
-        request.then(() => {
-          this.$modal.msgSuccess(this.form.id != null ? '修改成功' : '新增成功')
-          this.open = false
-          this.getList()
+        this.rejectLoading = true
+        rejectSupplierApplyAudit(this.rejectForm).then(() => {
+          this.$modal.msgSuccess('已驳回该报名')
+          const { applyId } = this.rejectForm
+          this.rejectOpen = false
+          this.refreshAfterAudit(applyId)
+        }).finally(() => {
+          this.rejectLoading = false
         })
       })
     },
-    handleDelete(row) {
-      const ids = row && row.id ? row.id : this.ids.join(',')
-      this.$modal.confirm('是否确认删除供应商报名编号为"' + ids + '"的数据项？').then(() => {
-        return delSupplierApply(ids)
-      }).then(() => {
-        this.getList()
-        this.$modal.msgSuccess('删除成功')
-      }).catch(() => {})
+    refreshAfterAudit(applyId) {
+      this.getList()
+      if (this.detailOpen && this.currentDetailId === applyId) {
+        this.loadDetail(applyId)
+      }
     },
-    handleExport() {
-      this.download('school/supplierApply/export', {
-        ...this.queryParams
-      }, `supplierApply_${new Date().getTime()}.xlsx`)
+    resetDetail() {
+      this.currentDetailId = null
+      this.detailForm = {}
+      this.detailMaterials = []
+      this.detailLogs = []
+      this.detailLoading = false
     },
-    getOptionLabel(options, value) {
-      const option = options.find(item => String(item.value) === String(value))
-      return option ? option.label : '--'
+    resetRejectForm() {
+      this.rejectLoading = false
+      this.rejectForm = {
+        applyId: null,
+        auditRemark: ''
+      }
+      if (this.$refs.rejectFormRef) {
+        this.$refs.rejectFormRef.resetFields()
+      }
     },
-    getOptionTagType(options, value) {
-      const option = options.find(item => String(item.value) === String(value))
-      return option ? option.tagType : 'info'
+    isImageMaterial(type) {
+      return type === 'SAMPLE_IMAGE'
+    },
+    joinMaterialUrls(fileUrls) {
+      return Array.isArray(fileUrls) ? fileUrls.filter(Boolean).join(',') : ''
+    },
+    formatMaterialSource(source) {
+      const sourceMap = {
+        PROFILE: '供应商主档',
+        QUALIFICATION: '资质复用',
+        NOTICE_RULE: '公告要求',
+        UPLOAD: '本次上传',
+        LEGACY: '历史数据'
+      }
+      return sourceMap[source] || source || '--'
+    },
+    actionText(actionType) {
+      const actionMap = {
+        SAVE_DRAFT: '保存草稿',
+        SUBMIT: '提交报名',
+        WITHDRAW: '撤回报名',
+        AUDIT_PASS: '审核通过',
+        AUDIT_REJECT: '审核驳回'
+      }
+      return actionMap[actionType] || actionType || '--'
     },
     formatValue(value) {
       return value == null || value === '' ? '--' : value
     },
-    formatDate(value) {
-      return value ? this.parseTime(value, '{y}-{m}-{d}') : '--'
+    formatDateTime(value) {
+      return value ? this.parseTime(value, '{y}-{m}-{d} {h}:{i}:{s}') : '--'
     },
     formatMultiline(value) {
       return value == null || value === '' ? '--' : value
@@ -735,7 +567,7 @@ export default {
 }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
 .query-form {
   margin-bottom: 16px;
   padding: 18px 20px 6px;
@@ -744,7 +576,7 @@ export default {
   border-radius: 12px;
 }
 
-.business-table {
+.audit-table {
   border-radius: 12px;
   overflow: hidden;
 }
@@ -767,21 +599,17 @@ export default {
 }
 
 .dialog-scroll {
-  max-height: 70vh;
+  max-height: 72vh;
   overflow-y: auto;
   padding-right: 8px;
 }
 
-.form-section {
+.detail-section {
   margin-bottom: 18px;
   padding: 18px;
   background: #f8fafc;
   border: 1px solid #e7edf5;
   border-radius: 12px;
-}
-
-.detail-section {
-  padding-bottom: 18px;
 }
 
 .section-head {
@@ -809,7 +637,7 @@ export default {
 .detail-kv {
   min-width: 0;
   padding: 12px 14px;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e7edf5;
   border-radius: 8px;
 }
@@ -823,11 +651,46 @@ export default {
 
 .detail-value {
   display: block;
-  overflow: hidden;
+  line-height: 1.6;
   font-size: 14px;
   color: #243447;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  word-break: break-all;
+}
+
+.material-list {
+  display: grid;
+  gap: 16px;
+}
+
+.material-card {
+  padding: 16px;
+  background: #fff;
+  border: 1px solid #e7edf5;
+  border-radius: 10px;
+}
+
+.material-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.material-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #243447;
+}
+
+.material-meta {
+  margin-top: 6px;
+  font-size: 12px;
+  color: #7a8798;
+}
+
+.material-meta span + span {
+  margin-left: 12px;
 }
 
 .detail-block + .detail-block {
@@ -841,18 +704,34 @@ export default {
   color: #243447;
 }
 
-.detail-text,
-.detail-pre {
+.detail-text {
   min-height: 42px;
   padding: 12px 14px;
   margin: 0;
-  overflow-x: auto;
   line-height: 1.6;
   color: #6b7785;
   white-space: pre-wrap;
-  background: #ffffff;
+  background: #fff;
   border: 1px solid #e7edf5;
   border-radius: 8px;
+}
+
+.timeline-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #23324a;
+}
+
+.timeline-meta {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7b8899;
+}
+
+.timeline-remark {
+  margin-top: 8px;
+  color: #4b5a6d;
+  line-height: 1.7;
 }
 
 @media (max-width: 1200px) {
@@ -864,6 +743,10 @@ export default {
 @media (max-width: 768px) {
   .detail-kv-grid {
     grid-template-columns: 1fr;
+  }
+
+  .material-header {
+    flex-direction: column;
   }
 }
 </style>

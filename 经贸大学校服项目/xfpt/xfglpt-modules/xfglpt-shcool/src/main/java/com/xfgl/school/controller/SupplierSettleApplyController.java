@@ -106,6 +106,14 @@ public class SupplierSettleApplyController extends BaseController {
         return getDataTable(list);
     }
 
+    @Operation(summary = "查询当前公告发布人已处理的入驻申请列表")
+    @GetMapping("/audit/processed/list")
+    public TableDataInfo processedList(XfptSupplierSettleApply query) {
+        startPage();
+        List<XfptSupplierSettleApply> list = supplierSettleApplyService.listProcessedByPublisher(query);
+        return getDataTable(list);
+    }
+
     @Operation(summary = "导出当前公告发布人已审核通过的入驻申请列表")
     @Log(title = "供应商入驻审核", businessType = BusinessType.EXPORT)
     @PostMapping("/audit/approved/export")
@@ -115,6 +123,17 @@ public class SupplierSettleApplyController extends BaseController {
                 .collect(Collectors.toList());
         ExcelUtil<ApprovedSupplierSettleExportVo> util = new ExcelUtil<ApprovedSupplierSettleExportVo>(ApprovedSupplierSettleExportVo.class);
         util.exportExcel(response, list, "已通过供应商入驻数据");
+    }
+
+    @Operation(summary = "导出当前公告发布人已处理的入驻申请列表")
+    @Log(title = "供应商入驻审核", businessType = BusinessType.EXPORT)
+    @PostMapping("/audit/processed/export")
+    public void processedExport(HttpServletResponse response, XfptSupplierSettleApply query) {
+        List<ApprovedSupplierSettleExportVo> list = supplierSettleApplyService.listProcessedByPublisher(query).stream()
+                .map(this::buildApprovedExportVo)
+                .collect(Collectors.toList());
+        ExcelUtil<ApprovedSupplierSettleExportVo> util = new ExcelUtil<ApprovedSupplierSettleExportVo>(ApprovedSupplierSettleExportVo.class);
+        util.exportExcel(response, list, "已处理供应商入驻数据");
     }
 
     @Operation(summary = "审核通过入驻申请")
@@ -141,6 +160,17 @@ public class SupplierSettleApplyController extends BaseController {
         vo.setLegalRepresentative(item.getLegalRepresentative());
         vo.setAuditTime(item.getAuditTime());
         vo.setAuditBy(StringUtils.defaultString(item.getAuditBy(), item.getUpdateBy()));
+        vo.setAuditStatusName(resolveAuditStatusName(item.getAuditStatus()));
         return vo;
+    }
+
+    private String resolveAuditStatusName(String auditStatus) {
+        if ("1".equals(auditStatus)) {
+            return "已通过";
+        }
+        if ("2".equals(auditStatus)) {
+            return "已驳回";
+        }
+        return "待审核";
     }
 }

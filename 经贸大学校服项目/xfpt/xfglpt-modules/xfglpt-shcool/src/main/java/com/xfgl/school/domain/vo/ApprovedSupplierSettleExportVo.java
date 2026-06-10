@@ -42,6 +42,10 @@ public class ApprovedSupplierSettleExportVo {
     @Schema(description = "审核时间")
     private Date auditTime;
 
+    @Excel(name = "审核状态")
+    @Schema(description = "审核状态")
+    private String auditStatusName;
+
     @Excel(name = "审核人")
     @Schema(description = "审核人")
     private String auditBy;

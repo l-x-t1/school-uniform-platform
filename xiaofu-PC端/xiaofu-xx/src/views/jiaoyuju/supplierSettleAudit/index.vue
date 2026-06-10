@@ -4,7 +4,7 @@
       <div class="page-header">
         <div>
           <div class="page-title">供应商入驻审核</div>
-          <div class="page-subtitle">审核供应商提交的入驻申请，并查询自己发布公告下已审核通过的厂商信息</div>
+          <div class="page-subtitle">审核供应商提交的入驻申请，并查询自己发布公告下已处理的入驻申请</div>
         </div>
         <el-button type="primary" plain icon="el-icon-refresh" size="mini" @click="refreshList">
           刷新
@@ -92,10 +92,10 @@
           />
         </el-tab-pane>
 
-        <el-tab-pane label="已通过厂商" name="approved">
+        <el-tab-pane label="已处理审核" name="processed">
           <el-form
-            ref="approvedQueryForm"
-            :model="approvedQueryParams"
+            ref="processedQueryForm"
+            :model="processedQueryParams"
             size="small"
             :inline="true"
             label-width="100px"
@@ -103,34 +103,44 @@
           >
             <el-form-item label="厂商名称" prop="supplierName">
               <el-input
-                v-model="approvedQueryParams.supplierName"
+                v-model="processedQueryParams.supplierName"
                 placeholder="请输入厂商名称"
                 clearable
-                @keyup.enter.native="handleApprovedQuery"
+                @keyup.enter.native="handleProcessedQuery"
               />
             </el-form-item>
             <el-form-item label="公告标题" prop="noticeTitle">
               <el-input
-                v-model="approvedQueryParams.noticeTitle"
+                v-model="processedQueryParams.noticeTitle"
                 placeholder="请输入公告标题"
                 clearable
-                @keyup.enter.native="handleApprovedQuery"
+                @keyup.enter.native="handleProcessedQuery"
               />
             </el-form-item>
+            <el-form-item label="审核状态" prop="auditStatus">
+              <el-select v-model="processedQueryParams.auditStatus" placeholder="请选择审核状态" clearable>
+                <el-option
+                  v-for="item in auditStatusOptions"
+                  :key="item.value"
+                  :label="item.label"
+                  :value="item.value"
+                />
+              </el-select>
+            </el-form-item>
             <el-form-item>
-              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleApprovedQuery">
+              <el-button type="primary" icon="el-icon-search" size="mini" @click="handleProcessedQuery">
                 搜索
               </el-button>
-              <el-button icon="el-icon-refresh" size="mini" @click="resetApprovedQuery">
+              <el-button icon="el-icon-refresh" size="mini" @click="resetProcessedQuery">
                 重置
               </el-button>
-              <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleApprovedExport">
+              <el-button type="warning" plain icon="el-icon-download" size="mini" @click="handleProcessedExport">
                 导出
               </el-button>
             </el-form-item>
           </el-form>
 
-          <el-table v-loading="approvedLoading" :data="approvedRows" border>
+          <el-table v-loading="processedLoading" :data="processedRows" border>
             <el-table-column type="index" label="序号" width="60" align="center" />
             <el-table-column label="厂商名称" prop="supplierName" min-width="160" show-overflow-tooltip />
             <el-table-column label="联系电话" prop="supplierPhone" width="130" align="center" />
@@ -143,10 +153,17 @@
                 {{ parseTime(scope.row.auditTime, "{y}-{m}-{d} {h}:{i}") || "-" }}
               </template>
             </el-table-column>
+            <el-table-column label="审核状态" width="100" align="center">
+              <template slot-scope="scope">
+                <el-tag v-if="scope.row.auditStatus === '1'" type="success" size="small">已通过</el-tag>
+                <el-tag v-else-if="scope.row.auditStatus === '2'" type="danger" size="small">已驳回</el-tag>
+                <span v-else>-</span>
+              </template>
+            </el-table-column>
             <el-table-column label="审核人" prop="auditBy" width="120" align="center" />
             <el-table-column label="操作" width="100" align="center" fixed="right">
               <template slot-scope="scope">
-                <el-button type="text" icon="el-icon-view" @click="openDetail(scope.row, 'approved')">
+                <el-button type="text" icon="el-icon-view" @click="openDetail(scope.row, 'processed')">
                   详情
                 </el-button>
               </template>
@@ -154,11 +171,11 @@
           </el-table>
 
           <pagination
-            v-show="approvedTotal > 0"
-            :total="approvedTotal"
-            :page.sync="approvedQueryParams.pageNum"
-            :limit.sync="approvedQueryParams.pageSize"
-            @pagination="getApprovedList"
+            v-show="processedTotal > 0"
+            :total="processedTotal"
+            :page.sync="processedQueryParams.pageNum"
+            :limit.sync="processedQueryParams.pageSize"
+            @pagination="getProcessedList"
           />
         </el-tab-pane>
       </el-tabs>
@@ -269,10 +286,10 @@
 <script>
 import {
   auditList,
-  approvedList,
+  processedList,
   approveApply,
   rejectApply,
-  exportApprovedApply,
+  exportProcessedApply,
 } from "@/api/school/supplierSettleAudit";
 
 export default {
@@ -281,25 +298,31 @@ export default {
     return {
       activeTab: "pending",
       pendingLoading: false,
-      approvedLoading: false,
+      processedLoading: false,
       rejectLoading: false,
-      approvedLoaded: false,
+      processedLoaded: false,
       pendingTotal: 0,
-      approvedTotal: 0,
+      processedTotal: 0,
       pendingRows: [],
-      approvedRows: [],
+      processedRows: [],
       pendingQueryParams: {
         pageNum: 1,
         pageSize: 10,
         supplierName: "",
         supplierPhone: "",
       },
-      approvedQueryParams: {
+      processedQueryParams: {
         pageNum: 1,
         pageSize: 10,
         supplierName: "",
         noticeTitle: "",
+        auditStatus: "",
       },
+      auditStatusOptions: [
+        { label: "全部已处理", value: "" },
+        { label: "已通过", value: "1" },
+        { label: "已驳回", value: "2" },
+      ],
       currentRow: {},
       detailMode: "pending",
       rejectDialogOpen: false,
@@ -328,7 +351,7 @@ export default {
       });
     },
     detailDialogTitle() {
-      return this.detailMode === "approved" ? "已通过入驻详情" : "入驻申请详情";
+      return this.detailMode === "processed" ? "已处理审核详情" : "入驻申请详情";
     },
   },
   created() {
@@ -346,21 +369,21 @@ export default {
           this.pendingLoading = false;
         });
     },
-    getApprovedList() {
-      this.approvedLoading = true;
-      this.approvedLoaded = true;
-      approvedList(this.approvedQueryParams)
+    getProcessedList() {
+      this.processedLoading = true;
+      this.processedLoaded = true;
+      processedList(this.processedQueryParams)
         .then((response) => {
-          this.approvedRows = response.rows || [];
-          this.approvedTotal = response.total || 0;
+          this.processedRows = response.rows || [];
+          this.processedTotal = response.total || 0;
         })
         .finally(() => {
-          this.approvedLoading = false;
+          this.processedLoading = false;
         });
     },
     handleTabChange() {
-      if (this.activeTab === "approved" && !this.approvedLoaded) {
-        this.getApprovedList();
+      if (this.activeTab === "processed" && !this.processedLoaded) {
+        this.getProcessedList();
       }
     },
     handlePendingQuery() {
@@ -371,22 +394,22 @@ export default {
       this.resetForm("pendingQueryForm");
       this.handlePendingQuery();
     },
-    handleApprovedQuery() {
-      this.approvedQueryParams.pageNum = 1;
-      this.getApprovedList();
+    handleProcessedQuery() {
+      this.processedQueryParams.pageNum = 1;
+      this.getProcessedList();
     },
-    resetApprovedQuery() {
-      this.resetForm("approvedQueryForm");
-      this.handleApprovedQuery();
+    resetProcessedQuery() {
+      this.resetForm("processedQueryForm");
+      this.handleProcessedQuery();
     },
-    handleApprovedExport() {
-      exportApprovedApply({
-        ...this.approvedQueryParams,
+    handleProcessedExport() {
+      exportProcessedApply({
+        ...this.processedQueryParams,
       });
     },
     refreshList() {
-      if (this.activeTab === "approved") {
-        this.getApprovedList();
+      if (this.activeTab === "processed") {
+        this.getProcessedList();
         return;
       }
       this.getPendingList();
@@ -408,8 +431,8 @@ export default {
         })
         .then(() => {
           this.msgSuccess("审核通过，已创建供应商账号和厂商信息");
-          if (this.approvedLoaded) {
-            this.getApprovedList();
+          if (this.processedLoaded) {
+            this.getProcessedList();
           }
         })
         .catch(() => {
@@ -438,6 +461,9 @@ export default {
           })
           .finally(() => {
             this.getPendingList();
+            if (this.processedLoaded) {
+              this.getProcessedList();
+            }
             this.rejectLoading = false;
           });
       });

@@ -14,6 +14,7 @@
     <SupplierSettleInfo
       v-else-if="step === 'supplier-info'"
       :noticeId="noticeId"
+      :redirect="redirect"
       :accountInfo="accountInfo"
       :supplierData="supplierData"
       @go-back="onGoBack"
@@ -37,6 +38,7 @@ export default {
     return {
       step: "login",
       noticeId: null,
+      redirect: "",
       accountInfo: null,
       supplierData: null,
     };
@@ -44,6 +46,7 @@ export default {
   created() {
     const query = this.$route && this.$route.query;
     this.noticeId = query && query.noticeId ? String(query.noticeId) : null;
+    this.redirect = query && query.redirect ? String(query.redirect) : "";
     if (query && query.step) {
       this.step = query.step;
     }

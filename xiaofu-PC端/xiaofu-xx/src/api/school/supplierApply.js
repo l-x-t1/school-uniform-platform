@@ -17,6 +17,29 @@ export function getSupplierApply(id) {
   })
 }
 
+export function listSupplierApplyLogs(applyId) {
+  return request({
+    url: '/school/supplierApply/log/' + applyId,
+    method: 'get'
+  })
+}
+
+export function passSupplierApplyAudit(data) {
+  return request({
+    url: '/school/supplierApply/audit/pass',
+    method: 'post',
+    data
+  })
+}
+
+export function rejectSupplierApplyAudit(data) {
+  return request({
+    url: '/school/supplierApply/audit/reject',
+    method: 'post',
+    data
+  })
+}
+
 // 新增供应商报名
 export function addSupplierApply(data) {
   return request({

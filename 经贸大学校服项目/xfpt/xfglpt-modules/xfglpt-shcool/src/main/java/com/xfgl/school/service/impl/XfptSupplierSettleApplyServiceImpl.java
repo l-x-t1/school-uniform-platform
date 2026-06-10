@@ -339,15 +339,31 @@ public class XfptSupplierSettleApplyServiceImpl
 
     @Override
     public List<XfptSupplierSettleApply> listApprovedByPublisher(XfptSupplierSettleApply query) {
+        return listProcessedByPublisher(query, AUDIT_STATUS_APPROVED);
+    }
+
+    @Override
+    public List<XfptSupplierSettleApply> listProcessedByPublisher(XfptSupplierSettleApply query) {
+        String auditStatus = query != null ? StringUtils.trimToNull(query.getAuditStatus()) : null;
+        if (AUDIT_STATUS_APPROVED.equals(auditStatus) || AUDIT_STATUS_REJECTED.equals(auditStatus)) {
+            return listProcessedByPublisher(query, auditStatus);
+        }
+        return listProcessedByPublisher(query, null);
+    }
+
+    private List<XfptSupplierSettleApply> listProcessedByPublisher(XfptSupplierSettleApply query, String auditStatus) {
         String supplierName = query != null ? StringUtils.trimToNull(query.getSupplierName()) : null;
         String noticeTitle = query != null ? StringUtils.trimToNull(query.getNoticeTitle()) : null;
-        Long currentUserId = SecurityUtils.getUserId();
+        Long currentUserId = currentLoginUser().getUserId();
         if (currentUserId == null) {
             throw new ServiceException("当前登录信息不存在，请重新登录后再试");
         }
         List<XfptSupplierSettleApply> list = lambdaQuery()
-                .eq(XfptSupplierSettleApply::getAuditStatus, AUDIT_STATUS_APPROVED)
                 .eq(XfptSupplierSettleApply::getNoticeUserId, currentUserId)
+                .eq(StringUtils.isNotBlank(auditStatus),
+                        XfptSupplierSettleApply::getAuditStatus, auditStatus)
+                .in(StringUtils.isBlank(auditStatus),
+                        XfptSupplierSettleApply::getAuditStatus, AUDIT_STATUS_APPROVED, AUDIT_STATUS_REJECTED)
                 .like(StringUtils.isNotBlank(supplierName),
                         XfptSupplierSettleApply::getSupplierName, supplierName)
                 .like(StringUtils.isNotBlank(noticeTitle),

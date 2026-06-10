@@ -18,6 +18,15 @@ export function approvedList(query) {
   });
 }
 
+// 查询已处理的厂商入驻列表
+export function processedList(query) {
+  return request({
+    url: "/school/supplierSettleApply/audit/processed/list",
+    method: "get",
+    params: query,
+  });
+}
+
 // 审核通过
 export function approveApply(id) {
   return request({
@@ -41,5 +50,14 @@ export function exportApprovedApply(query) {
     "/school/supplierSettleApply/audit/approved/export",
     query,
     `approved_supplier_settle_${new Date().getTime()}.xlsx`
+  );
+}
+
+// 导出已处理的厂商入驻列表
+export function exportProcessedApply(query) {
+  return download(
+    "/school/supplierSettleApply/audit/processed/export",
+    query,
+    `processed_supplier_settle_${new Date().getTime()}.xlsx`
   );
 }

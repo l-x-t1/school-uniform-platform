@@ -77,6 +77,35 @@ function normalizeGroupNoticeMenus(routes = []) {
   });
 }
 
+function normalizeSupplierApplyMenus(routes = []) {
+  return routes.map((route) => {
+    const current = { ...route };
+    const currentPath = current.path || "";
+    const currentComponent = current.component || "";
+    const currentTitle =
+      current.meta && current.meta.title ? current.meta.title : current.name;
+
+    const isSupplierApplyAudit =
+      currentPath === "supplierApply" ||
+      currentPath === "/newFeature/supplierApply" ||
+      currentComponent === "school/supplierApply/index" ||
+      currentTitle === "供应商报名";
+
+    if (current.children && current.children.length) {
+      current.children = normalizeSupplierApplyMenus(current.children);
+    }
+
+    if (isSupplierApplyAudit) {
+      current.meta = {
+        ...(current.meta || {}),
+        title: "供应商报名审核",
+      };
+    }
+
+    return current;
+  });
+}
+
 function buildRouteFullPath(parentPath = "", routePath = "") {
   if (!routePath) {
     return parentPath || "/";
@@ -458,7 +487,9 @@ function nestAdminNewFeatureMenus(routes = []) {
 }
 
 function normalizeNonSchoolRoutes(routes = []) {
-  return normalizeGroupNoticeMenus(normalizeUsageMenus(routes));
+  return normalizeSupplierApplyMenus(
+    normalizeGroupNoticeMenus(normalizeUsageMenus(routes))
+  );
 }
 
 function normalizeRuntimeRoutes(
@@ -478,6 +509,47 @@ function normalizeRuntimeRoutes(
   }
 
   return normalizedRoutes;
+}
+
+function buildSupplierPortalRoutes() {
+  return [
+    {
+      path: "/",
+      component: "Layout",
+      children: [
+        {
+          path: "supplier/applyCenter",
+          component: "supplier/applyCenter/index",
+          name: "SupplierApplyCenterMenu",
+          meta: { title: "报名中心", icon: "message" },
+        },
+      ],
+    },
+    {
+      path: "/",
+      component: "Layout",
+      children: [
+        {
+          path: "supplier/myApply",
+          component: "supplier/myApply/index",
+          name: "SupplierMyApplyMenu",
+          meta: { title: "我的报名", icon: "form" },
+        },
+      ],
+    },
+  ];
+}
+
+function hasRouteComponent(routes = [], component = "") {
+  return routes.some((route) => {
+    if (route.component === component) {
+      return true;
+    }
+    if (Array.isArray(route.children) && route.children.length) {
+      return hasRouteComponent(route.children, component);
+    }
+    return false;
+  });
 }
 
 const permission = {
@@ -508,9 +580,15 @@ const permission = {
       return new Promise((resolve) => {
         const userRoles = rootGetters.roles || [];
         const hasXuexiaoRole = userRoles.some((role) =>
-          role.includes("xuexiao")
+          String(role || "").toLowerCase().includes("xuexiao")
         );
-        const hasAdminRole = userRoles.some((role) => role.includes("admin"));
+        const hasAdminRole = userRoles.some((role) =>
+          String(role || "").toLowerCase().includes("admin")
+        );
+        const hasSupplierRole = userRoles.some((role) => {
+          const roleKey = String(role || "").toLowerCase();
+          return roleKey.includes("gys") || roleKey.includes("changshang");
+        });
 
         const homeRoute = hasXuexiaoRole
           ? homeRoutes.schoolHome
@@ -518,10 +596,18 @@ const permission = {
 
         getRouters().then((res) => {
           const serverRoutes = JSON.parse(JSON.stringify(res.data || []));
-          const normalizedRoutes = normalizeRuntimeRoutes(serverRoutes, {
+          let normalizedRoutes = normalizeRuntimeRoutes(serverRoutes, {
             useSchoolTonggouLayout: hasXuexiaoRole,
             nestAdminNewFeature: hasAdminRole && !hasXuexiaoRole,
           });
+          if (hasSupplierRole) {
+            buildSupplierPortalRoutes().forEach((route) => {
+              const child = Array.isArray(route.children) ? route.children[0] : null;
+              if (child && !hasRouteComponent(normalizedRoutes, child.component)) {
+                normalizedRoutes.push(route);
+              }
+            });
+          }
           const dedupedRoutes = dedupeRouteNames(normalizedRoutes);
           const sdata = JSON.parse(JSON.stringify(dedupedRoutes));
           const rdata = JSON.parse(JSON.stringify(dedupedRoutes));

@@ -96,6 +96,19 @@ export const constantRoutes = [
     hidden: true,
   },
   {
+    path: "/supplier/apply",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "detail",
+        component: () => import("@/views/supplier/applyDetail/index"),
+        name: "SupplierApplyDetailEntry",
+        meta: { title: "采购公告报名", activeMenu: "/supplier/applyCenter" },
+      },
+    ],
+  },
+  {
     path: "/404",
     component: () => import("@/views/error/404"),
     hidden: true,

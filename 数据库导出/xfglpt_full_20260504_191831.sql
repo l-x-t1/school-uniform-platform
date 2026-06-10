@@ -7985,4 +7985,518 @@ where gsr.del_flag = '0'
 -- where gsr.del_flag = '0'
 --   and coalesce(gsr.supplier_id, -1) <> coalesce(goods.supplier_id, -1);
 
+-- ============================================
+-- 2026-06-09 采购公告供应商报名闭环
+
+CREATE TABLE IF NOT EXISTS `xfpt_supplier_qualification` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `supplier_id` bigint NOT NULL COMMENT '供应商ID',
+  `qualification_type` varchar(64) NOT NULL COMMENT '资质类型',
+  `qualification_label` varchar(100) DEFAULT NULL COMMENT '资质名称',
+  `file_urls` longtext COMMENT '附件地址，逗号分隔',
+  `source` varchar(32) DEFAULT NULL COMMENT '来源',
+  `create_by` varchar(64) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标记，0正常 1删除',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uk_xfpt_supplier_qualification_supplier_type` (`supplier_id`,`qualification_type`,`del_flag`),
+  KEY `idx_xfpt_supplier_qualification_type` (`qualification_type`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供应商资质复用表';
+
+CREATE TABLE IF NOT EXISTS `xfpt_supplier_apply_log` (
+  `id` bigint NOT NULL AUTO_INCREMENT COMMENT '主键',
+  `apply_id` bigint NOT NULL COMMENT '报名ID',
+  `notice_id` bigint NOT NULL COMMENT '采购公告ID',
+  `supplier_id` bigint NOT NULL COMMENT '供应商ID',
+  `action_type` varchar(32) NOT NULL COMMENT '动作类型',
+  `version_no` int NOT NULL DEFAULT '1' COMMENT '版本号',
+  `action_remark` varchar(500) DEFAULT NULL COMMENT '动作备注',
+  `action_user` varchar(64) DEFAULT NULL COMMENT '操作人',
+  `action_time` datetime DEFAULT NULL COMMENT '操作时间',
+  `snapshot_json` longtext COMMENT '材料快照JSON',
+  `create_by` varchar(64) DEFAULT NULL COMMENT '创建人',
+  `create_time` datetime DEFAULT NULL COMMENT '创建时间',
+  `update_by` varchar(64) DEFAULT NULL COMMENT '更新人',
+  `update_time` datetime DEFAULT NULL COMMENT '更新时间',
+  `remark` varchar(500) DEFAULT NULL COMMENT '备注',
+  `del_flag` char(1) NOT NULL DEFAULT '0' COMMENT '删除标记，0正常 1删除',
+  PRIMARY KEY (`id`),
+  KEY `idx_xfpt_supplier_apply_log_apply` (`apply_id`,`version_no`),
+  KEY `idx_xfpt_supplier_apply_log_notice_supplier` (`notice_id`,`supplier_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='供应商报名操作日志';
+
+SET @admin_role_id := (
+  SELECT `role_id`
+  FROM `sys_role`
+  WHERE `role_key` = 'admin'
+  ORDER BY `role_id`
+  LIMIT 1
+);
+
+SET @school_role_id := (
+  SELECT `role_id`
+  FROM `sys_role`
+  WHERE `role_key` = 'xuexiao'
+  ORDER BY `role_id`
+  LIMIT 1
+);
+
+SET @supplier_role_id := (
+  SELECT `role_id`
+  FROM `sys_role`
+  WHERE `role_key` = 'gys'
+  ORDER BY `role_id`
+  LIMIT 1
+);
+
+SET @new_feature_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `path` = 'newFeature'
+    AND `menu_type` = 'M'
+  ORDER BY `menu_id` DESC
+  LIMIT 1
+);
+
+SET @supplier_apply_audit_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_type` = 'C'
+    AND (
+      `perms` = 'school:supplierApply:list'
+      OR `component` = 'school/supplierApply/index'
+      OR `path` = 'supplierApply'
+    )
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_apply_audit_menu_id := IFNULL(
+  @supplier_apply_audit_menu_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_apply_audit_menu_id, '供应商报名审核', @new_feature_menu_id, 33,
+       'supplierApply', 'school/supplierApply/index', NULL, 'SchoolSupplierApplyAuditMenu',
+       1, 0, 'C', '0', '0', 'school:supplierApply:list', 'form',
+       'codex', NOW(), 'codex', NOW(), '供应商报名审核菜单', NULL
+WHERE NOT EXISTS (
+  SELECT 1
+  FROM `sys_menu`
+  WHERE `menu_id` = @supplier_apply_audit_menu_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '供应商报名审核',
+    `parent_id` = @new_feature_menu_id,
+    `order_num` = 33,
+    `path` = 'supplierApply',
+    `component` = 'school/supplierApply/index',
+    `query` = NULL,
+    `route_name` = 'SchoolSupplierApplyAuditMenu',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'C',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'school:supplierApply:list',
+    `icon` = 'form',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '供应商报名审核菜单',
+    `type` = NULL
+WHERE `menu_id` = @supplier_apply_audit_menu_id;
+
+SET @supplier_apply_query_perm_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `parent_id` = @supplier_apply_audit_menu_id
+    AND `menu_type` = 'F'
+    AND `perms` = 'school:supplierApply:query'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_apply_query_perm_id := IFNULL(
+  @supplier_apply_query_perm_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_apply_query_perm_id, '供应商报名审核查询', @supplier_apply_audit_menu_id, 1,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierApply:query', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_apply_query_perm_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '供应商报名审核查询',
+    `parent_id` = @supplier_apply_audit_menu_id,
+    `order_num` = 1,
+    `path` = '#',
+    `component` = '',
+    `query` = NULL,
+    `route_name` = '',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'F',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'school:supplierApply:query',
+    `icon` = '#',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '',
+    `type` = NULL
+WHERE `menu_id` = @supplier_apply_query_perm_id;
+
+SET @supplier_apply_edit_perm_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `parent_id` = @supplier_apply_audit_menu_id
+    AND `menu_type` = 'F'
+    AND `perms` = 'school:supplierApply:edit'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_apply_edit_perm_id := IFNULL(
+  @supplier_apply_edit_perm_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_apply_edit_perm_id, '供应商报名审核处理', @supplier_apply_audit_menu_id, 2,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierApply:edit', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_apply_edit_perm_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '供应商报名审核处理',
+    `parent_id` = @supplier_apply_audit_menu_id,
+    `order_num` = 2,
+    `path` = '#',
+    `component` = '',
+    `query` = NULL,
+    `route_name` = '',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'F',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'school:supplierApply:edit',
+    `icon` = '#',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '',
+    `type` = NULL
+WHERE `menu_id` = @supplier_apply_edit_perm_id;
+
+SET @supplier_apply_export_perm_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `parent_id` = @supplier_apply_audit_menu_id
+    AND `menu_type` = 'F'
+    AND `perms` = 'school:supplierApply:export'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_apply_export_perm_id := IFNULL(
+  @supplier_apply_export_perm_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_apply_export_perm_id, '供应商报名审核导出', @supplier_apply_audit_menu_id, 3,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'school:supplierApply:export', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_apply_export_perm_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '供应商报名审核导出',
+    `parent_id` = @supplier_apply_audit_menu_id,
+    `order_num` = 3,
+    `path` = '#',
+    `component` = '',
+    `query` = NULL,
+    `route_name` = '',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'F',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'school:supplierApply:export',
+    `icon` = '#',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '',
+    `type` = NULL
+WHERE `menu_id` = @supplier_apply_export_perm_id;
+
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`)
+SELECT role_id, menu_id
+FROM (
+  SELECT @admin_role_id AS role_id, @supplier_apply_audit_menu_id AS menu_id
+  UNION ALL SELECT @admin_role_id, @supplier_apply_query_perm_id
+  UNION ALL SELECT @admin_role_id, @supplier_apply_edit_perm_id
+  UNION ALL SELECT @admin_role_id, @supplier_apply_export_perm_id
+  UNION ALL SELECT @school_role_id, @supplier_apply_audit_menu_id
+  UNION ALL SELECT @school_role_id, @supplier_apply_query_perm_id
+  UNION ALL SELECT @school_role_id, @supplier_apply_edit_perm_id
+  UNION ALL SELECT @school_role_id, @supplier_apply_export_perm_id
+) tmp
+WHERE role_id IS NOT NULL
+  AND menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`role_id` = tmp.role_id
+      AND rm.`menu_id` = tmp.menu_id
+  );
+
+SET @supplier_apply_center_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_type` = 'C'
+    AND (
+      `component` = 'supplier/applyCenter/index'
+      OR `path` = '/supplier/applyCenter'
+      OR `route_name` = 'SupplierApplyCenterMenu'
+    )
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_apply_center_menu_id := IFNULL(
+  @supplier_apply_center_menu_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_apply_center_menu_id, '报名中心', @new_feature_menu_id, 34,
+       '/supplier/applyCenter', 'supplier/applyCenter/index', NULL, 'SupplierApplyCenterMenu',
+       1, 0, 'C', '0', '0', 'supplier:applyCenter:list', 'message',
+       'codex', NOW(), 'codex', NOW(), '供应商报名中心菜单', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_apply_center_menu_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '报名中心',
+    `parent_id` = @new_feature_menu_id,
+    `order_num` = 34,
+    `path` = '/supplier/applyCenter',
+    `component` = 'supplier/applyCenter/index',
+    `query` = NULL,
+    `route_name` = 'SupplierApplyCenterMenu',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'C',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'supplier:applyCenter:list',
+    `icon` = 'message',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '供应商报名中心菜单',
+    `type` = NULL
+WHERE `menu_id` = @supplier_apply_center_menu_id;
+
+SET @supplier_apply_center_query_perm_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `parent_id` = @supplier_apply_center_menu_id
+    AND `menu_type` = 'F'
+    AND `perms` = 'supplier:applyCenter:query'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_apply_center_query_perm_id := IFNULL(
+  @supplier_apply_center_query_perm_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_apply_center_query_perm_id, '报名中心查询', @supplier_apply_center_menu_id, 1,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'supplier:applyCenter:query', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_apply_center_query_perm_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '报名中心查询',
+    `parent_id` = @supplier_apply_center_menu_id,
+    `order_num` = 1,
+    `path` = '#',
+    `component` = '',
+    `query` = NULL,
+    `route_name` = '',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'F',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'supplier:applyCenter:query',
+    `icon` = '#',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '',
+    `type` = NULL
+WHERE `menu_id` = @supplier_apply_center_query_perm_id;
+
+SET @supplier_my_apply_menu_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `menu_type` = 'C'
+    AND (
+      `component` = 'supplier/myApply/index'
+      OR `path` = '/supplier/myApply'
+      OR `route_name` = 'SupplierMyApplyMenu'
+    )
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_my_apply_menu_id := IFNULL(
+  @supplier_my_apply_menu_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_my_apply_menu_id, '我的报名', @new_feature_menu_id, 35,
+       '/supplier/myApply', 'supplier/myApply/index', NULL, 'SupplierMyApplyMenu',
+       1, 0, 'C', '0', '0', 'supplier:myApply:list', 'form',
+       'codex', NOW(), 'codex', NOW(), '供应商我的报名菜单', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_my_apply_menu_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '我的报名',
+    `parent_id` = @new_feature_menu_id,
+    `order_num` = 35,
+    `path` = '/supplier/myApply',
+    `component` = 'supplier/myApply/index',
+    `query` = NULL,
+    `route_name` = 'SupplierMyApplyMenu',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'C',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'supplier:myApply:list',
+    `icon` = 'form',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '供应商我的报名菜单',
+    `type` = NULL
+WHERE `menu_id` = @supplier_my_apply_menu_id;
+
+SET @supplier_my_apply_query_perm_id := (
+  SELECT `menu_id`
+  FROM `sys_menu`
+  WHERE `parent_id` = @supplier_my_apply_menu_id
+    AND `menu_type` = 'F'
+    AND `perms` = 'supplier:myApply:query'
+  ORDER BY `menu_id`
+  LIMIT 1
+);
+SET @supplier_my_apply_query_perm_id := IFNULL(
+  @supplier_my_apply_query_perm_id,
+  (SELECT IFNULL(MAX(`menu_id`), 0) + 1 FROM `sys_menu`)
+);
+
+INSERT INTO `sys_menu` (
+  `menu_id`, `menu_name`, `parent_id`, `order_num`, `path`, `component`, `query`, `route_name`,
+  `is_frame`, `is_cache`, `menu_type`, `visible`, `status`, `perms`, `icon`,
+  `create_by`, `create_time`, `update_by`, `update_time`, `remark`, `type`
+)
+SELECT @supplier_my_apply_query_perm_id, '我的报名查询', @supplier_my_apply_menu_id, 1,
+       '#', '', NULL, '',
+       1, 0, 'F', '0', '0', 'supplier:myApply:query', '#',
+       'codex', NOW(), 'codex', NOW(), '', NULL
+WHERE NOT EXISTS (
+  SELECT 1 FROM `sys_menu` WHERE `menu_id` = @supplier_my_apply_query_perm_id
+);
+
+UPDATE `sys_menu`
+SET `menu_name` = '我的报名查询',
+    `parent_id` = @supplier_my_apply_menu_id,
+    `order_num` = 1,
+    `path` = '#',
+    `component` = '',
+    `query` = NULL,
+    `route_name` = '',
+    `is_frame` = 1,
+    `is_cache` = 0,
+    `menu_type` = 'F',
+    `visible` = '0',
+    `status` = '0',
+    `perms` = 'supplier:myApply:query',
+    `icon` = '#',
+    `update_by` = 'codex',
+    `update_time` = NOW(),
+    `remark` = '',
+    `type` = NULL
+WHERE `menu_id` = @supplier_my_apply_query_perm_id;
+
+INSERT INTO `sys_role_menu` (`role_id`, `menu_id`)
+SELECT role_id, menu_id
+FROM (
+  SELECT @supplier_role_id AS role_id, @new_feature_menu_id AS menu_id
+  UNION ALL SELECT @supplier_role_id, @supplier_apply_center_menu_id
+  UNION ALL SELECT @supplier_role_id, @supplier_apply_center_query_perm_id
+  UNION ALL SELECT @supplier_role_id, @supplier_my_apply_menu_id
+  UNION ALL SELECT @supplier_role_id, @supplier_my_apply_query_perm_id
+  UNION ALL SELECT @admin_role_id, @supplier_apply_center_menu_id
+  UNION ALL SELECT @admin_role_id, @supplier_apply_center_query_perm_id
+  UNION ALL SELECT @admin_role_id, @supplier_my_apply_menu_id
+  UNION ALL SELECT @admin_role_id, @supplier_my_apply_query_perm_id
+) tmp
+WHERE role_id IS NOT NULL
+  AND menu_id IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1
+    FROM `sys_role_menu` rm
+    WHERE rm.`role_id` = tmp.role_id
+      AND rm.`menu_id` = tmp.menu_id
+  );
+
 -- Dump completed on 2026-05-04 19:18:33
