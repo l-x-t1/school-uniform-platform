@@ -11,6 +11,7 @@ import com.xfgl.school.support.SchoolAccessSupport;
 import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysUser;
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -59,7 +60,9 @@ public class XfptAfterSaleServiceImpl extends ServiceImpl<XfptAfterSaleMapper, X
             return Collections.emptyList();
         }
         applyCurrentSupplierScope(xfptAfterSale);
-        return xfptAfterSaleMapper.selectXfptAfterSaleList(xfptAfterSale);
+        List<XfptAfterSale> list = xfptAfterSaleMapper.selectXfptAfterSaleList(xfptAfterSale);
+        list.forEach(this::normalizeRefundFieldsForDisplay);
+        return list;
     }
 
     @Override
@@ -67,6 +70,7 @@ public class XfptAfterSaleServiceImpl extends ServiceImpl<XfptAfterSaleMapper, X
     {
         XfptAfterSale afterSale = super.getById(id);
         requireAccessibleAfterSale(afterSale);
+        normalizeRefundFieldsForDisplay(afterSale);
         return afterSale;
     }
 
@@ -168,5 +172,36 @@ public class XfptAfterSaleServiceImpl extends ServiceImpl<XfptAfterSaleMapper, X
             return null;
         }
         return SecurityUtils.getLoginUser().getSysUser();
+    }
+
+    private void normalizeRefundFieldsForDisplay(XfptAfterSale afterSale)
+    {
+        if (afterSale == null) {
+            return;
+        }
+        if (!isRefundApplyType(afterSale.getApplyType())) {
+            return;
+        }
+        BigDecimal applyAmount = afterSale.getApplyAmount();
+        BigDecimal actualRefundAmount = afterSale.getActualRefundAmount();
+        if (applyAmount != null && (actualRefundAmount == null || BigDecimal.ZERO.compareTo(actualRefundAmount) == 0)) {
+            afterSale.setActualRefundAmount(applyAmount);
+            actualRefundAmount = applyAmount;
+        }
+        String refundStatus = afterSale.getRefundStatus();
+        boolean refundAlreadyCompleted = "4".equals(String.valueOf(afterSale.getStatus()))
+                || afterSale.getRefundTime() != null
+                || afterSale.getFinishTime() != null
+                || (actualRefundAmount != null && BigDecimal.ZERO.compareTo(actualRefundAmount) < 0);
+        if (refundAlreadyCompleted && ("0".equals(String.valueOf(refundStatus))
+                || refundStatus == null
+                || refundStatus.trim().isEmpty())) {
+            afterSale.setRefundStatus("2");
+        }
+    }
+
+    private boolean isRefundApplyType(String applyType)
+    {
+        return "1".equals(String.valueOf(applyType)) || "2".equals(String.valueOf(applyType));
     }
 }

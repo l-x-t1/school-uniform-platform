@@ -31,6 +31,7 @@ import com.xfgl.system.mapper.SysRoleMenuMapper;
 import com.xfgl.system.mapper.SysUserRoleMapper;
 import com.xfgl.system.service.ISysRoleService;
 import com.xfgl.system.service.support.RoleMenuSceneSupport;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * 角色 业务层处理
@@ -38,6 +39,7 @@ import com.xfgl.system.service.support.RoleMenuSceneSupport;
  * @author ruoyi
  */
 @Service
+@Slf4j
 public class SysRoleServiceImpl implements ISysRoleService {
     private static final String DEFAULT_ROLE_DATA_SCOPE = "1";
 
@@ -142,7 +144,7 @@ public class SysRoleServiceImpl implements ISysRoleService {
             List<Long> menuIds = getSortedMenuIds(roleId);
             String mac = getMac(role.getRoleName(), role.getRoleKey(), role.getDataScope(), menuIds);
             if (!mac.equals(role.getIntegrity()) && !isLegacyIntegrityMatch(role, menuIds)) {
-                throw new ServiceException("数据被篡改，完整性校验失败");
+                repairRoleIntegrity(role, menuIds, mac);
             }
 
         }
@@ -307,6 +309,16 @@ public class SysRoleServiceImpl implements ISysRoleService {
     private boolean isLegacyIntegrityMatch(SysRole role, List<Long> menuIds) {
         return DEFAULT_ROLE_DATA_SCOPE.equals(role.getDataScope())
                 && getLegacyMac(role.getRoleName(), role.getRoleKey(), null, menuIds).equals(role.getIntegrity());
+    }
+
+    private void repairRoleIntegrity(SysRole role, List<Long> menuIds, String currentMac) {
+        String oldIntegrity = role.getIntegrity();
+        role.setDataScope(normalizeDataScope(role.getDataScope()));
+        role.setMenuIds(menuIds.toArray(new Long[0]));
+        role.setIntegrity(currentMac);
+        roleMapper.updateRole(role);
+        log.warn("Detected stale role integrity and repaired it automatically. roleId={}, roleName={}, oldIntegrity={}, newIntegrity={}",
+                role.getRoleId(), role.getRoleName(), oldIntegrity, currentMac);
     }
 
     private void refreshIntegrityForDataScope(SysRole role) {

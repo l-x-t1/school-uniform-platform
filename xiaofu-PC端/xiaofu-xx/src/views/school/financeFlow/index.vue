@@ -445,7 +445,7 @@ export default {
         payeeType: null,
         payeeId: null,
         payeeName: null,
-        status: '0',
+        status: undefined,
         tradeTime: null,
         deptId: null
       },

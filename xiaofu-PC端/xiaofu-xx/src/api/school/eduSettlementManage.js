@@ -25,3 +25,12 @@ export function getEduSettlementStatistics(query) {
     params: query
   })
 }
+
+// 执行学校结算
+export function executeEduSettlement(data) {
+  return request({
+    url: '/school/eduSettlementManage/settle',
+    method: 'post',
+    data
+  })
+}

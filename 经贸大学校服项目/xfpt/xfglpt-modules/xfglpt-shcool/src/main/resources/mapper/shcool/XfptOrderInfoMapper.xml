@@ -47,6 +47,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <collection property="xfptOrderItemList" ofType="XfptOrderItem" column="id" select="selectXfptOrderItemById" />
     </resultMap>
 
+    <resultMap id="XfptSettlementOrderInfoResult" type="XfptOrderInfo" extends="XfptOrderInfoResult">
+        <result property="settlementStatus" column="settlement_status" />
+        <result property="settlementTime" column="settlement_time" />
+        <result property="settlementNetAmount" column="settlement_net_amount" />
+    </resultMap>
+
     <resultMap type="XfptOrderItem" id="XfptOrderItemResult">
         <result property="id"    column="id"    />
         <result property="orderId"    column="order_id"    />
@@ -161,6 +167,79 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         where id = #{goodsId}
           and supplier_id = #{supplierId}
           and del_flag = '0'
+    </select>
+
+    <select id="selectSettlementOrderList" resultMap="XfptSettlementOrderInfoResult">
+        select
+            o.id,
+            o.order_no,
+            o.order_type,
+            o.notice_id,
+            o.school_id,
+            o.school_name,
+            o.supplier_id,
+            o.supplier_name,
+            o.user_id,
+            o.user_name,
+            o.student_id,
+            o.student_name,
+            o.grade_name,
+            o.class_name,
+            o.address_id,
+            o.receive_type,
+            o.receiver_name,
+            o.receiver_phone,
+            o.receiver_address,
+            o.total_amount,
+            o.pay_amount,
+            o.refund_amount,
+            o.pay_status,
+            o.order_status,
+            null as progress_status,
+            null as logistics_no,
+            o.pay_time,
+            o.cancel_time,
+            o.finish_time,
+            o.dept_id,
+            o.create_by,
+            o.create_time,
+            o.update_by,
+            o.update_time,
+            o.remark,
+            o.del_flag,
+            greatest(coalesce(o.pay_amount, 0) - coalesce(o.refund_amount, 0), 0) as settlement_net_amount,
+            case when sf.last_settlement_time is null then '0' else '1' end as settlement_status,
+            sf.last_settlement_time as settlement_time
+        from xfpt_order_info o
+        inner join xfpt_school_supplier_rel sr
+            on sr.school_id = o.school_id
+           and sr.supplier_id = o.supplier_id
+           and sr.cooperate_status = '1'
+           and sr.del_flag = '0'
+        left join (
+            select
+                order_id,
+                supplier_id,
+                max(trade_time) as last_settlement_time
+            from xfpt_finance_flow
+            where del_flag = '0'
+              and business_type = '4'
+              and flow_direction = '1'
+              and payee_type = '2'
+            group by order_id, supplier_id
+        ) sf
+            on sf.order_id = o.id
+           and sf.supplier_id = o.supplier_id
+        where o.del_flag = '0'
+          and o.school_id = #{schoolId}
+          and o.supplier_id = #{supplierId}
+          and o.pay_status in ('1', '2', '3')
+          and greatest(coalesce(o.pay_amount, 0) - coalesce(o.refund_amount, 0), 0) > 0
+          and date_format(coalesce(o.pay_time, o.create_time), '%Y-%m') = #{settlementCycle}
+          <if test="deptId != null">
+              and o.dept_id = #{deptId}
+          </if>
+        order by coalesce(o.pay_time, o.create_time) desc, o.id desc
     </select>
 
     <insert id="insertXfptOrderInfo" parameterType="XfptOrderInfo" useGeneratedKeys="true" keyProperty="id">

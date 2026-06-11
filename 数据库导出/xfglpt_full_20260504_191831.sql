@@ -1601,9 +1601,14 @@ PREPARE stage_type_stmt FROM @stage_type_sql;
 EXECUTE stage_type_stmt;
 DEALLOCATE PREPARE stage_type_stmt;
 
+SET @old_sql_safe_updates := @@SQL_SAFE_UPDATES;
+SET SQL_SAFE_UPDATES = 0;
+
 UPDATE xfpt_anno_results
 SET stage_type = '1'
 WHERE stage_type IS NULL OR stage_type = '';
+
+SET SQL_SAFE_UPDATES = @old_sql_safe_updates;
 
 --
 -- Table structure for table `xfpt_buy_grade_class`
@@ -6888,7 +6893,7 @@ SET @tonggou_shelf_menu_id := (
   WHERE `PERMS` = 'school:tonggouGoods:list'
   LIMIT 1
 );
-SET @tonggou_shelf_menu_id := IFNULL(@tonggou_shelf_menu_id, 3051);
+SET @tonggou_shelf_menu_id := IFNULL(@tonggou_shelf_menu_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
 
 INSERT INTO `sys_menu` (
   `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
@@ -6899,7 +6904,7 @@ SELECT @tonggou_shelf_menu_id, CONVERT(0xE7BB9FE8B4ADE4B88AE4B88BE69EB6 USING ut
        NULL, '', 1, 0, 'C', '0', '0', 'school:tonggouGoods:list', 'shopping',
        'admin', NOW(), '', NULL, CONVERT(0xE5ADA6E6A0A1E7ABAFE7BB9FE8B4ADE4B88AE4B88BE69EB6E88F9CE58D95 USING utf8mb4), NULL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:tonggouGoods:list'
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:tonggouGoods:list' OR `MENU_ID` = @tonggou_shelf_menu_id
 );
 
 UPDATE `sys_menu`
@@ -6927,7 +6932,7 @@ SET @tonggou_shelf_query_id := (
   WHERE `PERMS` = 'school:tonggouGoods:query'
   LIMIT 1
 );
-SET @tonggou_shelf_query_id := IFNULL(@tonggou_shelf_query_id, 3052);
+SET @tonggou_shelf_query_id := IFNULL(@tonggou_shelf_query_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
 
 INSERT INTO `sys_menu` (
   `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
@@ -6938,7 +6943,7 @@ SELECT @tonggou_shelf_query_id, CONVERT(0xE7BB9FE8B4ADE4B88AE4B88BE69EB6E69FA5E8
        1, 0, 'F', '0', '0', 'school:tonggouGoods:query', '#',
        'admin', NOW(), '', NULL, '', NULL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:tonggouGoods:query'
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:tonggouGoods:query' OR `MENU_ID` = @tonggou_shelf_query_id
 );
 
 UPDATE `sys_menu`
@@ -6965,7 +6970,7 @@ SET @tonggou_shelf_edit_id := (
   WHERE `PERMS` = 'school:tonggouGoods:edit'
   LIMIT 1
 );
-SET @tonggou_shelf_edit_id := IFNULL(@tonggou_shelf_edit_id, 3053);
+SET @tonggou_shelf_edit_id := IFNULL(@tonggou_shelf_edit_id, (SELECT IFNULL(MAX(`MENU_ID`), 0) + 1 FROM `sys_menu`));
 
 INSERT INTO `sys_menu` (
   `MENU_ID`, `MENU_NAME`, `PARENT_ID`, `ORDER_NUM`, `PATH`, `COMPONENT`, `QUERY`, `ROUTE_NAME`,
@@ -6976,7 +6981,7 @@ SELECT @tonggou_shelf_edit_id, CONVERT(0xE7BB9FE8B4ADE4B88AE4B88BE69EB6E4BFAEE69
        1, 0, 'F', '0', '0', 'school:tonggouGoods:edit', '#',
        'admin', NOW(), '', NULL, '', NULL
 WHERE NOT EXISTS (
-  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:tonggouGoods:edit'
+  SELECT 1 FROM `sys_menu` WHERE `PERMS` = 'school:tonggouGoods:edit' OR `MENU_ID` = @tonggou_shelf_edit_id
 );
 
 UPDATE `sys_menu`

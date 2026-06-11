@@ -35,6 +35,14 @@ export function updateOrderInfo(data) {
   })
 }
 
+// 零售订单发货
+export function shipOrderInfo(id) {
+  return request({
+    url: '/school/orderInfo/' + id + '/ship',
+    method: 'put'
+  })
+}
+
 // 删除订单信息
 export function delOrderInfo(id) {
   return request({

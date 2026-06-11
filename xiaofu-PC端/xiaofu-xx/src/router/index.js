@@ -206,7 +206,7 @@ export const constantRoutes = [
         path: "index",
         component: () => import("@/views/school/groupNotice/index"),
         name: "SchoolGroupNoticeEntry",
-        meta: { title: "学校统购公告查询", icon: "message" },
+        meta: { title: "公告管理", icon: "message" },
       },
     ],
   },

@@ -78,7 +78,9 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             return Collections.emptyList();
         }
         applyCurrentSupplierScope(xfptComment);
-        return xfptCommentMapper.selectXfptCommentList(xfptComment);
+        List<XfptComment> list = xfptCommentMapper.selectXfptCommentList(xfptComment);
+        list.forEach(this::hydrateLatestSupplierReplySnapshot);
+        return list;
     }
 
         /**
@@ -195,6 +197,7 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             XfptComment xfptComment = requireAccessibleComment(id);
             List<XfptCommentReply> xfptCommentReplyList = xfptCommentMapper.selectXfptCommentReplyById(id);
             xfptComment.setXfptCommentReplyList(xfptCommentReplyList);
+            hydrateLatestSupplierReplySnapshot(xfptComment, xfptCommentReplyList);
             return xfptComment;
         }
 
@@ -358,6 +361,68 @@ public class XfptCommentServiceImpl extends ServiceImpl<XfptCommentMapper, XfptC
             xfptComment.setDelFlag(StringUtils.isEmpty(xfptComment.getDelFlag()) ? "0" : xfptComment.getDelFlag());
             xfptComment.setCreateBy(displayName);
             xfptComment.setUpdateBy(displayName);
+        }
+
+        private void hydrateLatestSupplierReplySnapshot(XfptComment comment)
+        {
+            if (comment == null || comment.getId() == null) {
+                return;
+            }
+            hydrateLatestSupplierReplySnapshot(comment, xfptCommentMapper.selectXfptCommentReplyById(comment.getId()));
+        }
+
+        private void hydrateLatestSupplierReplySnapshot(XfptComment comment, List<XfptCommentReply> replies)
+        {
+            if (comment == null || replies == null || replies.isEmpty()) {
+                return;
+            }
+            XfptCommentReply latestSupplierReply = null;
+            for (XfptCommentReply reply : replies) {
+                if (reply == null) {
+                    continue;
+                }
+                if (!REPLY_ROLE_SUPPLIER.equals(String.valueOf(reply.getFromRoleType()))) {
+                    continue;
+                }
+                if (!"0".equals(String.valueOf(reply.getDelFlag()))) {
+                    continue;
+                }
+                if (latestSupplierReply == null || compareReplyPriority(reply, latestSupplierReply) > 0) {
+                    latestSupplierReply = reply;
+                }
+            }
+            if (latestSupplierReply == null) {
+                return;
+            }
+            if (StringUtils.isNotEmpty(latestSupplierReply.getContent())) {
+                comment.setReplyContent(latestSupplierReply.getContent());
+            }
+            Date latestReplyTime = latestSupplierReply.getUpdateTime() != null
+                    ? latestSupplierReply.getUpdateTime()
+                    : latestSupplierReply.getCreateTime();
+            if (latestReplyTime != null) {
+                comment.setReplyTime(latestReplyTime);
+            }
+        }
+
+        private int compareReplyPriority(XfptCommentReply current, XfptCommentReply target)
+        {
+            Date currentTime = current.getUpdateTime() != null ? current.getUpdateTime() : current.getCreateTime();
+            Date targetTime = target.getUpdateTime() != null ? target.getUpdateTime() : target.getCreateTime();
+            if (currentTime == null && targetTime == null) {
+                return Long.compare(current.getId() == null ? 0L : current.getId(), target.getId() == null ? 0L : target.getId());
+            }
+            if (currentTime == null) {
+                return -1;
+            }
+            if (targetTime == null) {
+                return 1;
+            }
+            int timeCompare = currentTime.compareTo(targetTime);
+            if (timeCompare != 0) {
+                return timeCompare;
+            }
+            return Long.compare(current.getId() == null ? 0L : current.getId(), target.getId() == null ? 0L : target.getId());
         }
 
         private void applyCurrentSupplierScope(XfptComment xfptComment)

@@ -9,6 +9,12 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
+      <el-form-item label="订单类型" prop="orderType">
+        <el-select v-model="queryParams.orderType" placeholder="请选择订单类型" clearable>
+          <el-option label="统购" value="1" />
+          <el-option label="零售" value="2" />
+        </el-select>
+      </el-form-item>
       <el-form-item label="学校名称" prop="schoolName">
         <el-input
           v-model="queryParams.schoolName"
@@ -235,6 +241,14 @@
             icon="el-icon-view"
             @click="handleView(scope.row)"
           >详情</el-button>
+          <el-button
+            v-if="canShip(scope.row)"
+            v-hasPermi="['school:orderInfo:edit']"
+            size="mini"
+            type="text"
+            icon="el-icon-truck"
+            @click="handleShip(scope.row)"
+          >发货</el-button>
           <el-button
             v-hasPermi="['school:orderInfo:edit']"
             size="mini"
@@ -523,7 +537,7 @@
 </template>
 
 <script>
-import { listOrderInfo, getOrderInfo, delOrderInfo, addOrderInfo, updateOrderInfo } from '@/api/school/orderInfo'
+import { listOrderInfo, getOrderInfo, delOrderInfo, addOrderInfo, updateOrderInfo, shipOrderInfo } from '@/api/school/orderInfo'
 
 export default {
   name: 'OrderInfo',
@@ -805,6 +819,20 @@ export default {
         this.open = true
         this.title = '修改订单信息'
       })
+    },
+    canShip(row) {
+      return this.isSupplierUser &&
+        String(row.orderType || '') === '2' &&
+        String(row.payStatus || '') === '1' &&
+        String(row.orderStatus || '') === '2'
+    },
+    handleShip(row) {
+      this.$modal.confirm('确认将该零售订单标记为已发货吗？').then(() => {
+        return shipOrderInfo(row.id)
+      }).then(() => {
+        this.$modal.msgSuccess('发货成功')
+        this.getList()
+      }).catch(() => {})
     },
     /** 提交按钮 */
     submitForm() {

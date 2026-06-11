@@ -135,6 +135,27 @@ public class XfptOrderInfoController extends BaseController {
             return toAjax(xfptOrderInfoService.updateXfptOrderInfo(xfptOrderInfo));
     }
 
+    /**
+     * 零售订单发货
+     */
+    @Operation(summary = "零售订单发货")
+    @RequiresPermissions("school:orderInfo:edit")
+    @Log(title = "订单信息", businessType = BusinessType.UPDATE)
+    @PutMapping("/{id}/ship")
+    public AjaxResult ship(@PathVariable("id") Long id) {
+            XfptOrderInfo currentOrder = xfptOrderInfoService.getById(id);
+            if (currentOrder == null) {
+                return error("订单不存在");
+            }
+            if (!canAccessSupplierRecord(currentOrder.getSupplierId())) {
+                return error("当前操作没有权限");
+            }
+            if (isSupplierUserWithoutBinding()) {
+                return error("当前供应商账号未关联厂商，暂无权限操作订单");
+            }
+            return toAjax(xfptOrderInfoService.shipRetailOrder(id));
+    }
+
 
     /**
      * 删除订单信息

@@ -353,12 +353,13 @@ export async function confirmOrder(id) {
 
 export async function payOrder(id) {
   const order = await fetchBackendOrder(id)
+  const targetOrderStatus = String(order.orderType || '1') === '2' ? '2' : '3'
   return request({
     url: '/school/orderInfo',
     method: 'PUT',
     data: buildOrderUpdate(order, {
       payStatus: '1',
-      orderStatus: '2',
+      orderStatus: targetOrderStatus,
       payTime: getCurrentTime()
     })
   })

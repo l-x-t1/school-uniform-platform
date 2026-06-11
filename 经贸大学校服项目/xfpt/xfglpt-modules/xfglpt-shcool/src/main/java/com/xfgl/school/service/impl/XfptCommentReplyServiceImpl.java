@@ -11,6 +11,7 @@ import com.xfgl.school.service.IXfptCommentReplyService;
 import com.xfgl.school.support.SupplierAccessSupport;
 import com.xfgl.system.api.domain.SysUser;
 import java.io.Serializable;
+import java.util.Date;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -61,7 +62,11 @@ public class XfptCommentReplyServiceImpl extends ServiceImpl<XfptCommentReplyMap
     public boolean save(XfptCommentReply entity)
     {
         fillReplySnapshotAndValidate(entity, null);
-        return super.save(entity);
+        boolean saved = super.save(entity);
+        if (saved) {
+            syncCommentReplySnapshot(entity.getCommentId());
+        }
+        return saved;
     }
 
     @Override
@@ -69,7 +74,11 @@ public class XfptCommentReplyServiceImpl extends ServiceImpl<XfptCommentReplyMap
     {
         XfptCommentReply existing = requireAccessibleReply(super.getById(entity.getId()));
         fillReplySnapshotAndValidate(entity, existing);
-        return super.updateById(entity);
+        boolean updated = super.updateById(entity);
+        if (updated) {
+            syncCommentReplySnapshot(entity.getCommentId());
+        }
+        return updated;
     }
 
     @Override
@@ -193,6 +202,74 @@ public class XfptCommentReplyServiceImpl extends ServiceImpl<XfptCommentReplyMap
             return null;
         }
         return SecurityUtils.getLoginUser().getSysUser();
+    }
+
+    private void syncCommentReplySnapshot(Long commentId)
+    {
+        if (commentId == null) {
+            return;
+        }
+        XfptComment comment = xfptCommentMapper.selectById(commentId);
+        if (comment == null || !"0".equals(String.valueOf(comment.getDelFlag()))) {
+            return;
+        }
+        List<XfptCommentReply> replies = xfptCommentMapper.selectXfptCommentReplyById(commentId);
+        XfptCommentReply latestSupplierReply = findLatestSupplierReply(replies);
+        if (latestSupplierReply == null || latestSupplierReply.getContent() == null || latestSupplierReply.getContent().trim().isEmpty()) {
+            return;
+        }
+        XfptComment updateEntity = new XfptComment();
+        updateEntity.setId(commentId);
+        updateEntity.setReplyContent(latestSupplierReply.getContent());
+        updateEntity.setReplyTime(latestSupplierReply.getUpdateTime() != null
+                ? latestSupplierReply.getUpdateTime()
+                : latestSupplierReply.getCreateTime());
+        updateEntity.setUpdateBy(SecurityUtils.getUsername());
+        updateEntity.setUpdateTime(new Date());
+        xfptCommentMapper.updateById(updateEntity);
+    }
+
+    private XfptCommentReply findLatestSupplierReply(List<XfptCommentReply> replies)
+    {
+        if (replies == null || replies.isEmpty()) {
+            return null;
+        }
+        XfptCommentReply latestReply = null;
+        for (XfptCommentReply reply : replies) {
+            if (reply == null) {
+                continue;
+            }
+            if (!"2".equals(String.valueOf(reply.getFromRoleType()))) {
+                continue;
+            }
+            if (!"0".equals(String.valueOf(reply.getDelFlag()))) {
+                continue;
+            }
+            if (latestReply == null || compareReplyPriority(reply, latestReply) > 0) {
+                latestReply = reply;
+            }
+        }
+        return latestReply;
+    }
+
+    private int compareReplyPriority(XfptCommentReply current, XfptCommentReply target)
+    {
+        Date currentTime = current.getUpdateTime() != null ? current.getUpdateTime() : current.getCreateTime();
+        Date targetTime = target.getUpdateTime() != null ? target.getUpdateTime() : target.getCreateTime();
+        if (currentTime == null && targetTime == null) {
+            return Long.compare(current.getId() == null ? 0L : current.getId(), target.getId() == null ? 0L : target.getId());
+        }
+        if (currentTime == null) {
+            return -1;
+        }
+        if (targetTime == null) {
+            return 1;
+        }
+        int timeCompare = currentTime.compareTo(targetTime);
+        if (timeCompare != 0) {
+            return timeCompare;
+        }
+        return Long.compare(current.getId() == null ? 0L : current.getId(), target.getId() == null ? 0L : target.getId());
     }
 
 }

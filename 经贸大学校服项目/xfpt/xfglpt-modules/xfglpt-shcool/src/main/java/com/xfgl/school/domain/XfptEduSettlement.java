@@ -2,7 +2,9 @@ package com.xfgl.school.domain;
 
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.List;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -59,6 +61,9 @@ public class XfptEduSettlement extends BaseEntity {
     @Schema(description = "提现单号")
     private String withdrawNo;
 
+    @Schema(description = "学校ID")
+    private Long schoolId;
+
     @Schema(description = "供应商名称")
     private String supplierName;
 
@@ -87,4 +92,8 @@ public class XfptEduSettlement extends BaseEntity {
     @Excel(name = "部门ID")
     @Schema(description = "当前归属部门/教育局")
     private Long deptId;
+
+    @TableField(exist = false)
+    @Schema(description = "结算对应订单列表")
+    private List<XfptOrderInfo> orderList;
 }

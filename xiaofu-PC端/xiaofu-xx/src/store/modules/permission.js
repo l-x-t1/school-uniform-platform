@@ -51,7 +51,7 @@ function normalizeGroupNoticeMenus(routes = []) {
     const currentPath = current.path || "";
     const currentComponent = current.component || "";
 
-    const isGroupNotice =
+    const isReadonlyGroupNotice =
       currentPath === "supplierGroupNotice" ||
       currentPath === "/newFeature/supplierGroupNotice" ||
       currentPath === "adminGroupNoticeQuery" ||
@@ -59,17 +59,30 @@ function normalizeGroupNoticeMenus(routes = []) {
       currentPath === "/supplier/groupNotice" ||
       currentPath === "/school/groupNoticeReadonly" ||
       currentComponent === "supplier/groupNotice/index" ||
-      currentComponent === "school/groupNotice/index" ||
       currentComponent === "school/groupNoticeReadonly/index";
+
+    const isEditableGroupNotice =
+      currentPath === "groupNotice" ||
+      currentPath === "/tonggou/groupNotice" ||
+      currentPath === "/schoolGroupNoticeEntry/index" ||
+      currentPath === "/schoolGroupNoticeEntry" ||
+      currentComponent === "school/groupNotice/index";
 
     if (current.children && current.children.length) {
       current.children = normalizeGroupNoticeMenus(current.children);
     }
 
-    if (isGroupNotice) {
+    if (isReadonlyGroupNotice) {
       current.meta = {
         ...(current.meta || {}),
         title: "学校统购公告查询",
+      };
+    }
+
+    if (isEditableGroupNotice) {
+      current.meta = {
+        ...(current.meta || {}),
+        title: "公告管理",
       };
     }
 
@@ -177,7 +190,6 @@ function dedupeRouteNames(routes = [], parentPath = "", usedNames = new Set()) {
 }
 
 const schoolTonggouMenuTitles = {
-  公告管理: "统购公告管理",
   质检报告管理: "统购质检报告管理",
   尺码调换记录: "统购尺码调换记录",
   发货单统计: "统购发货单统计",
@@ -249,6 +261,18 @@ const schoolRetiredMenuTitles = new Set([
   "订单明细",
 ]);
 
+const schoolReadonlyGroupNoticePaths = new Set([
+  "supplierGroupNotice",
+  "adminGroupNoticeQuery",
+]);
+
+const schoolReadonlyGroupNoticeComponents = new Set([
+  "supplier/groupNotice/index",
+  "school/groupNoticeReadonly/index",
+]);
+
+const schoolReadonlyGroupNoticeTitles = new Set(["学校统购公告查询"]);
+
 function isSchoolRetiredRoute(route = {}) {
   const normalizedPath = String(route.path || "").replace(/^\/+/, "");
   const title = getRouteTitle(route);
@@ -257,6 +281,17 @@ function isSchoolRetiredRoute(route = {}) {
     schoolRetiredMenuPaths.has(normalizedPath) ||
     schoolRetiredMenuComponents.has(route.component || "") ||
     schoolRetiredMenuTitles.has(title)
+  );
+}
+
+function isSchoolReadonlyGroupNoticeRoute(route = {}) {
+  const normalizedPath = String(route.path || "").replace(/^\/+/, "");
+  const title = getRouteTitle(route);
+
+  return (
+    schoolReadonlyGroupNoticePaths.has(normalizedPath) ||
+    schoolReadonlyGroupNoticeComponents.has(route.component || "") ||
+    schoolReadonlyGroupNoticeTitles.has(title)
   );
 }
 
@@ -282,6 +317,32 @@ function filterSchoolRetiredMenus(routes = []) {
     }
 
     if (isSchoolRetiredRoute(current)) {
+      return result;
+    }
+
+    if (shouldPruneEmptySchoolRoute(current)) {
+      return result;
+    }
+
+    if (Array.isArray(current.children) && current.children.length === 0) {
+      delete current.children;
+      delete current.redirect;
+    }
+
+    result.push(current);
+    return result;
+  }, []);
+}
+
+function filterSchoolReadonlyGroupNoticeRoutes(routes = []) {
+  return routes.reduce((result, route) => {
+    const current = { ...route };
+
+    if (current.children && current.children.length) {
+      current.children = filterSchoolReadonlyGroupNoticeRoutes(current.children);
+    }
+
+    if (isSchoolReadonlyGroupNoticeRoute(current)) {
       return result;
     }
 
@@ -501,6 +562,7 @@ function normalizeRuntimeRoutes(
   );
 
   if (useSchoolTonggouLayout) {
+    normalizedRoutes = filterSchoolReadonlyGroupNoticeRoutes(normalizedRoutes);
     normalizedRoutes = promoteSchoolTonggouMenus(normalizedRoutes);
   }
 

@@ -20,7 +20,7 @@ public interface XfptEduSettlementMapper extends BaseMapper<XfptEduSettlement> {
      */
     public List<XfptEduSettlement> selectXfptEduSettlementList(XfptEduSettlement xfptEduSettlement);
 
-    public XfptEduSettlement selectXfptEduSettlementById(Long id);
+    public XfptEduSettlement selectXfptEduSettlementById(XfptEduSettlement xfptEduSettlement);
 
     /**
      * 查询教育局结算统计

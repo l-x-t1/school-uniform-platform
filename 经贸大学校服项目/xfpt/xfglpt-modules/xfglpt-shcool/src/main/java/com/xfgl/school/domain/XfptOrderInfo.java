@@ -191,4 +191,13 @@ private static final long serialVersionUID = 1L;
 private List<XfptOrderItem> xfptOrderItemList;
 @TableField(exist = false)
 private String noticeTitle;
+@TableField(exist = false)
+@Schema(description = "结算状态，0待结算 1已结算")
+private String settlementStatus;
+@TableField(exist = false)
+@Schema(description = "结算时间")
+private Date settlementTime;
+@TableField(exist = false)
+@Schema(description = "本单可结算金额")
+private BigDecimal settlementNetAmount;
         }

@@ -15,8 +15,30 @@ function buildAfterSaleNo() {
   return `AS${Date.now()}`
 }
 
-function normalizeAfterSale(item = {}) {
+function normalizeRefundInfo(item = {}, normalized = {}) {
+  const applyType = String(normalized.applyType || item.applyType || item.apply_type || '2')
+  const status = String(normalized.status || item.status || '1')
+  const applyAmount = Number(normalized.applyAmount || item.applyAmount || item.apply_amount || 0)
+  let actualRefundAmount = Number(normalized.actualRefundAmount || item.actualRefundAmount || item.actual_refund_amount || 0)
+  let refundStatus = String(normalized.refundStatus || item.refundStatus || item.refund_status || '0')
+
+  if (['1', '2'].includes(applyType)) {
+    if (!actualRefundAmount && applyAmount > 0) {
+      actualRefundAmount = applyAmount
+    }
+    if ((refundStatus === '0' || !refundStatus) && (status === '4' || actualRefundAmount > 0)) {
+      refundStatus = '2'
+    }
+  }
+
   return {
+    actualRefundAmount,
+    refundStatus
+  }
+}
+
+function normalizeAfterSale(item = {}) {
+  const normalized = {
     ...item,
     id: item.id || item.afterSaleId,
     afterSaleNo: item.afterSaleNo || item.after_sale_no || '',
@@ -48,9 +70,16 @@ function normalizeAfterSale(item = {}) {
     finishTime: item.finishTime || item.finish_time || '',
     deptId: item.deptId || item.dept_id
   }
+  return {
+    ...normalized,
+    ...normalizeRefundInfo(item, normalized)
+  }
 }
 
 export function createAfterSale(data = {}) {
+  const applyType = String(data.applyType || '2')
+  const isRefundType = ['1', '2'].includes(applyType)
+  const applyAmount = Number(data.applyAmount || 0)
   return request({
     url: '/school/afterSale',
     method: 'POST',
@@ -72,10 +101,10 @@ export function createAfterSale(data = {}) {
       reason: data.reason || '',
       imagesJson: data.imagesJson || '[]',
       applyNum: Number(data.applyNum || 1),
-      applyAmount: Number(data.applyAmount || 0),
-      actualRefundAmount: 0,
-      refundStatus: '0',
-      status: '1',
+      applyAmount,
+      actualRefundAmount: isRefundType ? applyAmount : 0,
+      refundStatus: isRefundType ? '2' : '0',
+      status: '4',
       handleRemark: data.handleRemark || '',
       deptId: data.deptId,
       delFlag: '0'

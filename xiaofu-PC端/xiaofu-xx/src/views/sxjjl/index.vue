@@ -32,13 +32,6 @@
       </el-form-item>
     </el-form>
 
-    <el-tabs v-model="activeTab" @tab-click="handleTabClick">
-      <el-tab-pane label="待受理" name="pending" />
-      <el-tab-pane label="已通过" name="approved" />
-      <el-tab-pane label="已退回" name="returned" />
-      <el-tab-pane label="已更换" name="changed" />
-    </el-tabs>
-
     <el-table v-loading="loading" :data="tableData" style="width: 100%">
       <el-table-column label="商品信息" prop="productInfo" min-width="300">
         <template slot-scope="scope">
@@ -113,7 +106,6 @@ export default {
       tableData: [],
       detailOpen: false,
       detailInfo: {},
-      activeTab: 'pending',
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -121,7 +113,7 @@ export default {
         productStatus: '',
         productCategory: '',
         productStyle: '',
-        status: '0'
+        status: ''
       }
     }
   },
@@ -141,16 +133,6 @@ export default {
     handleQuery() {
       this.queryParams.pageNum = 1
       this.getList()
-    },
-    handleTabClick(tab) {
-      const statusMap = {
-        pending: '0',
-        approved: '1',
-        returned: '2',
-        changed: '4'
-      }
-      this.queryParams.status = statusMap[tab.name]
-      this.handleQuery()
     },
     statusText(status) {
       const textMap = {

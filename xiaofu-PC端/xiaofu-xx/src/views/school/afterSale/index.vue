@@ -82,16 +82,10 @@
       <div class="page-header">
         <div>
           <div class="page-title">售后单处理</div>
-          <div class="page-subtitle">查询待处理、已发货和已完成售后单，查看售后单处理情况</div>
+          <div class="page-subtitle">顾客提交退换货后系统自动处理完成，供应商仅查看售后单详情</div>
         </div>
         <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
       </div>
-
-      <el-tabs v-model="activeTab" @tab-click="handleTabChange">
-        <el-tab-pane label="待处理" name="pending" />
-        <el-tab-pane label="已发货" name="shipped" />
-        <el-tab-pane label="已完成" name="completed" />
-      </el-tabs>
 
       <el-table v-loading="loading" :data="afterSaleList" border>
         <el-table-column label="售后单号" prop="afterSaleNo" min-width="180" show-overflow-tooltip />
@@ -225,59 +219,11 @@
       </div>
     </el-dialog>
 
-    <el-dialog :title="auditType === 'approve' ? '完成售后处理' : '退回售后单'" :visible.sync="auditOpen" width="680px" append-to-body>
-      <div v-loading="auditLoading">
-        <el-descriptions :column="2" border class="audit-info">
-          <el-descriptions-item label="售后单号">{{ auditForm.afterSaleNo || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="订单编号">{{ auditForm.orderNo || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="退货物流单号">{{ auditForm.returnTrackingNo || '-' }}</el-descriptions-item>
-          <el-descriptions-item label="申请类型">{{ formatApplyType(auditForm.applyType) }}</el-descriptions-item>
-          <el-descriptions-item label="申请用户">{{ auditForm.userName || '-' }}</el-descriptions-item>
-        </el-descriptions>
-
-        <div class="section-block">
-          <div class="section-title">申请原因</div>
-          <div class="plain-box">{{ auditForm.reason || '暂无申请原因' }}</div>
-        </div>
-
-        <el-form ref="auditRef" :model="auditSubmitForm" :rules="auditRules" label-width="110px">
-          <el-form-item
-            v-if="showRefundAmountField"
-            label="实际退款金额"
-            prop="actualRefundAmount"
-          >
-            <el-input-number
-              v-model="auditSubmitForm.actualRefundAmount"
-              :min="0"
-              :precision="2"
-              :step="1"
-              :max="getMaxRefundAmount(auditForm)"
-              controls-position="right"
-              style="width: 100%"
-            />
-          </el-form-item>
-          <el-form-item label="处理备注" prop="handleRemark">
-            <el-input
-              v-model="auditSubmitForm.handleRemark"
-              type="textarea"
-              :rows="5"
-              maxlength="300"
-              show-word-limit
-              :placeholder="auditType === 'approve' ? '请输入通过说明，可选' : '请输入退回原因'"
-            />
-          </el-form-item>
-        </el-form>
-      </div>
-      <div slot="footer" class="dialog-footer">
-        <el-button @click="auditOpen = false">取 消</el-button>
-        <el-button type="primary" :loading="submitLoading" @click="submitAudit">确 定</el-button>
-      </div>
-    </el-dialog>
   </div>
 </template>
 
 <script>
-import { getAfterSale, listAfterSale, updateAfterSale } from '@/api/school/afterSale'
+import { getAfterSale, listAfterSale } from '@/api/school/afterSale'
 
 const createDefaultAfterSale = () => ({
   id: undefined,
@@ -315,29 +261,17 @@ const createDefaultAfterSale = () => ({
   delFlag: '0'
 })
 
-const createAuditSubmitForm = () => ({
-  actualRefundAmount: undefined,
-  handleRemark: ''
-})
-
 export default {
   name: 'AfterSale',
   data() {
     return {
-      activeTab: 'pending',
       showSearch: true,
       loading: false,
       detailLoading: false,
-      auditLoading: false,
-      submitLoading: false,
       detailOpen: false,
-      auditOpen: false,
-      auditType: 'approve',
       total: 0,
       afterSaleList: [],
       detailForm: createDefaultAfterSale(),
-      auditForm: createDefaultAfterSale(),
-      auditSubmitForm: createAuditSubmitForm(),
       queryParams: {
         pageNum: 1,
         pageSize: 10,
@@ -348,36 +282,6 @@ export default {
         applyType: '',
         userName: '',
         studentName: ''
-      },
-      auditRules: {
-        actualRefundAmount: [
-          {
-            validator: (rule, value, callback) => {
-              if (!this.showRefundAmountField) {
-                callback()
-                return
-              }
-              if (value === undefined || value === null || value === '') {
-                callback(new Error('请输入实际退款金额'))
-                return
-              }
-              callback()
-            },
-            trigger: 'blur'
-          }
-        ],
-        handleRemark: [
-          {
-            validator: (rule, value, callback) => {
-              if (this.auditType === 'reject' && !value) {
-                callback(new Error('请输入退回原因'))
-                return
-              }
-              callback()
-            },
-            trigger: 'blur'
-          }
-        ]
       }
     }
   },
@@ -387,13 +291,6 @@ export default {
     },
     detailPreviewImages() {
       return this.detailImages.map((item) => this.buildFileUrl(item))
-    },
-    showRefundAmountField() {
-      return this.auditType === 'approve' && ['1', '2'].includes(String(this.auditForm.applyType || ''))
-    },
-    currentUserName() {
-      const userInfo = this.$store.getters.userInfo || {}
-      return userInfo.nickName || userInfo.userName || this.$store.getters.nickName || this.$store.getters.name || '管理员'
     }
   },
   created() {
@@ -403,8 +300,7 @@ export default {
     getList() {
       this.loading = true
       listAfterSale({
-        ...this.queryParams,
-        ...this.getTabFilters()
+        ...this.queryParams
       })
         .then((response) => {
           this.afterSaleList = response.rows || []
@@ -413,19 +309,6 @@ export default {
         .finally(() => {
           this.loading = false
         })
-    },
-    getTabFilters() {
-      if (this.activeTab === 'pending') {
-        return { status: '1' }
-      }
-      if (this.activeTab === 'shipped') {
-        return { status: '3' }
-      }
-      return { status: '4' }
-    },
-    handleTabChange() {
-      this.queryParams.pageNum = 1
-      this.getList()
     },
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -439,10 +322,7 @@ export default {
     handleExport() {
       this.download(
         'school/afterSale/export',
-        {
-          ...this.queryParams,
-          ...this.getTabFilters()
-        },
+        this.queryParams,
         `afterSale_${new Date().getTime()}.xlsx`
       )
     },
@@ -450,19 +330,8 @@ export default {
       this.detailOpen = true
       this.loadAfterSaleDetail(row, 'detail')
     },
-    handleAudit(row, type) {
-      this.auditType = type
-      this.auditOpen = true
-      this.auditSubmitForm = createAuditSubmitForm()
-      this.$nextTick(() => {
-        if (this.$refs.auditRef) {
-          this.$refs.auditRef.clearValidate()
-        }
-      })
-      this.loadAfterSaleDetail(row, 'audit')
-    },
     loadAfterSaleDetail(row, target) {
-      const loadingKey = target === 'detail' ? 'detailLoading' : 'auditLoading'
+      const loadingKey = 'detailLoading'
       this[loadingKey] = true
       getAfterSale(row.id)
         .then((response) => {
@@ -471,58 +340,11 @@ export default {
             ...row,
             ...(response.data || {})
           }
-          if (target === 'detail') {
-            this.detailForm = data
-          } else {
-            this.auditForm = data
-            if (['1', '2'].includes(String(data.applyType || ''))) {
-              this.auditSubmitForm.actualRefundAmount = data.actualRefundAmount || data.applyAmount || 0
-            }
-          }
+          this.detailForm = data
         })
         .finally(() => {
           this[loadingKey] = false
         })
-    },
-    submitAudit() {
-      this.$refs.auditRef.validate((valid) => {
-        if (!valid) {
-          return
-        }
-        const source = this.auditForm
-        const today = this.formatToday()
-        const isRefundType = ['1', '2'].includes(String(source.applyType || ''))
-        const payload = {
-          ...source,
-          status: '4',
-          auditBy: this.currentUserName,
-          auditTime: today,
-          handleResult: String(source.applyType) === '3' ? '已完成换货处理' : '已完成售后处理',
-          handleRemark: this.auditSubmitForm.handleRemark,
-          finishTime: today,
-          actualRefundAmount: isRefundType
-            ? this.auditSubmitForm.actualRefundAmount
-            : source.actualRefundAmount,
-          refundStatus: isRefundType ? '2' : source.refundStatus,
-          refundTime: isRefundType ? today : source.refundTime
-        }
-        this.submitLoading = true
-        updateAfterSale(payload)
-          .then(() => {
-            this.$modal.msgSuccess('处理完成')
-            this.auditOpen = false
-            this.getList()
-            if (this.detailOpen && this.detailForm.id === source.id) {
-              this.loadAfterSaleDetail(source, 'detail')
-            }
-          })
-          .finally(() => {
-            this.submitLoading = false
-          })
-      })
-    },
-    isPendingRow(row) {
-      return ['0', '1'].includes(String(row.status))
     },
     formatOrderType(value) {
       if (String(value) === '1') return '统购'
@@ -536,8 +358,8 @@ export default {
       return '-'
     },
     formatStatus(value, row = {}) {
-      if (String(value) === '1') return '待处理'
-      if (String(value) === '3') return '已发货'
+      if (String(value) === '1') return '已通过'
+      if (String(value) === '3') return '处理中'
       if (String(value) === '4') return '已完成'
       return '-'
     },
@@ -555,7 +377,7 @@ export default {
       return ''
     },
     getStatusTagType(value) {
-      if (String(value) === '1') return 'warning'
+      if (String(value) === '1') return 'info'
       if (String(value) === '3') return 'primary'
       if (String(value) === '4') return 'success'
       return 'info'
@@ -591,12 +413,6 @@ export default {
       if (!path) return ''
       if (/^https?:\/\//.test(path)) return path
       return `${process.env.VUE_APP_IMAGE_BASE_API}${path}`
-    },
-    formatToday() {
-      return this.parseTime(new Date(), '{y}-{m}-{d}')
-    },
-    getMaxRefundAmount(row) {
-      return Number(row.applyAmount || 99999999)
     }
   }
 }
@@ -677,7 +493,4 @@ export default {
   border: 1px solid #ebeef5;
 }
 
-.audit-info {
-  margin-bottom: 20px;
-}
 </style>

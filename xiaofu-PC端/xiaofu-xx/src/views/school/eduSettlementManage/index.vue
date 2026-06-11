@@ -86,7 +86,7 @@
     </el-row>
 
     <el-alert
-      title="结算说明：教育局结算管理为独立只读台账，用于按单位、项目、周期、状态查询结算金额、税额、已付和未付金额。"
+      title="结算说明：本页按家长端已支付订单汇总学校与供应商的应结算金额，执行结算后会同步生成供应商资金流水。"
       type="info"
       :closable="false"
       show-icon
@@ -124,8 +124,19 @@
           {{ formatMoney(scope.row.unpaidAmount) }}
         </template>
       </el-table-column>
-      <el-table-column label="操作" width="100" align="center" fixed="right">
+      <el-table-column label="操作" width="160" align="center" fixed="right">
         <template slot-scope="scope">
+          <el-button
+            v-if="Number(scope.row.unpaidAmount || 0) > 0"
+            v-hasPermi="['school:eduSettlementManage:list']"
+            size="mini"
+            type="text"
+            icon="el-icon-money"
+            :loading="settlingId === scope.row.id"
+            @click="handleSettle(scope.row)"
+          >
+            结算
+          </el-button>
           <el-button
             v-hasPermi="['school:eduSettlementManage:query']"
             size="mini"
@@ -147,7 +158,7 @@
       @pagination="getList"
     />
 
-    <el-dialog title="教育局结算详情" :visible.sync="detailOpen" width="820px" append-to-body>
+    <el-dialog title="学校结算详情" :visible.sync="detailOpen" width="820px" append-to-body>
       <el-descriptions :column="2" border size="small">
         <el-descriptions-item label="结算单位">{{ detail.unitName || '-' }}</el-descriptions-item>
         <el-descriptions-item label="项目名称">{{ detail.projectName || '-' }}</el-descriptions-item>
@@ -159,6 +170,41 @@
         <el-descriptions-item label="未付金额">{{ formatMoney(detail.unpaidAmount) }}</el-descriptions-item>
         <el-descriptions-item label="结算说明" :span="2">{{ detail.remark || '-' }}</el-descriptions-item>
       </el-descriptions>
+      <div class="detail-orders">
+        <div class="detail-orders__title">对应供应商订单列表</div>
+        <el-table :data="detail.orderList || []" border size="small" max-height="320">
+          <el-table-column label="订单编号" prop="orderNo" min-width="170" show-overflow-tooltip />
+          <el-table-column label="家长/用户" prop="userName" min-width="110" show-overflow-tooltip />
+          <el-table-column label="支付金额" min-width="100" align="right">
+            <template slot-scope="scope">{{ formatMoney(scope.row.payAmount) }}</template>
+          </el-table-column>
+          <el-table-column label="退款金额" min-width="100" align="right">
+            <template slot-scope="scope">{{ formatMoney(scope.row.refundAmount) }}</template>
+          </el-table-column>
+          <el-table-column label="可结算金额" min-width="110" align="right">
+            <template slot-scope="scope">{{ formatMoney(scope.row.settlementNetAmount) }}</template>
+          </el-table-column>
+          <el-table-column label="支付状态" min-width="100" align="center">
+            <template slot-scope="scope">{{ formatPayStatus(scope.row.payStatus) }}</template>
+          </el-table-column>
+          <el-table-column label="订单状态" min-width="100" align="center">
+            <template slot-scope="scope">{{ formatOrderStatus(scope.row.orderStatus) }}</template>
+          </el-table-column>
+          <el-table-column label="结算状态" min-width="100" align="center">
+            <template slot-scope="scope">
+              <el-tag :type="scope.row.settlementStatus === '1' ? 'success' : 'warning'">
+                {{ formatSettlementStatus(scope.row.settlementStatus) }}
+              </el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column label="支付时间" min-width="160" align="center">
+            <template slot-scope="scope">{{ formatDateTime(scope.row.payTime) }}</template>
+          </el-table-column>
+          <el-table-column label="结算时间" min-width="160" align="center">
+            <template slot-scope="scope">{{ formatDateTime(scope.row.settlementTime) }}</template>
+          </el-table-column>
+        </el-table>
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="detailOpen = false">关 闭</el-button>
       </div>
@@ -168,6 +214,7 @@
 
 <script>
 import {
+  executeEduSettlement,
   getEduSettlementManage,
   getEduSettlementStatistics,
   listEduSettlementManage
@@ -178,6 +225,7 @@ export default {
   data() {
     return {
       loading: false,
+      settlingId: null,
       showSearch: true,
       detailOpen: false,
       total: 0,
@@ -243,14 +291,59 @@ export default {
         this.detailOpen = true
       })
     },
+    handleSettle(row) {
+      this.$modal.confirm(`确认结算 ${row.unitName} 在 ${row.settlementCycle} 的待结算金额吗？`).then(() => {
+        this.settlingId = row.id
+        return executeEduSettlement({
+          supplierId: row.supplierId,
+          settlementCycle: row.settlementCycle
+        })
+      }).then(() => {
+        this.$modal.msgSuccess('结算成功，已同步生成供应商资金流水')
+        return this.getList()
+      }).finally(() => {
+        this.settlingId = null
+      }).catch(() => {})
+    },
     formatMoney(value) {
       return `¥${Number(value || 0).toFixed(2)}`
+    },
+    formatDateTime(value) {
+      return value ? (this.parseTime(value, '{y}-{m}-{d} {h}:{i}:{s}') || value) : '-'
     },
     formatStatus(value) {
       const statusMap = {
         '0': '待结算',
         '1': '部分结算',
         '2': '已结算'
+      }
+      return statusMap[String(value)] || '-'
+    },
+    formatSettlementStatus(value) {
+      const statusMap = {
+        '0': '待结算',
+        '1': '已结算'
+      }
+      return statusMap[String(value)] || '-'
+    },
+    formatPayStatus(value) {
+      const statusMap = {
+        '0': '待支付',
+        '1': '已支付',
+        '2': '部分退款',
+        '3': '已退款'
+      }
+      return statusMap[String(value)] || '-'
+    },
+    formatOrderStatus(value) {
+      const statusMap = {
+        '0': '待支付',
+        '1': '待生产',
+        '2': '待发货',
+        '3': '待收货',
+        '4': '已完成',
+        '5': '已取消',
+        '6': '售后中'
       }
       return statusMap[String(value)] || '-'
     },
@@ -316,5 +409,16 @@ export default {
 
 .rule-alert {
   margin-bottom: 16px;
+}
+
+.detail-orders {
+  margin-top: 16px;
+}
+
+.detail-orders__title {
+  margin-bottom: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
 }
 </style>

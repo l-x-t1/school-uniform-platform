@@ -87,6 +87,7 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         {
             applyCurrentSchoolScopeForWrite(xfptOrderInfo, null);
             validateGroupPurchaseOrder(xfptOrderInfo);
+            normalizeOrderStatusAfterPayment(xfptOrderInfo, null);
             int rows = xfptOrderInfoMapper.insert(xfptOrderInfo);
             insertXfptOrderItem(xfptOrderInfo);
             return rows;
@@ -104,9 +105,34 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
         {
             XfptOrderInfo existing = requireAccessibleOrder(xfptOrderInfoMapper.selectById(xfptOrderInfo.getId()));
             applyCurrentSchoolScopeForWrite(xfptOrderInfo, existing);
+            normalizeOrderStatusAfterPayment(xfptOrderInfo, existing);
             xfptOrderInfoMapper.deleteXfptOrderItemByOrderId(xfptOrderInfo.getId());
             insertXfptOrderItem(xfptOrderInfo);
             return xfptOrderInfoMapper.updateById(xfptOrderInfo);
+        }
+
+        @Override
+        public int shipRetailOrder(Long id)
+        {
+            XfptOrderInfo existing = requireAccessibleOrder(xfptOrderInfoMapper.selectById(id));
+            if (!"2".equals(String.valueOf(existing.getOrderType()))) {
+                throw new ServiceException("仅零售订单支持发货");
+            }
+            if (!"1".equals(String.valueOf(existing.getPayStatus()))) {
+                throw new ServiceException("订单未支付，不能发货");
+            }
+            if (!"2".equals(String.valueOf(existing.getOrderStatus()))) {
+                throw new ServiceException("当前订单不是待发货状态，不能重复发货");
+            }
+            XfptOrderInfo updateEntity = new XfptOrderInfo();
+            updateEntity.setId(id);
+            updateEntity.setPayStatus("1");
+            updateEntity.setOrderStatus("3");
+            updateEntity.setUpdateTime(new Date());
+            if (StringUtils.isNotBlank(SecurityUtils.getUsername())) {
+                updateEntity.setUpdateBy(SecurityUtils.getUsername());
+            }
+            return xfptOrderInfoMapper.updateById(updateEntity);
         }
 
         /**
@@ -220,6 +246,27 @@ public class XfptOrderInfoServiceImpl extends ServiceImpl<XfptOrderInfoMapper, X
                 if (supplierMatched <= 0) {
                     throw new ServiceException("订单供应商与商品所属供应商不一致，请重新选择商品后再提交");
                 }
+            }
+        }
+
+        private void normalizeOrderStatusAfterPayment(XfptOrderInfo xfptOrderInfo, XfptOrderInfo existing)
+        {
+            if (xfptOrderInfo == null || !"1".equals(String.valueOf(xfptOrderInfo.getPayStatus()))) {
+                return;
+            }
+            if (existing != null && "1".equals(String.valueOf(existing.getPayStatus()))) {
+                return;
+            }
+            String orderType = xfptOrderInfo.getOrderType();
+            if (StringUtils.isBlank(orderType) && existing != null) {
+                orderType = existing.getOrderType();
+            }
+            if ("1".equals(String.valueOf(orderType))) {
+                xfptOrderInfo.setOrderStatus("3");
+                return;
+            }
+            if ("2".equals(String.valueOf(orderType))) {
+                xfptOrderInfo.setOrderStatus("2");
             }
         }
 

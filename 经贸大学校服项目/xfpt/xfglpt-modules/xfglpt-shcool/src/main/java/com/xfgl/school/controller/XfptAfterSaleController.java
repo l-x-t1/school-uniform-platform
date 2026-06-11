@@ -2,6 +2,7 @@ package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
 import java.util.Date;
+import java.math.BigDecimal;
 import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,17 +88,33 @@ public class XfptAfterSaleController extends BaseController {
         if (xfptAfterSale == null) {
             return;
         }
-        xfptAfterSale.setStatus("1");
+        Date now = new Date();
+        boolean isRefundType = "1".equals(xfptAfterSale.getApplyType()) || "2".equals(xfptAfterSale.getApplyType());
+        xfptAfterSale.setStatus("4");
         if (isBlank(xfptAfterSale.getAuditBy())) {
             xfptAfterSale.setAuditBy("系统自动通过");
         }
         if (xfptAfterSale.getAuditTime() == null) {
-            xfptAfterSale.setAuditTime(new Date());
+            xfptAfterSale.setAuditTime(now);
         }
         if (isBlank(xfptAfterSale.getHandleResult())) {
-            xfptAfterSale.setHandleResult("家长端提交后自动通过售后申请，等待供应商发货");
+            xfptAfterSale.setHandleResult(isRefundType
+                    ? "家长端提交后系统自动完成退款售后处理"
+                    : "家长端提交后系统自动完成换货售后处理");
         }
-        if (isBlank(xfptAfterSale.getRefundStatus())) {
+        if (xfptAfterSale.getFinishTime() == null) {
+            xfptAfterSale.setFinishTime(now);
+        }
+        if (isRefundType) {
+            if (xfptAfterSale.getActualRefundAmount() == null
+                    || BigDecimal.ZERO.compareTo(xfptAfterSale.getActualRefundAmount()) == 0) {
+                xfptAfterSale.setActualRefundAmount(xfptAfterSale.getApplyAmount());
+            }
+            xfptAfterSale.setRefundStatus("2");
+            if (xfptAfterSale.getRefundTime() == null) {
+                xfptAfterSale.setRefundTime(now);
+            }
+        } else {
             xfptAfterSale.setRefundStatus("0");
         }
     }
