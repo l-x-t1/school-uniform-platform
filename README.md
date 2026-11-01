@@ -6,8 +6,6 @@
 
 以下截图来自本地运行的 PC 端公开首页。
 
-![Edge 中实际运行的校服管理平台公开首页](screenshots/live-public-home.png)
-
 
 ![平台首页公告与内容区](screenshots/portal-detail.png)
 
