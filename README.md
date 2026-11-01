@@ -31,17 +31,71 @@
 
 ![学校后台评价管理](screenshots/school-evaluation.png)
 
-## 项目组成
+## 仓库目录结构
 
-| 目录                           | 说明                                | 主要技术                                                     |
-| ---------------------------- | --------------------------------- | -------------------------------------------------------- |
-| `经贸大学校服项目/xfpt`              | 后端微服务工程                           | Java 8、Spring Boot 2.7、Spring Cloud Alibaba、MyBatis Plus |
-| `xiaofu-PC端/xiaofu-xx`       | PC 管理后台                           | Vue 2、Vue CLI 4、Element UI                               |
-| `xiaofu-手机端/xiaofu-jiazhang` | 家长端，支持 uni-app 的 H5、微信小程序和 App 构建 | uni-app、Vue 2                                            |
-| `修改数据库`                      | 业务表创建、升级脚本和数据库说明                  | MySQL SQL                                                |
-| `数据库备份`、`数据库导出`              | 数据库备份与导出文件                        | MySQL SQL                                                |
+```text
+school-uniform-platform/
+|-- README.md
+|-- screenshots/                              # README 中使用的页面截图
+|-- 经贸大学校服项目/
+|   `-- xfpt/                                 # Java 后端 Maven 工程
+|       |-- xfglpt-auth/                      # 登录认证与令牌
+|       |-- xfglpt-gateway/                   # API 网关
+|       |-- xfglpt-api/xfglpt-api-system/      # 微服务间 API 接口
+|       |-- xfglpt-common/                    # 公共组件与基础能力
+|       |-- xfglpt-modules/
+|       |   |-- xfglpt-system/                # 用户、角色、菜单与系统管理
+|       |   |-- xfglpt-shcool/                # 学校业务（目录名沿用项目拼写）
+|       |   |-- xfglpt-supplier/              # 供应商业务
+|       |   |-- xfglpt-app/                   # 家长端接口
+|       |   |-- xfglpt-file/                  # 文件服务
+|       |   |-- xfglpt-gen/                   # 代码生成
+|       |   `-- xfglpt-job/                   # 定时任务
+|       |-- xfglpt-visual/xfglpt-monitor/      # 服务监控
+|       |-- docker/                           # Docker 部署配置
+|       |-- sql/                              # 后端初始化 SQL
+|       |-- docs/                             # 本地启动及开发文档
+|       `-- bin/                              # Windows 打包和启动脚本
+|-- xiaofu-PC端/
+|   `-- xiaofu-xx/                            # Vue PC 管理后台
+|       |-- public/                           # 静态入口资源
+|       |-- src/
+|       |   |-- api/                          # 后端 API 封装
+|       |   |-- components/                   # 公共组件
+|       |   |-- layout/                       # 后台布局
+|       |   |-- router/                       # 页面路由
+|       |   |-- store/                        # Vuex 状态管理
+|       |   `-- views/                        # 登录、门户和业务页面
+|       |-- package.json
+|       `-- vue.config.js
+|-- xiaofu-手机端/
+|   `-- xiaofu-jiazhang/                      # uni-app 家长端
+|       |-- pages/                            # H5、小程序页面
+|       |-- api/                              # 接口封装
+|       |-- config/                           # 环境配置
+|       |-- static/                           # 图片等静态资源
+|       |-- uni_modules/                      # uni-app 扩展模块
+|       |-- manifest.json                     # 应用及平台配置
+|       `-- pages.json                        # 页面和导航配置
+|-- 修改数据库/
+|   |-- 新增表sql脚本/                        # 新业务表脚本
+|   `-- 对原来的数据库修改的sql脚本/          # 已有表升级脚本
+|-- 数据库备份/                               # 数据库备份文件
+|-- 数据库导出/                               # 数据库导出文件
+|-- sql/                                      # 仓库级补充 SQL
+`-- 业务扩充数据库设计说明-完整版(1).md
+```
 
-后端业务服务包括学校业务（`xfglpt-shcool`，模块名沿用现有拼写）、供应商业务、家长端接口（`xfglpt-app`）、系统管理、文件、代码生成、定时任务和监控；同时包含认证服务与 API 网关。
+## 主要组件和技术
+
+| 目录 | 说明 | 主要技术 |
+| --- | --- | --- |
+| `经贸大学校服项目/xfpt` | 后端微服务工程 | Java 8、Spring Boot 2.7、Spring Cloud Alibaba、MyBatis Plus |
+| `xiaofu-PC端/xiaofu-xx` | PC 管理后台与公开门户 | Vue 2、Vue CLI 4、Element UI |
+| `xiaofu-手机端/xiaofu-jiazhang` | 家长端，支持 H5、微信小程序和 App 构建 | uni-app、Vue 2 |
+| `修改数据库`、`数据库备份`、`数据库导出` | 业务 SQL、升级脚本及数据库资料 | MySQL |
+
+后端服务包括认证、系统管理、学校、供应商、家长端接口、文件、代码生成、定时任务、监控和 API 网关。各服务端口及推荐启动顺序见下文。
 
 ## 开发环境
 
