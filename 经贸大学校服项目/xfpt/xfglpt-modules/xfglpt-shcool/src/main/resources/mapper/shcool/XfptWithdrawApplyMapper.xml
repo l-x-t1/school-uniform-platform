@@ -19,6 +19,10 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="payTime"    column="pay_time"    />
         <result property="auditRemark"    column="audit_remark"    />
         <result property="financeFlowId"    column="finance_flow_id"    />
+        <result property="schoolId"    column="school_id"    />
+        <result property="schoolName"    column="school_name"    />
+        <result property="flowNo"    column="flow_no"    />
+        <result property="orderNo"    column="order_no"    />
         <result property="createBy"    column="create_by"    />
         <result property="createTime"    column="create_time"    />
         <result property="updateBy"    column="update_by"    />
@@ -28,30 +32,122 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </resultMap>
 
     <sql id="selectXfptWithdrawApplyVo">
-        select id, withdraw_no, supplier_id, supplier_name, apply_amount, bank_info_json, status, apply_time, audit_user_id, audit_user_name, audit_time, pay_time, audit_remark, finance_flow_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_withdraw_apply
+        select
+            w.id,
+            w.withdraw_no,
+            w.supplier_id,
+            w.supplier_name,
+            w.apply_amount,
+            w.bank_info_json,
+            w.status,
+            w.apply_time,
+            w.audit_user_id,
+            w.audit_user_name,
+            w.audit_time,
+            w.pay_time,
+            w.audit_remark,
+            w.finance_flow_id,
+            f.school_id,
+            coalesce(o.school_name, d.dept_name) as school_name,
+            f.flow_no,
+            coalesce(o.order_no, f.order_no) as order_no,
+            w.create_by,
+            w.create_time,
+            w.update_by,
+            w.update_time,
+            w.remark,
+            w.del_flag
+        from xfpt_withdraw_apply w
+        left join xfpt_finance_flow f on w.finance_flow_id = f.id and f.del_flag = 0
+        left join xfpt_order_info o on f.order_id = o.id and o.del_flag = 0
+        left join sys_dept d on f.school_id = d.dept_id and d.del_flag = 0
     </sql>
 
     <select id="selectXfptWithdrawApplyList" parameterType="XfptWithdrawApply" resultMap="XfptWithdrawApplyResult">
         <include refid="selectXfptWithdrawApplyVo"/>
         <include refid="search"/>
-            <if test="withdrawNo != null  and withdrawNo != ''"> and withdraw_no like concat('%', #{withdrawNo}, '%')</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
-            <if test="applyAmount != null "> and apply_amount = #{applyAmount}</if>
-            <if test="status != null  and status != ''"> and status = #{status}</if>
-            <if test="applyTime != null "> and apply_time = #{applyTime}</if>
-            <if test="auditUserId != null "> and audit_user_id = #{auditUserId}</if>
-            <if test="auditUserName != null  and auditUserName != ''"> and audit_user_name like concat('%', #{auditUserName}, '%')</if>
-            <if test="auditTime != null "> and audit_time = #{auditTime}</if>
-            <if test="payTime != null "> and pay_time = #{payTime}</if>
-            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
-            <if test="financeFlowId != null "> and finance_flow_id = #{financeFlowId}</if>
+            <if test="id != null"> and w.id = #{id}</if>
+            <if test="withdrawNo != null  and withdrawNo != ''"> and w.withdraw_no like concat('%', #{withdrawNo}, '%')</if>
+            <if test="supplierId != null "> and w.supplier_id = #{supplierId}</if>
+            <if test="supplierName != null  and supplierName != ''"> and w.supplier_name like concat('%', #{supplierName}, '%')</if>
+            <if test="schoolId != null "> and f.school_id = #{schoolId}</if>
+            <if test="schoolName != null  and schoolName != ''"> and coalesce(o.school_name, d.dept_name) like concat('%', #{schoolName}, '%')</if>
+            <if test="flowNo != null  and flowNo != ''"> and f.flow_no like concat('%', #{flowNo}, '%')</if>
+            <if test="orderNo != null  and orderNo != ''"> and coalesce(o.order_no, f.order_no) like concat('%', #{orderNo}, '%')</if>
+            <if test="applyAmount != null "> and w.apply_amount = #{applyAmount}</if>
+            <if test="status != null  and status != ''"> and w.status = #{status}</if>
+            <if test="applyTime != null "> and w.apply_time = #{applyTime}</if>
+            <if test="auditUserId != null "> and w.audit_user_id = #{auditUserId}</if>
+            <if test="auditUserName != null  and auditUserName != ''"> and w.audit_user_name like concat('%', #{auditUserName}, '%')</if>
+            <if test="auditTime != null "> and w.audit_time = #{auditTime}</if>
+            <if test="payTime != null "> and w.pay_time = #{payTime}</if>
+            <if test="auditRemark != null  and auditRemark != ''"> and w.audit_remark = #{auditRemark}</if>
+            <if test="financeFlowId != null "> and w.finance_flow_id = #{financeFlowId}</if>
+            <if test="scopeSchoolIds != null and scopeSchoolIds.size() > 0">
+                and f.school_id in
+                <foreach item="schoolIdItem" collection="scopeSchoolIds" open="(" separator="," close=")">
+                    #{schoolIdItem}
+                </foreach>
+            </if>
+            <if test='viewMode != null and viewMode == "school"'>
+                and f.school_id = #{scopeSchoolId}
+                and (
+                    f.order_id is null
+                    or not exists (
+                        select 1
+                        from xfpt_order_item oi_all
+                        where oi_all.order_id = f.order_id
+                          and oi_all.del_flag = 0
+                    )
+                    or exists (
+                        select 1
+                        from xfpt_order_item oi
+                        inner join xfpt_school_supplier_goods_rel rel
+                            on rel.school_id = f.school_id
+                           and rel.supplier_id = w.supplier_id
+                           and rel.goods_id = oi.goods_id
+                           and rel.del_flag = 0
+                        where oi.order_id = f.order_id
+                          and oi.del_flag = 0
+                    )
+                )
+            </if>
 
     </select>
 
-    <select id="selectXfptWithdrawApplyById" parameterType="Long" resultMap="XfptWithdrawApplyResult">
+    <select id="selectXfptWithdrawApplyDetail" parameterType="XfptWithdrawApply" resultMap="XfptWithdrawApplyResult">
         <include refid="selectXfptWithdrawApplyVo"/>
-        where id = #{id}
+        <include refid="search"/>
+            and w.id = #{id}
+            <if test="scopeSchoolIds != null and scopeSchoolIds.size() > 0">
+                and f.school_id in
+                <foreach item="schoolIdItem" collection="scopeSchoolIds" open="(" separator="," close=")">
+                    #{schoolIdItem}
+                </foreach>
+            </if>
+            <if test='viewMode != null and viewMode == "school"'>
+                and f.school_id = #{scopeSchoolId}
+                and (
+                    f.order_id is null
+                    or not exists (
+                        select 1
+                        from xfpt_order_item oi_all
+                        where oi_all.order_id = f.order_id
+                          and oi_all.del_flag = 0
+                    )
+                    or exists (
+                        select 1
+                        from xfpt_order_item oi
+                        inner join xfpt_school_supplier_goods_rel rel
+                            on rel.school_id = f.school_id
+                           and rel.supplier_id = w.supplier_id
+                           and rel.goods_id = oi.goods_id
+                           and rel.del_flag = 0
+                        where oi.order_id = f.order_id
+                          and oi.del_flag = 0
+                    )
+                )
+            </if>
     </select>
 
     <insert id="insertXfptWithdrawApply" parameterType="XfptWithdrawApply" useGeneratedKeys="true" keyProperty="id">
@@ -137,6 +233,6 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         </foreach>
     </delete>
     <sql id="search">
-        where del_flag = 0
+        where w.del_flag = 0
     </sql>
 </mapper>

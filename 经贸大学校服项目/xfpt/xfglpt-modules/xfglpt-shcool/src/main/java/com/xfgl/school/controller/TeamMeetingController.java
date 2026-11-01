@@ -2,6 +2,7 @@ package com.xfgl.school.controller;
 
 import java.io.IOException;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.servlet.http.HttpServletResponse;
@@ -43,6 +44,12 @@ import com.xfgl.common.core.utils.poi.ExcelUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Operation;
 import com.xfgl.common.core.web.page.TableDataInfo;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -73,6 +80,10 @@ public class TeamMeetingController extends BaseController {
     private IXfptSuppliceContractService suppliceContractService;
     @Autowired
     private IXfptSuppliceInspectionReportService suppliceInspectionReportService;
+    @Autowired
+    private IXfptRwggzsService rwggzsService;
+    @Autowired
+    private IXfptPdxzSureSupplierService pdxzSureSupplierService;
     @Autowired
     private IXfptPatriarchSatisfactionSummarizeService patriarchSatisfactionSummarizeService;
     @Autowired
@@ -110,6 +121,50 @@ public class TeamMeetingController extends BaseController {
         return sdf.getData();
     }
 
+    private XfptProcessCGStatisticsVO buildProcessStatistics(String name, Long deptId, List<XfptSchoolStatisticsVO> dataList) {
+        return XfptProcessCGStatisticsVO.builder()
+                .name(name)
+                .deptId(deptId)
+                .bzhyTotal(countReported(dataList, XfptSchoolStatisticsVO::getBzhyFlg))
+                .jzgmyjTotal(countReported(dataList, XfptSchoolStatisticsVO::getJzgmyjFlg))
+                .zzmdTotal(countReported(dataList, XfptSchoolStatisticsVO::getZzmdFlg))
+                .zzxgmsTotal(countReported(dataList, XfptSchoolStatisticsVO::getXyzzxgmsFlg))
+                .xgjggsTotal(countReported(dataList, XfptSchoolStatisticsVO::getXgjggsFlg))
+                .cghtTotal(countReported(dataList, XfptSchoolStatisticsVO::getCghtFlg))
+                .cgjgggTotal(countReported(dataList, XfptSchoolStatisticsVO::getCgjgggFlg))
+                .cpzljcTotal(countReported(dataList, XfptSchoolStatisticsVO::getCpzljybgFlg))
+                .jzmydzjbgTotal(countReported(dataList, XfptSchoolStatisticsVO::getJzmydzjbgFlg))
+                .zjbbTotal(countReported(dataList, XfptSchoolStatisticsVO::getZjbbFlg))
+                .cggzzjTotal(countReported(dataList, XfptSchoolStatisticsVO::getCggzzjFlag))
+                .build();
+    }
+
+    private XfptProcessCGStatisticsVO buildProcessStatisticsSummary(String name, List<XfptProcessCGStatisticsVO> dataList) {
+        return XfptProcessCGStatisticsVO.builder()
+                .name(name)
+                .bzhyTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getBzhyTotal()).orElse(0L)).sum())
+                .jzgmyjTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getJzgmyjTotal()).orElse(0L)).sum())
+                .zzmdTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getZzmdTotal()).orElse(0L)).sum())
+                .zzxgmsTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getZzxgmsTotal()).orElse(0L)).sum())
+                .xgjggsTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getXgjggsTotal()).orElse(0L)).sum())
+                .cghtTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getCghtTotal()).orElse(0L)).sum())
+                .cgjgggTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getCgjgggTotal()).orElse(0L)).sum())
+                .cpzljcTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getCpzljcTotal()).orElse(0L)).sum())
+                .jzmydzjbgTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getJzmydzjbgTotal()).orElse(0L)).sum())
+                .zjbbTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getZjbbTotal()).orElse(0L)).sum())
+                .cggzzjTotal(dataList.stream().mapToLong(item -> Optional.ofNullable(item.getCggzzjTotal()).orElse(0L)).sum())
+                .build();
+    }
+
+    private Long countReported(List<XfptSchoolStatisticsVO> dataList, Function<XfptSchoolStatisticsVO, String> flagGetter) {
+        return dataList.stream()
+                .filter(item -> "已报备".equals(flagGetter.apply(item)))
+                .count();
+    }
+
+    private String resolveSchoolTypeName(String schoolTypeValue, Map<String, String> schoolTypeDictMap) {
+        return schoolTypeDictMap.getOrDefault(schoolTypeValue, "其他");
+    }
 
     /**
      * 查询班子会议列表
@@ -386,13 +441,29 @@ public class TeamMeetingController extends BaseController {
     }
 
     /**
-     * 获取第一阶段的统计数据，仅查询市教育局直辖区县的9大模块的报备学校数
+     * 获取第一阶段的统计数据，仅查询市教育局直辖区县的 11 步流程报备学校数
      *
      * @param parentDeptId 查询哪个部门就是哪个部门的id
      * @param entity       这里主要使用params['beginTime'] 和 params['endTime']
      * @return
      */
     public List<XfptProcessCGStatisticsVO> getStep_one_list(Long parentDeptId, BaseEntity entity) {
+        if (System.currentTimeMillis() >= 0) {
+            boolean admin = SecurityUtils.isAdmin(SecurityUtils.getUserId());
+            if (!admin) {
+                parentDeptId = SecurityUtils.getLoginUser().getSysUser().getDeptId();
+            }
+            List<SysDept> deptList = getDeptList(parentDeptId);
+            List<XfptProcessCGStatisticsVO> finalDataList = deptList.stream()
+                    .map(dept -> buildProcessStatistics(
+                            dept.getDeptName(),
+                            dept.getDeptId(),
+                            getSchoolBaoBeiSituationDataList(dept.getDeptId(), entity, XfptSchoolStatisticsVO.builder().build(), false)
+                    ))
+                    .collect(Collectors.toList());
+            finalDataList.add(0, buildProcessStatisticsSummary("总数", finalDataList));
+            return finalDataList;
+        }
 
         boolean admin = SecurityUtils.isAdmin(SecurityUtils.getUserId());
         if (!admin) {
@@ -410,7 +481,7 @@ public class TeamMeetingController extends BaseController {
         List<Long> teamMeetingIdList = teamMeetingList.stream().map(TeamMeeting::getId)
                 .filter(Objects::nonNull).collect(Collectors.toList());
         boolean emptyTeamMeetingFlg = CollectionUtils.isEmpty(teamMeetingIdList);
-        //注：以下9大相关模块均做关联班子会议处理
+        //注：以下为旧统计逻辑，保留兼容；运行时已切换到新的 11 步统计逻辑
         //查询家长购买意见征集报备
         List<XfptJzBuyOpinions> jzBuyOpinionList = new ArrayList<>();
         //选用组织名单报备学校数
@@ -423,6 +494,10 @@ public class TeamMeetingController extends BaseController {
         List<XfptSuppliceContract> caiGouHtList = new ArrayList<>();
         //产品质量检测报告报备学校数
         List<XfptSuppliceInspectionReport> chanPinReportList = new ArrayList<>();
+        //备选公告展示
+        List<XfptRwggzs> rwggzsList = new ArrayList<>();
+        //家长投票
+        List<XfptPdxzSureSupplier> parentVoteList = new ArrayList<>();
         //家长满意度总结报告报备学校数
         List<XfptPatriarchSatisfactionSummarize> jzManYdReportList = new ArrayList<>();
         //家长满意度总结报告报备学校数
@@ -443,6 +518,10 @@ public class TeamMeetingController extends BaseController {
             caiGouHtList.removeIf(e -> !e.getAncestors().contains(finalParentDeptId.toString()));
             chanPinReportList = suppliceInspectionReportService.list(new LambdaQueryWrapper<XfptSuppliceInspectionReport>().in(XfptSuppliceInspectionReport::getTeamMeetingId, teamMeetingIdList));
             chanPinReportList.removeIf(e -> !e.getAncestors().contains(finalParentDeptId.toString()));
+            rwggzsList = rwggzsService.list(new LambdaQueryWrapper<XfptRwggzs>().in(XfptRwggzs::getTeamId, teamMeetingIdList));
+            rwggzsList.removeIf(e -> !e.getAncestors().contains(finalParentDeptId.toString()));
+            parentVoteList = pdxzSureSupplierService.list(new LambdaQueryWrapper<XfptPdxzSureSupplier>().in(XfptPdxzSureSupplier::getTeamId, teamMeetingIdList));
+            parentVoteList.removeIf(e -> !e.getAncestors().contains(finalParentDeptId.toString()));
             jzManYdReportList = patriarchSatisfactionSummarizeService.list(new LambdaQueryWrapper<XfptPatriarchSatisfactionSummarize>().in(XfptPatriarchSatisfactionSummarize::getTeamMeetingId, teamMeetingIdList));
             jzManYdReportList.removeIf(e -> !e.getAncestors().contains(finalParentDeptId.toString()));
             jXfptProcSummaryList=iXfptProcSummaryService.list(new LambdaQueryWrapper<XfptProcSummary>().in(XfptProcSummary::getTeamId, teamMeetingIdList));
@@ -450,6 +529,8 @@ public class TeamMeetingController extends BaseController {
             xfptCglcgzzjsList=iXfptCglcgzzjService.list(new LambdaQueryWrapper<XfptCglcgzzj>().in(XfptCglcgzzj::getTeamId, teamMeetingIdList));
             xfptCglcgzzjsList.removeIf(e -> !e.getAncestors().contains(finalParentDeptId.toString()));
         }
+        List<XfptAnnoResults> voteResultNoticeList = xuangResultList.stream().filter(e -> "1".equals(e.getStageType())).collect(Collectors.toList());
+        List<XfptAnnoResults> purchaseResultNoticeList = xuangResultList.stream().filter(e -> "2".equals(e.getStageType())).collect(Collectors.toList());
         List<XfptProcessCGStatisticsVO> finalDataList = new ArrayList<>();
         Long bzhyTotal = 0L;
         Long jzgmyjTotal = 0L;
@@ -457,6 +538,7 @@ public class TeamMeetingController extends BaseController {
         Long zzxgmsTotal = 0L;
         Long xgjggsTotal = 0L;
         Long cghtTotal = 0L;
+        Long cgjgggTotal = 0L;
         Long cpzljcTotal = 0L;
         Long jzmydzjbgTotal = 0L;
         Long zjbbTotal = 0L;
@@ -471,25 +553,25 @@ public class TeamMeetingController extends BaseController {
                 bzhyTotal += bzhyCurr;
             }
             //查询家长购买意见征集报备
-            Long jzgmyjCurr = jzBuyOpinionList.stream().filter(e -> e.getDeptId().equals(deptId)
+            Long jzgmyjCurr = reportModeList.stream().filter(e -> e.getDeptId().equals(deptId)
                     || e.getAncestors().contains(deptIdStr)).count();
             if (jzgmyjCurr > 0) {
                 jzgmyjTotal += jzgmyjCurr;
             }
             //选用组织名单报备学校数
-            Long zzmdCurr = orgReportDiscloseList.stream().filter(e -> e.getDeptId().equals(deptId)
+            Long zzmdCurr = rwggzsList.stream().filter(e -> e.getDeptId().equals(deptId)
                     || e.getAncestors().contains(deptIdStr)).count();
             if (zzmdCurr > 0) {
                 zzmdTotal += zzmdCurr;
             }
             //选用组织选购模式报备学校数
-            Long zzxgmsCurr = reportModeList.stream().filter(e -> e.getDeptId().equals(deptId)
+            Long zzxgmsCurr = parentVoteList.stream().filter(e -> e.getDeptId().equals(deptId)
                     || e.getAncestors().contains(deptIdStr)).count();
             if (zzxgmsCurr > 0) {
                 zzxgmsTotal += zzxgmsCurr;
             }
             //选购结果公示报备学校数
-            Long xgjggsCurr = xuangResultList.stream().filter(e -> e.getDeptId().equals(deptId)
+            Long xgjggsCurr = voteResultNoticeList.stream().filter(e -> e.getDeptId().equals(deptId)
                     || e.getAncestors().contains(deptIdStr)).count();
             if (xgjggsCurr > 0) {
                 xgjggsTotal += xgjggsCurr;
@@ -499,6 +581,12 @@ public class TeamMeetingController extends BaseController {
                     || e.getAncestors().contains(deptIdStr)).count();
             if (cghtCurr > 0) {
                 cghtTotal += cghtCurr;
+            }
+            //采购结果公告
+            Long cgjgggCurr = purchaseResultNoticeList.stream().filter(e -> e.getDeptId().equals(deptId)
+                    || e.getAncestors().contains(deptIdStr)).count();
+            if (cgjgggCurr > 0) {
+                cgjgggTotal += cgjgggCurr;
             }
             //产品质量检测报告报备学校数
             Long cpzljcCurr = chanPinReportList.stream().filter(e -> e.getDeptId().equals(deptIdStr)
@@ -539,6 +627,7 @@ public class TeamMeetingController extends BaseController {
                     .zzxgmsTotal(zzxgmsCurr)
                     .xgjggsTotal(xgjggsCurr)
                     .cghtTotal(cghtCurr)
+                    .cgjgggTotal(cgjgggCurr)
                     .cpzljcTotal(cpzljcCurr)
                     .jzmydzjbgTotal(jzmydzjbgCurr)
                     .zjbbTotal(zjbbCurr)
@@ -556,6 +645,7 @@ public class TeamMeetingController extends BaseController {
                 .zzxgmsTotal(zzxgmsTotal)
                 .xgjggsTotal(xgjggsTotal)
                 .cghtTotal(cghtTotal)
+                .cgjgggTotal(cgjgggTotal)
                 .cpzljcTotal(cpzljcTotal)
                 .jzmydzjbgTotal(jzmydzjbgTotal)
                 .jzgmyjTotal(jzgmyjTotal)
@@ -582,13 +672,31 @@ public class TeamMeetingController extends BaseController {
     }
 
     /**
-     * 获取第二阶段的统计数据，仅查询特定区县下9大模块的报备学校数
+     * 获取第二阶段的统计数据，仅查询特定区县下 11 步流程报备学校数
      *
      * @param parentDeptId 查询哪个部门就是哪个部门的id
      * @param entity       这里主要使用params['beginTime'] 和 params['endTime']
      * @return
      */
     public List<XfptProcessCGStatisticsVO> getStep_school_list(Long parentDeptId, BaseEntity entity) {
+        if (System.currentTimeMillis() >= 0) {
+            Map<String, String> schoolTypeDictMap = Optional.ofNullable(getDictValueLabelMap("sc_sc_type")).orElse(Collections.emptyMap());
+            List<XfptSchoolStatisticsVO> dataList =
+                    getSchoolBaoBeiSituationDataList(parentDeptId, entity, XfptSchoolStatisticsVO.builder().build(), false);
+            List<String> categoryList = Stream.of("高级中学", "初级中学", "小学", "幼儿园", "其他").collect(Collectors.toList());
+            List<XfptProcessCGStatisticsVO> finalDataList = categoryList.stream()
+                    .map(category -> buildProcessStatistics(
+                            category,
+                            null,
+                            dataList.stream()
+                                    .filter(item -> category.equals(resolveSchoolTypeName(item.getSchoolType(), schoolTypeDictMap)))
+                                    .collect(Collectors.toList())
+                    ))
+                    .collect(Collectors.toList());
+            finalDataList.add(0, buildProcessStatistics("总数", null, dataList));
+            return finalDataList;
+        }
+
         List<SysDept> deptList = getSonDeptList(parentDeptId);
         List<Long> sonDeptIdList = deptList.stream().map(e -> e.getDeptId()).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(sonDeptIdList)) {
@@ -981,127 +1089,156 @@ public class TeamMeetingController extends BaseController {
     private void list1(Long teamId, TeamMeeting teamMeeting, List<Integer> result) {
         String timeTb = teamMeeting.getTimeTb();
 
-        if(!timeTb.contains(ProceConstants.BZHY)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.GMYJ)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.ZZMD)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.XGMS)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.ZZTP)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-//        if(!timeTb.contains(ProceConstants.YXWZ)){
-//            result.add(0);
-//        }else {
-//            result.add(1);
-//        }
-//        if(!timeTb.contains(ProceConstants.DSFZB)){
-//            result.add(0);
-//        }else {
-//            result.add(1);
-//        }
-        if(!timeTb.contains(ProceConstants.RWZS)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.PDXZ)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.JGGS)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.HTGK)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.ZJBGGK)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.MDYBB)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
+        result.add(timeTb.contains(ProceConstants.BZHY) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.CGGGFB) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.BXGGZS) || timeTb.contains(ProceConstants.RWZS) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.JZTP) || timeTb.contains(ProceConstants.PDXZ) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.TPJGGS) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.HTGK) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.CGJGGG) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.ZJBGGK) ? 1 : 0);
+        result.add(timeTb.contains(ProceConstants.MDYBB) ? 1 : 0);
         Long count = iXfptProcSummaryService.lambdaQuery().eq(XfptProcSummary::getTeamId, teamId).count();
-        if(count==0){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
-        if(!timeTb.contains(ProceConstants.CGGZZJ)){
-            result.add(0);
-        }else {
-            result.add(1);
-        }
+        result.add(count == 0 ? 0 : 1);
+        result.add(timeTb.contains(ProceConstants.CGGZZJ) ? 1 : 0);
     }
     private void list(Long teamId, TeamMeeting teamMeeting, List<Integer> result) {
-
-        result.add(0);
-        result.add(0);
-        result.add(0);
-//        result.add(0);
-        result.add(0);
-//        if(!timeTb.contains(ProceConstants.YXWZ)){
-//            result.add(0);
-//        }else {
-//            result.add(1);
-//        }
-        result.add(0);
-        result.add(0);
-        result.add(0);
-        result.add(0);
-        result.add(0);
-        result.add(0);
-        result.add(0);
-        result.add(0);
-        result.add(0);
+        for (int i = 0; i < 11; i++) {
+            result.add(0);
+        }
     }
     @PostMapping("/importUserName")
     public AjaxResult importUserName(MultipartFile file) throws IOException {
-        ExcelUtil<UserName> util = new ExcelUtil<UserName>(UserName.class);
-        List<UserName> userList = util.importExcel(file.getInputStream());
-        List<String> collect = userList.stream().map(UserName::getName).collect(Collectors.toList());
-        String result="";
+        if (file == null || file.isEmpty()) {
+            return AjaxResult.error("导入失败：请选择 xls/xlsx 文件");
+        }
+        List<UserName> userList;
+        try {
+            userList = parseUserNameList(file);
+        } catch (Exception e) {
+            String message = StrUtil.blankToDefault(e.getMessage(), "导入失败：请上传有效的 xls/xlsx 文件");
+            return AjaxResult.error(message);
+        }
+        if (CollUtil.isEmpty(userList)) {
+            return AjaxResult.error("导入失败：未识别到人员名单，请使用模板或在第一列填写姓名、第二列填写电话");
+        }
+        String result = userList.stream()
+                .map(this::buildUserNameText)
+                .filter(StrUtil::isNotBlank)
+                .collect(Collectors.joining(","));
+        if (StrUtil.isBlank(result)) {
+            return AjaxResult.error("导入失败：名单内容为空，请检查 Excel");
+        }
+        return AjaxResult.success(result);
+    }
 
-        int flag=0;
-        for (UserName userName : userList) {
-            flag++;
-            if(StrUtil.isNotEmpty(userName.getName())){
-                result=result+userName.getName();
+    private List<UserName> parseUserNameList(MultipartFile file) throws IOException {
+        ExcelUtil<UserName> util = new ExcelUtil<UserName>(UserName.class);
+        List<UserName> userList = normalizeUserNames(util.importExcel(file.getInputStream()));
+        if (CollUtil.isNotEmpty(userList)) {
+            return userList;
+        }
+        return parseUserNamesWithoutHeader(file);
+    }
+
+    private List<UserName> normalizeUserNames(List<UserName> userList) {
+        if (CollUtil.isEmpty(userList)) {
+            return Collections.emptyList();
+        }
+        return userList.stream()
+                .filter(Objects::nonNull)
+                .peek(userName -> {
+                    userName.setName(StrUtil.trim(userName.getName()));
+                    userName.setPhone(StrUtil.trim(userName.getPhone()));
+                })
+                .filter(userName -> StrUtil.isNotBlank(userName.getName()) || StrUtil.isNotBlank(userName.getPhone()))
+                .collect(Collectors.toList());
+    }
+
+    private List<UserName> parseUserNamesWithoutHeader(MultipartFile file) throws IOException {
+        try (Workbook workbook = WorkbookFactory.create(file.getInputStream())) {
+            if (workbook.getNumberOfSheets() == 0) {
+                return Collections.emptyList();
             }
-            if(StrUtil.isNotEmpty(userName.getPhone())){
-                result=result+"-"+userName.getPhone();
+            Sheet sheet = workbook.getSheetAt(0);
+            DataFormatter formatter = new DataFormatter();
+            List<UserName> userList = new ArrayList<>();
+            for (int i = 0; i <= sheet.getLastRowNum(); i++) {
+                Row row = sheet.getRow(i);
+                if (isUserNameRowEmpty(row, formatter)) {
+                    continue;
+                }
+                String name = getCellText(row.getCell(0), formatter);
+                String phone = getCellText(row.getCell(1), formatter);
+                if (i == 0 && isUserNameHeaderRow(name, phone)) {
+                    continue;
+                }
+                UserName userName = new UserName();
+                userName.setName(StrUtil.trim(name));
+                userName.setPhone(StrUtil.trim(phone));
+                if (StrUtil.isBlank(userName.getName()) && StrUtil.isBlank(userName.getPhone())) {
+                    continue;
+                }
+                userList.add(userName);
             }
-            if(flag!=userList.size()){
-                result=result+",";
+            return userList;
+        } catch (IOException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IOException("导入失败：请上传有效的 xls/xlsx 文件", e);
+        }
+    }
+
+    private boolean isUserNameRowEmpty(Row row, DataFormatter formatter) {
+        if (row == null) {
+            return true;
+        }
+        return StrUtil.isBlank(getCellText(row.getCell(0), formatter))
+                && StrUtil.isBlank(getCellText(row.getCell(1), formatter));
+    }
+
+    private boolean isUserNameHeaderRow(String firstCell, String secondCell) {
+        String first = normalizeHeaderCell(firstCell);
+        String second = normalizeHeaderCell(secondCell);
+        return containsHeaderKeyword(first, "学生姓名", "姓名", "名字", "家长姓名")
+                && (StrUtil.isBlank(second) || containsHeaderKeyword(second, "电话", "手机号", "手机号码", "联系电话"));
+    }
+
+    private String normalizeHeaderCell(String value) {
+        if (value == null) {
+            return StrUtil.EMPTY;
+        }
+        return value.replace(" ", "").trim();
+    }
+
+    private boolean containsHeaderKeyword(String value, String... keywords) {
+        for (String keyword : keywords) {
+            if (value.contains(keyword)) {
+                return true;
             }
         }
+        return false;
+    }
 
-        return AjaxResult.success(result);
+    private String getCellText(Cell cell, DataFormatter formatter) {
+        if (cell == null) {
+            return StrUtil.EMPTY;
+        }
+        return formatter.formatCellValue(cell);
+    }
+
+    private String buildUserNameText(UserName userName) {
+        StringBuilder builder = new StringBuilder();
+        if (StrUtil.isNotBlank(userName.getName())) {
+            builder.append(userName.getName());
+        }
+        if (StrUtil.isNotBlank(userName.getPhone())) {
+            if (builder.length() > 0) {
+                builder.append("-");
+            }
+            builder.append(userName.getPhone());
+        }
+        return builder.toString();
     }
 
     @GetMapping("/getStatus")

@@ -96,6 +96,18 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "公告截止时间")
     private Date endTime;
 
+    /** 统购开始时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "统购开始时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "统购开始时间")
+    private Date purchaseStartTime;
+
+    /** 统购结束时间 */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Excel(name = "统购结束时间", width = 30, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "统购结束时间")
+    private Date purchaseEndTime;
+
     /** 状态，0草稿 1已发布 2已结束 3已撤回 */
             @Excel(name = "状态，0草稿 1已发布 2已结束 3已撤回")
     @Schema(description = "状态，0草稿 1已发布 2已结束 3已撤回")

@@ -161,6 +161,19 @@ public class SysUserController extends BaseController {
     }
 
     /**
+     * 内部新增用户（跳过注册开关，供供应商入驻审核等内部流程使用）
+     */
+    @InnerAuth
+    @PostMapping("/addInner")
+    public R<Boolean> addInner(@RequestBody SysUser sysUser) {
+        String username = sysUser.getUserName();
+        if (!userService.checkUserNameUnique(sysUser)) {
+            return R.fail("保存用户'" + username + "'失败，注册账号已存在");
+        }
+        return R.ok(userService.registerUser(sysUser));
+    }
+
+    /**
      * 记录用户登录IP地址和登录时间
      */
     @InnerAuth

@@ -58,6 +58,10 @@ public class XfptStudentInfo extends BaseEntity {
     @Schema(description = "姓名")
     private String name;
 
+    @Excel(name = "学号")
+    @Schema(description = "学号")
+    private String studentNo;
+
     /**
      * 性别
      */
@@ -90,6 +94,18 @@ public class XfptStudentInfo extends BaseEntity {
     private String idNumber;
 
     private String grade;
+
+    @Excel(name = "上衣尺码")
+    @Schema(description = "上衣尺码")
+    private String topSize;
+
+    @Excel(name = "裤子尺码")
+    @Schema(description = "裤子尺码")
+    private String bottomSize;
+
+    @Excel(name = "鞋子尺码")
+    @Schema(description = "鞋子尺码")
+    private String shoesSize;
 
     @TableField(exist = false)
     private String phone;

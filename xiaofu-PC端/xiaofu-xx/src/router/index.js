@@ -91,6 +91,24 @@ export const constantRoutes = [
     hidden: true,
   },
   {
+    path: "/supplier-settle",
+    component: () => import("@/views/supplier-settle/index"),
+    hidden: true,
+  },
+  {
+    path: "/supplier/apply",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "detail",
+        component: () => import("@/views/supplier/applyDetail/index"),
+        name: "SupplierApplyDetailEntry",
+        meta: { title: "采购公告报名", activeMenu: "/supplier/applyCenter" },
+      },
+    ],
+  },
+  {
     path: "/404",
     component: () => import("@/views/error/404"),
     hidden: true,
@@ -122,7 +140,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/accountBalance/index"),
-        name: "AccountBalance",
+        name: "SchoolAccountBalanceEntry",
         meta: { title: "账户余额", activeMenu: "/newFeature/accountBalance" },
       },
     ],
@@ -135,7 +153,7 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/supplierWithdrawRecord/index"),
-        name: "SupplierWithdrawRecord",
+        name: "SchoolSupplierWithdrawRecordEntry",
         meta: { title: "供应商提现记录", activeMenu: "/newFeature/supplierWithdrawRecord" },
       },
     ],
@@ -148,8 +166,8 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/platformUsage/index"),
-        name: "PlatformUsage",
-        meta: { title: "使用情况", activeMenu: "/newFeature/platformUsage" },
+        name: "SchoolPlatformUsageEntry",
+        meta: { title: "教育局监管统计", activeMenu: "/newFeature/platformUsage" },
       },
     ],
   },
@@ -160,8 +178,8 @@ export const constantRoutes = [
     children: [
       {
         path: "index",
-        component: () => import("@/views/school/groupNotice/index"),
-        name: "SupplierGroupNotice",
+        component: () => import("@/views/school/groupNoticeReadonly/index"),
+        name: "SupplierGroupNoticeEntry",
         meta: { title: "学校统购公告查询", activeMenu: "/newFeature/supplierGroupNotice" },
       },
     ],
@@ -174,8 +192,21 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/groupNoticeReadonly/index"),
-        name: "AdminGroupNoticeQuery",
+        name: "SchoolGroupNoticeReadonlyEntry",
         meta: { title: "学校统购公告查询", activeMenu: "/newFeature/adminGroupNoticeQuery" },
+      },
+    ],
+  },
+  {
+    path: "/schoolGroupNoticeEntry",
+    component: Layout,
+    hidden: true,
+    children: [
+      {
+        path: "index",
+        component: () => import("@/views/school/groupNotice/index"),
+        name: "SchoolGroupNoticeEntry",
+        meta: { title: "公告管理", icon: "message" },
       },
     ],
   },
@@ -187,8 +218,8 @@ export const constantRoutes = [
       {
         path: "index",
         component: () => import("@/views/school/schoolUsage/index"),
-        name: "SchoolUsage",
-        meta: { title: "使用情况", activeMenu: "/newFeature/schoolUsage" },
+        name: "SchoolUsageEntry",
+        meta: { title: "教育局监管统计", activeMenu: "/newFeature/schoolUsage" },
       },
     ],
   },
@@ -230,6 +261,26 @@ export const constantRoutes = [
         name: "BxactiveAdd",
       },
     ],
+  },
+  {
+    path: "/newFeature/comment",
+    redirect: "/newFeature/commentReply",
+    hidden: true,
+  },
+  {
+    path: "/newFeature/productionOrderItem",
+    redirect: "/newFeature/productionOrder",
+    hidden: true,
+  },
+  {
+    path: "/newFeature/deliveryOrderItem",
+    redirect: "/newFeature/deliveryOrder",
+    hidden: true,
+  },
+  {
+    path: "/newFeature/orderItem",
+    redirect: "/newFeature/orderInfo",
+    hidden: true,
   },
 ];
 

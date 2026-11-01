@@ -584,8 +584,6 @@ public class QrOpenController extends BaseController {
     }
     @Autowired
     private IXfptAnnoResultsService xfptAnnoResultsService;
-    @Autowired
-    private IXfptReportModeService iXfptReportModeService;
     /**
      * 查询选用组织选购结果公示报备与公开列表
      */
@@ -599,23 +597,7 @@ public class QrOpenController extends BaseController {
         if(CollUtil.isEmpty(list)){
             return getDataTable(list);
         }
-        //查询成成交模式
-        List<XfptReportMode> list1 = iXfptReportModeService.lambdaQuery().eq(XfptReportMode::getTeamId, list.get(0).getTeamId()).list();
-        if(CollUtil.isEmpty(list1)){
-
-            throw new ServiceException("未查询到选购模式");
-        }
-
-        //遍历枚举ReportModeStatus找到对应值
-        list.stream().forEach(item->{
-            String purchaseMode = list1.get(0).getPurchaseMode();
-            if(StrUtil.isEmpty(purchaseMode)){
-                item.setReportMode("");
-            }else {
-                item.setReportMode(getMenu(purchaseMode));
-            }
-
-        });
+        fillResultReportMode(list);
         return getDataTable(list);
     }
     /**
@@ -636,6 +618,9 @@ public class QrOpenController extends BaseController {
      * @return
      */
     private static String getMenu(String purchaseMode) {
+        if (StrUtil.isBlank(purchaseMode)) {
+            return "";
+        }
         PurchaseType[] values = PurchaseType.values();
         for (int i = 0; i < values.length; i++) {
             String code = values[i].getCode();
@@ -644,6 +629,16 @@ public class QrOpenController extends BaseController {
             }
         }
         return "";
+    }
+
+    private void fillResultReportMode(List<XfptAnnoResults> list) {
+        Map<Long, String> purchaseModeMap = new HashMap<>();
+        list.stream()
+                .map(XfptAnnoResults::getTeamId)
+                .filter(Objects::nonNull)
+                .distinct()
+                .forEach(teamId -> purchaseModeMap.put(teamId, xfptAnnoResultsService.resolvePurchaseMode(teamId)));
+        list.forEach(item -> item.setReportMode(getMenu(purchaseModeMap.get(item.getTeamId()))));
     }
     @Autowired
     private IXfptSuppliceContractService xfptSuppliceContractService;

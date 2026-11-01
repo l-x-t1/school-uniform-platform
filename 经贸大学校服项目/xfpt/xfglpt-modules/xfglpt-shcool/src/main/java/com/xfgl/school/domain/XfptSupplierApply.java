@@ -35,17 +35,14 @@ private static final long serialVersionUID = 1L;
     private Long id;
 
     /** 公告ID */
-            @Excel(name = "公告ID")
     @Schema(description = "公告ID")
     private Long noticeId;
 
     /** 学校ID */
-            @Excel(name = "学校ID")
     @Schema(description = "学校ID")
     private Long schoolId;
 
     /** 供应商ID */
-            @Excel(name = "供应商ID")
     @Schema(description = "供应商ID")
     private Long supplierId;
 
@@ -105,8 +102,66 @@ private static final long serialVersionUID = 1L;
     private String compareFilesJson;
 
     /** 当前归属部门/学校 */
-            @Excel(name = "当前归属部门/学校")
     @Schema(description = "当前归属部门/学校")
     private Long deptId;
+
+    /** 公告标题 */
+    @TableField(exist = false)
+    @Excel(name = "公告标题")
+    @Schema(description = "公告标题")
+    private String noticeTitle;
+
+    /** 公告编号 */
+    @TableField(exist = false)
+    @Excel(name = "公告编号")
+    @Schema(description = "公告编号")
+    private String noticeCode;
+
+    /** 学校名称 */
+    @TableField(exist = false)
+    @Excel(name = "学校名称")
+    @Schema(description = "学校名称")
+    private String schoolName;
+
+    /** 报名截止时间 */
+    @TableField(exist = false)
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Schema(description = "报名截止时间")
+    private Date bmjzTime;
+
+    /** 报名上限 */
+    @TableField(exist = false)
+    @Schema(description = "报名上限")
+    private Integer signupLimit;
+
+    /** 是否要求样衣图 */
+    @TableField(exist = false)
+    @Schema(description = "是否要求样衣图")
+    private String isSamplesPic;
+
+    /** 公告样衣图 */
+    @TableField(exist = false)
+    @Schema(description = "公告样衣图")
+    private String samplesPic;
+
+    /** 公告文件 */
+    @TableField(exist = false)
+    @Schema(description = "公告文件")
+    private String noticeFile;
+
+    /** 其他附件 */
+    @TableField(exist = false)
+    @Schema(description = "其他附件")
+    private String otherFile;
+
+    /** 对应发布公告ID */
+    @TableField(exist = false)
+    @Schema(description = "对应发布公告ID")
+    private Long publicNoticeId;
+
+    /** 供应商端/学校端展示状态 */
+    @TableField(exist = false)
+    @Schema(description = "展示状态")
+    private String statusText;
 
         }

@@ -129,6 +129,11 @@ public class XfptSuppliceInspectionReportController extends BaseController {
                 .eq(XfptSuppliceInspectionReport::getDeptId, xfptSuppliceInspectionReport.getDeptId())
                 .eq(XfptSuppliceInspectionReport::getTeamMeetingId, xfptSuppliceInspectionReport.getTeamMeetingId())
                 .list();
+        boolean existsSupplier = lists.stream().anyMatch(item ->
+                StringUtils.equals(item.getSupplierId(), xfptSuppliceInspectionReport.getSupplierId()));
+        if (existsSupplier) {
+            throw new ServiceException("该合作厂商已存在，请勿重复添加");
+        }
         if (lists.isEmpty()) {
             teamMeetingService.updateTeamMeetingCurrOrder(Long.valueOf(xfptSuppliceInspectionReport.getTeamMeetingId()), ProceConstants.ZJBGGK + "#" + DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss"));
         }

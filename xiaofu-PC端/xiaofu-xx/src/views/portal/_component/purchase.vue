@@ -105,6 +105,9 @@
           <h2 class="policy-dialog-title">{{ selectedAnnouncement.isBc == 1? selectedAnnouncement.title +'（补充）':selectedAnnouncement.title }}</h2>
           <div class="policy-dialog-meta">
             <!-- <span>发布时间：{{ selectedAnnouncement.createTime }}</span> -->
+            <span v-if="selectedAnnouncement.endTime"
+              >截止时间：{{ selectedAnnouncement.endTime }}</span
+            >
             <span v-if="selectedAnnouncement.createBy"
               >发布人：{{ selectedAnnouncement.createBy }}</span
             >
@@ -130,6 +133,10 @@
         </div>
       </div>
       <div slot="footer" class="dialog-footer">
+        <el-button type="primary" icon="el-icon-s-promotion" @click="handleApply">
+          立即报名
+        </el-button>
+        <el-button @click="openSupplierSettlePage">先完成供应商入驻</el-button>
         <!-- <el-button @click="announcementDialogVisible = false">关 闭</el-button> -->
       </div>
     </el-dialog>
@@ -137,8 +144,8 @@
 </template>
 
 <script>
+import { getToken } from "@/utils/auth";
 import { getArticleList, getDeptList, addReadCount, getArticleDetail } from "@/api/publicIndex";
-import { Base64 } from "js-base64";
 
 export default {
   name: "Purchase",
@@ -158,7 +165,6 @@ export default {
         pageSize: 10,
       },
       articleList: [],
-      loading: false,
       pageSize: 10,
       selectedId: null, // 选中的公告ID
     };
@@ -229,6 +235,53 @@ export default {
     selectItem(id) {
       this.selectedId = id;
       this.goDetail(id);
+    },
+    getApplyNoticeId() {
+      const noticeId = this.selectedAnnouncement && this.selectedAnnouncement.enteId;
+      return noticeId ? String(noticeId) : "";
+    },
+    buildApplyTargetPath() {
+      const noticeId = this.getApplyNoticeId();
+      if (!noticeId) {
+        return "";
+      }
+      return `/supplier/apply/detail?noticeId=${noticeId}`;
+    },
+    openSupplierSettlePage(targetPath) {
+      const noticeId = this.getApplyNoticeId();
+      const routeData = this.$router.resolve({
+        path: "/supplier-settle",
+        query: {
+          step: "login",
+          noticeId: noticeId || undefined,
+          redirect: targetPath || undefined,
+        },
+      });
+      window.open(routeData.href, "_blank");
+    },
+    handleApply() {
+      const targetPath = this.buildApplyTargetPath();
+      if (!targetPath) {
+        this.$message.warning("当前公告尚未关联采购公告，暂时无法直接报名，请联系管理员补齐 noticeId。");
+        return;
+      }
+      if (!getToken()) {
+        this.$router.push({
+          path: "/login",
+          query: { redirect: targetPath },
+        });
+        return;
+      }
+      if (targetPath) {
+        const routeData = this.$router.resolve({ path: targetPath });
+        window.open(routeData.href, "_blank");
+        return;
+      } else {
+        const routeData = this.$router.resolve({ path: targetPath });
+        window.open(routeData.href, "_blank");
+      }
+      this.$message.warning("当前账号尚未具备供应商报名资格，请先完成供应商入驻。");
+      this.openSupplierSettlePage(targetPath);
     },
 
     // 跳转详情页
@@ -332,6 +385,55 @@ export default {
   margin-bottom: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
   border: 1px solid #f1f5f9;
+}
+
+.supplier-entry-banner {
+  margin-top: 28px;
+  padding: 24px 28px;
+  border-radius: 18px;
+  background: linear-gradient(135deg, #eff6ff, #f8fafc);
+  border: 1px solid #bfdbfe;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+
+  .supplier-entry-copy {
+    .supplier-entry-eyebrow {
+      display: inline-flex;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #dbeafe;
+      color: #1d4ed8;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    h3 {
+      margin: 0 0 8px;
+      font-size: 22px;
+      line-height: 1.4;
+      color: #0f172a;
+    }
+
+    p {
+      margin: 0;
+      color: #475569;
+      line-height: 1.7;
+    }
+  }
+
+  .supplier-entry-actions {
+    display: flex;
+    gap: 12px;
+    flex-shrink: 0;
+
+    .el-button {
+      border-radius: 999px;
+      padding: 12px 22px;
+    }
+  }
 }
 
 .section-header {
@@ -535,6 +637,16 @@ export default {
   .announcements-content .announcements-list {
     grid-template-columns: 1fr;
   }
+
+  .supplier-entry-banner {
+    flex-direction: column;
+    align-items: flex-start;
+
+    .supplier-entry-actions {
+      width: 100%;
+      flex-wrap: wrap;
+    }
+  }
 }
 
 @media (max-width: 768px) {
@@ -562,6 +674,23 @@ export default {
       
       .el-input,
       .el-select {
+        width: 100%;
+      }
+    }
+  }
+
+  .supplier-entry-banner {
+    padding: 20px;
+
+    .supplier-entry-copy h3 {
+      font-size: 18px;
+    }
+
+    .supplier-entry-actions {
+      width: 100%;
+      flex-direction: column;
+
+      .el-button {
         width: 100%;
       }
     }

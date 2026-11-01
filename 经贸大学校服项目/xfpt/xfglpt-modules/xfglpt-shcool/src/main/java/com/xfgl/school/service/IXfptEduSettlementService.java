@@ -20,6 +20,8 @@ public interface IXfptEduSettlementService extends IService<XfptEduSettlement> {
      */
     public List<XfptEduSettlement> selectXfptEduSettlementList(XfptEduSettlement xfptEduSettlement);
 
+    public XfptEduSettlement selectXfptEduSettlementById(Long id);
+
     /**
      * 查询教育局结算统计
      *
@@ -27,4 +29,12 @@ public interface IXfptEduSettlementService extends IService<XfptEduSettlement> {
      * @return 教育局结算统计
      */
     public EduSettlementStatisticsVO selectXfptEduSettlementStatistics(XfptEduSettlement xfptEduSettlement);
+
+    /**
+     * 执行学校结算，并为供应商生成结算资金流水。
+     *
+     * @param xfptEduSettlement 结算条件
+     * @return 最新结算结果
+     */
+    public XfptEduSettlement executeSettlement(XfptEduSettlement xfptEduSettlement);
 }

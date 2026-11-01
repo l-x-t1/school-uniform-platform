@@ -125,6 +125,21 @@ public class XfptSuppliceContractSon extends BaseEntity {
      */
     private Double zj;
 
+    /**
+     * 电子合同内容
+     */
+    private String electronicContent;
+
+    /**
+     * 合同模板文件
+     */
+    private String templateFile;
+
+    /**
+     * 纸质合同图片
+     */
+    private String paperContractFiles;
+
     @TableField(exist = false)
     private List<TeamMeetingSon> teamMeetingSonList;
 

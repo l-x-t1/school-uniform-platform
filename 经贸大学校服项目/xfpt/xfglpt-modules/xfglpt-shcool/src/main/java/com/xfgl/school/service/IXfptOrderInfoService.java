@@ -58,4 +58,12 @@ public interface IXfptOrderInfoService extends IService<XfptOrderInfo> {
          * @return 结果
          */
         public int deleteXfptOrderInfoById(Long id);
+
+        /**
+         * 零售订单发货
+         *
+         * @param id 订单信息主键
+         * @return 结果
+         */
+        public int shipRetailOrder(Long id);
 }

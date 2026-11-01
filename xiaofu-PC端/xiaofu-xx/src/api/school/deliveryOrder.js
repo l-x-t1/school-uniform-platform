@@ -1,6 +1,5 @@
 import request from '@/utils/request'
 
-// 查询发货单列表
 export function listDeliveryOrder(query) {
   return request({
     url: '/school/deliveryOrder/list',
@@ -9,7 +8,21 @@ export function listDeliveryOrder(query) {
   })
 }
 
-// 查询发货单详细
+export function listDeliveryOrderStatistics(query) {
+  return request({
+    url: '/school/deliveryOrder/statistics/list',
+    method: 'get',
+    params: query
+  })
+}
+
+export function listDeliveryOrderStatisticsSuppliers() {
+  return request({
+    url: '/school/deliveryOrder/statistics/suppliers',
+    method: 'get'
+  })
+}
+
 export function getDeliveryOrder(id) {
   return request({
     url: '/school/deliveryOrder/' + id,
@@ -17,7 +30,6 @@ export function getDeliveryOrder(id) {
   })
 }
 
-// 新增发货单
 export function addDeliveryOrder(data) {
   return request({
     url: '/school/deliveryOrder',
@@ -26,7 +38,6 @@ export function addDeliveryOrder(data) {
   })
 }
 
-// 修改发货单
 export function updateDeliveryOrder(data) {
   return request({
     url: '/school/deliveryOrder',
@@ -35,7 +46,6 @@ export function updateDeliveryOrder(data) {
   })
 }
 
-// 删除发货单
 export function delDeliveryOrder(id) {
   return request({
     url: '/school/deliveryOrder/' + id,

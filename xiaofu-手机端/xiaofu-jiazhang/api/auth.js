@@ -1,12 +1,18 @@
 import request from '@/utils/request'
 
-export function sendSmsCode() {
-  return Promise.resolve({
-    code: 200,
-    msg: '开发环境验证码已发送',
-    data: {
-      devCode: '123456'
-    }
+export function sendSmsCode(data) {
+  return request({
+    url: '/school/mobile/sendSmsCode',
+    method: 'POST',
+    data
+  })
+}
+
+export function registerParent(data) {
+  return request({
+    url: '/school/mobile/register',
+    method: 'POST',
+    data
   })
 }
 
@@ -25,17 +31,19 @@ function normalizeLoginResult(res) {
   }
 }
 
-export function mobileLogin() {
+export function mobileLogin(data) {
   return request({
-    url: '/school/simOpen/devLogin',
-    method: 'GET'
+    url: '/school/mobile/login',
+    method: 'POST',
+    data
   }).then(normalizeLoginResult)
 }
 
-export function wechatPhoneLogin() {
+export function wechatPhoneLogin(data) {
   return request({
-    url: '/school/simOpen/devLogin',
-    method: 'GET'
+    url: '/school/mobile/wechat-phone-login',
+    method: 'POST',
+    data
   }).then(normalizeLoginResult)
 }
 

@@ -63,7 +63,7 @@
           ></image>
           <view class="student-info">
             <text class="student-name">{{ student.name }}</text>
-            <text class="student-class">{{ student.className }}</text>
+            <text class="student-class">{{ student.gradeClassText || student.className }}</text>
           </view>
         </view>
       </view>
@@ -157,7 +157,8 @@ export default {
         { title: '我的订单', icon: 'list', url: '/pages/order/order-list', color: '#30A3FF' },
         { title: '购物车', icon: 'cart', url: '/pages/cart/cart', color: '#12B886' },
         { title: '收货地址', icon: 'location', url: '/pages/user/address-list', color: '#FF9F1C' },
-        { title: '学生信息', icon: 'person', url: '/pages/user/student-info', color: '#7D3BFF' }
+        { title: '学生信息', icon: 'person', url: '/pages/user/student-info', color: '#7D3BFF' },
+        { title: '我的投诉', icon: 'chatbubble', url: '/pages/complaint/complaint-list', color: '#F97316' }
       ],
       // 反馈统计数据
       feedbackStats: {
@@ -263,11 +264,22 @@ export default {
     },
 
     normalizeStudent(item = {}) {
+      const grade = item.grade || item.gradeName || '';
+      const classValue = item.className || item.classId || item.class || '';
+
       return {
         id: item.id || item.studentId,
+        studentId: item.studentId || item.id || '',
         name: item.name || item.studentName || '',
         sex: item.sex || item.gender || '0',
-        className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
+        grade,
+        classId: item.classId || classValue || '',
+        className: classValue,
+        gradeClassText: item.gradeClassText || (classValue.startsWith(grade) ? classValue : `${grade}${classValue}`),
+        schoolId: item.schoolId || item.shcoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        shcoolId: item.shcoolId || item.schoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        deptId: item.deptId || item.schoolId || item.shcoolId || (item.sysDepts && item.sysDepts.deptId) || '',
+        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || '',
         schoolName: item.schoolName || item.school || (item.sysDepts && item.sysDepts.deptName) || ''
       };
     },

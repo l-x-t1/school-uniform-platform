@@ -219,7 +219,7 @@ export default {
       return this.purchaseType === '2' ? '零售购买' : '统购购买';
     },
     showGroupPrice() {
-      return this.uniform.saleType === '1' || this.uniform.saleType === '3';
+      return (this.uniform.saleType === '1' || this.uniform.saleType === '3') && !!this.uniform.noticeId;
     },
     showRetailPrice() {
       return this.uniform.saleType === '2' || this.uniform.saleType === '3';
@@ -267,6 +267,9 @@ export default {
       if (/^https?:\/\//i.test(url)) {
         return url;
       }
+      if (url.indexOf('/filestatics/') === 0) {
+        return `http://127.0.0.1:9300${url}`;
+      }
       if (url.indexOf('/profile/upload/') === 0) {
         return url.replace('/profile/upload/', 'http://127.0.0.1:9300/filestatics/upload/');
       }
@@ -288,6 +291,27 @@ export default {
       }
     },
 
+    parseImageList(value) {
+      if (!value) {
+        return [];
+      }
+      if (Array.isArray(value)) {
+        return value.map((item) => `${item || ''}`.trim()).filter(Boolean);
+      }
+      if (typeof value === 'object') {
+        return Object.values(value).map((item) => `${item || ''}`.trim()).filter(Boolean);
+      }
+      const text = `${value}`.trim();
+      if (!text) {
+        return [];
+      }
+      const parsed = this.safeParseJson(text, null);
+      if (Array.isArray(parsed)) {
+        return parsed.map((item) => `${item || ''}`.trim()).filter(Boolean);
+      }
+      return text.split(',').map((item) => item.trim()).filter(Boolean);
+    },
+
     formatPrice(value) {
       const num = Number(value || 0);
       return Number.isNaN(num) ? '0.00' : num.toFixed(2);
@@ -302,8 +326,11 @@ export default {
       return map[String(saleType || '')] || '商品信息';
     },
 
-    getDefaultPurchaseType(saleType) {
+    getDefaultPurchaseType(saleType, noticeId) {
       if (String(saleType) === '2') {
+        return '2';
+      }
+      if (String(saleType) === '3' && !noticeId) {
         return '2';
       }
       return '1';
@@ -342,10 +369,7 @@ export default {
     },
 
     normalizeUniform(data = {}) {
-      const detailImages = this.safeParseJson(data.detailImagesJson, []);
-      const imageList = Array.isArray(detailImages) && detailImages.length
-        ? detailImages.map((item) => this.resolveImage(item))
-        : [];
+      const imageList = this.parseImageList(data.detailImagesJson).map((item) => this.resolveImage(item));
       const mainImage = this.resolveImage(data.image || data.coverImage || data.mainImage);
       const rawSizes = Array.isArray(data.xfptGoodsSizeList) ? data.xfptGoodsSizeList : [];
       const sizes = rawSizes
@@ -383,16 +407,20 @@ export default {
         brandName: data.brandName || '未设置品牌',
         supplierId: data.supplierId || '',
         supplierName: data.supplierName || '未设置供应商',
-        schoolId: data.schoolId || data.deptId || '',
+        schoolId: data.schoolId || data.shcoolId || data.deptId || '',
+        shcoolId: data.shcoolId || data.schoolId || data.deptId || '',
         schoolName: data.schoolName || '',
-        deptId: data.deptId || data.schoolId || '',
+        deptId: data.deptId || data.schoolId || data.shcoolId || '',
+        noticeId: data.noticeId || null,
+        purchaseStartTime: data.purchaseStartTime || '',
+        purchaseEndTime: data.purchaseEndTime || '',
         publishTime: data.publishTime || '',
         saleType: String(data.saleType || ''),
         saleTypeText: this.getSaleTypeText(data.saleType),
         genderTypeText,
         totalStock,
         images: imageList.length ? [mainImage, ...imageList.filter((item) => item !== mainImage)] : [mainImage],
-        displayImages: imageList.length ? imageList : [mainImage],
+        displayImages: imageList,
         sizes,
         specs: this.buildSpecs(data, sizes),
         detailContent: data.detailContent || ''
@@ -405,7 +433,7 @@ export default {
       getUniform(this.id)
         .then((res) => {
           this.uniform = this.normalizeUniform(res.data || res);
-          this.purchaseType = this.getDefaultPurchaseType(this.uniform.saleType);
+          this.purchaseType = this.getDefaultPurchaseType(this.uniform.saleType, this.uniform.noticeId);
           if (this.uniform.sizes.length) {
             const defaultSize = this.uniform.sizes.find((item) => item.inStock) || this.uniform.sizes[0];
             this.selectedSizeId = defaultSize.id;
@@ -427,6 +455,12 @@ export default {
     switchPurchaseType(type) {
       if (this.uniform.saleType !== '3') {
         return;
+      }
+      if (type === '1' && !this.uniform.noticeId) {
+        return uni.showToast({
+          title: '当前不在统购时间内',
+          icon: 'none'
+        });
       }
       this.purchaseType = type;
     },
@@ -455,6 +489,17 @@ export default {
       uni.navigateTo({ url });
     },
 
+    validatePurchaseAvailable() {
+      if (this.purchaseType === '1' && !this.uniform.noticeId) {
+        uni.showToast({
+          title: '当前不在统购时间内',
+          icon: 'none'
+        });
+        return false;
+      }
+      return true;
+    },
+
     buildOrderItem() {
       const selectedSku = this.selectedSize || {};
       const price = this.getSelectedUnitPrice(selectedSku);
@@ -479,14 +524,14 @@ export default {
         color: selectedSku.genderTypeText || '通用',
         spec: selectedSku.name || '',
         studentId: selectedStudent.id || selectedStudent.studentId || 0,
-        schoolId: this.uniform.schoolId || selectedStudent.schoolId || selectedStudent.deptId || 0,
+        schoolId: this.uniform.schoolId || this.uniform.shcoolId || selectedStudent.schoolId || selectedStudent.shcoolId || selectedStudent.deptId || 0,
         schoolName: this.uniform.schoolName || selectedStudent.school || selectedStudent.schoolName || '',
-        deptId: this.uniform.deptId || this.uniform.schoolId || selectedStudent.schoolId || selectedStudent.deptId || 0,
-        supplierId: this.uniform.supplierId || 1,
+        deptId: this.uniform.deptId || this.uniform.schoolId || this.uniform.shcoolId || selectedStudent.schoolId || selectedStudent.shcoolId || selectedStudent.deptId || 0,
+        supplierId: this.uniform.supplierId || null,
         supplierName: this.uniform.supplierName || '',
         selected: true,
         checkedFlag: '1',
-        noticeId: null,
+        noticeId: this.purchaseType === '1' ? this.uniform.noticeId : null,
         saleType: this.purchaseType,
         orderType: this.purchaseType
       };
@@ -519,6 +564,7 @@ export default {
           icon: 'none'
         });
       }
+      if (!this.validatePurchaseAvailable()) return;
 
       const item = this.buildOrderItem();
       upsertCart(item)
@@ -558,6 +604,7 @@ export default {
           icon: 'none'
         });
       }
+      if (!this.validatePurchaseAvailable()) return;
       uni.setStorageSync('confirmOrderItems', [this.buildOrderItem()]);
       uni.navigateTo({
         url: '/pages/order/order-confirm?source=buyNow'

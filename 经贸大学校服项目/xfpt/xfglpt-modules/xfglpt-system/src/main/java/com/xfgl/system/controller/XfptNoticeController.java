@@ -2,6 +2,8 @@ package com.xfgl.system.controller;
 
 import java.util.List;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -16,6 +18,7 @@ import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
 import com.xfgl.common.security.annotation.RequiresPermissions;
 import com.xfgl.system.api.domain.XfptNotice;
+import com.xfgl.system.api.domain.NoticePublisherVo;
 import com.xfgl.system.service.IXfptNoticeService;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
@@ -148,6 +151,22 @@ public class XfptNoticeController extends BaseController {
         LambdaQueryWrapper<XfptNotice> queryWrapper = new LambdaQueryWrapper<>();
         queryWrapper.eq(XfptNotice::getEnteId, id);
         return R.ok(xfptNoticeService.remove(queryWrapper));
+    }
+
+    @InnerAuth
+    @GetMapping("/inner/{id}")
+    public R<XfptNotice> innerInfo(@PathVariable("id") Long id) {
+        return R.ok(xfptNoticeService.getById(id));
+    }
+
+    @InnerAuth
+    @GetMapping("/inner/publisher/{id}")
+    public R<NoticePublisherVo> innerPublisher(@PathVariable("id") Long id) {
+        XfptNotice notice = xfptNoticeService.getById(id);
+        if (notice == null) {
+            return R.fail("公告不存在");
+        }
+        return R.ok(new NoticePublisherVo(notice.getUserId(), notice.getCreateBy()));
     }
 
     @GetMapping("/appList")

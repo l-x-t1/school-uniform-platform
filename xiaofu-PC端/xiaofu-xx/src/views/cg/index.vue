@@ -258,20 +258,13 @@
                       class="class-row"
                     >
                       <div class="class-name">
-                        <el-select
+                        <el-input
                           v-model="cls.gradeClass"
-                          placeholder="班级名称"
+                          placeholder="请输入班级名称，如：1班、实验班"
                           size="small"
-                          style="width: 160px"
-                        >
-                          <el-option
-                            v-for="i in 100"
-                            :key="i"
-                            :label="`${i}班`"
-                            :value="`${i}班`"
-                          >
-                          </el-option>
-                        </el-select>
+                          style="width: 220px"
+                          clearable
+                        />
                       </div>
                       <div class="class-number">
                         <el-input
@@ -315,11 +308,15 @@
                     <div>
                       <el-select
                         v-model="scope.row.gradeClass"
-                        placeholder="请选择"
-                        style="width: 140px"
+                        placeholder="请选择年级"
+                        style="width: 180px"
+                        filterable
+                        allow-create
+                        default-first-option
+                        clearable
                       >
                         <el-option
-                          v-for="item in dict.type.xd"
+                          v-for="item in gradeOptions"
                           :key="item.value"
                           :label="item.label"
                           :value="item.value"
@@ -451,7 +448,7 @@
                      学年：{{ scope.row.gradeYear }}
                    </div>
                    <div style="display: flex;align-items: center;">
-                     年级：<dict-tag :options="dict.type.xd" :value="scope.row.gradeClass" />
+                     年级：{{ getGradeLabel(scope.row.gradeClass) }}
                    </div>
                  </div>
                </template>
@@ -486,7 +483,6 @@ import {
 } from "@/api/cg/cglcprocess";
 
 export default {
-  dicts: ["xd"],
   name: "PurchaseProcess",
   components: {
     TabsComponent,
@@ -518,7 +514,38 @@ export default {
        viewOpen: false,
        // 详细对话框显示状态
        detailOpen: false,
-             // 年级班级相关数据
+       gradeOptions: [
+        { label: "小班", value: "小班" },
+        { label: "中班", value: "中班" },
+        { label: "大班", value: "大班" },
+        { label: "一年级", value: "一年级" },
+        { label: "二年级", value: "二年级" },
+        { label: "三年级", value: "三年级" },
+        { label: "四年级", value: "四年级" },
+        { label: "五年级", value: "五年级" },
+        { label: "六年级", value: "六年级" },
+        { label: "初一", value: "初一" },
+        { label: "初二", value: "初二" },
+        { label: "初三", value: "初三" },
+        { label: "高一", value: "高一" },
+        { label: "高二", value: "高二" },
+        { label: "高三", value: "高三" },
+        { label: "中专一年级", value: "中专一年级" },
+        { label: "中专二年级", value: "中专二年级" },
+        { label: "中专三年级", value: "中专三年级" },
+        { label: "大专一年级", value: "大专一年级" },
+        { label: "大专二年级", value: "大专二年级" },
+        { label: "大专三年级", value: "大专三年级" },
+      ],
+      legacyGradeLabelMap: {
+        "1": "幼儿园",
+        "2": "小学",
+        "3": "初中",
+        "4": "高中",
+        "5": "中专",
+        "6": "大专",
+      },
+       // 年级班级相关数据
        expandedRows: [],
        isAllExpanded: false,
        xfptSchoolGradeClass: [],
@@ -641,18 +668,20 @@ export default {
        this.viewOpen = true;
      },
      /** 详细按钮操作 */
-     handleDetail(row) {
-       const id = row.id;
-       getCglcprocess(id).then((response) => {
-         this.detailForm = response.data;
-         // 如果有年级数据，需要解析
-         if (this.detailForm.xfptSchoolGradeClass) {
-           try {
-             this.detailXfptSchoolGradeClass = this.detailForm.xfptSchoolGradeClass;
-           } catch (error) {
-             this.detailXfptSchoolGradeClass = [];
-           }
-         }
+    handleDetail(row) {
+      const id = row.id;
+      getCglcprocess(id).then((response) => {
+        this.detailForm = response.data;
+        // 如果有年级数据，需要解析
+        if (this.detailForm.xfptSchoolGradeClass) {
+          try {
+            this.detailXfptSchoolGradeClass = this.normalizeGradeRows(
+              this.detailForm.xfptSchoolGradeClass
+            );
+          } catch (error) {
+            this.detailXfptSchoolGradeClass = [];
+          }
+        }
          this.detailOpen = true;
        });
      },
@@ -665,7 +694,9 @@ export default {
         // 如果有年级数据，需要解析
         if (this.form.xfptSchoolGradeClass) {
           try {
-            this.xfptSchoolGradeClass = this.form.xfptSchoolGradeClass;
+            this.xfptSchoolGradeClass = this.normalizeGradeRows(
+              this.form.xfptSchoolGradeClass
+            );
           } catch (error) {
             this.xfptSchoolGradeClass = [];
           }
@@ -692,7 +723,17 @@ export default {
               ...this.form,
               xfptSchoolGradeClass: this.xfptSchoolGradeClass.map((item) => {
                 return {
-                  ...item,id:item.id.toString().includes('new_')?null:item.id
+                  ...item,
+                  id:
+                    item.id && item.id.toString().includes("new_")
+                      ? null
+                      : item.id,
+                  gradeClass: this.normalizeText(item.gradeClass),
+                  classes: (item.classes || []).map((cls) => ({
+                    ...cls,
+                    gradeClass: this.normalizeText(cls.gradeClass),
+                    number: cls.number,
+                  })),
                 };
               }),
             };
@@ -735,6 +776,23 @@ export default {
       return "";
     },
     // 年级班级相关方法
+    normalizeText(value) {
+      return value == null ? "" : String(value).trim();
+    },
+    getGradeLabel(value) {
+      const normalizedValue = this.normalizeText(value);
+      return this.legacyGradeLabelMap[normalizedValue] || normalizedValue;
+    },
+    normalizeGradeRows(rows) {
+      return (rows || []).map((grade) => ({
+        ...grade,
+        gradeClass: this.getGradeLabel(grade.gradeClass),
+        classes: (grade.classes || []).map((cls) => ({
+          ...cls,
+          gradeClass: this.normalizeText(cls.gradeClass),
+        })),
+      }));
+    },
     addGradeDirectly() {
       // 创建一个临时ID，用于自动展开
       const tempId = "new_" + Date.now();
@@ -746,7 +804,7 @@ export default {
         gradeYear: "",
         classes: [
           // 默认添加一条班级信息
-          { gradeClass: "1班", number: "" },
+          { gradeClass: "", number: "" },
         ],
       };
 
@@ -913,7 +971,7 @@ export default {
 
       // 显示确认对话框
       this.$confirm(
-        `确认删除班级【${grade.gradeClass}${cls.gradeClass}】吗？删除后将无法恢复`,
+        `确认删除班级【${grade.gradeClass} ${cls.gradeClass}】吗？删除后将无法恢复`,
         "提示",
         {
           confirmButtonText: "确定",
@@ -962,7 +1020,7 @@ export default {
           return false;
         }
 
-        if (!grade.gradeClass) {
+        if (!this.normalizeText(grade.gradeClass)) {
           this.$message.error("请选择年级名称");
           return false;
         }
@@ -974,8 +1032,8 @@ export default {
         }
 
         for (const cls of grade.classes) {
-          if (!cls.gradeClass) {
-            this.$message.error("请选择班级名称");
+          if (!this.normalizeText(cls.gradeClass)) {
+            this.$message.error("请输入班级名称");
             return false;
           }
 

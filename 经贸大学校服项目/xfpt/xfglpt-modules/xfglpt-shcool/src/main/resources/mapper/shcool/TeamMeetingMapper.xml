@@ -156,7 +156,7 @@
 
     <select id="listSchoolStatistics" resultType="com.xfgl.school.domain.vo.XfptSchoolStatisticsVO">
         select t.deptId,t.schoolName,t.bzhyFlg,t.jzgmyjFlg,t.zzmdFlg,
-               t.xyzzxgmsFlg,t.xgjggsFlg,t.cghtFlg,t.cpzljybgFlg,t.jzmydzjbgFlg,t.schoolType,t.cggzzjFlag,t.zjbbFlg
+               t.xyzzxgmsFlg,t.xgjggsFlg,t.cghtFlg,t.cgjgggFlg,t.cpzljybgFlg,t.jzmydzjbgFlg,t.schoolType,t.cggzzjFlag,t.zjbbFlg
                from (select dept.dept_id deptId,dept.dept_name schoolName,xsm.school_Type as schoolType,
         case when exists(select 1 from xfpt_team_meeting a
         <where>
@@ -170,31 +170,32 @@
                 </foreach>
             </if>
         </where>) then '已报备' else '未报备' end as bzhyFlg,
-        case when exists(select 1 from xfpt_jz_buy_opinions b
+        case when exists(select 1 from xfpt_organization_mode b
         <where>
             b.dept_id = dept.dept_id
             and b.del_flag = 0
+            and b.is_release = '1'
             and find_in_set(#{parentDeptId},b.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
-                and b.team_meeting_id in
+                and b.team_id in
                 <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
                     #{teamMeetingIdCurr}
                 </foreach>
             </if>
         </where>) then '已报备' else '未报备' end as jzgmyjFlg,
-        case when exists(select 1 from xfpt_org_report_disclose c
+        case when exists(select 1 from xfpt_rwggzs c
         <where>
             c.dept_id = dept.dept_id
             and c.del_flag = 0
             and find_in_set(#{parentDeptId},c.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
-                and c.team_meeting_id in
+                and c.team_id in
                 <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
                     #{teamMeetingIdCurr}
                 </foreach>
             </if>
         </where>) then '已报备' else '未报备' end as zzmdFlg,
-        case when exists(select 1 from xfpt_report_mode d
+        case when exists(select 1 from xfpt_pdxz_sure_supplier d
         <where>
             d.dept_id = dept.dept_id
             and d.del_flag = 0
@@ -210,6 +211,7 @@
         <where>
             e.dept_id = dept.dept_id
             and e.del_flag = 0
+            and e.stage_type = '1'
             and find_in_set(#{parentDeptId},e.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
                 and e.team_id in
@@ -230,19 +232,20 @@
                 </foreach>
             </if>
         </where>) then '已报备' else '未报备' end as cghtFlg,
-        case when exists(select 1 from xfpt_supplice_inspection_report g
+        case when exists(select 1 from xfpt_anno_results g
         <where>
             g.dept_id = dept.dept_id
             and g.del_flag = 0
+            and g.stage_type = '2'
             and find_in_set(#{parentDeptId},g.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
-                and g.team_meeting_id in
+                and g.team_id in
                 <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
                     #{teamMeetingIdCurr}
                 </foreach>
             </if>
-        </where>) then '已报备' else '未报备' end as cpzljybgFlg,
-        case when exists(select 1 from xfpt_patriarch_satisfaction_summarize h
+        </where>) then '已报备' else '未报备' end as cgjgggFlg,
+        case when exists(select 1 from xfpt_supplice_inspection_report h
         <where>
             h.dept_id = dept.dept_id
             and h.del_flag = 0
@@ -253,19 +256,19 @@
                     #{teamMeetingIdCurr}
                 </foreach>
             </if>
-        </where>) then '已报备' else '未报备' end as cggzzjFlag,
-        case when exists(select 1 from XFPT_CGLCGZZJ cggg
+        </where>) then '已报备' else '未报备' end as cpzljybgFlg,
+        case when exists(select 1 from xfpt_patriarch_satisfaction_summarize cggg
         <where>
             cggg.dept_id = dept.dept_id
             and cggg.del_flag = 0
             and find_in_set(#{parentDeptId},cggg.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
-                and cggg.team_id in
+                and cggg.team_meeting_id in
                 <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
                     #{teamMeetingIdCurr}
                 </foreach>
             </if>
-        </where>)then '已报备' else '未报备' end as zjbbFlg,
+        </where>)then '已报备' else '未报备' end as cggzzjFlag,
         case when exists(select 1 from XFPT_PROC_SUMMARY xps
         <where>
             xps.dept_id = dept.dept_id
@@ -273,6 +276,18 @@
             and find_in_set(#{parentDeptId},xps.ancestors)
             <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
                 and xps.team_id in
+                <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
+                    #{teamMeetingIdCurr}
+                </foreach>
+            </if>
+        </where>)then '已报备' else '未报备' end as zjbbFlg,
+        case when exists(select 1 from XFPT_CGLCGZZJ xcg
+        <where>
+            xcg.dept_id = dept.dept_id
+            and xcg.del_flag = 0
+            and find_in_set(#{parentDeptId},xcg.ancestors)
+            <if test="teamMeetingIds != null and teamMeetingIds.size() > 0">
+                and xcg.team_id in
                 <foreach collection="teamMeetingIds" item="teamMeetingIdCurr" open="(" separator="," close=")">
                     #{teamMeetingIdCurr}
                 </foreach>
@@ -303,22 +318,33 @@
                         and cghtFlg = #{bblbValue}
                     </when>
                     <when test="selectType == 7">
-                        and cpzljybgFlg = #{bblbValue}
+                        and cgjgggFlg = #{bblbValue}
                     </when>
                     <when test="selectType == 8">
-                        and jzmydzjbgFlg = #{bblbValue}
+                        and cpzljybgFlg = #{bblbValue}
                     </when>
                     <when test="selectType == 9">
+                        and jzmydzjbgFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 10">
+                        and zjbbFlg = #{bblbValue}
+                    </when>
+                    <when test="selectType == 11">
+                        and cggzzjFlag = #{bblbValue}
+                    </when>
+                    <when test="selectType == 12">
                         <if test="bblbValue == '已报备'">
                             and (
-                                bzhyFlg = '已报备' or jzgmyjFlg = '已发起' or zzmdFlg = '已报备' or xyzzxgmsFlg = '已报备'
-                                or xgjggsFlg = '已报备' or cghtFlg = '已报备' or cpzljybgFlg = '已报备' or jzmydzjbgFlg = '已报备'
+                                bzhyFlg = '已报备' or jzgmyjFlg = '已报备' or zzmdFlg = '已报备' or xyzzxgmsFlg = '已报备'
+                                or xgjggsFlg = '已报备' or cghtFlg = '已报备' or cgjgggFlg = '已报备' or cpzljybgFlg = '已报备'
+                                or jzmydzjbgFlg = '已报备' or zjbbFlg = '已报备' or cggzzjFlag = '已报备'
                             )
                         </if>
                         <if test="bblbValue == '未报备'">
                             and (
-                                bzhyFlg = '未报备' or jzgmyjFlg = '未发起' or zzmdFlg = '未报备' or xyzzxgmsFlg = '未报备'
-                                or xgjggsFlg = '未报备' or cghtFlg = '未报备' or cpzljybgFlg = '未报备' or jzmydzjbgFlg = '未报备'
+                                bzhyFlg = '未报备' or jzgmyjFlg = '未报备' or zzmdFlg = '未报备' or xyzzxgmsFlg = '未报备'
+                                or xgjggsFlg = '未报备' or cghtFlg = '未报备' or cgjgggFlg = '未报备' or cpzljybgFlg = '未报备'
+                                or jzmydzjbgFlg = '未报备' or zjbbFlg = '未报备' or cggzzjFlag = '未报备'
                             )
                         </if>
                     </when>

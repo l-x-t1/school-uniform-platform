@@ -25,8 +25,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             d.school_id,
             d.delivery_no,
             d.order_no,
-            o.school_name,
-            o.supplier_name,
+            COALESCE(o.school_name, smsg.school_name) AS school_name,
+            COALESCE(o.supplier_name, sm.supplier_name, sr.supplier_name) AS supplier_name,
             d.delivery_status,
             COALESCE(SUM(COALESCE(i.delivery_num, 0)), 0) AS delivery_total_num,
             COALESCE(SUM(COALESCE(i.sign_num, 0)), 0) AS sign_total_num,
@@ -34,20 +34,32 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             d.delivery_time,
             d.sign_time
         FROM xfpt_delivery_order d
-        INNER JOIN xfpt_order_info o
+        LEFT JOIN xfpt_order_info o
             ON o.id = d.order_id
-           AND o.order_type = '2'
            AND o.del_flag = 0
+        LEFT JOIN xfpt_school_message smsg
+            ON smsg.id = d.school_id
+        LEFT JOIN xfpt_supplier_message sm
+            ON sm.id = d.supplier_id
+           AND sm.del_flag = 0
+        LEFT JOIN xfpt_school_supplier_rel sr
+            ON sr.school_id = d.school_id
+           AND sr.supplier_id = d.supplier_id
+           AND sr.cooperate_status = '1'
+           AND sr.del_flag = 0
         LEFT JOIN xfpt_delivery_order_item i
             ON i.delivery_id = d.id
            AND i.del_flag = 0
         <where>
             d.del_flag = 0
             <if test="schoolId != null">AND d.school_id = #{schoolId}</if>
+            <if test="schoolId != null">
+                AND sr.id IS NOT NULL
+            </if>
             <if test="deliveryNo != null and deliveryNo != ''">AND d.delivery_no LIKE concat('%', #{deliveryNo}, '%')</if>
             <if test="orderNo != null and orderNo != ''">AND d.order_no LIKE concat('%', #{orderNo}, '%')</if>
-            <if test="schoolName != null and schoolName != ''">AND o.school_name LIKE concat('%', #{schoolName}, '%')</if>
-            <if test="supplierName != null and supplierName != ''">AND o.supplier_name LIKE concat('%', #{supplierName}, '%')</if>
+            <if test="schoolName != null and schoolName != ''">AND COALESCE(o.school_name, smsg.school_name) LIKE concat('%', #{schoolName}, '%')</if>
+            <if test="supplierName != null and supplierName != ''">AND COALESCE(o.supplier_name, sm.supplier_name, sr.supplier_name) LIKE concat('%', #{supplierName}, '%')</if>
             <if test="deliveryStatus != null and deliveryStatus != ''">AND d.delivery_status = #{deliveryStatus}</if>
             <if test="params != null and params.beginTime != null and params.beginTime != ''">
                 AND DATE_FORMAT(d.delivery_time, '%Y-%m-%d') &gt;= #{params.beginTime}
@@ -61,8 +73,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             d.school_id,
             d.delivery_no,
             d.order_no,
-            o.school_name,
-            o.supplier_name,
+            COALESCE(o.school_name, smsg.school_name),
+            COALESCE(o.supplier_name, sm.supplier_name, sr.supplier_name),
             d.delivery_status,
             d.carriage_fee,
             d.delivery_time,

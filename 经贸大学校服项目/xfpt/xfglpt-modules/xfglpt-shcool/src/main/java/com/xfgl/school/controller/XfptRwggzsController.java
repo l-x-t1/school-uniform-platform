@@ -161,7 +161,7 @@ public class XfptRwggzsController extends BaseController {
         //设置时间轴
         //保存时间轴
         String format = DateUtil.format(new Date(), "yyyy-MM-dd HH:mm:ss");
-        int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptRwggzs.getTeamId(), ProceConstants.RWZS + "#" + format);
+        int i = iTeamMeetingService.updateTeamMeetingCurrOrder(xfptRwggzs.getTeamId(), ProceConstants.BXGGZS + "#" + format);
         if(i==0){
             log.error("保存时间轴失败：{}",xfptRwggzs.toString());
             throw new ServiceException("系统错误");

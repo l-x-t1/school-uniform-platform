@@ -1,6 +1,7 @@
 package com.xfgl.school.mapper;
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptOrderInfo;
 import org.apache.ibatis.annotations.Param;
 import com.xfgl.school.domain.XfptOrderItem;
@@ -42,4 +43,15 @@ public interface XfptOrderInfoMapper extends BaseMapper<XfptOrderInfo> {
          * @return 结果
          */
         int batchInsertXfptOrderItem(List<XfptOrderItem> xfptOrderItemList);
+
+        XfptGroupNotice selectGroupNoticeForPurchase(@Param("noticeId") Long noticeId);
+
+        int countGroupNoticeGoods(@Param("noticeId") Long noticeId, @Param("goodsId") Long goodsId);
+
+        int countGoodsSupplierMatch(@Param("goodsId") Long goodsId, @Param("supplierId") Long supplierId);
+
+        List<XfptOrderInfo> selectSettlementOrderList(@Param("schoolId") Long schoolId,
+                                                      @Param("supplierId") Long supplierId,
+                                                      @Param("settlementCycle") String settlementCycle,
+                                                      @Param("deptId") Long deptId);
 }

@@ -1,14 +1,11 @@
 <template>
-  <div class="dashboard-container">
-    <!-- 加载状态 -->
-    <div v-if="loading" class="loading-container">
-      <el-loading
-        :loading="loading"
-        text="正在加载数据..."
-        spinner="el-icon-loading"
-        background="rgba(0, 0, 0, 0.8)"
-      />
-    </div>
+  <div
+    v-loading="loading"
+    class="dashboard-container"
+    element-loading-text="正在加载数据..."
+    element-loading-spinner="el-icon-loading"
+    element-loading-background="rgba(0, 0, 0, 0.8)"
+  >
 
     <!-- 上半部分：统计数据和订购人数图表 -->
     <el-row :gutter="20" class="top-section">
@@ -517,18 +514,6 @@ export default {
   display: flex;
   flex-direction: column;
   position: relative;
-}
-
-.loading-container {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
 .top-section {

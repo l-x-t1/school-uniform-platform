@@ -1,6 +1,8 @@
 package com.xfgl.school.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.xfgl.common.core.web.domain.BaseEntity;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
@@ -30,7 +32,8 @@ public class XfptSchoolGradeClass  extends BaseEntity {
     /**
      * $column.columnComment
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     @Schema(description = "$column.columnComment")
     private Long id;
 
@@ -73,6 +76,7 @@ public class XfptSchoolGradeClass  extends BaseEntity {
     private List<Classes> classes;
 
     /** 父菜单ID */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long parentId;
 
     @Excel(name = "年份")
@@ -85,5 +89,6 @@ public class XfptSchoolGradeClass  extends BaseEntity {
     /**
      * 采购id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long cgId;
 }

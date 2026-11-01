@@ -17,4 +17,6 @@ public interface XfptWithdrawApplyMapper extends BaseMapper<XfptWithdrawApply> {
      * @return 供应商提现申请集合
      */
     public List<XfptWithdrawApply> selectXfptWithdrawApplyList(XfptWithdrawApply xfptWithdrawApply);
+
+    public XfptWithdrawApply selectXfptWithdrawApplyDetail(XfptWithdrawApply xfptWithdrawApply);
 }

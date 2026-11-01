@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -31,7 +33,8 @@ public class XfptJzbuyOpinionsConfig extends BaseEntity {
      * $column.columnComment
      */
     @Schema(description = "$column.columnComment")
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -52,6 +55,7 @@ public class XfptJzbuyOpinionsConfig extends BaseEntity {
      * 部门id
      */
     @Schema(description = "部门id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     /**

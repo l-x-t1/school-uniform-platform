@@ -57,10 +57,56 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
+    <resultMap type="com.xfgl.school.domain.vo.DeliveryOrderStatisticsVo" id="DeliveryOrderStatisticsResult">
+        <result property="id" column="id" />
+        <result property="noticeId" column="notice_id" />
+        <result property="manufacturerId" column="manufacturer_id" />
+        <result property="noticeName" column="notice_name" />
+        <result property="paymentDeadline" column="payment_deadline" />
+        <result property="expectedArrivalDate" column="expected_arrival_date" />
+        <result property="manufacturerName" column="manufacturer_name" />
+        <result property="status" column="status" />
+        <result property="statusText" column="status_text" />
+    </resultMap>
+
+    <resultMap type="com.xfgl.school.domain.vo.SupplierOptionVo" id="SupplierOptionResult">
+        <result property="value" column="value" />
+        <result property="label" column="label" />
+    </resultMap>
+
     <sql id="selectXfptDeliveryOrderVo">
-        select d.id, d.delivery_no, d.notice_id, d.order_id, d.order_no, o.order_type, d.production_id, d.school_id, o.school_name, d.supplier_id, o.supplier_name, d.receiver_name, d.receiver_phone, d.receiver_address, d.logistics_company, d.logistics_no, d.delivery_status, d.delivery_time, d.sign_time, d.carriage_fee, d.dept_id, d.create_by, d.create_time, d.update_by, d.update_time, d.remark, d.del_flag
+        select d.id,
+               d.delivery_no,
+               d.notice_id,
+               d.order_id,
+               d.order_no,
+               coalesce(o.order_type, p.order_type) as order_type,
+               d.production_id,
+               d.school_id,
+               coalesce(o.school_name, smsg.school_name) as school_name,
+               d.supplier_id,
+               coalesce(o.supplier_name, supp.supplier_name) as supplier_name,
+               coalesce(nullif(nullif(d.receiver_name, ''), 'school receiver'), o.receiver_name, smsg.principal_name, smsg.school_name) as receiver_name,
+               coalesce(nullif(nullif(d.receiver_phone, ''), 'pending'), o.receiver_phone, smsg.principal_phone) as receiver_phone,
+               coalesce(nullif(nullif(d.receiver_address, ''), 'school address pending'), o.receiver_address, smsg.detailed_address) as receiver_address,
+               d.logistics_company,
+               d.logistics_no,
+               d.delivery_status,
+               d.delivery_time,
+               d.sign_time,
+               d.carriage_fee,
+               d.dept_id,
+               d.create_by,
+               d.create_time,
+               d.update_by,
+               d.update_time,
+               d.remark,
+               d.del_flag
         from xfpt_delivery_order d
         left join xfpt_order_info o on o.id = d.order_id and o.del_flag = 0
+        left join xfpt_production_order p on p.id = d.production_id and p.del_flag = 0
+        left join xfpt_school_message smsg on smsg.id = d.school_id
+        left join xfpt_supplier_message supp on supp.id = d.supplier_id and supp.del_flag = 0
     </sql>
 
     <select id="selectXfptDeliveryOrderList" parameterType="XfptDeliveryOrder" resultMap="XfptDeliveryOrderResult">
@@ -70,7 +116,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="noticeId != null "> and d.notice_id = #{noticeId}</if>
             <if test="orderId != null "> and d.order_id = #{orderId}</if>
             <if test="orderNo != null  and orderNo != ''"> and d.order_no like concat('%', #{orderNo}, '%')</if>
-            <if test="orderType != null  and orderType != ''"> and o.order_type = #{orderType}</if>
+            <if test="orderType != null  and orderType != ''"> and coalesce(o.order_type, p.order_type) = #{orderType}</if>
             <if test="productionId != null "> and d.production_id = #{productionId}</if>
             <if test="schoolId != null "> and d.school_id = #{schoolId}</if>
             <if test="supplierId != null "> and d.supplier_id = #{supplierId}</if>
@@ -88,15 +134,66 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectXfptDeliveryOrderById" parameterType="Long" resultMap="XfptDeliveryOrderXfptDeliveryOrderItemResult">
-        select id, delivery_no, notice_id, order_id, order_no, production_id, school_id, supplier_id, receiver_name, receiver_phone, receiver_address, logistics_company, logistics_no, delivery_status, delivery_time, sign_time, carriage_fee, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_delivery_order
-        where id = #{id}
+        <include refid="selectXfptDeliveryOrderVo"/>
+        where d.id = #{id}
     </select>
 
     <select id="selectXfptDeliveryOrderItemById" resultMap="XfptDeliveryOrderItemResult">
         select id, delivery_id, order_item_id, goods_id, size_id, goods_name, size_name, delivery_num, sign_num, status, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_delivery_order_item
         where delivery_id = #{id}
+    </select>
+
+    <select id="selectDeliveryOrderStatisticsList" parameterType="com.xfgl.school.domain.vo.DeliveryOrderStatisticsQuery" resultMap="DeliveryOrderStatisticsResult">
+        select
+            d.id,
+            d.notice_id,
+            d.supplier_id as manufacturer_id,
+            coalesce(g.title, d.delivery_no) as notice_name,
+            g.end_time as payment_deadline,
+            d.delivery_time as expected_arrival_date,
+            coalesce(oi.supplier_name, sm.supplier_name) as manufacturer_name,
+            d.delivery_status as status,
+            case d.delivery_status
+                when '0' then '待发货'
+                when '1' then '已发货'
+                when '2' then '已签收'
+                else '未知'
+            end as status_text
+        from xfpt_delivery_order d
+        left join xfpt_group_notice g on g.id = d.notice_id and g.del_flag = 0
+        left join xfpt_order_info oi on oi.id = d.order_id and oi.del_flag = 0
+        left join xfpt_supplier_message sm on sm.id = d.supplier_id and sm.del_flag = 0
+        where d.del_flag = 0
+          and d.school_id = #{schoolId}
+          and d.dept_id = #{deptId}
+        <if test="manufacturerId != null">
+          and d.supplier_id = #{manufacturerId}
+        </if>
+        <if test="exportType != null and exportType != ''">
+            <if test="exportType == '1'">
+          and d.delivery_status = '0'
+            </if>
+            <if test="exportType == '2'">
+          and d.delivery_status in ('1', '2')
+            </if>
+        </if>
+        order by d.create_time desc, d.id desc
+    </select>
+
+    <select id="selectDeliveryOrderSupplierOptions" resultMap="SupplierOptionResult">
+        select distinct
+            d.supplier_id as value,
+            coalesce(oi.supplier_name, sm.supplier_name) as label
+        from xfpt_delivery_order d
+        left join xfpt_order_info oi on oi.id = d.order_id and oi.del_flag = 0
+        left join xfpt_supplier_message sm on sm.id = d.supplier_id and sm.del_flag = 0
+        where d.del_flag = 0
+          and d.school_id = #{schoolId}
+          and d.dept_id = #{deptId}
+          and d.supplier_id is not null
+          and coalesce(oi.supplier_name, sm.supplier_name) is not null
+        order by label
     </select>
 
     <insert id="insertXfptDeliveryOrder" parameterType="XfptDeliveryOrder" useGeneratedKeys="true" keyProperty="id">

@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -35,7 +37,8 @@ public class XfptJzBuyOpinions extends BaseEntity {
      * 主键
      */
     @Schema(description = "主键")
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -43,6 +46,7 @@ public class XfptJzBuyOpinions extends BaseEntity {
      */
     @Excel(name = "班子会议id")
     @Schema(description = "班子会议id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamMeetingId;
 
     /**
@@ -118,6 +122,7 @@ public class XfptJzBuyOpinions extends BaseEntity {
      * 模板配置id
      */
     @TableField(exist = false)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long configId;
 
     /**
@@ -143,6 +148,7 @@ public class XfptJzBuyOpinions extends BaseEntity {
      * 部门id
      */
     @Schema(description = "部门id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     /**

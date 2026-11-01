@@ -12,6 +12,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,6 +58,16 @@ public class XfptEduSettlementManageController extends BaseController {
     @RequiresPermissions("school:eduSettlementManage:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-        return success(xfptEduSettlementService.getById(id));
+        return success(xfptEduSettlementService.selectXfptEduSettlementById(id));
+    }
+
+    /**
+     * 学校执行结算
+     */
+    @Operation(summary = "学校执行结算")
+    @RequiresPermissions("school:eduSettlementManage:list")
+    @PostMapping("/settle")
+    public AjaxResult settle(@RequestBody XfptEduSettlement xfptEduSettlement) {
+        return success(xfptEduSettlementService.executeSettlement(xfptEduSettlement));
     }
 }

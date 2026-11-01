@@ -4,6 +4,8 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -33,6 +35,8 @@ public class XfptBuyGradeClass extends BaseEntity {
      * $column.columnComment
      */
     @Schema(description = "$column.columnComment")
+    @TableId(type = IdType.ASSIGN_ID)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -40,6 +44,7 @@ public class XfptBuyGradeClass extends BaseEntity {
      */
     @Excel(name = "年级或班级id")
     @Schema(description = "年级或班级id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long gradeClassId;
 
     /**
@@ -61,6 +66,7 @@ public class XfptBuyGradeClass extends BaseEntity {
      */
     @Excel(name = "区分是那个模块")
     @Schema(description = "区分是那个模块")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long category;
 
     /**
@@ -68,10 +74,12 @@ public class XfptBuyGradeClass extends BaseEntity {
      */
     @Excel(name = "对应模块的主键id")
     @Schema(description = "对应模块的主键id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long pid;
 
     @TableField(exist = false)
     private List<Long> pidList;
 
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long parentId;
 }

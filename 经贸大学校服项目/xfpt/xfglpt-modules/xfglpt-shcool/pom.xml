@@ -61,8 +61,21 @@
       <artifactId>xfgl-common-sensitive</artifactId>
     </dependency>
     <dependency>
+      <groupId>com.xfgl</groupId>
+      <artifactId>xfgl-common-security</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>com.xfgl</groupId>
+      <artifactId>xfgl-api-system</artifactId>
+    </dependency>
+    <dependency>
       <groupId>org.springframework.boot</groupId>
       <artifactId>spring-boot-starter-web</artifactId>
+    </dependency>
+    <!-- Spring Mail -->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-mail</artifactId>
     </dependency>
   </dependencies>
   <build>

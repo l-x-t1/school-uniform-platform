@@ -42,6 +42,9 @@ export function createAfterSale(order, product, form = {}) {
   const userName = getCurrentUserName()
   const quantity = Number(form.applyNum || product.quantity || 1)
   const unitPrice = Number(product.price || 0)
+  const applyType = form.applyType || '2'
+  const isRefundType = applyType === '1' || applyType === '2'
+  const applyAmount = Number((unitPrice * quantity).toFixed(2))
 
   return request({
     url: '/school/afterSale',
@@ -57,17 +60,17 @@ export function createAfterSale(order, product, form = {}) {
       userId,
       userName,
       studentName: order.studentName || '',
-      applyType: form.applyType || '2',
+      applyType,
       targetSizeId: form.targetSizeId ? Number(form.targetSizeId) : null,
       targetSizeName: form.targetSizeName || '',
       returnTrackingNo: form.returnTrackingNo || '',
       reason: form.reason || '',
       imagesJson: JSON.stringify(form.images || []),
       applyNum: quantity,
-      applyAmount: Number((unitPrice * quantity).toFixed(2)),
-      actualRefundAmount: 0,
-      refundStatus: '0',
-      status: '1',
+      applyAmount,
+      actualRefundAmount: isRefundType ? applyAmount : 0,
+      refundStatus: isRefundType ? '2' : '0',
+      status: '4',
       deptId: Number(order.deptId || 1),
       createBy: userName,
       delFlag: '0'

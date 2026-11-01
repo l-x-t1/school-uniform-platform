@@ -225,11 +225,10 @@ export default {
                 this.$store.dispatch("GenerateRoutes").then((accessRoutes) => {
                   this.$router.addRoutes(accessRoutes);
                   setTimeout(() => {
-                    if(res.roles.includes("xuexiao")){
-                      this.$router.push({ path: "/schoolIndex" });
-                    }else{
-                      this.$router.push({ path: "/index" }); 
-                    }
+                    const targetPath =
+                      this.redirect ||
+                      (res.roles.includes("xuexiao") ? "/schoolIndex" : "/index");
+                    this.$router.push({ path: targetPath });
                   }, 500); 
                 });
               });

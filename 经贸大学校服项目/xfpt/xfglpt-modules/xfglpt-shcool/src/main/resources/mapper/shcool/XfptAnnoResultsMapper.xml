@@ -26,12 +26,13 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="teamId"    column="team_id"    />
         <result property="fileType"    column="file_type"    />
         <result property="isRelease"    column="is_release"    />
+        <result property="stageType"    column="stage_type"    />
         <result property="cgsj"    column="cgsj"    />
         <result property="noticeFile"    column="notice_file"    />
     </resultMap>
 
     <sql id="selectXfptAnnoResultsVo">
-        select notice_file,cgsj,is_release,file_type,dept_id,ancestors,team_id,id, notice_title, procurement_notice_name, procurement_notice_id, transaction_company_name, bid_price, judges_list, judges_count, announcement_file, other_file, remark, del_flag, create_by, update_time, update_by, create_time from xfpt_anno_results
+        select notice_file,cgsj,is_release,stage_type,file_type,dept_id,ancestors,team_id,id, notice_title, procurement_notice_name, procurement_notice_id, transaction_company_name, bid_price, judges_list, judges_count, announcement_file, other_file, remark, del_flag, create_by, update_time, update_by, create_time from xfpt_anno_results
     </sql>
 
     <select id="selectXfptAnnoResultsList" parameterType="XfptAnnoResults" resultMap="XfptAnnoResultsResult">
@@ -47,6 +48,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="announcementFile != null  and announcementFile != ''"> and announcement_file = #{announcementFile}</if>
             <if test="otherFile != null and otherFile != ''"> and other_file = #{otherFile}</if>
             <if test="teamId != null"> and team_id = #{teamId}</if>
+            <if test="stageType != null and stageType != ''"> and stage_type = #{stageType}</if>
             <if test="deptId != null">
                 and (dept_id = #{deptId} or find_in_set(#{deptId},ancestors))
             </if>
@@ -81,6 +83,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">update_time,</if>
             <if test="updateBy != null">update_by,</if>
             <if test="createTime != null">create_time,</if>
+            <if test="stageType != null">stage_type,</if>
          </trim>
         <trim prefix="values (" suffix=")" suffixOverrides=",">
             <if test="noticeTitle != null">#{noticeTitle},</if>
@@ -98,6 +101,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">#{updateTime},</if>
             <if test="updateBy != null">#{updateBy},</if>
             <if test="createTime != null">#{createTime},</if>
+            <if test="stageType != null">#{stageType},</if>
          </trim>
     </insert>
 
@@ -119,6 +123,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="updateTime != null">update_time = #{updateTime},</if>
             <if test="updateBy != null">update_by = #{updateBy},</if>
             <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="stageType != null">stage_type = #{stageType},</if>
         </trim>
         where id = #{id}
     </update>

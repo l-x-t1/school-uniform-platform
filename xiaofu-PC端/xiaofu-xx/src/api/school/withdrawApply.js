@@ -10,10 +10,11 @@ export function listWithdrawApply(query) {
 }
 
 // 查询供应商提现申请详细
-export function getWithdrawApply(id) {
+export function getWithdrawApply(id, params) {
   return request({
     url: '/school/withdrawApply/' + id,
-    method: 'get'
+    method: 'get',
+    params
   })
 }
 
@@ -30,6 +31,15 @@ export function addWithdrawApply(data) {
 export function updateWithdrawApply(data) {
   return request({
     url: '/school/withdrawApply',
+    method: 'put',
+    data: data
+  })
+}
+
+// 学校端审核供应商提现申请
+export function auditWithdrawApply(data) {
+  return request({
+    url: '/school/withdrawApply/audit',
     method: 'put',
     data: data
   })

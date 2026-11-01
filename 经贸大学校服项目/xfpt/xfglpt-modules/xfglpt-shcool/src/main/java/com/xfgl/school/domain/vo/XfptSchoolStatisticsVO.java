@@ -24,20 +24,23 @@ public class XfptSchoolStatisticsVO {
     @Excel(name = "班子会议纪要是否报备")
     private String bzhyFlg;
 
-    @Excel(name = "家长购买意见表决")
+    @Excel(name = "发布采购公告")
     private String jzgmyjFlg;
 
-    @Excel(name = "选用组织名单是否报备")
+    @Excel(name = "备选公告展示")
     private String zzmdFlg;
 
-    @Excel(name = "选用组织选购模式是否报备")
+    @Excel(name = "家长投票")
     private String xyzzxgmsFlg;
 
-    @Excel(name = "选购结果公示是否报备")
+    @Excel(name = "投票结果公示")
     private String xgjggsFlg;
 
-    @Excel(name = "采购合同是否报备")
+    @Excel(name = "签订合同")
     private String cghtFlg;
+
+    @Excel(name = "采购结果公告")
+    private String cgjgggFlg;
 
     @Excel(name = "产品质量检验报告是否报备")
     private String cpzljybgFlg;

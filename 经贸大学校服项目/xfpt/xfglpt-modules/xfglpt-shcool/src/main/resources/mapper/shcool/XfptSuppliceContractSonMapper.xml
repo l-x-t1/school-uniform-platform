@@ -27,6 +27,9 @@
         <result property="dj" column="dj"/>
         <result property="zj" column="zj"/>
         <result property="integrity" column="integrity"/>
+        <result property="electronicContent" column="electronic_content"/>
+        <result property="templateFile" column="template_file"/>
+        <result property="paperContractFiles" column="paper_contract_files"/>
     </resultMap>
 
     <sql id="selectXfptSuppliceContractSonVo">
@@ -46,7 +49,7 @@
                supplier_phone,
                number_orderers,
                unit_price,
-               total_amount,fzr,fzrdh,count,dj,zj,integrity
+               total_amount,fzr,fzrdh,count,dj,zj,integrity,electronic_content,template_file,paper_contract_files
         from xfpt_supplice_contract_son
     </sql>
 
@@ -81,8 +84,11 @@
         <if test="unitPrice != null  and unitPrice != ''">
             and unit_price = #{unitPrice}
         </if>
-        <if test="totalAmount != null  and totalAmount != ''">
-            and total_amount = #{totalAmount}
+            <if test="totalAmount != null  and totalAmount != ''">
+                and total_amount = #{totalAmount}
+            </if>
+        <if test="electronicContent != null and electronicContent != ''">
+            and electronic_content = #{electronicContent}
         </if>
 
 
@@ -144,6 +150,15 @@
             <if test="totalAmount != null">
                 total_amount,
             </if>
+            <if test="electronicContent != null">
+                electronic_content,
+            </if>
+            <if test="templateFile != null">
+                template_file,
+            </if>
+            <if test="paperContractFiles != null">
+                paper_contract_files,
+            </if>
 
 
         </trim>
@@ -192,6 +207,15 @@
             </if>
             <if test="totalAmount != null">
                 #{totalAmount},
+            </if>
+            <if test="electronicContent != null">
+                #{electronicContent},
+            </if>
+            <if test="templateFile != null">
+                #{templateFile},
+            </if>
+            <if test="paperContractFiles != null">
+                #{paperContractFiles},
             </if>
 
         </trim>
@@ -245,6 +269,15 @@
             </if>
             <if test="totalAmount != null">
                 total_amount = #{totalAmount},
+            </if>
+            <if test="electronicContent != null">
+                electronic_content = #{electronicContent},
+            </if>
+            <if test="templateFile != null">
+                template_file = #{templateFile},
+            </if>
+            <if test="paperContractFiles != null">
+                paper_contract_files = #{paperContractFiles},
             </if>
         </trim>
         where id = #{id}

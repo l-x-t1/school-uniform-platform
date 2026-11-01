@@ -105,6 +105,9 @@
           <h2 class="policy-dialog-title">{{ selectedAnnouncement.isBc == 1? selectedAnnouncement.title +'（补充）':selectedAnnouncement.title }}</h2>
           <div class="policy-dialog-meta">
             <!-- <span>发布时间：{{ selectedAnnouncement.createTime }}</span> -->
+            <span v-if="selectedAnnouncement.endTime"
+              >截止时间：{{ selectedAnnouncement.endTime }}</span
+            >
             <span v-if="selectedAnnouncement.createBy"
               >发布人：{{ selectedAnnouncement.createBy }}</span
             >

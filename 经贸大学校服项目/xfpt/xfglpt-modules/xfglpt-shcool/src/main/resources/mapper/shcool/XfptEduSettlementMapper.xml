@@ -11,6 +11,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="settlementCycle" column="settlement_cycle" />
         <result property="status" column="status" />
         <result property="settlementAmount" column="settlement_amount" />
+        <result property="withdrawNo" column="withdraw_no" />
+        <result property="schoolId" column="school_id" />
+        <result property="supplierName" column="supplier_name" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="applyAmount" column="apply_amount" />
+        <result property="applyTime" column="apply_time" />
         <result property="taxAmount" column="tax_amount" />
         <result property="paidAmount" column="paid_amount" />
         <result property="unpaidAmount" column="unpaid_amount" />
@@ -34,40 +40,139 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="settledCount" column="settled_count" />
     </resultMap>
 
-    <sql id="selectXfptEduSettlementVo">
-        select id, unit_name, project_name, settlement_cycle, status, settlement_amount, tax_amount,
-               paid_amount, unpaid_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
-        from xfpt_edu_settlement
+    <sql id="settlementOrderBase">
+        select
+            o.id as order_id,
+            o.school_id,
+            o.school_name,
+            o.supplier_id,
+            o.supplier_name,
+            o.dept_id,
+            date_format(coalesce(o.pay_time, o.create_time), '%Y-%m') as settlement_cycle,
+            greatest(coalesce(o.pay_amount, 0) - coalesce(o.refund_amount, 0), 0) as net_amount,
+            case when sf.order_id is null then 0 else 1 end as settled_flag,
+            sf.last_settlement_time,
+            o.create_time as order_create_time
+        from xfpt_order_info o
+        inner join xfpt_school_supplier_rel sr
+            on sr.school_id = o.school_id
+           and sr.supplier_id = o.supplier_id
+           and sr.cooperate_status = '1'
+           and sr.del_flag = '0'
+        left join (
+            select
+                order_id,
+                supplier_id,
+                max(trade_time) as last_settlement_time
+            from xfpt_finance_flow
+            where del_flag = '0'
+              and business_type = '4'
+              and flow_direction = '1'
+              and payee_type = '2'
+            group by order_id, supplier_id
+        ) sf
+            on sf.order_id = o.id
+           and sf.supplier_id = o.supplier_id
+        where o.del_flag = '0'
+          and o.supplier_id is not null
+          and o.pay_status in ('1', '2', '3')
+          and greatest(coalesce(o.pay_amount, 0) - coalesce(o.refund_amount, 0), 0) &gt; 0
+          <if test="deptId != null">
+              and o.dept_id = #{deptId}
+          </if>
+          <if test="params != null and params.schoolId != null">
+              and o.school_id = #{params.schoolId}
+          </if>
     </sql>
 
-    <sql id="search">
-        <where>
-            del_flag = '0'
-            <if test="unitName != null and unitName != ''"> and unit_name like concat('%', #{unitName}, '%')</if>
-            <if test="projectName != null and projectName != ''"> and project_name like concat('%', #{projectName}, '%')</if>
-            <if test="settlementCycle != null and settlementCycle != ''"> and settlement_cycle = #{settlementCycle}</if>
-            <if test="status != null and status != ''"> and status = #{status}</if>
-            <if test="deptId != null"> and dept_id = #{deptId}</if>
-        </where>
+    <sql id="settlementAggregateTable">
+        select
+            min(base.order_id) as id,
+            base.school_id as school_id,
+            base.supplier_name as unit_name,
+            concat(base.school_name, '家长端订单结算') as project_name,
+            base.settlement_cycle,
+            case
+                when sum(case when base.settled_flag = 0 then base.net_amount else 0 end) = 0 then '2'
+                when sum(case when base.settled_flag = 1 then base.net_amount else 0 end) = 0 then '0'
+                else '1'
+            end as status,
+            sum(base.net_amount) as settlement_amount,
+            null as withdraw_no,
+            base.supplier_name as supplier_name,
+            base.supplier_id as supplier_id,
+            sum(case when base.settled_flag = 1 then base.net_amount else 0 end) as apply_amount,
+            max(base.last_settlement_time) as apply_time,
+            0 as tax_amount,
+            sum(case when base.settled_flag = 1 then base.net_amount else 0 end) as paid_amount,
+            sum(case when base.settled_flag = 0 then base.net_amount else 0 end) as unpaid_amount,
+            base.dept_id as dept_id,
+            null as create_by,
+            min(base.order_create_time) as create_time,
+            null as update_by,
+            max(base.last_settlement_time) as update_time,
+            concat(
+                '订单', count(1), '笔；已结算',
+                sum(case when base.settled_flag = 1 then 1 else 0 end),
+                '笔；待结算',
+                sum(case when base.settled_flag = 0 then 1 else 0 end),
+                '笔'
+            ) as remark,
+            '0' as del_flag
+        from (
+            <include refid="settlementOrderBase"/>
+        ) base
+        group by
+            base.school_id,
+            base.school_name,
+            base.supplier_id,
+            base.supplier_name,
+            base.settlement_cycle,
+            base.dept_id
     </sql>
 
     <select id="selectXfptEduSettlementList" parameterType="XfptEduSettlement" resultMap="XfptEduSettlementResult">
-        <include refid="selectXfptEduSettlementVo"/>
-        <include refid="search"/>
-        order by settlement_cycle desc, id desc
+        select *
+        from (
+            <include refid="settlementAggregateTable"/>
+        ) s
+        where 1 = 1
+          <if test="id != null">and s.id = #{id}</if>
+          <if test="unitName != null and unitName != ''">and s.unit_name like concat('%', #{unitName}, '%')</if>
+          <if test="supplierName != null and supplierName != ''">and s.supplier_name like concat('%', #{supplierName}, '%')</if>
+          <if test="projectName != null and projectName != ''">and s.project_name like concat('%', #{projectName}, '%')</if>
+          <if test="settlementCycle != null and settlementCycle != ''">and s.settlement_cycle = #{settlementCycle}</if>
+          <if test="status != null and status != ''">and s.status = #{status}</if>
+        order by s.settlement_cycle desc, s.supplier_id desc
+    </select>
+
+    <select id="selectXfptEduSettlementById" parameterType="XfptEduSettlement" resultMap="XfptEduSettlementResult">
+        select *
+        from (
+            <include refid="settlementAggregateTable"/>
+        ) s
+        where s.id = #{id}
+        limit 1
     </select>
 
     <select id="selectXfptEduSettlementStatistics" parameterType="XfptEduSettlement" resultMap="EduSettlementStatisticsResult">
         select
-            coalesce(sum(settlement_amount), 0) as settlement_amount,
-            coalesce(sum(tax_amount), 0) as tax_amount,
-            coalesce(sum(paid_amount), 0) as paid_amount,
-            coalesce(sum(unpaid_amount), 0) as unpaid_amount,
+            coalesce(sum(s.settlement_amount), 0) as settlement_amount,
+            0 as tax_amount,
+            coalesce(sum(s.paid_amount), 0) as paid_amount,
+            coalesce(sum(s.unpaid_amount), 0) as unpaid_amount,
             count(1) as total_count,
-            sum(case when status = '0' then 1 else 0 end) as pending_count,
-            sum(case when status = '1' then 1 else 0 end) as partial_count,
-            sum(case when status = '2' then 1 else 0 end) as settled_count
-        from xfpt_edu_settlement
-        <include refid="search"/>
+            sum(case when s.status = '0' then 1 else 0 end) as pending_count,
+            sum(case when s.status = '1' then 1 else 0 end) as partial_count,
+            sum(case when s.status = '2' then 1 else 0 end) as settled_count
+        from (
+            <include refid="settlementAggregateTable"/>
+        ) s
+        where 1 = 1
+          <if test="unitName != null and unitName != ''">and s.unit_name like concat('%', #{unitName}, '%')</if>
+          <if test="supplierName != null and supplierName != ''">and s.supplier_name like concat('%', #{supplierName}, '%')</if>
+          <if test="projectName != null and projectName != ''">and s.project_name like concat('%', #{projectName}, '%')</if>
+          <if test="settlementCycle != null and settlementCycle != ''">and s.settlement_cycle = #{settlementCycle}</if>
+          <if test="status != null and status != ''">and s.status = #{status}</if>
     </select>
 </mapper>

@@ -1,4 +1,4 @@
-<template>
+﻿<template>
   <div class="app-container">
     <el-form
       :model="queryParams"
@@ -127,7 +127,7 @@
       <el-table-column
         fixed="right"
         label="操作"
-        width="300"
+        width="400"
         align="center"
         class-name="small-padding fixed-width"
       >
@@ -155,17 +155,22 @@
             >移除黑名单</el-button
           >
           <el-button
+            icon="el-icon-user"
+            type="text"
+            @click="handleUserManage(scope.row)"
+            >用户管理</el-button
+          >
+          <el-button
             type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:supplierMessage:edit']"
+            v-hasPermi="['school:manufacturers:edit']"
             >修改</el-button
           >
           <el-button
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['school:supplierMessage:remove']"
             >删除</el-button
           >
         </template>
@@ -181,12 +186,7 @@
     />
 
     <!-- 添加或修改供应商信息对话框 -->
-    <el-dialog
-      :title="title"
-      :visible.sync="open"
-      width="1000px"
-      append-to-body
-    >
+    <el-dialog :title="title" :visible.sync="open" width="780px" append-to-body>
       <el-form ref="form" :model="form" :rules="rules" label-width="100px">
         <el-row>
           <el-col :span="12">
@@ -269,41 +269,23 @@
         <el-row>
           <el-col :span="24">
             <el-form-item label="厂商介绍" prop="supplierIntroduce">
-              <editor v-model="form.supplierIntroduce" :min-height="192" />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <!-- <el-row>
-          <el-col :span="24">
-            <el-form-item label="设备条件" prop="equipmentConditions">
               <el-input
                 type="textarea"
-                v-model="form.equipmentConditions"
-                placeholder="请输入设备条件"
+                v-model="form.supplierIntroduce"
+                placeholder="请输入厂商介绍"
+                :rows="4"
               />
             </el-form-item>
           </el-col>
-        </el-row> -->
+        </el-row>
         <el-row>
           <el-col :span="24">
             <el-form-item label="厂商资质" prop="businessLicense">
-              <FileUpload
+              <el-input
+                type="textarea"
                 v-model="form.businessLicense"
-                :file-list="form.businessLicenseList"
-                :limit="1"
-                :file-type="['jpg', 'png', 'jpeg', 'pdf']"
-              />
-            </el-form-item>
-          </el-col>
-        </el-row>
-        <el-row>
-          <el-col :span="24">
-            <el-form-item label="信用评级" prop="xypj">
-              <FileUpload
-                v-model="form.xypj"
-                :file-list="form.xypjList"
-                :limit="1"
-                :file-type="['jpg', 'png', 'jpeg', 'pdf']"
+                placeholder="请输入厂商资质信息"
+                :rows="3"
               />
             </el-form-item>
           </el-col>
@@ -315,18 +297,26 @@
       </div>
     </el-dialog>
 
+    <!-- 厂商详情与服务学校列表对话框 -->
     <el-dialog
-      title="服务学校列表"
+      title="厂商详情"
       :visible.sync="schoolListDialogVisible"
-      width="70%"
+      width="60%"
     >
-      <el-descriptions class="margin-top" :column="2">
+      <el-descriptions :column="2" border>
         <el-descriptions-item>
           <template slot="label">
-            <i class="el-icon-user"></i>
+            <i class="el-icon-office-building"></i>
             厂商名称
           </template>
           {{ vendorDetail.supplierName }}
+        </el-descriptions-item>
+        <el-descriptions-item>
+          <template slot="label">
+            <i class="el-icon-phone"></i>
+            联系方式
+          </template>
+          {{ vendorDetail.supplierPhone }}
         </el-descriptions-item>
         <el-descriptions-item>
           <template slot="label">
@@ -388,6 +378,67 @@
         <el-button @click="schoolListDialogVisible = false">关 闭</el-button>
       </span>
     </el-dialog>
+
+    <!-- 用户管理对话框 -->
+    <el-dialog
+      title="用户管理"
+      :visible.sync="userManageDialogVisible"
+      width="650px"
+      append-to-body
+    >
+      <el-divider content-position="left">已绑定用户</el-divider>
+      <el-table :data="boundUserList" empty-text="暂无绑定用户">
+        <el-table-column label="用户名" align="center" prop="userName" />
+        <el-table-column label="昵称" align="center" prop="nickName" />
+        <el-table-column label="手机号" align="center" prop="phonenumber" />
+        <el-table-column label="操作" align="center" width="100">
+          <template slot-scope="scope">
+            <el-button
+              type="text"
+              icon="el-icon-delete"
+              style="color: #f56c6c"
+              @click="handleUnbindUser(scope.row)"
+            >解除绑定</el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+
+      <el-divider content-position="left">新增绑定</el-divider>
+      <el-form :inline="true" size="small">
+        <el-form-item label="选择用户">
+          <el-select
+            v-model="selectedUserId"
+            filterable
+            remote
+            reserve-keyword
+            placeholder="请输入用户名搜索"
+            :remote-method="remoteSearchUsers"
+            :loading="userSearchLoading"
+            clearable
+            style="width: 280px"
+          >
+            <el-option
+              v-for="user in userSearchOptions"
+              :key="user.userId"
+              :label="user.userName + ' (' + user.nickName + ')'"
+              :value="user.userId"
+            />
+          </el-select>
+        </el-form-item>
+        <el-form-item>
+          <el-button
+            type="primary"
+            icon="el-icon-plus"
+            :disabled="!selectedUserId"
+            @click="handleBindUser"
+          >绑定</el-button>
+        </el-form-item>
+      </el-form>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="userManageDialogVisible = false">关 闭</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -398,6 +449,9 @@ import {
   delSupplierMessage,
   addSupplierMessage,
   updateSupplierMessage,
+  getSupplierUsers,
+  bindSupplierUser,
+  unbindSupplierUser,
 } from "@/api/school/manufacturers";
 import {
   getVendorsList,
@@ -405,6 +459,7 @@ import {
   getSchoolList,
   getVendorDetail,
 } from "@/api/jiaoyuju/vendors";
+import { listUser } from "@/api/system/user";
 export default {
   name: "SupplierMessage",
   data() {
@@ -418,6 +473,13 @@ export default {
       schoolListTableData: [],
       schoolListTotal: 0,
       vendorDetail: {},
+      // 用户管理
+      userManageDialogVisible: false,
+      currentSupplierId: null,
+      boundUserList: [],
+      selectedUserId: null,
+      userSearchOptions: [],
+      userSearchLoading: false,
       // 遮罩层
       loading: true,
       // 选中数组
@@ -556,6 +618,67 @@ export default {
           this.getList();
         });
       });
+    },
+    // 用户管理
+    handleUserManage(row) {
+      this.currentSupplierId = row.id;
+      this.selectedUserId = null;
+      this.userSearchOptions = [];
+      this.loadBoundUsers();
+      this.userManageDialogVisible = true;
+    },
+    loadBoundUsers() {
+      getSupplierUsers(this.currentSupplierId).then((res) => {
+        this.boundUserList = res.data || [];
+      });
+    },
+    handleBindUser() {
+      if (!this.selectedUserId) return;
+      // 去重校验
+      const alreadyBound = this.boundUserList.some(
+        (u) => u.userId === this.selectedUserId
+      );
+      if (alreadyBound) {
+        this.$message.warning("该用户已绑定此厂商，请勿重复绑定");
+        return;
+      }
+      bindSupplierUser({
+        supplierId: this.currentSupplierId,
+        userId: this.selectedUserId,
+      }).then(() => {
+        this.$message.success("绑定成功");
+        this.selectedUserId = null;
+        this.userSearchOptions = [];
+        this.loadBoundUsers();
+      });
+    },
+    handleUnbindUser(row) {
+      this.$confirm("确定要解除该用户与当前厂商的绑定吗？", "提示", {
+        confirmButtonText: "确定",
+        cancelButtonText: "取消",
+        type: "warning",
+      }).then(() => {
+        unbindSupplierUser({
+          supplierId: this.currentSupplierId,
+          userId: row.userId,
+        }).then(() => {
+          this.$message.success("解除绑定成功");
+          this.loadBoundUsers();
+        });
+      }).catch(() => {});
+    },
+    remoteSearchUsers(query) {
+      if (query !== "") {
+        this.userSearchLoading = true;
+        listUser({ userName: query, pageNum: 1, pageSize: 20 }).then(
+          (res) => {
+            this.userSearchOptions = res.rows || [];
+            this.userSearchLoading = false;
+          }
+        );
+      } else {
+        this.userSearchOptions = [];
+      }
     },
     /** 查询供应商信息列表 */
     getList() {

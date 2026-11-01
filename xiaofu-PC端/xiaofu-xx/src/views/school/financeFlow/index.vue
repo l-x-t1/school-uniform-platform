@@ -1,6 +1,6 @@
 <template>
   <div class="app-container">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+    <el-form v-show="showSearch" ref="queryForm" :model="queryParams" size="small" :inline="true" label-width="68px">
       <el-form-item label="流水单号" prop="flowNo">
         <el-input
           v-model="queryParams.flowNo"
@@ -10,12 +10,14 @@
         />
       </el-form-item>
       <el-form-item label="收支方向" prop="flowDirection">
-        <el-input
+        <el-select
           v-model="queryParams.flowDirection"
-          placeholder="请输入收支方向"
+          placeholder="请选择收支方向"
           clearable
-          @keyup.enter.native="handleQuery"
-        />
+        >
+          <el-option label="收入" value="1" />
+          <el-option label="支出" value="2" />
+        </el-select>
       </el-form-item>
       <el-form-item label="订单编号" prop="orderNo">
         <el-input
@@ -81,29 +83,25 @@
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
-      <el-form-item label="收款账户户名" prop="payeeAccountName">
-        <el-input
-          v-model="queryParams.payeeAccountName"
-          placeholder="请输入收款账户户名"
+      <el-form-item label="流水状态" prop="status">
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择流水状态"
           clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="收款银行" prop="payeeBankName">
-        <el-input
-          v-model="queryParams.payeeBankName"
-          placeholder="请输入收款银行"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
+        >
+          <el-option label="未支付" value="0" />
+          <el-option label="已到达学校账号" value="1" />
+          <el-option label="已到达供应商账号" value="2" />
+        </el-select>
       </el-form-item>
       <el-form-item label="交易发生时间" prop="tradeTime">
-        <el-date-picker clearable
+        <el-date-picker
           v-model="queryParams.tradeTime"
+          clearable
           type="date"
           value-format="yyyy-MM-dd"
-          placeholder="请选择交易发生时间">
-        </el-date-picker>
+          placeholder="请选择交易发生时间"
+        />
       </el-form-item>
       <el-form-item>
         <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
@@ -114,47 +112,47 @@
     <el-row :gutter="10" class="mb8">
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:financeFlow:add']"
           type="primary"
           plain
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['school:financeFlow:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:financeFlow:edit']"
           type="success"
           plain
           icon="el-icon-edit"
           size="mini"
           :disabled="single"
           @click="handleUpdate"
-          v-hasPermi="['school:financeFlow:edit']"
         >修改</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:financeFlow:remove']"
           type="danger"
           plain
           icon="el-icon-delete"
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['school:financeFlow:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:financeFlow:export']"
           type="warning"
           plain
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['school:financeFlow:export']"
         >导出</el-button>
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
     </el-row>
 
     <el-table v-loading="loading" :data="financeFlowList" @selection-change="handleSelectionChange">
@@ -171,26 +169,12 @@
         </template>
       </el-table-column>
       <el-table-column label="订单编号" align="center" prop="orderNo" />
-      <el-table-column label="订单类型" align="center" prop="orderType">
-        <template slot-scope="scope">
-          {{ orderTypeText(scope.row.orderType) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="售后单号" align="center" prop="afterSaleNo" />
       <el-table-column label="学校名称" align="center" prop="schoolName" />
       <el-table-column label="供应商名称" align="center" prop="supplierName" />
       <el-table-column label="用户名称" align="center" prop="userName" />
       <el-table-column label="流水金额" align="center" prop="amount" />
       <el-table-column label="支付渠道" align="center" prop="payChannel" />
-      <el-table-column label="交易单号" align="center" prop="tradeNo" />
-      <el-table-column label="收款方类型" align="center" prop="payeeType">
-        <template slot-scope="scope">
-          {{ payeeTypeText(scope.row.payeeType) }}
-        </template>
-      </el-table-column>
       <el-table-column label="收款方名称" align="center" prop="payeeName" />
-      <el-table-column label="收款账户户名" align="center" prop="payeeAccountName" />
-      <el-table-column label="收款银行" align="center" prop="payeeBankName" />
       <el-table-column label="流水状态" align="center" prop="status">
         <template slot-scope="scope">
           {{ flowStatusText(scope.row.status) }}
@@ -201,23 +185,27 @@
           <span>{{ parseTime(scope.row.tradeTime, '{y}-{m}-{d}') }}</span>
         </template>
       </el-table-column>
-      <el-table-column label="当前归属部门/学校" align="center" prop="deptId" />
-      <el-table-column label="备注" align="center" prop="remark" />
       <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
             size="mini"
             type="text"
+            icon="el-icon-view"
+            @click="handleView(scope.row)"
+          >详情</el-button>
+          <el-button
+            v-hasPermi="['school:financeFlow:edit']"
+            size="mini"
+            type="text"
             icon="el-icon-edit"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:financeFlow:edit']"
           >修改</el-button>
           <el-button
+            v-hasPermi="['school:financeFlow:remove']"
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['school:financeFlow:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
@@ -230,6 +218,60 @@
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
+
+    <el-dialog title="资金流水详情" :visible.sync="detailOpen" width="980px" append-to-body>
+      <div v-loading="detailLoading" class="detail-wrap">
+        <div class="detail-section">
+          <div class="section-title">业务信息</div>
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="流水单号">{{ formatValue(detailForm.flowNo) }}</el-descriptions-item>
+            <el-descriptions-item label="业务类型">{{ businessTypeText(detailForm.businessType) }}</el-descriptions-item>
+            <el-descriptions-item label="收支方向">{{ flowDirectionText(detailForm.flowDirection) }}</el-descriptions-item>
+            <el-descriptions-item label="订单编号">{{ formatValue(detailForm.orderNo) }}</el-descriptions-item>
+            <el-descriptions-item label="学校名称">{{ formatValue(detailForm.schoolName) }}</el-descriptions-item>
+            <el-descriptions-item label="供应商名称">{{ formatValue(detailForm.supplierName) }}</el-descriptions-item>
+            <el-descriptions-item label="用户名称">{{ formatValue(detailForm.userName) }}</el-descriptions-item>
+            <el-descriptions-item label="流水金额">{{ formatAmount(detailForm.amount) }}</el-descriptions-item>
+            <el-descriptions-item label="支付渠道">{{ formatValue(detailForm.payChannel) }}</el-descriptions-item>
+            <el-descriptions-item label="交易单号">{{ formatValue(detailForm.tradeNo) }}</el-descriptions-item>
+            <el-descriptions-item label="收款方类型">{{ payeeTypeText(detailForm.payeeType) }}</el-descriptions-item>
+            <el-descriptions-item label="收款方名称">{{ formatValue(detailForm.payeeName) }}</el-descriptions-item>
+            <el-descriptions-item label="流水状态">{{ flowStatusText(detailForm.status) }}</el-descriptions-item>
+            <el-descriptions-item label="交易时间">{{ formatDateTime(detailForm.tradeTime) }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-title">内部字段</div>
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="订单ID">{{ formatValue(detailForm.orderId) }}</el-descriptions-item>
+            <el-descriptions-item label="售后单ID">{{ formatValue(detailForm.afterSaleId) }}</el-descriptions-item>
+            <el-descriptions-item label="学校ID">{{ formatValue(detailForm.schoolId) }}</el-descriptions-item>
+            <el-descriptions-item label="供应商ID">{{ formatValue(detailForm.supplierId) }}</el-descriptions-item>
+            <el-descriptions-item label="用户ID">{{ formatValue(detailForm.userId) }}</el-descriptions-item>
+            <el-descriptions-item label="收款方ID">{{ formatValue(detailForm.payeeId) }}</el-descriptions-item>
+            <el-descriptions-item label="归属部门/学校">{{ formatValue(detailForm.deptId) }}</el-descriptions-item>
+            <el-descriptions-item label="备注">{{ formatValue(detailForm.remark) }}</el-descriptions-item>
+          </el-descriptions>
+        </div>
+
+        <div class="detail-section">
+          <div class="section-title">银行账户快照</div>
+          <el-descriptions :column="2" border>
+            <el-descriptions-item label="收款账户户名">{{ formatValue(detailForm.payeeAccountName) }}</el-descriptions-item>
+            <el-descriptions-item label="收款银行">{{ formatValue(detailForm.payeeBankName) }}</el-descriptions-item>
+            <el-descriptions-item label="收款银行卡号" :span="2">{{ formatValue(detailForm.payeeBankAccountNo) }}</el-descriptions-item>
+            <el-descriptions-item label="收款码" :span="2">
+              <image-preview v-if="detailForm.receiptQrCode" :src="detailForm.receiptQrCode" :width="120" :height="120" />
+              <span v-else>--</span>
+            </el-descriptions-item>
+          </el-descriptions>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="detailOpen = false">关闭</el-button>
+      </div>
+    </el-dialog>
 
     <!-- 添加或修改资金流水对话框 -->
     <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
@@ -318,7 +360,7 @@
           <el-input v-model="form.payeeBankAccountNo" placeholder="请输入收款银行卡号快照" />
         </el-form-item>
         <el-form-item label="收款码快照；统购展示学校收款码，零售展示供应商收款码" prop="receiptQrCode">
-          <image-upload v-model="form.receiptQrCode"/>
+          <image-upload v-model="form.receiptQrCode" />
         </el-form-item>
         <el-form-item label="流水状态" prop="status">
           <el-select v-model="form.status" placeholder="请选择流水状态" clearable>
@@ -328,12 +370,13 @@
           </el-select>
         </el-form-item>
         <el-form-item label="交易发生时间" prop="tradeTime">
-          <el-date-picker clearable
+          <el-date-picker
             v-model="form.tradeTime"
+            clearable
             type="date"
             value-format="yyyy-MM-dd"
-            placeholder="请选择交易发生时间">
-          </el-date-picker>
+            placeholder="请选择交易发生时间"
+          />
         </el-form-item>
         <el-form-item label="当前归属部门/学校" prop="deptId">
           <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
@@ -351,10 +394,10 @@
 </template>
 
 <script>
-import { listFinanceFlow, getFinanceFlow, delFinanceFlow, addFinanceFlow, updateFinanceFlow } from "@/api/school/financeFlow";
+import { listFinanceFlow, getFinanceFlow, delFinanceFlow, addFinanceFlow, updateFinanceFlow } from '@/api/school/financeFlow'
 
 export default {
-  name: "FinanceFlow",
+  name: 'FinanceFlow',
   data() {
     return {
       // 遮罩层
@@ -371,8 +414,12 @@ export default {
       total: 0,
       // 资金流水表格数据
       financeFlowList: [],
+      // 详情
+      detailOpen: false,
+      detailLoading: false,
+      detailForm: {},
       // 弹出层标题
-      title: "",
+      title: '',
       // 是否显示弹出层
       open: false,
       // 查询参数
@@ -398,60 +445,71 @@ export default {
         payeeType: null,
         payeeId: null,
         payeeName: null,
-        payeeAccountName: null,
-        payeeBankName: null,
-        status: "0",
+        status: undefined,
         tradeTime: null,
-        deptId: null,
+        deptId: null
       },
       // 表单参数
       form: {},
       // 表单校验
       rules: {
         flowNo: [
-          { required: true, message: "流水单号不能为空", trigger: "blur" }
+          { required: true, message: '流水单号不能为空', trigger: 'blur' }
         ],
         businessType: [
-          { required: true, message: "业务类型不能为空", trigger: "change" }
+          { required: true, message: '业务类型不能为空', trigger: 'change' }
         ],
         flowDirection: [
-          { required: true, message: "收支方向不能为空", trigger: "change" }
+          { required: true, message: '收支方向不能为空', trigger: 'change' }
         ],
         amount: [
-          { required: true, message: "流水金额不能为空", trigger: "blur" }
+          { required: true, message: '流水金额不能为空', trigger: 'blur' }
         ],
         payeeType: [
-          { required: true, message: "收款方类型不能为空", trigger: "change" }
+          { required: true, message: '收款方类型不能为空', trigger: 'change' }
         ],
         payeeId: [
-          { required: true, message: "收款方ID不能为空", trigger: "blur" }
+          { required: true, message: '收款方ID不能为空', trigger: 'blur' }
         ],
         payeeName: [
-          { required: true, message: "收款方名称快照不能为空", trigger: "blur" }
+          { required: true, message: '收款方名称快照不能为空', trigger: 'blur' }
         ],
         status: [
-          { required: true, message: "流水状态不能为空", trigger: "change" }
+          { required: true, message: '流水状态不能为空', trigger: 'change' }
         ]
       }
-    };
+    }
   },
   created() {
-    this.getList();
+    this.getList()
   },
   methods: {
+    formatValue(value) {
+      return value === undefined || value === null || value === '' ? '--' : value
+    },
+    formatAmount(value) {
+      if (value === undefined || value === null || value === '') {
+        return '--'
+      }
+      const amount = Number(value)
+      return Number.isNaN(amount) ? value : `￥${amount.toFixed(2)}`
+    },
+    formatDateTime(value) {
+      return this.parseTime(value, '{y}-{m}-{d} {h}:{i}:{s}') || '--'
+    },
     /** 查询资金流水列表 */
     getList() {
-      this.loading = true;
+      this.loading = true
       listFinanceFlow(this.queryParams).then(response => {
-        this.financeFlowList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
+        this.financeFlowList = response.rows
+        this.total = response.total
+        this.loading = false
+      })
     },
     // 取消按钮
     cancel() {
-      this.open = false;
-      this.reset();
+      this.open = false
+      this.reset()
     },
     // 表单重置
     reset() {
@@ -489,91 +547,102 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: "0"
-      };
-      this.resetForm("form");
+        delFlag: '0'
+      }
+      this.resetForm('form')
     },
     /** 搜索按钮操作 */
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
     /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm");
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.handleQuery()
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
+      this.single = selection.length !== 1
       this.multiple = !selection.length
     },
     /** 新增按钮操作 */
     handleAdd() {
-      this.reset();
-      this.open = true;
-      this.title = "添加资金流水";
+      this.reset()
+      this.open = true
+      this.title = '添加资金流水'
+    },
+    /** 详情按钮操作 */
+    handleView(row) {
+      const id = row.id || this.ids[0]
+      this.detailOpen = true
+      this.detailLoading = true
+      getFinanceFlow(id).then(response => {
+        this.detailForm = response.data || {}
+      }).finally(() => {
+        this.detailLoading = false
+      })
     },
     /** 修改按钮操作 */
     handleUpdate(row) {
-      this.reset();
+      this.reset()
       const id = row.id || this.ids
       getFinanceFlow(id).then(response => {
-        this.form = response.data;
-        this.open = true;
-        this.title = "修改资金流水";
-      });
+        this.form = response.data
+        this.open = true
+        this.title = '修改资金流水'
+      })
     },
     /** 提交按钮 */
     submitForm() {
-      this.$refs["form"].validate(valid => {
+      this.$refs['form'].validate(valid => {
         if (valid) {
           if (this.form.id != null) {
             updateFinanceFlow(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
+              this.$modal.msgSuccess('修改成功')
+              this.open = false
+              this.getList()
+            })
           } else {
             addFinanceFlow(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
+              this.$modal.msgSuccess('新增成功')
+              this.open = false
+              this.getList()
+            })
           }
         }
-      });
+      })
     },
     /** 删除按钮操作 */
     handleDelete(row) {
-      const ids = row.id || this.ids;
+      const ids = row.id || this.ids
       this.$modal.confirm('是否确认删除资金流水编号为"' + ids + '"的数据项？').then(function() {
-        return delFinanceFlow(ids);
+        return delFinanceFlow(ids)
       }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
+        this.getList()
+        this.$modal.msgSuccess('删除成功')
+      }).catch(() => {})
     },
     businessTypeText(value) {
-      const map = { 1: "支付", 2: "退款", 3: "提现", 4: "结算" };
-      return map[String(value)] || value || "-";
+      const map = { 1: '支付', 2: '退款', 3: '提现', 4: '结算' }
+      return map[String(value)] || value || '-'
     },
     flowDirectionText(value) {
-      const map = { 1: "收入", 2: "支出" };
-      return map[String(value)] || value || "-";
+      const map = { 1: '收入', 2: '支出' }
+      return map[String(value)] || value || '-'
     },
     orderTypeText(value) {
-      const map = { 1: "统购", 2: "零售" };
-      return map[String(value)] || value || "-";
+      const map = { 1: '统购', 2: '零售' }
+      return map[String(value)] || value || '-'
     },
     payeeTypeText(value) {
-      const map = { 1: "学校", 2: "供应商" };
-      return map[String(value)] || value || "-";
+      const map = { 1: '学校', 2: '供应商' }
+      return map[String(value)] || value || '-'
     },
     flowStatusText(value) {
-      const map = { 0: "未支付", 1: "已到达学校账号", 2: "已到达供应商账号" };
-      return map[String(value)] || value || "-";
+      const map = { 0: '未支付', 1: '已到达学校账号', 2: '已到达供应商账号' }
+      return map[String(value)] || value || '-'
     },
     /** 导出按钮操作 */
     handleExport() {
@@ -582,5 +651,22 @@ export default {
       }, `financeFlow_${new Date().getTime()}.xlsx`)
     }
   }
-};
+}
 </script>
+
+<style scoped>
+.detail-wrap {
+  min-height: 220px;
+}
+
+.detail-section + .detail-section {
+  margin-top: 20px;
+}
+
+.section-title {
+  margin-bottom: 12px;
+  color: #303133;
+  font-size: 15px;
+  font-weight: 600;
+}
+</style>

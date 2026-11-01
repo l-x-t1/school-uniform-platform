@@ -1,8 +1,9 @@
 package com.xfgl.school.controller;
 import java.util.List;
 import java.util.Arrays;
-import java.io.IOException;
 import javax.servlet.http.HttpServletResponse;
+
+import cn.hutool.core.util.StrUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,8 +15,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.xfgl.common.log.annotation.Log;
 import com.xfgl.common.log.enums.BusinessType;
+import com.xfgl.common.core.exception.ServiceException;
+import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.system.api.domain.SysDept;
 import com.xfgl.common.security.annotation.RequiresPermissions;
+import com.xfgl.school.domain.XfptOrganizationMode;
 import com.xfgl.school.domain.XfptSupplierApply;
+import com.xfgl.school.domain.XfptSupplierApplyLog;
+import com.xfgl.school.domain.vo.SupplierApplyAuditRequest;
+import com.xfgl.school.service.IXfptOrganizationModeService;
 import com.xfgl.school.service.IXfptSupplierApplyService;
 import com.xfgl.common.core.web.controller.BaseController;
 import com.xfgl.common.core.web.domain.AjaxResult;
@@ -36,6 +44,8 @@ import com.xfgl.common.core.web.page.TableDataInfo;
 public class XfptSupplierApplyController extends BaseController {
     @Autowired
     private IXfptSupplierApplyService xfptSupplierApplyService;
+    @Autowired
+    private IXfptOrganizationModeService xfptOrganizationModeService;
 
 /**
  * 查询供应商报名列表
@@ -45,6 +55,12 @@ public class XfptSupplierApplyController extends BaseController {
 @RequiresPermissions("school:supplierApply:list")
 @GetMapping("/list")
     public TableDataInfo list(XfptSupplierApply xfptSupplierApply) {
+        if (!SecurityUtils.isAdmin(SecurityUtils.getUserId())) {
+            SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
+            if (dept != null) {
+                xfptSupplierApply.setDeptId(dept.getDeptId());
+            }
+        }
         startPage();
         List<XfptSupplierApply> list = xfptSupplierApplyService.selectXfptSupplierApplyList(xfptSupplierApply);
         return getDataTable(list);
@@ -70,7 +86,42 @@ public class XfptSupplierApplyController extends BaseController {
     @RequiresPermissions("school:supplierApply:query")
     @GetMapping(value = "/{id}")
     public AjaxResult getInfo(@PathVariable("id") Long id) {
-            return success(xfptSupplierApplyService.getById(id));
+            return success(xfptSupplierApplyService.selectXfptSupplierApplyById(id));
+    }
+
+    @Operation(summary = "获取供应商报名日志")
+    @RequiresPermissions("school:supplierApply:query")
+    @GetMapping("/log/{applyId}")
+    public AjaxResult getLogs(@PathVariable("applyId") Long applyId) {
+        List<XfptSupplierApplyLog> logs = xfptSupplierApplyService.selectApplyLogs(applyId);
+        return success(logs);
+    }
+
+    @Operation(summary = "审核通过供应商报名")
+    @RequiresPermissions("school:supplierApply:edit")
+    @Log(title = "供应商报名审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/audit/pass")
+    public AjaxResult auditPass(@RequestBody SupplierApplyAuditRequest request) {
+        Long deptId = SecurityUtils.isAdmin(SecurityUtils.getUserId())
+                ? null
+                : SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        xfptSupplierApplyService.auditPass(deptId, request);
+        return success();
+    }
+
+    @Operation(summary = "审核驳回供应商报名")
+    @RequiresPermissions("school:supplierApply:edit")
+    @Log(title = "供应商报名审核", businessType = BusinessType.UPDATE)
+    @PostMapping("/audit/reject")
+    public AjaxResult auditReject(@RequestBody SupplierApplyAuditRequest request) {
+        if (request == null || StrUtil.isBlank(request.getAuditRemark())) {
+            throw new ServiceException("驳回时必须填写驳回原因");
+        }
+        Long deptId = SecurityUtils.isAdmin(SecurityUtils.getUserId())
+                ? null
+                : SecurityUtils.getLoginUser().getSysUser().getDeptId();
+        xfptSupplierApplyService.auditReject(deptId, request);
+        return success();
     }
 
     /**
@@ -81,6 +132,29 @@ public class XfptSupplierApplyController extends BaseController {
     @Log(title = "供应商报名" , businessType = BusinessType.INSERT)
     @PostMapping
     public AjaxResult add(@RequestBody XfptSupplierApply xfptSupplierApply) {
+            XfptOrganizationMode organizationMode = xfptOrganizationModeService.getById(xfptSupplierApply.getNoticeId());
+            if (organizationMode == null) {
+                throw new ServiceException("采购公告不存在");
+            }
+            if (organizationMode.getSignupLimit() != null && organizationMode.getSignupLimit() > 0) {
+                long currentCount = xfptSupplierApplyService.lambdaQuery()
+                        .eq(XfptSupplierApply::getNoticeId, xfptSupplierApply.getNoticeId())
+                        .ne(XfptSupplierApply::getApplyStatus, "2")
+                        .count();
+                if (currentCount >= organizationMode.getSignupLimit()) {
+                    throw new ServiceException("当前采购公告报名人数已满");
+                }
+            }
+            SysDept dept = SecurityUtils.getLoginUser().getSysUser().getDept();
+            if (xfptSupplierApply.getDeptId() == null) {
+                xfptSupplierApply.setDeptId(dept.getDeptId());
+            }
+            if (xfptSupplierApply.getSchoolId() == null) {
+                xfptSupplierApply.setSchoolId(dept.getDeptId());
+            }
+            if (StrUtil.isBlank(xfptSupplierApply.getApplyStatus())) {
+                xfptSupplierApply.setApplyStatus("1");
+            }
             return toAjax(xfptSupplierApplyService.save(xfptSupplierApply));
     }
 

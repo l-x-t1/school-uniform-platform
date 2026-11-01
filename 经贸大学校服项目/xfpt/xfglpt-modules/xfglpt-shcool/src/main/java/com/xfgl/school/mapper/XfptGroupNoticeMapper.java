@@ -2,6 +2,7 @@ package com.xfgl.school.mapper;
 import java.util.List;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.XfptOrderInfo;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
@@ -31,6 +32,14 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
      * @return 统购公告集合
      */
     public List<XfptGroupNotice> selectSupplierGroupNoticeList(XfptGroupNotice xfptGroupNotice);
+
+    /**
+     * 供应商查询合作学校发布的选购公告列表
+     *
+     * @param xfptGroupNotice 统购公告
+     * @return 统购公告集合
+     */
+    public List<XfptGroupNotice> selectSupplierCooperationGroupNoticeList(XfptGroupNotice xfptGroupNotice);
         /**
          * 查询统购公告
          *
@@ -38,6 +47,8 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
          * @return 统购公告
          */
         XfptGroupNotice selectSupplierGroupNoticeById(@Param("id") Long id, @Param("supplierId") Long supplierId);
+
+        XfptGroupNotice selectSupplierCooperationGroupNoticeById(@Param("id") Long id, @Param("supplierId") Long supplierId);
         List<XfptGroupNoticeItem> selectXfptGroupNoticeItemById(@Param("id")Long id);
 
         List<Long> selectSupplierIdsByNoticeId(@Param("noticeId") Long noticeId);
@@ -68,5 +79,12 @@ public interface XfptGroupNoticeMapper extends BaseMapper<XfptGroupNotice> {
 
         List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(@Param("noticeId") Long noticeId,
                                                                     @Param("supplierId") Long supplierId,
+                                                                    @Param("schoolId") Long schoolId,
                                                                     @Param("deptId") Long deptId);
+
+        XfptOrderInfo selectProgressOrderById(@Param("orderId") Long orderId);
+
+        int updateProgressStatus(@Param("orderId") Long orderId,
+                                 @Param("progressStatus") String progressStatus);
+
 }

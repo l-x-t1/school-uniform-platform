@@ -2,6 +2,7 @@ package com.xfgl.system.service.impl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -24,6 +25,7 @@ import com.xfgl.system.mapper.SysMenuMapper;
 import com.xfgl.system.mapper.SysRoleMapper;
 import com.xfgl.system.mapper.SysRoleMenuMapper;
 import com.xfgl.system.service.ISysMenuService;
+import com.xfgl.system.service.support.RoleMenuSceneSupport;
 
 /**
  * 菜单 业务层处理
@@ -43,6 +45,9 @@ public class SysMenuServiceImpl implements ISysMenuService
 
     @Autowired
     private SysRoleMenuMapper roleMenuMapper;
+
+    @Autowired
+    private RoleMenuSceneSupport roleMenuSceneSupport;
 
     /**
      * 根据用户查询系统菜单列表
@@ -77,6 +82,15 @@ public class SysMenuServiceImpl implements ISysMenuService
             menuList = menuMapper.selectMenuListByUserId(menu);
         }
         return menuList;
+    }
+
+    @Override
+    public List<SysMenu> selectMenuListByScene(SysMenu menu, String targetRoleKey, String menuScene)
+    {
+        String resolvedScene = roleMenuSceneSupport.resolveMenuScene(targetRoleKey, menuScene);
+        List<SysMenu> normalizedMenus = roleMenuSceneSupport.normalizeFlatMenus(menuMapper.selectMenuList(new SysMenu()),
+                resolvedScene);
+        return roleMenuSceneSupport.filterMenusByQuery(normalizedMenus, menu);
     }
 
     /**
@@ -539,5 +553,24 @@ public class SysMenuServiceImpl implements ISysMenuService
     {
         return StringUtils.replaceEach(path, new String[] { Constants.HTTP, Constants.HTTPS, Constants.WWW, ".", ":" },
                 new String[] { "", "", "", "/", "/" });
+    }
+
+    @Override
+    public List<Long> filterMenuIdsByRoleKey(Collection<Long> menuIds, String roleKey)
+    {
+        return filterMenuIdsByScene(menuIds, resolveMenuSceneByRoleKey(roleKey));
+    }
+
+    @Override
+    public List<Long> filterMenuIdsByScene(Collection<Long> menuIds, String menuScene)
+    {
+        List<SysMenu> normalizedMenus = selectMenuListByScene(new SysMenu(), null, menuScene);
+        return roleMenuSceneSupport.filterMenuIds(menuIds, roleMenuSceneSupport.collectMenuIds(normalizedMenus));
+    }
+
+    @Override
+    public String resolveMenuSceneByRoleKey(String roleKey)
+    {
+        return roleMenuSceneSupport.resolveMenuSceneByRoleKey(roleKey);
     }
 }

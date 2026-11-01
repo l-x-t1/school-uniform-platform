@@ -110,7 +110,7 @@ export default {
       afterSaleNo: '',
       order: {},
       afterSale: {
-        status: '1',
+        status: '4',
         refundStatus: '0'
       }
     }
@@ -181,28 +181,38 @@ export default {
       return map[String(type || '2')] || '退换申请'
     },
     getStatusText(status) {
+      const normalizedStatus = this.normalizeStatus(status)
       const map = {
-        '1': '待处理',
-        '3': '已发货',
+        '1': '已完成',
+        '3': '已完成',
         '4': '已完成'
       }
-      return map[String(status || '1')] || '待处理'
+      return map[normalizedStatus] || '已完成'
     },
     getStatusDesc(status) {
+      const normalizedStatus = this.normalizeStatus(status)
       const map = {
-        '1': '售后申请已通过，请等待供应商发货。',
-        '3': '供应商已发货，请留意物流或收货通知。',
+        '1': '售后处理已完成。',
+        '3': '售后处理已完成。',
         '4': '售后处理已完成。'
       }
-      return map[String(status || '1')] || '售后申请已通过，请等待供应商发货。'
+      return map[normalizedStatus] || '售后处理已完成。'
     },
     getStatusIcon(status) {
+      const normalizedStatus = this.normalizeStatus(status)
       const map = {
-        '1': 'calendar',
-        '3': 'paperplane',
+        '1': 'checkbox-filled',
+        '3': 'checkbox-filled',
         '4': 'checkbox-filled'
       }
-      return map[String(status || '1')] || 'help'
+      return map[normalizedStatus] || 'checkbox-filled'
+    },
+    normalizeStatus(status) {
+      const normalizedStatus = String(status || '4')
+      if (['1', '3', '4'].includes(normalizedStatus)) {
+        return '4'
+      }
+      return normalizedStatus
     },
     getRefundStatusText(status) {
       const map = {

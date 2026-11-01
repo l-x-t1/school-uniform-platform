@@ -1,31 +1,27 @@
 <template>
   <view>
-    <!--  兼容vue2-->
     <view class="lin-fixed" v-show="showComboxSelect" @click="gclick"></view>
-    <view class="lin-combox">
+    <view class="lin-combox" @click="showDropdown">
       <uni-easyinput
         ref="uni-easyinput"
         :placeholder="placeholder"
         type="text"
         @input="oninput"
+        @focus="onfocus"
       />
       <view class="lin-combox-select" v-show="showComboxSelect">
         <view class="lin-popper__arrow"></view>
         <scroll-view scroll-y="true" :style="'max-height:' + maxHeight + 'px;'">
-          <view v-if="loading" class="fedback-popper_loading">{{
-            loadingText
-          }}</view>
+          <view v-if="loading" class="fedback-popper_loading">{{ loadingText }}</view>
           <template v-else>
-            <view v-if="!list.length" class="fedback-popper_nodata"
-              >暂无数据</view
-            >
+            <view v-if="!list.length" class="fedback-popper_nodata">暂无数据</view>
             <view
               v-else
               class="items"
               v-for="(item, key) in list"
               :key="key"
               :id="key"
-              @click="comboxCheckHandel(item)"
+              @click.stop="comboxCheckHandel(item)"
             >
               {{ item[nameKey] }}
             </view>
@@ -37,7 +33,7 @@
 </template>
 <script>
 export default {
-  emits: ["update:modelValue", "input", "confirm"],
+  emits: ["update:modelValue", "input", "change", "confirm", "focus"],
   props: {
     loading: {
       type: Boolean,
@@ -80,9 +76,6 @@ export default {
       checkValue: "",
     };
   },
-
-  created() {},
-
   mounted() {
     if (!this.$refs["uni-easyinput"]) {
       console.error("请先导入uni-easyinput插件");
@@ -90,15 +83,7 @@ export default {
     }
     this.watchInitialValue();
   },
-
   watch: {
-    list: {
-      handler(val) {
-        if (this.list.length && this.type == "edit") {
-          this.comboxCheckHandel(this.list[0]);
-        }
-      },
-    },
     // #ifdef VUE2
     value(val) {
       this.checkValue = val;
@@ -111,93 +96,86 @@ export default {
       this.getInitText();
     },
     // #endif
-    checkValue(val) {},
   },
   methods: {
     gclick() {
       this.showComboxSelect = false;
-      this.reset();
     },
-
-    /*
-     * 判断如果数据源有数据直接获取，没有数据就进行监听
-     */
+    onfocus() {
+      this.$emit("focus");
+      this.showDropdown();
+    },
+    showDropdown() {
+      if (!this.list.length) return;
+      this.showComboxSelect = true;
+    },
     watchInitialValue() {
       if (this.list.length) {
         this.getInitText();
         return;
       }
-      const unwatchList = this.$watch("list", (val) => {
+      const unwatchList = this.$watch("list", () => {
         this.getInitText();
         unwatchList();
       });
     },
-
     getInitText() {
-      this.checkValue = this.modelValue === null ? this.value : this.modelValue;
+      const initialValue =
+        this.modelValue === undefined || this.modelValue === null
+          ? this.value
+          : this.modelValue;
+      this.checkValue = initialValue;
 
       if (!this.list.length) return;
       if (
         this.checkValue === "" ||
         this.checkValue === undefined ||
         this.checkValue === null
-      )
+      ) {
         return;
+      }
       if (this.showComboxSelect) return;
 
-      const _item = this.list.find((item) => {
-        return item[this.valueKey] === +this.checkValue;
-      });
-      this.$refs["uni-easyinput"].val = _item[this.nameKey];
+      const currentValue = Number.isNaN(Number(this.checkValue))
+        ? this.checkValue
+        : +this.checkValue;
+      const item = this.list.find((option) => option[this.valueKey] === currentValue);
+      if (item) {
+        this.$refs["uni-easyinput"].val = item[this.nameKey];
+      }
     },
-
-    /**
-     * 重置
-     */
     reset() {
+      this.checkValue = "";
+      this.$emit("change", "");
       // #ifdef VUE3
       this.$emit("update:modelValue", "");
-      // #endif
-      // #ifdef VUE2
-      this.$emit("input", "");
       // #endif
       this.$nextTick(() => {
         this.$refs["uni-easyinput"].val = "";
       });
     },
-
-    /**
-     * 选中事件
-     */
     comboxCheckHandel(item) {
       const text = item[this.nameKey];
       const value = item[this.valueKey];
-      this.checkValue = "";
       this.checkValue = value;
       this.showComboxSelect = false;
       // #ifdef VUE3
       this.$emit("update:modelValue", value);
       // #endif
-      // #ifdef VUE2
-      this.$emit("input", value);
-      // #endif
+      this.$emit("change", value);
       this.$nextTick(() => {
         this.$refs["uni-easyinput"].val = text;
       });
       this.$emit("confirm", value);
     },
-
-    /**
-     * 输入事件
-     */
     oninput(val) {
-      this.$emit("update:modelValue", val);
-      this.$emit("input", val);
       if (!val) {
-        this.showComboxSelect = false;
-        return;
+        this.checkValue = "";
+        this.showComboxSelect = this.list.length > 0;
+      } else {
+        this.showComboxSelect = true;
       }
-      this.showComboxSelect = true;
+      this.$emit("input", val);
     },
   },
 };
@@ -221,13 +199,10 @@ export default {
     left: 0;
     right: 0;
     background-color: #fff;
-    z-index: 2;
-    border-radius: 3px;
-    padding: 3px 0;
     z-index: 8;
-    background-color: #fff;
-    border: 1px solid #ebeef5;
     border-radius: 6px;
+    padding: 3px 0;
+    border: 1px solid #ebeef5;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
 
     .fedback-popper_nodata {

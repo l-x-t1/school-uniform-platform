@@ -1,7 +1,11 @@
 package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xfgl.school.domain.XfptGoods;
+import com.xfgl.school.domain.XfptGoodsSize;
 import com.xfgl.school.domain.XfptGroupNotice;
+import com.xfgl.school.domain.XfptOrderInfo;
+import com.xfgl.school.domain.XfptSchoolSupplierRel;
 import com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo;
 import com.xfgl.school.domain.vo.GroupNoticeProgressQuery;
 import com.xfgl.school.domain.vo.GroupNoticeProgressVo;
@@ -30,6 +34,14 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
      */
     public List<XfptGroupNotice> selectSupplierGroupNoticeList(XfptGroupNotice xfptGroupNotice);
 
+    /**
+     * 供应商查询合作学校发布的选购公告列表
+     *
+     * @param xfptGroupNotice 统购公告
+     * @return 统购公告集合
+     */
+    public List<XfptGroupNotice> selectSupplierCooperationGroupNoticeList(XfptGroupNotice xfptGroupNotice);
+
         /**
          * 查询统购公告
          *
@@ -39,12 +51,29 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
         public XfptGroupNotice selectXfptGroupNoticeById(Long id);
 
         /**
+         * 家长端按绑定学生学校查询统购公告详情
+         *
+         * @param id 统购公告主键
+         * @param simId 家长绑定标识
+         * @return 统购公告
+         */
+        public XfptGroupNotice selectXfptGroupNoticeById(Long id, String simId);
+
+        /**
          * 供应商查询学校发布的统购公告详情
          *
          * @param id 统购公告主键
          * @return 统购公告
          */
         public XfptGroupNotice selectSupplierGroupNoticeById(Long id);
+
+        /**
+         * 供应商查询合作学校发布的选购公告详情
+         *
+         * @param id 统购公告主键
+         * @return 统购公告
+         */
+        public XfptGroupNotice selectSupplierCooperationGroupNoticeById(Long id);
 
         /**
          * 新增统购公告
@@ -80,5 +109,19 @@ public interface IXfptGroupNoticeService extends IService<XfptGroupNotice> {
 
         public List<GroupNoticeProgressVo> selectGroupNoticeProgressList(GroupNoticeProgressQuery query);
 
-        public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long noticeId, Long supplierId);
+        public List<GroupNoticeOrderDetailVo> selectGroupNoticeOrderDetail(Long orderId, Long supplierId);
+
+        public XfptOrderInfo viewGroupNoticeOrder(Long orderId);
+
+        public int startGroupNoticeOrder(Long orderId);
+
+        public int finishGroupNoticeOrder(Long orderId);
+
+        public int fillGroupNoticeOrderLogistics(Long orderId, String logisticsNo);
+
+        public List<XfptSchoolSupplierRel> selectNoticeSupplierOptions(Long schoolId);
+
+        public List<XfptGoods> selectNoticeGoodsOptions(Long schoolId, String supplierIds);
+
+        public List<XfptGoodsSize> selectNoticeGoodsSizeOptions(Long schoolId, String supplierIds);
 }

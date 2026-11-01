@@ -43,6 +43,16 @@ public interface RemoteUserService
     public R<Boolean> registerUserInfo(@RequestBody SysUser sysUser, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
 
     /**
+     * 内部新增用户（跳过注册开关，供供应商入驻审核等内部流程使用）
+     *
+     * @param sysUser 用户信息
+     * @param source 请求来源
+     * @return 结果
+     */
+    @PostMapping("/user/addInner")
+    public R<Boolean> addInnerUser(@RequestBody SysUser sysUser, @RequestHeader(SecurityConstants.FROM_SOURCE) String source);
+
+    /**
      * 记录用户登录IP地址和登录时间
      *
      * @param sysUser 用户信息

@@ -36,6 +36,25 @@ public class SupplierMessage extends BaseEntity {
     private Long id;
 
     /**
+     * 关联的系统用户ID
+     */
+    @Schema(description = "关联的系统用户ID（已迁移至 xfpt_supplier_user_rel 表）")
+    @TableField(exist = false)
+    private Long userId;
+
+    @Schema(description = "是否已绑定供应商账号")
+    @TableField(exist = false)
+    private Boolean hasUserBinding;
+
+    @Schema(description = "绑定的供应商账号数量")
+    @TableField(exist = false)
+    private Integer bindUserCount;
+
+    @Schema(description = "绑定的供应商账号名称")
+    @TableField(exist = false)
+    private String bindUserNames;
+
+    /**
      * 厂商名称
      */
     @Excel(name = "厂商名称")

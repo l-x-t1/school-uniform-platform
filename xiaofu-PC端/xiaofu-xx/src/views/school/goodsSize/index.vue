@@ -126,7 +126,7 @@
       <el-table-column label="关联商品" prop="goodsId" min-width="240" show-overflow-tooltip>
         <template slot-scope="scope">
           <div class="goods-info-cell">
-            <div class="goods-title">{{ getGoodsName(scope.row.goodsId) }}</div>
+            <div class="goods-title">{{ getGoodsDisplayName(scope.row) }}</div>
           </div>
         </template>
       </el-table-column>
@@ -146,7 +146,6 @@
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="备注" prop="remark" min-width="180" show-overflow-tooltip />
       <el-table-column label="操作" width="140" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
           <el-button
@@ -561,16 +560,22 @@ export default {
       }, `goodsSize_${new Date().getTime()}.xlsx`)
     },
     getGoodsOptions() {
-      listGoods({ pageNum: 1, pageSize: 1000, status: '1' }).then(response => {
+      listGoods({ pageNum: 1, pageSize: 1000 }).then(response => {
         this.goodsOptions = response.rows || []
       })
     },
     formatGoodsOption(item) {
       return item.goodsCode ? `${item.goodsName}（${item.goodsCode}）` : item.goodsName
     },
+    getGoodsDisplayName(row) {
+      if (row && row.goodsName) {
+        return row.goodsCode ? `${row.goodsName}（${row.goodsCode}）` : row.goodsName
+      }
+      return this.getGoodsName(row ? row.goodsId : null)
+    },
     getGoodsName(goodsId) {
       const goods = this.goodsOptions.find(item => String(item.id) === String(goodsId))
-      return goods ? this.formatGoodsOption(goods) : goodsId
+      return goods ? this.formatGoodsOption(goods) : '--'
     },
     getOptionLabel(options, value) {
       const option = options.find(item => item.value === String(value))

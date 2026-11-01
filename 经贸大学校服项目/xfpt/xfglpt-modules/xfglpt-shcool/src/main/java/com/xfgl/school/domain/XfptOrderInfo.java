@@ -151,6 +151,17 @@ private static final long serialVersionUID = 1L;
     @Schema(description = "订单状态，0待支付 1待生产 2待发货 3待收货 4已完成 5已取消 6售后中")
     private String orderStatus;
 
+    /** 统购订购进度状态，0待查看 1供应商已查看 2制作中 3已完成 4已发货 */
+    @Excel(name = "统购订购进度状态")
+    @Schema(description = "统购订购进度状态，0待查看 1供应商已查看 2制作中 3已完成 4已发货")
+    private String progressStatus;
+
+    /** 物流单号 */
+    @Excel(name = "物流单号")
+    @Schema(description = "物流单号")
+    @TableField(exist = false)
+    private String logisticsNo;
+
     /** 支付时间 */
             @JsonFormat(pattern = "yyyy-MM-dd")
             @Excel(name = "支付时间", width = 30, dateFormat = "yyyy-MM-dd")
@@ -180,4 +191,13 @@ private static final long serialVersionUID = 1L;
 private List<XfptOrderItem> xfptOrderItemList;
 @TableField(exist = false)
 private String noticeTitle;
+@TableField(exist = false)
+@Schema(description = "结算状态，0待结算 1已结算")
+private String settlementStatus;
+@TableField(exist = false)
+@Schema(description = "结算时间")
+private Date settlementTime;
+@TableField(exist = false)
+@Schema(description = "本单可结算金额")
+private BigDecimal settlementNetAmount;
         }

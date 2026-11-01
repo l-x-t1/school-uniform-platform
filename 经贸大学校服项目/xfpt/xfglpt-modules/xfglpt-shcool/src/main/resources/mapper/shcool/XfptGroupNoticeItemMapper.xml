@@ -5,47 +5,75 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.xfgl.school.mapper.XfptGroupNoticeItemMapper">
 
     <resultMap type="XfptGroupNoticeItem" id="XfptGroupNoticeItemResult">
-        <result property="id"    column="id"    />
-        <result property="noticeId"    column="notice_id"    />
-        <result property="goodsId"    column="goods_id"    />
-        <result property="goodsName"    column="goods_name"    />
-        <result property="sizeRuleJson"    column="size_rule_json"    />
-        <result property="unitName"    column="unit_name"    />
-        <result property="buyNum"    column="buy_num"    />
-        <result property="priceDesc"    column="price_desc"    />
-        <result property="gradeIds"    column="grade_ids"    />
-        <result property="gradeNames"    column="grade_names"    />
-        <result property="deptId"    column="dept_id"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
+        <result property="id" column="id" />
+        <result property="noticeId" column="notice_id" />
+        <result property="goodsId" column="goods_id" />
+        <result property="goodsName" column="goods_name" />
+        <result property="sizeRuleJson" column="size_rule_json" />
+        <result property="unitName" column="unit_name" />
+        <result property="buyNum" column="buy_num" />
+        <result property="priceDesc" column="price_desc" />
+        <result property="gradeIds" column="grade_ids" />
+        <result property="gradeNames" column="grade_names" />
+        <result property="deptId" column="dept_id" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
+        <result property="noticeTitle" column="notice_title" />
+        <result property="noticeCode" column="notice_code" />
+        <result property="schoolName" column="school_name" />
     </resultMap>
 
     <sql id="selectXfptGroupNoticeItemVo">
-        select id, notice_id, goods_id, goods_name, size_rule_json, unit_name, buy_num, price_desc, grade_ids, grade_names, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_group_notice_item
+        select
+            i.id,
+            i.notice_id,
+            i.goods_id,
+            i.goods_name,
+            i.size_rule_json,
+            i.unit_name,
+            i.buy_num,
+            i.price_desc,
+            i.grade_ids,
+            i.grade_names,
+            i.dept_id,
+            i.create_by,
+            i.create_time,
+            i.update_by,
+            i.update_time,
+            i.remark,
+            i.del_flag,
+            n.title as notice_title,
+            n.notice_code as notice_code,
+            n.school_name as school_name
+        from xfpt_group_notice_item i
+        inner join xfpt_group_notice n on n.id = i.notice_id and n.del_flag = '0'
     </sql>
 
     <select id="selectXfptGroupNoticeItemList" parameterType="XfptGroupNoticeItem" resultMap="XfptGroupNoticeItemResult">
-        <include refid="selectXfptGroupNoticeItemVo"/>
-        <include refid="search"/>
-            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
-            <if test="goodsId != null "> and goods_id = #{goodsId}</if>
-            <if test="goodsName != null  and goodsName != ''"> and goods_name like concat('%', #{goodsName}, '%')</if>
-            <if test="unitName != null  and unitName != ''"> and unit_name like concat('%', #{unitName}, '%')</if>
-            <if test="buyNum != null "> and buy_num = #{buyNum}</if>
-            <if test="priceDesc != null  and priceDesc != ''"> and price_desc = #{priceDesc}</if>
-            <if test="gradeIds != null  and gradeIds != ''"> and grade_ids = #{gradeIds}</if>
-            <if test="gradeNames != null  and gradeNames != ''"> and grade_names = #{gradeNames}</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
-
+        <include refid="selectXfptGroupNoticeItemVo" />
+        <include refid="search" />
+        <if test="noticeId != null"> and i.notice_id = #{noticeId}</if>
+        <if test="goodsId != null"> and i.goods_id = #{goodsId}</if>
+        <if test="goodsName != null and goodsName != ''"> and i.goods_name like concat('%', #{goodsName}, '%')</if>
+        <if test="unitName != null and unitName != ''"> and i.unit_name like concat('%', #{unitName}, '%')</if>
+        <if test="buyNum != null"> and i.buy_num = #{buyNum}</if>
+        <if test="priceDesc != null and priceDesc != ''"> and i.price_desc like concat('%', #{priceDesc}, '%')</if>
+        <if test="gradeIds != null and gradeIds != ''"> and i.grade_ids like concat('%', #{gradeIds}, '%')</if>
+        <if test="gradeNames != null and gradeNames != ''"> and i.grade_names like concat('%', #{gradeNames}, '%')</if>
+        <if test="deptId != null"> and i.dept_id = #{deptId}</if>
+        <if test="noticeTitle != null and noticeTitle != ''"> and n.title like concat('%', #{noticeTitle}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and n.notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="schoolName != null and schoolName != ''"> and n.school_name like concat('%', #{schoolName}, '%')</if>
+        order by i.create_time desc, i.id desc
     </select>
 
     <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
-        <include refid="selectXfptGroupNoticeItemVo"/>
-        where id = #{id}
+        <include refid="selectXfptGroupNoticeItemVo" />
+        where i.id = #{id}
     </select>
 
     <insert id="insertXfptGroupNoticeItem" parameterType="XfptGroupNoticeItem" useGeneratedKeys="true" keyProperty="id">
@@ -121,7 +149,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
     <sql id="search">
-        where del_flag = 0
+        where i.del_flag = 0
     </sql>
 </mapper>

@@ -41,7 +41,7 @@
           </view>
           <view class="info-row">
             <text class="info-label">年级班级</text>
-            <text class="info-value"> {{ student.className }}</text>
+            <text class="info-value"> {{ student.gradeClassText }}</text>
           </view>
         </view>
 
@@ -89,14 +89,33 @@ export default {
     this.getStudentList();
   },
   methods: {
+    formatGradeClassText(grade = '', classValue = '') {
+      const nextGrade = `${grade || ''}`.trim();
+      const nextClass = `${classValue || ''}`.trim();
+
+      if (!nextGrade) return nextClass;
+      if (!nextClass) return nextGrade;
+      if (nextClass.startsWith(nextGrade)) return nextClass;
+      return `${nextGrade}${nextClass}`;
+    },
     normalizeStudent(item = {}) {
+      const grade = item.grade || item.gradeName || '';
+      const classValue = item.className || item.classId || item.class || '';
+
       return {
         id: item.id || item.studentId,
+        studentId: item.studentId || item.id || '',
         name: item.name || item.studentName || '',
         gender: item.gender || item.sex || '0',
-        grade: item.grade || item.gradeName || '',
-        className: item.className || item.class || (item.grade && item.classId ? `${item.grade}级${item.classId}班` : ''),
-        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || ''
+        grade,
+        classId: item.classId || classValue || '',
+        className: classValue,
+        gradeClassText: item.gradeClassText || this.formatGradeClassText(grade, classValue),
+        schoolId: item.schoolId || item.shcoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        shcoolId: item.shcoolId || item.schoolId || item.deptId || (item.sysDepts && item.sysDepts.deptId) || '',
+        deptId: item.deptId || item.schoolId || item.shcoolId || (item.sysDepts && item.sysDepts.deptId) || '',
+        school: item.school || item.schoolName || (item.sysDepts && item.sysDepts.deptName) || '',
+        schoolName: item.schoolName || item.school || (item.sysDepts && item.sysDepts.deptName) || ''
       };
     },
     getLocalStudents() {
@@ -113,6 +132,12 @@ export default {
           if (rows.length) {
             this.studentList = rows.map(this.normalizeStudent);
             this.saveLocalStudents(this.studentList);
+            const selectedStudent = uni.getStorageSync('selectedStudent') || {};
+            const selectedStudentId = selectedStudent.id || selectedStudent.studentId || '';
+            const matchedStudent = this.studentList.find((item) =>
+              String(item.id || item.studentId || '') === String(selectedStudentId)
+            );
+            uni.setStorageSync('selectedStudent', matchedStudent || this.studentList[0]);
             return;
           }
           this.studentList = config.enableMockFallback ? this.getLocalStudents().map(this.normalizeStudent) : [];
@@ -190,8 +215,13 @@ export default {
         return;
       }
       uni.setStorageSync("isImprove", 1);
-      uni.redirectTo({
-        url: '/pages/index/index'
+      uni.switchTab({
+        url: '/pages/index/index',
+        fail: () => {
+          uni.reLaunch({
+            url: '/pages/index/index'
+          });
+        }
       })
     }
   },

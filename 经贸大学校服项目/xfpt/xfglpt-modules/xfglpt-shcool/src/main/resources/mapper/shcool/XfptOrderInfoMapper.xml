@@ -29,6 +29,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="refundAmount"    column="refund_amount"    />
         <result property="payStatus"    column="pay_status"    />
         <result property="orderStatus"    column="order_status"    />
+        <result property="progressStatus"    column="progress_status"    />
+        <result property="logisticsNo"    column="logistics_no"    />
         <result property="payTime"    column="pay_time"    />
         <result property="cancelTime"    column="cancel_time"    />
         <result property="finishTime"    column="finish_time"    />
@@ -43,6 +45,12 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 
     <resultMap id="XfptOrderInfoXfptOrderItemResult" type="XfptOrderInfo" extends="XfptOrderInfoResult">
         <collection property="xfptOrderItemList" ofType="XfptOrderItem" column="id" select="selectXfptOrderItemById" />
+    </resultMap>
+
+    <resultMap id="XfptSettlementOrderInfoResult" type="XfptOrderInfo" extends="XfptOrderInfoResult">
+        <result property="settlementStatus" column="settlement_status" />
+        <result property="settlementTime" column="settlement_time" />
+        <result property="settlementNetAmount" column="settlement_net_amount" />
     </resultMap>
 
     <resultMap type="XfptOrderItem" id="XfptOrderItemResult">
@@ -66,8 +74,16 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         <result property="delFlag"    column="del_flag"    />
     </resultMap>
 
+    <resultMap type="XfptGroupNotice" id="GroupNoticePurchaseResult">
+        <result property="id" column="id" />
+        <result property="purchaseStartTime" column="purchase_start_time" />
+        <result property="purchaseEndTime" column="purchase_end_time" />
+        <result property="status" column="status" />
+        <result property="delFlag" column="del_flag" />
+    </resultMap>
+
     <sql id="selectXfptOrderInfoVo">
-        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_order_info
+        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, null as progress_status, null as logistics_no, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_order_info
     </sql>
 
     <select id="selectXfptOrderInfoList" parameterType="XfptOrderInfo" resultMap="XfptOrderInfoResult">
@@ -113,7 +129,7 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
     </select>
 
     <select id="selectXfptOrderInfoById" parameterType="Long" resultMap="XfptOrderInfoXfptOrderItemResult">
-        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        select id, order_no, order_type, notice_id, school_id, school_name, supplier_id, supplier_name, user_id, user_name, student_id, student_name, grade_name, class_name, address_id, receive_type, receiver_name, receiver_phone, receiver_address, total_amount, pay_amount, refund_amount, pay_status, order_status, null as progress_status, null as logistics_no, pay_time, cancel_time, finish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_order_info
         where id = #{id}
     </select>
@@ -128,6 +144,102 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         select id, order_id, goods_id, size_id, goods_name, size_name, main_image, sale_type, unit_price, buy_num, item_amount, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_order_item
         where order_id = #{order_id}
+    </select>
+
+    <select id="selectGroupNoticeForPurchase" resultMap="GroupNoticePurchaseResult">
+        select id, purchase_start_time, purchase_end_time, status, del_flag
+        from xfpt_group_notice
+        where id = #{noticeId}
+          and del_flag = '0'
+    </select>
+
+    <select id="countGroupNoticeGoods" resultType="int">
+        select count(1)
+        from xfpt_group_notice_item
+        where notice_id = #{noticeId}
+          and goods_id = #{goodsId}
+          and del_flag = '0'
+    </select>
+
+    <select id="countGoodsSupplierMatch" resultType="int">
+        select count(1)
+        from xfpt_goods
+        where id = #{goodsId}
+          and supplier_id = #{supplierId}
+          and del_flag = '0'
+    </select>
+
+    <select id="selectSettlementOrderList" resultMap="XfptSettlementOrderInfoResult">
+        select
+            o.id,
+            o.order_no,
+            o.order_type,
+            o.notice_id,
+            o.school_id,
+            o.school_name,
+            o.supplier_id,
+            o.supplier_name,
+            o.user_id,
+            o.user_name,
+            o.student_id,
+            o.student_name,
+            o.grade_name,
+            o.class_name,
+            o.address_id,
+            o.receive_type,
+            o.receiver_name,
+            o.receiver_phone,
+            o.receiver_address,
+            o.total_amount,
+            o.pay_amount,
+            o.refund_amount,
+            o.pay_status,
+            o.order_status,
+            null as progress_status,
+            null as logistics_no,
+            o.pay_time,
+            o.cancel_time,
+            o.finish_time,
+            o.dept_id,
+            o.create_by,
+            o.create_time,
+            o.update_by,
+            o.update_time,
+            o.remark,
+            o.del_flag,
+            greatest(coalesce(o.pay_amount, 0) - coalesce(o.refund_amount, 0), 0) as settlement_net_amount,
+            case when sf.last_settlement_time is null then '0' else '1' end as settlement_status,
+            sf.last_settlement_time as settlement_time
+        from xfpt_order_info o
+        inner join xfpt_school_supplier_rel sr
+            on sr.school_id = o.school_id
+           and sr.supplier_id = o.supplier_id
+           and sr.cooperate_status = '1'
+           and sr.del_flag = '0'
+        left join (
+            select
+                order_id,
+                supplier_id,
+                max(trade_time) as last_settlement_time
+            from xfpt_finance_flow
+            where del_flag = '0'
+              and business_type = '4'
+              and flow_direction = '1'
+              and payee_type = '2'
+            group by order_id, supplier_id
+        ) sf
+            on sf.order_id = o.id
+           and sf.supplier_id = o.supplier_id
+        where o.del_flag = '0'
+          and o.school_id = #{schoolId}
+          and o.supplier_id = #{supplierId}
+          and o.pay_status in ('1', '2', '3')
+          and greatest(coalesce(o.pay_amount, 0) - coalesce(o.refund_amount, 0), 0) > 0
+          and date_format(coalesce(o.pay_time, o.create_time), '%Y-%m') = #{settlementCycle}
+          <if test="deptId != null">
+              and o.dept_id = #{deptId}
+          </if>
+        order by coalesce(o.pay_time, o.create_time) desc, o.id desc
     </select>
 
     <insert id="insertXfptOrderInfo" parameterType="XfptOrderInfo" useGeneratedKeys="true" keyProperty="id">
@@ -156,6 +268,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null">refund_amount,</if>
             <if test="payStatus != null and payStatus != ''">pay_status,</if>
             <if test="orderStatus != null and orderStatus != ''">order_status,</if>
+            <if test="progressStatus != null and progressStatus != ''">progress_status,</if>
+            <if test="logisticsNo != null and logisticsNo != ''">logistics_no,</if>
             <if test="payTime != null">pay_time,</if>
             <if test="cancelTime != null">cancel_time,</if>
             <if test="finishTime != null">finish_time,</if>
@@ -191,6 +305,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null">#{refundAmount},</if>
             <if test="payStatus != null and payStatus != ''">#{payStatus},</if>
             <if test="orderStatus != null and orderStatus != ''">#{orderStatus},</if>
+            <if test="progressStatus != null and progressStatus != ''">#{progressStatus},</if>
+            <if test="logisticsNo != null and logisticsNo != ''">#{logisticsNo},</if>
             <if test="payTime != null">#{payTime},</if>
             <if test="cancelTime != null">#{cancelTime},</if>
             <if test="finishTime != null">#{finishTime},</if>
@@ -230,6 +346,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             <if test="refundAmount != null">refund_amount = #{refundAmount},</if>
             <if test="payStatus != null and payStatus != ''">pay_status = #{payStatus},</if>
             <if test="orderStatus != null and orderStatus != ''">order_status = #{orderStatus},</if>
+            <if test="progressStatus != null and progressStatus != ''">progress_status = #{progressStatus},</if>
+            <if test="logisticsNo != null">logistics_no = #{logisticsNo},</if>
             <if test="payTime != null">pay_time = #{payTime},</if>
             <if test="cancelTime != null">cancel_time = #{cancelTime},</if>
             <if test="finishTime != null">finish_time = #{finishTime},</if>

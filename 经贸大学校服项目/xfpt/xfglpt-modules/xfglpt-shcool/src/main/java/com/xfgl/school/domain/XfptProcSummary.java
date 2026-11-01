@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
@@ -33,8 +35,9 @@ public class XfptProcSummary extends BaseEntity {
     /**
      * ID
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -98,6 +101,7 @@ public class XfptProcSummary extends BaseEntity {
      */
     @Excel(name = "部门id")
     @Schema(description = "部门id")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long deptId;
 
     /**
@@ -128,6 +132,7 @@ public class XfptProcSummary extends BaseEntity {
     /**
      * 班子会议id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long teamId;
 
     /**

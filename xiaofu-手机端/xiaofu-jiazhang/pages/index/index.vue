@@ -83,30 +83,7 @@
     <!-- 公告区域 -->
     <view class="section notice-section"> 
       
-             <!-- 顶部选项卡 -->
-       <view class="notice-tabs">
-         <view
-           class="tab-item"
-           :class="{ active: currentNoticeTab === 0 }"
-           @click="switchNoticeTab(0)"
-         >
-           采购公告
-         </view>
-         <view
-           class="tab-item"
-           :class="{ active: currentNoticeTab === 1 }"
-           @click="switchNoticeTab(1)"
-         >
-           成交公告
-         </view>
-         <!-- <view
-           class="tab-item"
-           :class="{ active: currentNoticeTab === 2 }"
-           @click="switchNoticeTab(2)"
-         >
-           备选公告
-         </view> -->
-       </view>
+      <view class="notice-section-title">结果公告</view>
       
       <view class="notice-list">
         <view
@@ -134,6 +111,10 @@
 </template>
 
 <script>
+import { listOrders } from '@/api/order'
+import { listAfterSale } from '@/api/afterSale'
+import { listMyStudents } from '@/api/student'
+
 export default {
   data() {
     return {
@@ -194,10 +175,8 @@ export default {
         
       ],
       notices: [],
-      currentNoticeTab: 0, // 0: 采购公告, 1: 中标公告, 2: 备选公告
       data:{
-        status: '1',
-        noticeType: '1',
+        noticeType: '2',
         pageNum: 1,
         pageSize: 10,
         simId: uni.getStorageSync("simId"),
@@ -222,11 +201,10 @@ export default {
   },
   onLoad() {
     if (!this.checkLogin()) return;
-    this.getNoticeList();
-    this.refreshHomeStats();
+    this.initializeHome();
   },
   onShow() {
-    this.refreshHomeStats();
+    this.initializeHome();
   },
   onPullDownRefresh() {
     this.getNoticeList();
@@ -235,7 +213,9 @@ export default {
     // 检查登录状态
     checkLogin() {
       const isLoggedIn = uni.getStorageSync("isLoggedIn");
-      if (!isLoggedIn) {
+      const token = uni.getStorageSync("token");
+      if (!isLoggedIn || !token) {
+        uni.removeStorageSync("isLoggedIn");
         uni.reLaunch({
           url: "/pages/login/login",
         });
@@ -325,22 +305,60 @@ export default {
       const value = item.publishTime || item.resultPublishTime || item.createTime;
       return value ? String(value).split(' ')[0] : '暂无';
     },
-    refreshHomeStats() {
+    async initializeHome() {
+      await this.refreshStudentContext();
+      this.getNoticeList();
+      this.refreshHomeStats();
+    },
+    async refreshStudentContext() {
+      const simId = uni.getStorageSync('simId');
+      if (!simId) {
+        return;
+      }
+      try {
+        const res = await listMyStudents({ simId, pageNum: 1, pageSize: 50 });
+        const rows = res.rows || [];
+        if (!rows.length) {
+          return;
+        }
+        uni.setStorageSync('studentList', rows);
+        const selectedStudent = uni.getStorageSync('selectedStudent') || {};
+        const selectedStudentId = selectedStudent.id || selectedStudent.studentId || '';
+        const matchedStudent = rows.find((item) =>
+          String(item.id || item.studentId || '') === String(selectedStudentId)
+        );
+        uni.setStorageSync('selectedStudent', matchedStudent || rows[0]);
+      } catch (error) {
+        console.warn('刷新学生上下文失败', error);
+      }
+    },
+    async refreshHomeStats() {
       this.studentCount = (uni.getStorageSync('studentList') || []).length;
       this.cartCount = (uni.getStorageSync('cartList') || []).reduce((sum, item) => sum + Number(item.quantity || 1), 0);
-      const localOrders = uni.getStorageSync('devOrders') || {};
-      this.unpaidCount = Object.keys(localOrders).filter((key) => ['unpaid', 'unshipped'].includes(localOrders[key].status)).length;
+      try {
+        const [unpaidRes, unshippedRes, shippedRes, afterSaleRes] = await Promise.all([
+          listOrders({ status: 'unpaid', pageNum: 1, pageSize: 1 }),
+          listOrders({ status: 'unshipped', pageNum: 1, pageSize: 1 }),
+          listOrders({ status: 'shipped', pageNum: 1, pageSize: 1 }),
+          listAfterSale({ pageNum: 1, pageSize: 200 })
+        ]);
+
+        const afterSaleCount = (afterSaleRes.rows || []).filter((item) =>
+          ['0', '1', '3'].includes(String(item.status || '0'))
+        ).length;
+
+        this.unpaidCount =
+          Number(unpaidRes.total || 0) +
+          Number(unshippedRes.total || 0) +
+          Number(shippedRes.total || 0) +
+          afterSaleCount;
+      } catch (error) {
+        const localOrders = uni.getStorageSync('devOrders') || {};
+        const pendingStatuses = ['unpaid', 'unshipped', 'shipped', 'afterSale'];
+        this.unpaidCount = Object.keys(localOrders).filter((key) => pendingStatuses.includes(localOrders[key].status)).length;
+      }
     },
     
-    // 切换公告标签
-    switchNoticeTab(index) {
-      this.currentNoticeTab = index;
-      this.data.noticeType = index === 0 ? '1' : '2';
-      this.data.status = index === 0 ? '1' : '2';
-      this.data.pageNum = 1;
-      this.data.pageSize = 10;
-      this.getNoticeList();
-    },
     // 查看选购流程详情
     viewProcessDetail(step) {
       // 根据不同步骤跳转到对应的详情页
@@ -607,48 +625,11 @@ export default {
   }
 }
 
-// 公告选项卡
-.notice-tabs {
-  display: flex;
-  height: 88rpx;
-  background-color: #fff;
-  border-bottom: 1rpx solid #e8eaed;
-  position: relative;
-  box-shadow: 0 2rpx 8rpx rgba(0, 0, 0, 0.04);
-
-  .tab-item {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-size: 28rpx;
-    color: #666;
-    position: relative;
-    transition: all 0.3s ease;
-    font-weight: 400;
-
-    &.active {
-      color: #3b7aff;
-      font-weight: 600;
-
-      &::after {
-        content: "";
-        position: absolute;
-        bottom: 0;
-        left: 50%;
-        transform: translateX(-50%);
-        width: 48rpx;
-        height: 4rpx;
-        background-color: #3b7aff;
-        border-radius: 2rpx;
-        transition: all 0.3s ease;
-      }
-    }
-
-    &:active {
-      opacity: 0.7;
-    }
-  }
+.notice-section-title {
+  padding: 24rpx 30rpx 12rpx;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #3b7aff;
 }
 
 .notice-list {

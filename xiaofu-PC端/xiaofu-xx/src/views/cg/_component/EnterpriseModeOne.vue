@@ -51,6 +51,17 @@
               ></file-upload
             >
           </el-form-item>
+          <el-form-item label="报名上限" prop="signupLimit">
+            <el-input-number
+              v-model="form.signupLimit"
+              :min="1"
+              :precision="0"
+              :disabled="readOnly"
+              placeholder="请输入报名上限"
+              style="width: 220px"
+            />
+            <div class="upload-tip">供应商报名人数达到上限后，将禁止继续报名。</div>
+          </el-form-item>
           <el-form-item
             label="其他文件"
             prop="otherFile"
@@ -198,6 +209,9 @@ export default {
         noticeFile: [
           { required: true, message: "请上传采购公告", trigger: "blur" },
         ],
+        signupLimit: [
+          { required: true, message: "请输入报名上限", trigger: "change" },
+        ],
         isRelease: [
           { required: true, message: "请选择是否发布", trigger: "blur" },
         ],
@@ -258,6 +272,7 @@ export default {
         remark: null,
         otherFile: null,
         noticeFile: null,
+        signupLimit: 1,
         isRelease: null,
       };
       this.resetForm("form");

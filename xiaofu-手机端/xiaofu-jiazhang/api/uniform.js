@@ -17,6 +17,9 @@ function normalizeGoods(item = {}) {
     price: item.salePrice || item.price || item.minPrice || '',
     salePrice: item.salePrice || item.price || item.minPrice || '',
     salesCount: item.saleCount || item.salesCount || item.buyCount || '',
+    noticeId: item.noticeId || null,
+    purchaseStartTime: item.purchaseStartTime || '',
+    purchaseEndTime: item.purchaseEndTime || '',
     categoryName: item.categoryName || '',
     goodsCode: item.goodsCode || '',
     supplierId: item.supplierId || '',
@@ -34,14 +37,70 @@ function normalizeGoods(item = {}) {
   }
 }
 
+function resolveCurrentStudent(params = {}) {
+  const selectedStudent = uni.getStorageSync('selectedStudent') || {}
+  const studentList = uni.getStorageSync('studentList') || []
+  const fallbackStudent = studentList[0] || {}
+  const selectedStudentId = selectedStudent.id || selectedStudent.studentId || ''
+
+  if (params.studentId) {
+    const matchedStudent = studentList.find((item) =>
+      String(item.id || item.studentId || '') === String(params.studentId)
+    )
+    if (matchedStudent) {
+      return matchedStudent
+    }
+  }
+
+  if (selectedStudentId) {
+    const matchedSelectedStudent = studentList.find((item) =>
+      String(item.id || item.studentId || '') === String(selectedStudentId)
+    )
+    if (matchedSelectedStudent) {
+      return matchedSelectedStudent
+    }
+  }
+
+  return selectedStudentId && studentList.length === 0 ? selectedStudent : fallbackStudent
+}
+
+function resolveCurrentSchoolId(params = {}) {
+  const currentStudent = resolveCurrentStudent(params)
+  const schoolId = Number(
+    params.schoolId ||
+    currentStudent.schoolId ||
+    currentStudent.shcoolId ||
+    currentStudent.deptId ||
+    0
+  )
+
+  return Number.isNaN(schoolId) || schoolId <= 0 ? '' : schoolId
+}
+
+function resolveCurrentSimId(params = {}) {
+  return `${params.simId || uni.getStorageSync('simId') || ''}`.trim()
+}
+
 function buildGoodsParams(params = {}) {
-  return {
+  const schoolId = resolveCurrentSchoolId(params)
+  const simId = resolveCurrentSimId(params)
+  const query = {
     pageNum: params.pageNum,
     pageSize: params.pageSize,
     goodsName: params.keyword || params.goodsName || '',
     saleType: params.saleType || '',
+    groupPurchasable: '1',
     status: '1'
   }
+
+  if (simId) {
+    query.simId = simId
+  }
+  if (schoolId) {
+    query.schoolId = schoolId
+  }
+
+  return query
 }
 
 export function listUniforms(params = {}) {
@@ -56,9 +115,15 @@ export function listUniforms(params = {}) {
 }
 
 export function getUniform(id) {
+  const schoolId = resolveCurrentSchoolId()
+  const simId = resolveCurrentSimId()
   return request({
     url: `/school/goods/${id}`,
-    method: 'GET'
+    method: 'GET',
+    params: {
+      simId,
+      schoolId
+    }
   }).then((res) => ({
     ...res,
     data: normalizeGoods(res.data || res)

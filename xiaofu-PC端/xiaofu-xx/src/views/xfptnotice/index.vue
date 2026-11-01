@@ -130,6 +130,7 @@
         </template>
       </el-table-column>
       <el-table-column label="发布时间" align="center" prop="createTime" />
+      <el-table-column label="截止时间" align="center" prop="endTime" />
       <el-table-column label="发布状态" align="center" prop="status">
         <template slot-scope="scope">
           <dict-tag
@@ -191,6 +192,16 @@
         <el-form-item label="内容">
           <!-- <editor v-model="form.content" :min-height="192"/> -->
           <wangEditor v-model="form.content" :height="500" />
+        </el-form-item>
+        <el-form-item label="截止时间" prop="endTime">
+          <el-date-picker
+            v-model="form.endTime"
+            type="datetime"
+            value-format="yyyy-MM-dd HH:mm:ss"
+            placeholder="请选择截止时间"
+            clearable
+            style="width: 100%"
+          />
         </el-form-item>
         <el-form-item label="发布状态" prop="status">
           <el-radio-group v-model="form.status">
@@ -347,6 +358,7 @@ export default {
         title: null,
         content: null,
         createTime: null,
+        endTime: null,
         updateBy: null,
         updateTime: null,
         delFlag: null,

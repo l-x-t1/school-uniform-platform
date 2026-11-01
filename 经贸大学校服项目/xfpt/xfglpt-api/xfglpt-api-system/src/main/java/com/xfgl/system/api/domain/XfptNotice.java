@@ -1,12 +1,16 @@
 package com.xfgl.system.api.domain;
 
 import com.baomidou.mybatisplus.annotation.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.experimental.Accessors;
 import lombok.*;
 import com.xfgl.common.core.annotation.Excel;
 import com.xfgl.common.core.web.domain.BaseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 
 /**
  * 首页公告对象 xfpt_notice
@@ -28,8 +32,9 @@ public class XfptNotice extends BaseEntity {
     /**
      * 主键ID
      */
-    @TableId(type = IdType.AUTO)
+    @TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "主键ID")
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long id;
 
     /**
@@ -45,6 +50,15 @@ public class XfptNotice extends BaseEntity {
     @Excel(name = "内容")
     @Schema(description = "内容")
     private String content;
+
+    /**
+     * 截止时间
+     */
+    @Excel(name = "截止时间", width = 20, dateFormat = "yyyy-MM-dd HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @Schema(description = "截止时间")
+    private java.util.Date endTime;
 
 
     /**
@@ -93,16 +107,19 @@ public class XfptNotice extends BaseEntity {
     /**
      * 选购公告id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long enteId;
 
     /**
      * 阅读量
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long readCount;
 
     /**
      * 发布人id
      */
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long userId;
 
     /**
@@ -133,6 +150,7 @@ public class XfptNotice extends BaseEntity {
     private String isBc;
 
     @TableField(exist = false)
+    @JsonSerialize(using = ToStringSerializer.class)
     private Long simId;
 
 }

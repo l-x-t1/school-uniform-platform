@@ -354,7 +354,7 @@ export default {
       const textMap = {
         'unpaid': '待付款',
         'unshipped': '待发货',
-        'shipped': '运输中',
+        'shipped': '待收货',
         'afterSale': '售后中',
         'completed': '已完成',
         'cancelled': '已取消',
@@ -369,7 +369,7 @@ export default {
       const descMap = {
         'unpaid': '请在24小时内完成支付',
         'unshipped': '商家正在处理您的订单',
-        'shipped': '校服已发出，请注意查收',
+        'shipped': '订单已进入待收货状态，请注意查收',
         'afterSale': '售后申请已提交，请查看售后处理进度',
         'completed': '感谢您的购买，欢迎再次选购',
         'cancelled': '订单已取消',

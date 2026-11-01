@@ -1,6 +1,8 @@
 package com.xfgl.school.service;
 import java.util.List;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.xfgl.school.domain.XfptDeliveryOrder;
+import com.xfgl.school.domain.XfptGroupNotice;
 import com.xfgl.school.domain.XfptProductionOrder;
 
 /**
@@ -52,12 +54,27 @@ public interface IXfptProductionOrderService extends IService<XfptProductionOrde
         public int finishProductionOrder(Long id);
 
         /**
-         * 根据生产单生成发货单
+         * 根据生产单构建发货单预填数据
          *
          * @param id 生产单主键
-         * @return 生成的发货单主键
+         * @return 发货单预填数据
          */
-        public Long generateDeliveryOrder(Long id);
+        public XfptDeliveryOrder generateDeliveryOrder(Long id);
+
+        /**
+         * 查询当前用户可选择的统购公告
+         *
+         * @return 统购公告集合
+         */
+        public List<XfptGroupNotice> selectProductionNoticeOptions();
+
+        /**
+         * 查询统购公告详情，并校验当前用户是否可用于创建生产单
+         *
+         * @param noticeId 公告主键
+         * @return 统购公告
+         */
+        public XfptGroupNotice selectProductionNoticeDetail(Long noticeId);
 
         /**
          * 批量删除生产单

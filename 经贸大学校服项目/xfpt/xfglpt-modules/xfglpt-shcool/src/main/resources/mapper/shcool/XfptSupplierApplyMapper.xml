@@ -5,56 +5,223 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
 <mapper namespace="com.xfgl.school.mapper.XfptSupplierApplyMapper">
 
     <resultMap type="XfptSupplierApply" id="XfptSupplierApplyResult">
-        <result property="id"    column="id"    />
-        <result property="noticeId"    column="notice_id"    />
-        <result property="schoolId"    column="school_id"    />
-        <result property="supplierId"    column="supplier_id"    />
-        <result property="supplierName"    column="supplier_name"    />
-        <result property="applyNo"    column="apply_no"    />
-        <result property="applyStatus"    column="apply_status"    />
-        <result property="qualificationStatus"    column="qualification_status"    />
-        <result property="bidStageStatus"    column="bid_stage_status"    />
-        <result property="bidResultStatus"    column="bid_result_status"    />
-        <result property="applyTime"    column="apply_time"    />
-        <result property="auditTime"    column="audit_time"    />
-        <result property="auditRemark"    column="audit_remark"    />
-        <result property="applyFilesJson"    column="apply_files_json"    />
-        <result property="compareFilesJson"    column="compare_files_json"    />
-        <result property="deptId"    column="dept_id"    />
-        <result property="createBy"    column="create_by"    />
-        <result property="createTime"    column="create_time"    />
-        <result property="updateBy"    column="update_by"    />
-        <result property="updateTime"    column="update_time"    />
-        <result property="remark"    column="remark"    />
-        <result property="delFlag"    column="del_flag"    />
+        <result property="id" column="id" />
+        <result property="noticeId" column="notice_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="supplierName" column="supplier_name" />
+        <result property="applyNo" column="apply_no" />
+        <result property="applyStatus" column="apply_status" />
+        <result property="qualificationStatus" column="qualification_status" />
+        <result property="bidStageStatus" column="bid_stage_status" />
+        <result property="bidResultStatus" column="bid_result_status" />
+        <result property="applyTime" column="apply_time" />
+        <result property="auditTime" column="audit_time" />
+        <result property="auditRemark" column="audit_remark" />
+        <result property="applyFilesJson" column="apply_files_json" />
+        <result property="compareFilesJson" column="compare_files_json" />
+        <result property="deptId" column="dept_id" />
+        <result property="createBy" column="create_by" />
+        <result property="createTime" column="create_time" />
+        <result property="updateBy" column="update_by" />
+        <result property="updateTime" column="update_time" />
+        <result property="remark" column="remark" />
+        <result property="delFlag" column="del_flag" />
+        <result property="noticeTitle" column="notice_title" />
+        <result property="noticeCode" column="notice_code" />
+        <result property="schoolName" column="school_name" />
+        <result property="bmjzTime" column="bmjz_time" />
+        <result property="signupLimit" column="signup_limit" />
+        <result property="isSamplesPic" column="is_samples_pic" />
+        <result property="samplesPic" column="samples_pic" />
+        <result property="noticeFile" column="notice_file" />
+        <result property="otherFile" column="other_file" />
+        <result property="publicNoticeId" column="public_notice_id" />
+        <result property="statusText" column="status_text" />
+    </resultMap>
+
+    <resultMap type="com.xfgl.school.domain.vo.SupplierApplyNoticeVo" id="SupplierApplyNoticeVoResult">
+        <result property="noticeId" column="notice_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="noticeTitle" column="notice_title" />
+        <result property="noticeCode" column="notice_code" />
+        <result property="schoolName" column="school_name" />
+        <result property="bmjzTime" column="bmjz_time" />
+        <result property="signupLimit" column="signup_limit" />
+        <result property="signupCount" column="signup_count" />
+        <result property="isSamplesPic" column="is_samples_pic" />
+        <result property="samplesPic" column="samples_pic" />
+        <result property="noticeFile" column="notice_file" />
+        <result property="otherFile" column="other_file" />
+        <result property="applyId" column="apply_id" />
+        <result property="applyStatus" column="apply_status" />
+        <result property="qualificationStatus" column="qualification_status" />
+        <result property="statusText" column="status_text" />
     </resultMap>
 
     <sql id="selectXfptSupplierApplyVo">
-        select id, notice_id, school_id, supplier_id, supplier_name, apply_no, apply_status, qualification_status, bid_stage_status, bid_result_status, apply_time, audit_time, audit_remark, apply_files_json, compare_files_json, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_supplier_apply
+        select
+            a.id,
+            a.notice_id,
+            a.school_id,
+            a.supplier_id,
+            a.supplier_name,
+            a.apply_no,
+            a.apply_status,
+            a.qualification_status,
+            a.bid_stage_status,
+            a.bid_result_status,
+            a.apply_time,
+            a.audit_time,
+            a.audit_remark,
+            a.apply_files_json,
+            a.compare_files_json,
+            a.dept_id,
+            a.create_by,
+            a.create_time,
+            a.update_by,
+            a.update_time,
+            a.remark,
+            a.del_flag,
+            m.title as notice_title,
+            concat('CG-', m.id) as notice_code,
+            d.dept_name as school_name,
+            m.bmjz_time,
+            m.signup_limit,
+            m.is_samples_pic,
+            m.samples_pic,
+            m.notice_file,
+            m.other_file,
+            (
+                select max(n.id)
+                from xfpt_notice n
+                where n.ente_id = a.notice_id
+                  and n.catagory = 'CGGG'
+                  and n.type = '0'
+                  and n.status = '1'
+                  and n.del_flag = '0'
+            ) as public_notice_id,
+            case
+                when a.apply_status = '2' then '已撤回'
+                when a.qualification_status = '1' then '已通过'
+                when a.qualification_status = '2' then '已驳回'
+                when a.apply_status = '1' then '待审核'
+                else '待提交'
+            end as status_text
+        from xfpt_supplier_apply a
+        left join xfpt_organization_mode m on m.id = a.notice_id and m.del_flag = '0'
+        left join sys_dept d on d.dept_id = m.dept_id and d.del_flag = '0'
     </sql>
 
     <select id="selectXfptSupplierApplyList" parameterType="XfptSupplierApply" resultMap="XfptSupplierApplyResult">
-        <include refid="selectXfptSupplierApplyVo"/>
-        <include refid="search"/>
-            <if test="noticeId != null "> and notice_id = #{noticeId}</if>
-            <if test="schoolId != null "> and school_id = #{schoolId}</if>
-            <if test="supplierId != null "> and supplier_id = #{supplierId}</if>
-            <if test="supplierName != null  and supplierName != ''"> and supplier_name like concat('%', #{supplierName}, '%')</if>
-            <if test="applyNo != null  and applyNo != ''"> and apply_no like concat('%', #{applyNo}, '%')</if>
-            <if test="applyStatus != null  and applyStatus != ''"> and apply_status = #{applyStatus}</if>
-            <if test="qualificationStatus != null  and qualificationStatus != ''"> and qualification_status = #{qualificationStatus}</if>
-            <if test="bidStageStatus != null  and bidStageStatus != ''"> and bid_stage_status = #{bidStageStatus}</if>
-            <if test="bidResultStatus != null  and bidResultStatus != ''"> and bid_result_status = #{bidResultStatus}</if>
-            <if test="applyTime != null "> and apply_time = #{applyTime}</if>
-            <if test="auditTime != null "> and audit_time = #{auditTime}</if>
-            <if test="auditRemark != null  and auditRemark != ''"> and audit_remark = #{auditRemark}</if>
-            <if test="deptId != null "> and dept_id = #{deptId}</if>
-
+        <include refid="selectXfptSupplierApplyVo" />
+        <include refid="search" />
+        <if test="noticeId != null"> and a.notice_id = #{noticeId}</if>
+        <if test="schoolId != null"> and a.school_id = #{schoolId}</if>
+        <if test="supplierId != null"> and a.supplier_id = #{supplierId}</if>
+        <if test="supplierName != null and supplierName != ''"> and a.supplier_name like concat('%', #{supplierName}, '%')</if>
+        <if test="applyNo != null and applyNo != ''"> and a.apply_no like concat('%', #{applyNo}, '%')</if>
+        <if test="applyStatus != null and applyStatus != ''"> and a.apply_status = #{applyStatus}</if>
+        <if test="qualificationStatus != null and qualificationStatus != ''"> and a.qualification_status = #{qualificationStatus}</if>
+        <if test="bidStageStatus != null and bidStageStatus != ''"> and a.bid_stage_status = #{bidStageStatus}</if>
+        <if test="bidResultStatus != null and bidResultStatus != ''"> and a.bid_result_status = #{bidResultStatus}</if>
+        <if test="applyTime != null"> and date_format(a.apply_time, '%Y-%m-%d') = date_format(#{applyTime}, '%Y-%m-%d')</if>
+        <if test="auditTime != null"> and date_format(a.audit_time, '%Y-%m-%d') = date_format(#{auditTime}, '%Y-%m-%d')</if>
+        <if test="auditRemark != null and auditRemark != ''"> and a.audit_remark like concat('%', #{auditRemark}, '%')</if>
+        <if test="deptId != null"> and a.dept_id = #{deptId}</if>
+        <if test="noticeTitle != null and noticeTitle != ''"> and m.title like concat('%', #{noticeTitle}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and concat('CG-', m.id) like concat('%', #{noticeCode}, '%')</if>
+        <if test="schoolName != null and schoolName != ''"> and d.dept_name like concat('%', #{schoolName}, '%')</if>
+        order by a.create_time desc, a.id desc
     </select>
 
     <select id="selectXfptSupplierApplyById" parameterType="Long" resultMap="XfptSupplierApplyResult">
-        <include refid="selectXfptSupplierApplyVo"/>
-        where id = #{id}
+        <include refid="selectXfptSupplierApplyVo" />
+        where a.id = #{id}
+    </select>
+
+    <select id="selectSupplierApplyByNoticeIdAndSupplierId" resultMap="XfptSupplierApplyResult">
+        <include refid="selectXfptSupplierApplyVo" />
+        where a.notice_id = #{noticeId}
+          and a.supplier_id = #{supplierId}
+          and a.del_flag = '0'
+        order by a.id desc
+        limit 1
+    </select>
+
+    <select id="selectNoticeOverviewById" resultMap="SupplierApplyNoticeVoResult">
+        select
+            m.id as notice_id,
+            m.dept_id as school_id,
+            m.title as notice_title,
+            concat('CG-', m.id) as notice_code,
+            d.dept_name as school_name,
+            m.bmjz_time,
+            m.signup_limit,
+            (
+                select count(1)
+                from xfpt_supplier_apply sa
+                where sa.notice_id = m.id
+                  and sa.del_flag = '0'
+                  and sa.apply_status != '2'
+            ) as signup_count,
+            m.is_samples_pic,
+            m.samples_pic,
+            m.notice_file,
+            m.other_file
+        from xfpt_organization_mode m
+        left join sys_dept d on d.dept_id = m.dept_id and d.del_flag = '0'
+        where m.id = #{noticeId}
+          and m.del_flag = '0'
+    </select>
+
+    <select id="selectSupplierNoticeCenterList" resultMap="SupplierApplyNoticeVoResult">
+        select
+            m.id as notice_id,
+            m.dept_id as school_id,
+            m.title as notice_title,
+            concat('CG-', m.id) as notice_code,
+            d.dept_name as school_name,
+            m.bmjz_time,
+            m.signup_limit,
+            (
+                select count(1)
+                from xfpt_supplier_apply sa
+                where sa.notice_id = m.id
+                  and sa.del_flag = '0'
+                  and sa.apply_status != '2'
+            ) as signup_count,
+            m.is_samples_pic,
+            m.samples_pic,
+            m.notice_file,
+            m.other_file,
+            a.id as apply_id,
+            a.apply_status,
+            a.qualification_status,
+            case
+                when a.id is null then '未报名'
+                when a.apply_status = '2' then '已撤回'
+                when a.qualification_status = '1' then '已通过'
+                when a.qualification_status = '2' then '已驳回'
+                when a.apply_status = '1' then '待审核'
+                else '待提交'
+            end as status_text
+        from xfpt_organization_mode m
+        left join sys_dept d on d.dept_id = m.dept_id and d.del_flag = '0'
+        left join xfpt_supplier_apply a
+               on a.notice_id = m.id
+              and a.supplier_id = #{supplierId}
+              and a.del_flag = '0'
+        where m.del_flag = '0'
+          and m.is_release = '1'
+          and (m.bmjz_time is null or date(m.bmjz_time) >= curdate())
+        <if test="query != null and query.noticeTitle != null and query.noticeTitle != ''">
+            and m.title like concat('%', #{query.noticeTitle}, '%')
+        </if>
+        <if test="query != null and query.schoolName != null and query.schoolName != ''">
+            and d.dept_name like concat('%', #{query.schoolName}, '%')
+        </if>
+        order by m.create_time desc, m.id desc
     </select>
 
     <insert id="insertXfptSupplierApply" parameterType="XfptSupplierApply" useGeneratedKeys="true" keyProperty="id">
@@ -145,7 +312,8 @@ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
             #{id}
         </foreach>
     </delete>
+
     <sql id="search">
-        where del_flag = 0
+        where a.del_flag = 0
     </sql>
 </mapper>

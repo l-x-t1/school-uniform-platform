@@ -101,14 +101,20 @@
       <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
     </el-row>
 
-    <el-table v-loading="loading" :data="orderItemList" @selection-change="handleSelectionChange">
+    <el-table
+      v-loading="loading"
+      :data="orderItemList"
+      row-key="id"
+      table-layout="fixed"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" align="center" />
       <el-table-column label="订单号" align="center" prop="orderNo" />
       <el-table-column label="商品名称" align="center" prop="goodsName" />
       <el-table-column label="尺码名称" align="center" prop="sizeName" />
       <el-table-column label="商品主图" align="center" prop="mainImage" width="100">
         <template slot-scope="scope">
-          <image-preview :src="scope.row.mainImage" :width="50" :height="50"/>
+          <image-preview :src="scope.row.mainImage" :width="50" :height="50" :hover-scale="false" />
         </template>
       </el-table-column>
       <el-table-column label="销售类型，1统购 2零售 3统购零售" align="center" prop="saleType" />

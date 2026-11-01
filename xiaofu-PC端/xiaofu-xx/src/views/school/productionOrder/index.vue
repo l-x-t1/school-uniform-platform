@@ -1,101 +1,20 @@
 <template>
-  <div class="app-container">
-    <div v-if="false">
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">
+  <div class="app-container business-page">
+    <el-form
+      v-show="showSearch"
+      ref="queryForm"
+      :model="queryParams"
+      :inline="true"
+      size="small"
+      label-width="96px"
+      class="query-form"
+    >
       <el-form-item label="生产单号" prop="productionNo">
         <el-input
           v-model="queryParams.productionNo"
           placeholder="请输入生产单号"
           clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="统购公告ID" prop="noticeId">
-        <el-input
-          v-model="queryParams.noticeId"
-          placeholder="请输入统购公告ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单ID" prop="orderId">
-        <el-input
-          v-model="queryParams.orderId"
-          placeholder="请输入订单ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="订单号快照" prop="orderNo">
-        <el-input
-          v-model="queryParams.orderNo"
-          placeholder="请输入订单号快照"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="学校ID" prop="schoolId">
-        <el-input
-          v-model="queryParams.schoolId"
-          placeholder="请输入学校ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="供应商ID" prop="supplierId">
-        <el-input
-          v-model="queryParams.supplierId"
-          placeholder="请输入供应商ID"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item label="计划完成时间" prop="plannedFinishTime">
-        <el-date-picker clearable
-          v-model="queryParams.plannedFinishTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择计划完成时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="开始生产时间" prop="startTime">
-        <el-date-picker clearable
-          v-model="queryParams.startTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择开始生产时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="生产完成时间" prop="finishTime">
-        <el-date-picker clearable
-          v-model="queryParams.finishTime"
-          type="date"
-          value-format="yyyy-MM-dd"
-          placeholder="请选择生产完成时间">
-        </el-date-picker>
-      </el-form-item>
-      <el-form-item label="当前归属部门/学校" prop="deptId">
-        <el-input
-          v-model="queryParams.deptId"
-          placeholder="请输入当前归属部门/学校"
-          clearable
-          @keyup.enter.native="handleQuery"
-        />
-      </el-form-item>
-      <el-form-item>
-        <el-button type="primary" icon="el-icon-search" size="mini" @click="handleQuery">搜索</el-button>
-        <el-button icon="el-icon-refresh" size="mini" @click="resetQuery">重置</el-button>
-      </el-form-item>
-    </el-form>
-
-    </div>
-
-    <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="96px">
-      <el-form-item label="生产单号" prop="productionNo">
-        <el-input
-          v-model="queryParams.productionNo"
-          placeholder="请输入生产单号"
-          clearable
+          style="width: 220px"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
@@ -104,15 +23,59 @@
           v-model="queryParams.orderNo"
           placeholder="请输入订单号"
           clearable
+          style="width: 220px"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="公告编号" prop="noticeCode">
+        <el-input
+          v-model="queryParams.noticeCode"
+          placeholder="请输入公告编号"
+          clearable
+          style="width: 220px"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="公告标题" prop="noticeTitle">
+        <el-input
+          v-model="queryParams.noticeTitle"
+          placeholder="请输入公告标题"
+          clearable
+          style="width: 220px"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="学校名称" prop="schoolName">
+        <el-input
+          v-model="queryParams.schoolName"
+          placeholder="请输入学校名称"
+          clearable
+          style="width: 220px"
+          @keyup.enter.native="handleQuery"
+        />
+      </el-form-item>
+      <el-form-item label="供应商名称" prop="supplierName">
+        <el-input
+          v-model="queryParams.supplierName"
+          placeholder="请输入供应商名称"
+          clearable
+          style="width: 220px"
           @keyup.enter.native="handleQuery"
         />
       </el-form-item>
       <el-form-item label="生产状态" prop="status">
-        <el-select v-model="queryParams.status" placeholder="请选择生产状态" clearable>
-          <el-option label="待生产" value="0" />
-          <el-option label="生产中" value="1" />
-          <el-option label="生产完成" value="2" />
-          <el-option label="已生成发货单" value="3" />
+        <el-select
+          v-model="queryParams.status"
+          placeholder="请选择生产状态"
+          clearable
+          style="width: 220px"
+        >
+          <el-option
+            v-for="item in statusOptions"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
         </el-select>
       </el-form-item>
       <el-form-item label="计划完成时间" prop="plannedFinishTime">
@@ -122,6 +85,7 @@
           type="date"
           value-format="yyyy-MM-dd"
           placeholder="请选择计划完成时间"
+          style="width: 220px"
         />
       </el-form-item>
       <el-form-item label="开始生产时间" prop="startTime">
@@ -131,6 +95,7 @@
           type="date"
           value-format="yyyy-MM-dd"
           placeholder="请选择开始生产时间"
+          style="width: 220px"
         />
       </el-form-item>
       <el-form-item label="生产完成时间" prop="finishTime">
@@ -140,6 +105,7 @@
           type="date"
           value-format="yyyy-MM-dd"
           placeholder="请选择生产完成时间"
+          style="width: 220px"
         />
       </el-form-item>
       <el-form-item>
@@ -152,314 +118,475 @@
       <el-col :span="1.5">
         <el-button
           v-if="activeOrderType === '1'"
+          v-hasPermi="['school:productionOrder:add']"
           type="primary"
           plain
           icon="el-icon-plus"
           size="mini"
           @click="handleAdd"
-          v-hasPermi="['school:productionOrder:add']"
         >新增</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
-          type="success"
-          plain
-          icon="el-icon-edit"
-          size="mini"
-          :disabled="single"
-          v-if="false"
-          @click="handleUpdate"
           v-hasPermi="['school:productionOrder:edit']"
-        >修改</el-button>
-      </el-col>
-      <el-col :span="1.5">
-        <el-button
           type="success"
           plain
           icon="el-icon-check"
           size="mini"
           :disabled="single || !selectedCanFinish"
           @click="handleFinishSelected"
-          v-hasPermi="['school:productionOrder:edit']"
         >生产完成</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:productionOrder:edit']"
           type="warning"
           plain
           icon="el-icon-truck"
           size="mini"
           :disabled="single || !selectedCanGenerateDelivery"
           @click="handleGenerateDeliverySelected"
-          v-hasPermi="['school:productionOrder:edit']"
         >生成发货单</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:productionOrder:remove']"
           type="danger"
           plain
           icon="el-icon-delete"
           size="mini"
           :disabled="multiple"
           @click="handleDelete"
-          v-hasPermi="['school:productionOrder:remove']"
         >删除</el-button>
       </el-col>
       <el-col :span="1.5">
         <el-button
+          v-hasPermi="['school:productionOrder:export']"
           type="warning"
           plain
           icon="el-icon-download"
           size="mini"
           @click="handleExport"
-          v-hasPermi="['school:productionOrder:export']"
         >导出</el-button>
       </el-col>
-      <right-toolbar :showSearch.sync="showSearch" @queryTable="getList"></right-toolbar>
+      <right-toolbar :show-search.sync="showSearch" @queryTable="getList" />
     </el-row>
 
     <el-tabs v-model="activeOrderType" @tab-click="handleOrderTypeTabChange">
       <el-tab-pane label="统购" name="1" />
     </el-tabs>
 
-    <el-table v-loading="loading" :data="productionOrderList" @selection-change="handleSelectionChange">
+    <el-table
+      v-loading="loading"
+      :data="productionOrderList"
+      border
+      class="business-table"
+      @selection-change="handleSelectionChange"
+    >
       <el-table-column type="selection" width="55" align="center" />
-      <el-table-column label="生产单号" align="center" prop="productionNo" />
-      <el-table-column label="订单号快照" align="center" prop="orderNo" />
-      <el-table-column label="订单类型" align="center" prop="orderType">
+      <el-table-column label="生产单号" prop="productionNo" min-width="150" show-overflow-tooltip />
+      <el-table-column label="公告信息" min-width="280">
         <template slot-scope="scope">
-          <el-tag size="mini" :type="String(scope.row.orderType) === '1' ? 'warning' : 'success'">
-            {{ formatOrderType(scope.row.orderType) }}
+          <div class="info-cell">
+            <div class="info-title">{{ formatValue(scope.row.noticeTitle) }}</div>
+            <div class="info-subline">公告编号：{{ formatValue(scope.row.noticeCode) }}</div>
+          </div>
+        </template>
+      </el-table-column>
+      <el-table-column label="订单号" prop="orderNo" min-width="160" show-overflow-tooltip />
+      <el-table-column label="学校名称" prop="schoolName" min-width="180" show-overflow-tooltip />
+      <el-table-column label="供应商名称" prop="supplierName" min-width="180" show-overflow-tooltip />
+      <el-table-column label="状态" width="120" align="center">
+        <template slot-scope="scope">
+          <el-tag size="mini" :type="getOptionTagType(statusOptions, scope.row.status)">
+            {{ getOptionLabel(statusOptions, scope.row.status) }}
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="状态" align="center" prop="status">
-        <template slot-scope="scope">
-          <el-tag size="mini" :type="getStatusTagType(scope.row.status)">
-            {{ formatProductionStatus(scope.row.status) }}
-          </el-tag>
-        </template>
+      <el-table-column label="计划完成时间" width="120" align="center">
+        <template slot-scope="scope">{{ formatDate(scope.row.plannedFinishTime) }}</template>
       </el-table-column>
-      <el-table-column label="计划完成时间" align="center" prop="plannedFinishTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.plannedFinishTime, '{y}-{m}-{d}') }}</span>
-        </template>
+      <el-table-column label="开始生产时间" width="120" align="center">
+        <template slot-scope="scope">{{ formatDate(scope.row.startTime) }}</template>
       </el-table-column>
-      <el-table-column label="开始生产时间" align="center" prop="startTime" width="180">
-        <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.startTime, '{y}-{m}-{d}') }}</span>
-        </template>
+      <el-table-column label="生产完成时间" width="120" align="center">
+        <template slot-scope="scope">{{ formatDate(scope.row.finishTime) }}</template>
       </el-table-column>
-      <el-table-column label="生产完成时间" align="center" prop="finishTime" width="180">
+      <el-table-column label="操作" width="280" align="center" fixed="right" class-name="small-padding fixed-width">
         <template slot-scope="scope">
-          <span>{{ parseTime(scope.row.finishTime, '{y}-{m}-{d}') }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column label="备注" align="center" prop="remark" />
-      <el-table-column label="操作" align="center" class-name="small-padding fixed-width">
-        <template slot-scope="scope">
+          <el-button size="mini" type="text" icon="el-icon-view" @click="handleDetail(scope.row)">详情</el-button>
           <el-button
-            size="mini"
-            type="text"
-            icon="el-icon-view"
-            @click="handleDetail(scope.row)"
-          >详情</el-button>
-          <el-button
+            v-hasPermi="['school:productionOrder:edit']"
             size="mini"
             type="text"
             icon="el-icon-edit"
-            v-if="false"
             @click="handleUpdate(scope.row)"
-            v-hasPermi="['school:productionOrder:edit']"
           >修改</el-button>
           <el-button
+            v-hasPermi="['school:productionOrder:edit']"
             size="mini"
             type="text"
             icon="el-icon-check"
-            :disabled="String(scope.row.status) === '2' || String(scope.row.status) === '3'"
+            :disabled="!canFinish(scope.row)"
             @click="handleFinish(scope.row)"
-            v-hasPermi="['school:productionOrder:edit']"
           >生产完成</el-button>
           <el-button
+            v-hasPermi="['school:productionOrder:edit']"
             size="mini"
             type="text"
             icon="el-icon-truck"
-            :disabled="String(scope.row.status) !== '2'"
+            :disabled="!canGenerateDelivery(scope.row)"
             @click="handleGenerateDelivery(scope.row)"
-            v-hasPermi="['school:productionOrder:edit']"
           >生成发货单</el-button>
           <el-button
+            v-hasPermi="['school:productionOrder:remove']"
             size="mini"
             type="text"
             icon="el-icon-delete"
             @click="handleDelete(scope.row)"
-            v-hasPermi="['school:productionOrder:remove']"
           >删除</el-button>
         </template>
       </el-table-column>
     </el-table>
 
     <pagination
-      v-show="total>0"
+      v-show="total > 0"
       :total="total"
       :page.sync="queryParams.pageNum"
       :limit.sync="queryParams.pageSize"
       @pagination="getList"
     />
 
-    <el-dialog title="生产单详情" :visible.sync="detailOpen" width="900px" append-to-body>
-      <el-descriptions :column="2" border>
-        <el-descriptions-item label="主键">{{ detailForm.id || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="生产单号">{{ detailForm.productionNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="统购公告ID">{{ detailForm.noticeId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="订单ID">{{ detailForm.orderId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="订单号">{{ detailForm.orderNo || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="订单类型">{{ formatOrderType(detailForm.orderType) }}</el-descriptions-item>
-        <el-descriptions-item label="学校ID">{{ detailForm.schoolId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="供应商ID">{{ detailForm.supplierId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="状态">{{ formatProductionStatus(detailForm.status) }}</el-descriptions-item>
-        <el-descriptions-item label="计划完成时间">{{ parseTime(detailForm.plannedFinishTime, '{y}-{m}-{d}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="开始生产时间">{{ parseTime(detailForm.startTime, '{y}-{m}-{d}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="生产完成时间">{{ parseTime(detailForm.finishTime, '{y}-{m}-{d}') || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="当前归属部门/学校">{{ detailForm.deptId || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="删除标记">{{ detailForm.delFlag || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="创建人">{{ detailForm.createBy || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="创建时间">{{ detailForm.createTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="更新人">{{ detailForm.updateBy || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="更新时间">{{ detailForm.updateTime || '-' }}</el-descriptions-item>
-        <el-descriptions-item label="备注" :span="2">{{ detailForm.remark || '-' }}</el-descriptions-item>
-      </el-descriptions>
+    <el-dialog
+      title="生产单详情"
+      :visible.sync="detailOpen"
+      width="1080px"
+      top="5vh"
+      append-to-body
+      @closed="resetDetail"
+    >
+      <div class="dialog-scroll">
+        <div class="form-section detail-section">
+          <div class="section-head">
+            <div class="section-title">基础信息</div>
+            <div class="section-desc">以业务字段为主展示生产单、公告、学校和供应商信息</div>
+          </div>
+          <div class="detail-kv-grid">
+            <div class="detail-kv">
+              <span class="detail-label">生产单号</span>
+              <span class="detail-value">{{ formatValue(detailForm.productionNo) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">订单号</span>
+              <span class="detail-value">{{ formatValue(detailForm.orderNo) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">订单类型</span>
+              <span class="detail-value">{{ formatOrderType(detailForm.orderType) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">公告标题</span>
+              <span class="detail-value">{{ formatValue(detailForm.noticeTitle) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">公告编号</span>
+              <span class="detail-value">{{ formatValue(detailForm.noticeCode) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">学校名称</span>
+              <span class="detail-value">{{ formatValue(detailForm.schoolName) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">供应商名称</span>
+              <span class="detail-value">{{ formatValue(detailForm.supplierName) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">状态</span>
+              <span class="detail-value">{{ getOptionLabel(statusOptions, detailForm.status) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">计划完成时间</span>
+              <span class="detail-value">{{ formatDate(detailForm.plannedFinishTime) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">开始生产时间</span>
+              <span class="detail-value">{{ formatDate(detailForm.startTime) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">生产完成时间</span>
+              <span class="detail-value">{{ formatDate(detailForm.finishTime) }}</span>
+            </div>
+          </div>
+        </div>
 
-      <el-divider content-position="center">生产单明细</el-divider>
-      <el-table :data="detailItemList" border size="small">
-        <el-table-column label="订单明细ID" align="center" prop="orderItemId" />
-        <el-table-column label="商品ID" align="center" prop="goodsId" />
-        <el-table-column label="尺码ID" align="center" prop="sizeId" />
-        <el-table-column label="商品名称" align="center" prop="goodsName" />
-        <el-table-column label="尺码名称" align="center" prop="sizeName" />
-        <el-table-column label="应生产数量" align="center" prop="buyNum" />
-        <el-table-column label="已完成数量" align="center" prop="finishNum" />
-        <el-table-column label="状态" align="center" prop="status">
-          <template slot-scope="scope">
-            {{ formatProductionStatus(scope.row.status) }}
-          </template>
-        </el-table-column>
-        <el-table-column label="备注" align="center" prop="remark" />
-      </el-table>
+        <div class="form-section detail-section">
+          <div class="section-head">
+            <div class="section-title">生产单明细</div>
+            <div class="section-desc">默认展示商品和尺码信息，不在列表中直出明细 ID</div>
+          </div>
+          <el-table :data="detailItemList" border size="mini" class="detail-table">
+            <el-table-column label="商品名称" prop="goodsName" min-width="180" show-overflow-tooltip />
+            <el-table-column label="尺码名称" prop="sizeName" min-width="120" show-overflow-tooltip />
+            <el-table-column label="应生产数量" prop="buyNum" width="110" align="center" />
+            <el-table-column label="已完成数量" prop="finishNum" width="110" align="center" />
+            <el-table-column label="状态" width="110" align="center">
+              <template slot-scope="scope">
+                <el-tag size="mini" :type="getOptionTagType(itemStatusOptions, scope.row.status)">
+                  {{ getOptionLabel(itemStatusOptions, scope.row.status) }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column label="备注" prop="remark" min-width="180" show-overflow-tooltip />
+          </el-table>
+        </div>
+
+        <div class="form-section detail-section">
+          <div class="section-head">
+            <div class="section-title">补充字段</div>
+            <div class="section-desc">原始关联字段和备注收纳到详情中，便于排查但不影响主列表阅读</div>
+          </div>
+          <div class="detail-kv-grid">
+            <div class="detail-kv">
+              <span class="detail-label">主键</span>
+              <span class="detail-value">{{ formatValue(detailForm.id) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">公告ID</span>
+              <span class="detail-value">{{ formatValue(detailForm.noticeId) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">订单ID</span>
+              <span class="detail-value">{{ formatValue(detailForm.orderId) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">学校ID</span>
+              <span class="detail-value">{{ formatValue(detailForm.schoolId) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">供应商ID</span>
+              <span class="detail-value">{{ formatValue(detailForm.supplierId) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">部门/学校ID</span>
+              <span class="detail-value">{{ formatValue(detailForm.deptId) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">创建人</span>
+              <span class="detail-value">{{ formatValue(detailForm.createBy) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">创建时间</span>
+              <span class="detail-value">{{ formatValue(detailForm.createTime) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">更新人</span>
+              <span class="detail-value">{{ formatValue(detailForm.updateBy) }}</span>
+            </div>
+            <div class="detail-kv">
+              <span class="detail-label">更新时间</span>
+              <span class="detail-value">{{ formatValue(detailForm.updateTime) }}</span>
+            </div>
+            <div class="detail-kv detail-kv-wide">
+              <span class="detail-label">备注</span>
+              <span class="detail-value text-wrap">{{ formatValue(detailForm.remark) }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="detailOpen = false">关 闭</el-button>
+      </div>
     </el-dialog>
 
-    <!-- 添加或修改生产单对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="500px" append-to-body>
-      <el-form ref="form" :model="form" :rules="rules" label-width="80px">
-        <el-form-item label="生产单号" prop="productionNo">
-          <el-input v-model="form.productionNo" placeholder="请输入生产单号" />
-        </el-form-item>
-        <el-form-item label="统购公告ID" prop="noticeId">
-          <el-input v-model="form.noticeId" placeholder="请输入统购公告ID" />
-        </el-form-item>
-        <el-form-item label="订单ID" prop="orderId">
-          <el-input v-model="form.orderId" placeholder="请输入订单ID" />
-        </el-form-item>
-        <el-form-item label="订单号快照" prop="orderNo">
-          <el-input v-model="form.orderNo" placeholder="请输入订单号快照" />
-        </el-form-item>
-        <el-form-item label="学校ID" prop="schoolId">
-          <el-input v-model="form.schoolId" placeholder="请输入学校ID" />
-        </el-form-item>
-        <el-form-item label="供应商ID" prop="supplierId">
-          <el-input v-model="form.supplierId" placeholder="请输入供应商ID" />
-        </el-form-item>
-        <el-form-item label="计划完成时间" prop="plannedFinishTime">
-          <el-date-picker clearable
-            v-model="form.plannedFinishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择计划完成时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="开始生产时间" prop="startTime">
-          <el-date-picker clearable
-            v-model="form.startTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择开始生产时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="生产完成时间" prop="finishTime">
-          <el-date-picker clearable
-            v-model="form.finishTime"
-            type="date"
-            value-format="yyyy-MM-dd"
-            placeholder="请选择生产完成时间">
-          </el-date-picker>
-        </el-form-item>
-        <el-form-item label="当前归属部门/学校" prop="deptId">
-          <el-input v-model="form.deptId" placeholder="请输入当前归属部门/学校" />
-        </el-form-item>
-        <el-form-item label="备注" prop="remark">
-          <el-input v-model="form.remark" type="textarea" placeholder="请输入内容" />
-        </el-form-item>
-        <el-form-item label="删除标记，0正常 1删除" prop="delFlag">
-          <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
-        </el-form-item>
-        <el-divider content-position="center">生产单明细信息</el-divider>
-        <el-row :gutter="10" class="mb8">
-          <el-col :span="1.5">
-            <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAddXfptProductionOrderItem">添加</el-button>
-          </el-col>
-          <el-col :span="1.5">
-            <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDeleteXfptProductionOrderItem">删除</el-button>
-          </el-col>
-        </el-row>
-        <el-table :data="xfptProductionOrderItemList" :row-class-name="rowXfptProductionOrderItemIndex" @selection-change="handleXfptProductionOrderItemSelectionChange" ref="xfptProductionOrderItem">
-          <el-table-column type="selection" width="50" align="center" />
-          <el-table-column label="序号" align="center" prop="index" width="50"/>
-          <el-table-column label="订单明细ID" prop="orderItemId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.orderItemId" placeholder="请输入订单明细ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="商品ID" prop="goodsId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsId" placeholder="请输入商品ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="尺码ID" prop="sizeId" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sizeId" placeholder="请输入尺码ID" />
-            </template>
-          </el-table-column>
-          <el-table-column label="商品名称快照" prop="goodsName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称快照" />
-            </template>
-          </el-table-column>
-          <el-table-column label="尺码名称快照" prop="sizeName" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称快照" />
-            </template>
-          </el-table-column>
-          <el-table-column label="应生产数量" prop="buyNum" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.buyNum" placeholder="请输入应生产数量" />
-            </template>
-          </el-table-column>
-          <el-table-column label="已完成数量" prop="finishNum" width="150">
-            <template slot-scope="scope">
-              <el-input v-model="scope.row.finishNum" placeholder="请输入已完成数量" />
-            </template>
-          </el-table-column>
-          <el-table-column label="状态，0待生产 1生产中 2生产完成" prop="status" width="150">
-            <template slot-scope="scope">
-              <el-select v-model="scope.row.status" placeholder="请选择状态，0待生产 1生产中 2生产完成">
-                <el-option label="待生产" value="0" />
-                <el-option label="生产中" value="1" />
-                <el-option label="生产完成" value="2" />
-              </el-select>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-form>
+    <el-dialog :title="title" :visible.sync="open" width="980px" top="5vh" append-to-body :close-on-click-modal="false">
+      <div class="dialog-scroll">
+        <el-form ref="form" :model="form" :rules="rules" label-width="110px">
+          <div class="form-section">
+            <div class="section-head">
+              <div class="section-title">基础信息</div>
+              <div class="section-desc">供应商可按统购公告自动带出关联商品，再补充生产信息</div>
+            </div>
+            <el-row :gutter="20">
+              <el-col :span="12">
+                <el-form-item label="生产单号" prop="productionNo">
+                  <el-input v-model="form.productionNo" placeholder="可自动生成或手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="统购公告" prop="noticeId">
+                  <el-select
+                    v-model="form.noticeId"
+                    filterable
+                    clearable
+                    :loading="noticeLoading"
+                    placeholder="请选择统购公告"
+                    style="width: 100%"
+                    @change="handleNoticeChange"
+                  >
+                    <el-option
+                      v-for="item in noticeOptions"
+                      :key="item.id"
+                      :label="getNoticeOptionLabel(item)"
+                      :value="item.id"
+                    />
+                  </el-select>
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
+                <el-form-item label="订单ID" prop="orderId">
+                  <el-input v-model="form.orderId" placeholder="请输入订单ID" />
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
+                <el-form-item label="订单号" prop="orderNo">
+                  <el-input v-model="form.orderNo" placeholder="请输入订单号" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="公告编号">
+                  <el-input v-model="form.noticeCode" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="公告标题">
+                  <el-input v-model="form.noticeTitle" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="学校名称">
+                  <el-input v-model="form.schoolName" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="供应商名称">
+                  <el-input v-model="form.supplierName" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
+                <el-form-item label="学校ID" prop="schoolId">
+                  <el-input v-model="form.schoolId" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
+                <el-form-item label="供应商ID" prop="supplierId">
+                  <el-input v-model="form.supplierId" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="计划完成时间" prop="plannedFinishTime">
+                  <el-date-picker
+                    v-model="form.plannedFinishTime"
+                    clearable
+                    type="date"
+                    value-format="yyyy-MM-dd"
+                    placeholder="请选择计划完成时间"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="开始生产时间" prop="startTime">
+                  <el-date-picker
+                    v-model="form.startTime"
+                    clearable
+                    type="date"
+                    value-format="yyyy-MM-dd"
+                    placeholder="请选择开始生产时间"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="生产完成时间" prop="finishTime">
+                  <el-date-picker
+                    v-model="form.finishTime"
+                    clearable
+                    type="date"
+                    value-format="yyyy-MM-dd"
+                    placeholder="请选择生产完成时间"
+                    style="width: 100%"
+                  />
+                </el-form-item>
+              </el-col>
+              <el-col :span="12">
+                <el-form-item label="部门/学校ID" prop="deptId">
+                  <el-input v-model="form.deptId" placeholder="选择公告后自动带出，也可手动填写" />
+                </el-form-item>
+              </el-col>
+              <el-col :span="24">
+                <el-form-item label="备注" prop="remark">
+                  <el-input v-model="form.remark" type="textarea" :rows="3" placeholder="请输入备注" />
+                </el-form-item>
+              </el-col>
+              <el-col v-if="!isSupplierUser" :span="12">
+                <el-form-item label="删除标记" prop="delFlag">
+                  <el-input v-model="form.delFlag" placeholder="请输入删除标记，0正常 1删除" />
+                </el-form-item>
+              </el-col>
+            </el-row>
+          </div>
+
+          <div class="form-section">
+            <div class="section-head">
+              <div class="section-title">生产单明细</div>
+              <div class="section-desc">选择统购公告后会自动带入关联商品，仍可补充尺码和备注</div>
+            </div>
+            <div class="size-toolbar">
+              <el-button type="primary" icon="el-icon-plus" size="mini" @click="handleAddXfptProductionOrderItem">添加明细</el-button>
+              <el-button type="danger" icon="el-icon-delete" size="mini" @click="handleDeleteXfptProductionOrderItem">删除明细</el-button>
+            </div>
+            <el-table
+              ref="xfptProductionOrderItem"
+              v-loading="noticeItemLoading"
+              :data="xfptProductionOrderItemList"
+              border
+              size="mini"
+              :row-class-name="rowXfptProductionOrderItemIndex"
+              @selection-change="handleXfptProductionOrderItemSelectionChange"
+            >
+              <el-table-column type="selection" width="50" align="center" />
+              <el-table-column label="序号" align="center" prop="index" width="60" />
+              <el-table-column label="商品名称" prop="goodsName" min-width="140">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.goodsName" placeholder="请输入商品名称" />
+                </template>
+              </el-table-column>
+              <el-table-column label="尺码名称" prop="sizeName" min-width="120">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.sizeName" placeholder="请输入尺码名称" />
+                </template>
+              </el-table-column>
+              <el-table-column label="应生产数量" prop="buyNum" width="120">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.buyNum" placeholder="请输入应生产数量" />
+                </template>
+              </el-table-column>
+              <el-table-column label="已完成数量" prop="finishNum" width="120">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.finishNum" placeholder="请输入已完成数量" />
+                </template>
+              </el-table-column>
+              <el-table-column label="状态" prop="status" width="120">
+                <template slot-scope="scope">
+                  <el-select v-model="scope.row.status" placeholder="请选择状态" style="width: 100%">
+                    <el-option
+                      v-for="item in itemStatusOptions"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value"
+                    />
+                  </el-select>
+                </template>
+              </el-table-column>
+              <el-table-column label="备注" prop="remark" min-width="140">
+                <template slot-scope="scope">
+                  <el-input v-model="scope.row.remark" placeholder="请输入备注" />
+                </template>
+              </el-table-column>
+            </el-table>
+          </div>
+        </el-form>
+      </div>
       <div slot="footer" class="dialog-footer">
         <el-button type="primary" @click="submitForm">确 定</el-button>
         <el-button @click="cancel">取 消</el-button>
@@ -469,117 +596,135 @@
 </template>
 
 <script>
-import { listProductionOrder, getProductionOrder, delProductionOrder, addProductionOrder, updateProductionOrder, finishProductionOrder, generateDeliveryOrder } from "@/api/school/productionOrder";
+import { listProductionOrder, getProductionOrder, delProductionOrder, addProductionOrder, updateProductionOrder, finishProductionOrder, generateDeliveryOrder, listProductionNoticeOptions, getProductionNoticeDetail } from '@/api/school/productionOrder'
+import cache from '@/plugins/cache'
+
+const DELIVERY_ORDER_DRAFT_CACHE_KEY = 'production_delivery_order_draft'
+
+const STATUS_OPTIONS = [
+  { label: '待生产', value: '0', tagType: 'info' },
+  { label: '生产中', value: '1', tagType: 'warning' },
+  { label: '生产完成', value: '2', tagType: 'success' },
+  { label: '已生成发货单', value: '3', tagType: 'primary' }
+]
+
+const ITEM_STATUS_OPTIONS = [
+  { label: '待生产', value: '0', tagType: 'info' },
+  { label: '生产中', value: '1', tagType: 'warning' },
+  { label: '生产完成', value: '2', tagType: 'success' }
+]
 
 export default {
-  name: "ProductionOrder",
-  computed: {
-    selectedCanFinish() {
-      return this.selectedRow && !["2", "3"].includes(String(this.selectedRow.status));
-    },
-    selectedCanGenerateDelivery() {
-      return this.selectedRow && String(this.selectedRow.status) === "2";
-    }
-  },
+  name: 'ProductionOrder',
   data() {
+    const validateSupplierId = (rule, value, callback) => {
+      if (this.isSupplierUser) {
+        callback()
+        return
+      }
+      if (value === undefined || value === null || value === '') {
+        callback(new Error('供应商ID不能为空'))
+        return
+      }
+      callback()
+    }
     return {
-      // 遮罩层
       loading: true,
-      // 选中数组
       ids: [],
-      // 子表选中数据
       checkedXfptProductionOrderItem: [],
-      // 非单个禁用
       single: true,
-      // 非多个禁用
       multiple: true,
       selectedRow: null,
-      // 显示搜索条件
       showSearch: true,
-      // 总条数
       total: 0,
-      // 生产单表格数据
       productionOrderList: [],
-      // 生产单明细表格数据
       xfptProductionOrderItemList: [],
-      // 弹出层标题
-      title: "",
-      // 是否显示弹出层
+      noticeOptions: [],
+      noticeLoading: false,
+      noticeItemLoading: false,
+      title: '',
       open: false,
       detailOpen: false,
       detailForm: {},
       detailItemList: [],
-      activeOrderType: "1",
-      // 查询参数
+      activeOrderType: '1',
+      statusOptions: STATUS_OPTIONS,
+      itemStatusOptions: ITEM_STATUS_OPTIONS,
       queryParams: {
         pageNum: 1,
         pageSize: 10,
         productionNo: null,
-        noticeId: null,
-        orderId: null,
         orderNo: null,
-        orderType: "1",
-        schoolId: null,
-        supplierId: null,
+        noticeCode: null,
+        noticeTitle: null,
+        schoolName: null,
+        supplierName: null,
+        orderType: '1',
         status: null,
         plannedFinishTime: null,
         startTime: null,
         finishTime: null,
-        deptId: null,
+        noticeId: null,
+        orderId: null,
+        schoolId: null,
+        supplierId: null,
+        deptId: null
       },
-      // 表单参数
       form: {},
-      // 表单校验
       rules: {
-        productionNo: [
-          { required: true, message: "生产单号不能为空", trigger: "blur" }
+        noticeId: [
+          { required: true, message: '请选择统购公告', trigger: 'change' }
         ],
         orderType: [
-          { required: true, message: "订单类型，1统购 2零售不能为空", trigger: "change" }
+          { required: true, message: '订单类型不能为空', trigger: 'change' }
         ],
         supplierId: [
-          { required: true, message: "供应商ID不能为空", trigger: "blur" }
+          { validator: validateSupplierId, trigger: 'blur' }
         ],
         status: [
-          { required: true, message: "状态，0待生产 1生产中 2生产完成不能为空", trigger: "change" }
+          { required: true, message: '状态不能为空', trigger: 'change' }
         ],
         delFlag: [
-          { required: true, message: "删除标记，0正常 1删除不能为空", trigger: "blur" }
+          { required: true, message: '删除标记不能为空', trigger: 'blur' }
         ]
       }
-    };
+    }
+  },
+  computed: {
+    selectedCanFinish() {
+      return this.selectedRow ? this.canFinish(this.selectedRow) : false
+    },
+    selectedCanGenerateDelivery() {
+      return this.selectedRow ? this.canGenerateDelivery(this.selectedRow) : false
+    },
+    isSupplierUser() {
+      const roles = this.$store.getters.roles || []
+      return roles.some(role => {
+        const roleKey = String(role || '').toLowerCase()
+        return roleKey.includes('gys') || roleKey.includes('ceshigongying') || roleKey.includes('changshang')
+      })
+    }
   },
   created() {
-    this.getList();
+    this.getList()
+    this.loadNoticeOptions()
   },
   methods: {
-    /** 查询生产单列表 */
-    getList() {
-      this.loading = true;
-      this.queryParams.orderType = this.activeOrderType;
-      listProductionOrder(this.queryParams).then(response => {
-        this.productionOrderList = response.rows;
-        this.total = response.total;
-        this.loading = false;
-      });
-    },
-    // 取消按钮
-    cancel() {
-      this.open = false;
-      this.reset();
-    },
-    // 表单重置
-    reset() {
-      this.form = {
+    getDefaultForm() {
+      return {
         id: null,
         productionNo: null,
         noticeId: null,
         orderId: null,
         orderNo: null,
-        orderType: "1",
+        orderType: '1',
         schoolId: null,
         supplierId: null,
-        status: null,
+        supplierName: null,
+        noticeTitle: null,
+        noticeCode: null,
+        schoolName: null,
+        status: '0',
         plannedFinishTime: null,
         startTime: null,
         finishTime: null,
@@ -589,179 +734,454 @@ export default {
         updateBy: null,
         updateTime: null,
         remark: null,
-        delFlag: null
-      };
-      this.xfptProductionOrderItemList = [];
-      this.resetForm("form");
+        delFlag: '0'
+      }
     },
-    /** 搜索按钮操作 */
+    getDefaultItemRow() {
+      return {
+        goodsId: null,
+        sizeId: null,
+        goodsName: '',
+        sizeName: '',
+        buyNum: '',
+        finishNum: '',
+        status: '0',
+        remark: ''
+      }
+    },
+    getNoticeOptionLabel(item) {
+      if (!item) {
+        return ''
+      }
+      const parts = []
+      if (item.noticeCode) {
+        parts.push(item.noticeCode)
+      }
+      if (item.title) {
+        parts.push(item.title)
+      }
+      if (item.schoolName) {
+        parts.push(item.schoolName)
+      }
+      return parts.join(' / ')
+    },
+    parseNoticeItemSizeRules(sizeRuleJson) {
+      if (!sizeRuleJson) {
+        return []
+      }
+      try {
+        const parsed = JSON.parse(sizeRuleJson)
+        return Array.isArray(parsed) ? parsed : []
+      } catch (error) {
+        return []
+      }
+    },
+    buildProductionItemsFromNoticeItems(noticeItems, currentSupplierId) {
+      const scopedItems = this.isSupplierUser && currentSupplierId
+        ? noticeItems.filter(item => String(item.supplierId) === String(currentSupplierId))
+        : noticeItems
+
+      const result = []
+      scopedItems.forEach(item => {
+        const sizeRules = this.parseNoticeItemSizeRules(item.sizeRuleJson)
+        if (sizeRules.length) {
+          sizeRules.forEach(size => {
+            const sizeBuyNum = Number(size && size.buyNum)
+            result.push({
+              goodsId: item.goodsId || null,
+              sizeId: size && size.id != null ? size.id : null,
+              goodsName: item.goodsName || '',
+              sizeName: size && size.sizeCode ? size.sizeCode : '',
+              buyNum: !Number.isNaN(sizeBuyNum) && sizeBuyNum > 0 ? sizeBuyNum : (item.buyNum || 1),
+              finishNum: 0,
+              status: '0',
+              remark: ''
+            })
+          })
+          return
+        }
+        result.push({
+          goodsId: item.goodsId || null,
+          sizeId: null,
+          goodsName: item.goodsName || '',
+          sizeName: '',
+          buyNum: item.buyNum || 1,
+          finishNum: 0,
+          status: '0',
+          remark: ''
+        })
+      })
+      return result
+    },
+    loadNoticeOptions() {
+      this.noticeLoading = true
+      listProductionNoticeOptions().then(response => {
+        this.noticeOptions = response.data || []
+      }).finally(() => {
+        this.noticeLoading = false
+      })
+    },
+    getList() {
+      this.loading = true
+      this.queryParams.orderType = this.activeOrderType
+      listProductionOrder(this.queryParams).then(response => {
+        this.productionOrderList = response.rows || []
+        this.total = response.total || 0
+      }).finally(() => {
+        this.loading = false
+      })
+    },
+    cancel() {
+      this.open = false
+      this.reset()
+    },
+    reset() {
+      this.form = this.getDefaultForm()
+      this.xfptProductionOrderItemList = []
+      this.checkedXfptProductionOrderItem = []
+      this.noticeItemLoading = false
+      this.resetForm('form')
+    },
+    resetDetail() {
+      this.detailForm = {}
+      this.detailItemList = []
+    },
     handleQuery() {
-      this.queryParams.pageNum = 1;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.getList()
     },
-    /** 重置按钮操作 */
     resetQuery() {
-      this.resetForm("queryForm");
-      this.queryParams.orderType = this.activeOrderType;
-      this.handleQuery();
+      this.resetForm('queryForm')
+      this.queryParams.orderType = this.activeOrderType
+      this.handleQuery()
     },
     handleOrderTypeTabChange() {
-      this.queryParams.pageNum = 1;
-      this.queryParams.orderType = this.activeOrderType;
-      this.getList();
+      this.queryParams.pageNum = 1
+      this.queryParams.orderType = this.activeOrderType
+      this.getList()
     },
-    handleDetail(row) {
-      const id = row.id || this.ids[0];
-      getProductionOrder(id).then(response => {
-        this.detailForm = response.data || {};
-        this.detailItemList = this.detailForm.xfptProductionOrderItemList || [];
-        this.detailOpen = true;
-      });
-    },
-    formatOrderType(value) {
-      if (String(value) === "1") return "统购";
-      if (String(value) === "2") return "零售";
-      return "-";
-    },
-    formatProductionStatus(value) {
-      if (String(value) === "0") return "待生产";
-      if (String(value) === "1") return "生产中";
-      if (String(value) === "2") return "生产完成";
-      if (String(value) === "3") return "已生成发货单";
-      return "-";
-    },
-    getStatusTagType(value) {
-      if (String(value) === "0") return "info";
-      if (String(value) === "1") return "warning";
-      if (String(value) === "2") return "success";
-      if (String(value) === "3") return "primary";
-      return "";
-    },
-    // 多选框选中数据
     handleSelectionChange(selection) {
       this.ids = selection.map(item => item.id)
-      this.single = selection.length!==1
-      this.multiple = !selection.length
+      this.single = selection.length !== 1
+      this.multiple = selection.length === 0
       this.selectedRow = selection.length === 1 ? selection[0] : null
     },
-    /** 新增按钮操作 */
     handleAdd() {
-      if (this.activeOrderType !== "1") {
-        this.$modal.msgError("零售生产单不支持手动新增");
-        return;
+      this.reset()
+      this.form.orderType = this.activeOrderType
+      this.form.status = '0'
+      this.open = true
+      this.title = '添加生产单'
+    },
+    handleDetail(row) {
+      const id = row && row.id ? row.id : this.ids[0]
+      if (!id) {
+        this.$modal.msgError('请选择要查看的生产单')
+        return
       }
-      this.reset();
-      this.form.orderType = "1";
-      this.form.status = "0";
-      this.open = true;
-      this.title = "添加统购生产单";
+      getProductionOrder(id).then(response => {
+        const data = response.data || {}
+        this.detailForm = Object.assign(this.getDefaultForm(), data)
+        this.detailItemList = data.xfptProductionOrderItemList || []
+        this.detailOpen = true
+      })
+    },
+    handleUpdate(row) {
+      this.reset()
+      const id = row && row.id ? row.id : this.ids[0]
+      getProductionOrder(id).then(response => {
+        const data = response.data || {}
+        this.form = Object.assign(this.getDefaultForm(), data)
+        this.xfptProductionOrderItemList = (data.xfptProductionOrderItemList || []).map(item => Object.assign({}, item))
+        this.open = true
+        this.title = '修改生产单'
+      })
+    },
+    handleNoticeChange(noticeId) {
+      if (!noticeId) {
+        this.form.noticeTitle = null
+        this.form.noticeCode = null
+        this.form.schoolId = null
+        this.form.schoolName = null
+        this.form.supplierId = null
+        this.form.supplierName = null
+        this.form.deptId = null
+        this.xfptProductionOrderItemList = []
+        return
+      }
+      this.noticeItemLoading = true
+      getProductionNoticeDetail(noticeId).then(response => {
+        const notice = response.data || {}
+        this.form.noticeId = notice.id
+        this.form.noticeTitle = notice.title
+        this.form.noticeCode = notice.noticeCode
+        this.form.schoolId = notice.schoolId
+        this.form.schoolName = notice.schoolName
+        this.form.deptId = notice.deptId
+        const items = notice.xfptGroupNoticeItemList || []
+        const firstSupplier = items.find(item => item && item.supplierId != null)
+        if (firstSupplier) {
+          this.form.supplierId = firstSupplier.supplierId
+          this.form.supplierName = firstSupplier.supplierName
+        }
+        const currentSupplierId = this.form.supplierId
+        this.xfptProductionOrderItemList = this.buildProductionItemsFromNoticeItems(items, currentSupplierId)
+        if (!this.xfptProductionOrderItemList.length) {
+          this.$modal.msgWarning('该统购公告下暂无可带入的关联商品')
+        }
+      }).finally(() => {
+        this.noticeItemLoading = false
+      })
+    },
+    submitForm() {
+      this.$refs.form.validate(valid => {
+        if (!valid) {
+          return
+        }
+        if (!this.xfptProductionOrderItemList.length) {
+          this.$modal.msgError('请先选择统购公告并带入商品明细')
+          return
+        }
+        if (this.form.productionNo != null && String(this.form.productionNo).trim() === '') {
+          this.form.productionNo = null
+        }
+        this.form.xfptProductionOrderItemList = this.xfptProductionOrderItemList
+        const request = this.form.id != null ? updateProductionOrder(this.form) : addProductionOrder(this.form)
+        request.then(() => {
+          this.$modal.msgSuccess(this.form.id != null ? '修改成功' : '新增成功')
+          this.open = false
+          this.getList()
+        })
+      })
+    },
+    handleDelete(row) {
+      const ids = row && row.id ? row.id : this.ids.join(',')
+      this.$modal.confirm('是否确认删除生产单编号为"' + ids + '"的数据项？').then(() => {
+        return delProductionOrder(ids)
+      }).then(() => {
+        this.getList()
+        this.$modal.msgSuccess('删除成功')
+      }).catch(() => {})
     },
     handleFinishSelected() {
-      this.handleFinish({ id: this.ids[0] });
-    },
-    handleGenerateDeliverySelected() {
-      this.handleGenerateDelivery({ id: this.ids[0] });
-    },
-    handleFinish(row) {
-      const id = row.id;
-      this.$modal.confirm('是否确认将该生产单标记为生产完成？').then(() => {
-        return finishProductionOrder(id);
-      }).then(() => {
-        this.$modal.msgSuccess("生产完成");
-        this.getList();
-      }).catch(() => {});
-    },
-    handleGenerateDelivery(row) {
-      const id = row.id;
-      this.$modal.confirm('是否确认根据该生产单生成发货单？').then(() => {
-        return generateDeliveryOrder(id);
-      }).then(() => {
-        this.$modal.msgSuccess("生成发货单成功");
-        this.getList();
-      }).catch(() => {});
-    },
-    /** 修改按钮操作 */
-    handleUpdate(row) {
-      this.reset();
-      const id = row.id || this.ids
-      getProductionOrder(id).then(response => {
-        this.form = response.data;
-        this.xfptProductionOrderItemList = response.data.xfptProductionOrderItemList;
-        this.open = true;
-        this.title = "修改生产单";
-      });
-    },
-    /** 提交按钮 */
-    submitForm() {
-      this.$refs["form"].validate(valid => {
-        if (valid) {
-          this.form.xfptProductionOrderItemList = this.xfptProductionOrderItemList;
-          if (this.form.id != null) {
-            updateProductionOrder(this.form).then(response => {
-              this.$modal.msgSuccess("修改成功");
-              this.open = false;
-              this.getList();
-            });
-          } else {
-            addProductionOrder(this.form).then(response => {
-              this.$modal.msgSuccess("新增成功");
-              this.open = false;
-              this.getList();
-            });
-          }
-        }
-      });
-    },
-    /** 删除按钮操作 */
-    handleDelete(row) {
-      const ids = row.id || this.ids;
-      this.$modal.confirm('是否确认删除生产单编号为"' + ids + '"的数据项？').then(function() {
-        return delProductionOrder(ids);
-      }).then(() => {
-        this.getList();
-        this.$modal.msgSuccess("删除成功");
-      }).catch(() => {});
-    },
-	/** 生产单明细序号 */
-    rowXfptProductionOrderItemIndex({ row, rowIndex }) {
-      row.index = rowIndex + 1;
-    },
-    /** 生产单明细添加按钮操作 */
-    handleAddXfptProductionOrderItem() {
-      let obj = {};
-      obj.orderItemId = "";
-      obj.goodsId = "";
-      obj.sizeId = "";
-      obj.goodsName = "";
-      obj.sizeName = "";
-      obj.buyNum = "";
-      obj.finishNum = "";
-      obj.status = "";
-      obj.remark = "";
-      this.xfptProductionOrderItemList.push(obj);
-    },
-    /** 生产单明细删除按钮操作 */
-    handleDeleteXfptProductionOrderItem() {
-      if (this.checkedXfptProductionOrderItem.length == 0) {
-        this.$modal.msgError("请先选择要删除的生产单明细数据");
-      } else {
-        const xfptProductionOrderItemList = this.xfptProductionOrderItemList;
-        const checkedXfptProductionOrderItem = this.checkedXfptProductionOrderItem;
-        this.xfptProductionOrderItemList = xfptProductionOrderItemList.filter(function(item) {
-          return checkedXfptProductionOrderItem.indexOf(item.index) == -1
-        });
+      if (this.selectedRow) {
+        this.handleFinish(this.selectedRow)
       }
     },
-    /** 复选框选中数据 */
+    handleGenerateDeliverySelected() {
+      if (this.selectedRow) {
+        this.handleGenerateDelivery(this.selectedRow)
+      }
+    },
+    handleFinish(row) {
+      const id = row.id
+      this.$modal.confirm('是否确认将该生产单标记为生产完成？').then(() => {
+        return finishProductionOrder(id)
+      }).then(() => {
+        this.$modal.msgSuccess('生产完成')
+        this.getList()
+      }).catch(() => {})
+    },
+    handleGenerateDelivery(row) {
+      const id = row.id
+      this.$modal.confirm('是否根据该生产单带出发货单信息，并跳转到发货单页面继续填写？').then(() => {
+        return generateDeliveryOrder(id)
+      }).then((response) => {
+        const draft = response.data || {}
+        cache.session.setJSON(DELIVERY_ORDER_DRAFT_CACHE_KEY, draft)
+        this.$router.push({
+          path: '/newFeature/deliveryOrder',
+          query: {
+            fromProductionOrder: String(id),
+            autoOpenAdd: '1'
+          }
+        })
+        this.$modal.msgSuccess('已带出发货单预填信息，请继续补充后提交')
+        this.getList()
+      }).catch(() => {})
+    },
+    rowXfptProductionOrderItemIndex({ row, rowIndex }) {
+      row.index = rowIndex + 1
+    },
+    handleAddXfptProductionOrderItem() {
+      this.xfptProductionOrderItemList.push(this.getDefaultItemRow())
+    },
+    handleDeleteXfptProductionOrderItem() {
+      if (this.checkedXfptProductionOrderItem.length === 0) {
+        this.$modal.msgError('请先选择要删除的生产单明细数据')
+        return
+      }
+      this.xfptProductionOrderItemList = this.xfptProductionOrderItemList.filter(item => {
+        return this.checkedXfptProductionOrderItem.indexOf(item.index) === -1
+      })
+      this.checkedXfptProductionOrderItem = []
+    },
     handleXfptProductionOrderItemSelectionChange(selection) {
       this.checkedXfptProductionOrderItem = selection.map(item => item.index)
     },
-    /** 导出按钮操作 */
     handleExport() {
       this.download('school/productionOrder/export', {
         ...this.queryParams
       }, `productionOrder_${new Date().getTime()}.xlsx`)
+    },
+    canFinish(row) {
+      return row && !['2', '3'].includes(String(row.status))
+    },
+    canGenerateDelivery(row) {
+      return row && String(row.status) === '2'
+    },
+    getOptionLabel(options, value) {
+      const option = options.find(item => String(item.value) === String(value))
+      return option ? option.label : '--'
+    },
+    getOptionTagType(options, value) {
+      const option = options.find(item => String(item.value) === String(value))
+      return option ? option.tagType : 'info'
+    },
+    formatOrderType(value) {
+      if (String(value) === '1') return '统购'
+      if (String(value) === '2') return '零售'
+      return '--'
+    },
+    formatValue(value) {
+      return value == null || value === '' ? '--' : value
+    },
+    formatDate(value) {
+      return value ? this.parseTime(value, '{y}-{m}-{d}') : '--'
     }
   }
-};
+}
 </script>
+
+<style scoped>
+.query-form {
+  margin-bottom: 16px;
+  padding: 18px 20px 6px;
+  background: #f8fafc;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+}
+
+.business-table {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.info-cell {
+  min-width: 0;
+}
+
+.info-title {
+  margin-bottom: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #243447;
+}
+
+.info-subline {
+  font-size: 12px;
+  line-height: 1.7;
+  color: #6b7785;
+}
+
+.dialog-scroll {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.form-section {
+  margin-bottom: 18px;
+  padding: 18px;
+  background: #f8fafc;
+  border: 1px solid #e7edf5;
+  border-radius: 12px;
+}
+
+.detail-section {
+  padding-bottom: 18px;
+}
+
+.section-head {
+  margin-bottom: 16px;
+}
+
+.section-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #243447;
+}
+
+.section-desc {
+  margin-top: 4px;
+  font-size: 12px;
+  color: #7a8798;
+}
+
+.detail-kv-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.detail-kv {
+  min-width: 0;
+  padding: 12px 14px;
+  background: #ffffff;
+  border: 1px solid #e7edf5;
+  border-radius: 8px;
+}
+
+.detail-kv-wide {
+  grid-column: span 2;
+}
+
+.detail-label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: #7a8798;
+}
+
+.detail-value {
+  display: block;
+  overflow: hidden;
+  font-size: 14px;
+  color: #243447;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-wrap {
+  white-space: pre-wrap;
+}
+
+.detail-table {
+  background: #ffffff;
+}
+
+.size-toolbar {
+  display: flex;
+  margin-bottom: 12px;
+}
+
+.size-toolbar .el-button + .el-button {
+  margin-left: 8px;
+}
+
+@media (max-width: 1200px) {
+  .detail-kv-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .detail-kv-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detail-kv-wide {
+    grid-column: span 1;
+  }
+}
+</style>

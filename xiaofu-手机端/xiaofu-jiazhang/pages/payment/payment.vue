@@ -275,10 +275,11 @@ export default {
           saleType: this.orderInfo.orderType || '1'
         }))
       };
-      currentOrder.status = 'unshipped';
+      const isRetailOrder = String(currentOrder.orderType || this.orderInfo.orderType || '1') === '2';
+      currentOrder.status = isRetailOrder ? 'unshipped' : 'shipped';
       currentOrder.payTime = this.getCurrentTime();
       currentOrder.payStatus = '1';
-      currentOrder.orderStatus = '2';
+      currentOrder.orderStatus = isRetailOrder ? '2' : '3';
       localOrders[this.orderId] = currentOrder;
       uni.setStorageSync('devOrders', localOrders);
 

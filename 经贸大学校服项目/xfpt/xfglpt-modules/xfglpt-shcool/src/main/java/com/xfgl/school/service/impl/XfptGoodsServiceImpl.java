@@ -10,10 +10,24 @@ import java.util.Arrays;
 import com.xfgl.common.core.exception.ServiceException;
 import com.xfgl.common.core.utils.StringUtils;
 import org.springframework.transaction.annotation.Transactional;
+import com.xfgl.common.security.utils.SecurityUtils;
+import com.xfgl.school.domain.SupplierMessage;
 import com.xfgl.school.domain.XfptGoodsSize;
+import com.xfgl.school.domain.XfptSchoolMessage;
+import com.xfgl.school.domain.XfptStudentInfo;
 import com.xfgl.school.mapper.XfptGoodsMapper;
 import com.xfgl.school.domain.XfptGoods;
+import com.xfgl.school.service.IXfptSchoolMessageService;
+import com.xfgl.school.service.ISupplierMessageService;
 import com.xfgl.school.service.IXfptGoodsService;
+import com.xfgl.school.service.IXfptStudentInfoService;
+import com.xfgl.school.support.SupplierAccessSupport;
+import com.xfgl.system.api.domain.SysUser;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Objects;
+import java.util.Set;
 
 /**
  * 商品信息Service业务层处理
@@ -26,6 +40,14 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
 
     @Autowired
     private XfptGoodsMapper xfptGoodsMapper;
+    @Autowired
+    private SupplierAccessSupport supplierAccessSupport;
+    @Autowired
+    private ISupplierMessageService supplierMessageService;
+    @Autowired
+    private IXfptStudentInfoService xfptStudentInfoService;
+    @Autowired
+    private IXfptSchoolMessageService xfptSchoolMessageService;
 
     /**
      * 查询商品信息列表
@@ -36,6 +58,11 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
     @Override
     public List<XfptGoods> selectXfptGoodsList(XfptGoods xfptGoods)
     {
+        if (isSupplierScopedUser() && getCurrentSupplierIdIfScoped() == null) {
+            return Collections.emptyList();
+        }
+        applyParentSchoolScope(xfptGoods);
+        applyCurrentSupplierScope(xfptGoods);
         return xfptGoodsMapper.selectXfptGoodsList(xfptGoods);
     }
 
@@ -48,7 +75,24 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public XfptGoods selectXfptGoodsById(Long id)
         {
-            XfptGoods xfptGoods = xfptGoodsMapper.selectById(id);
+            return selectXfptGoodsById(id, null, null);
+        }
+
+        @Override
+        public XfptGoods selectXfptGoodsById(Long id, Long schoolId, String simId)
+        {
+            XfptGoods scopedQuery = new XfptGoods();
+            scopedQuery.setSchoolId(schoolId);
+            if (StringUtils.isNotBlank(simId)) {
+                scopedQuery.getParams().put("simId", simId.trim());
+            }
+            applyParentSchoolScope(scopedQuery);
+            if (StringUtils.isNotBlank(simId)
+                    && scopedQuery.getSchoolId() == null
+                    && scopedQuery.getParams().get("schoolIds") != null) {
+                throw new ServiceException("当前账号绑定了多个学校，请先选择学生后再查看商品详情");
+            }
+            XfptGoods xfptGoods = requireAccessibleGoods(id, scopedQuery.getSchoolId());
             List<XfptGoodsSize> xfptGoodsSizeList = xfptGoodsMapper.selectXfptGoodsSizeById(id);
             xfptGoods.setXfptGoodsSizeList(xfptGoodsSizeList);
             return xfptGoods;
@@ -64,6 +108,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public int insertXfptGoods(XfptGoods xfptGoods)
         {
+            applyCurrentSupplierScope(xfptGoods);
             fillGoodsDefaults(xfptGoods);
             int rows = xfptGoodsMapper.insert(xfptGoods);
             insertXfptGoodsSize(xfptGoods);
@@ -91,6 +136,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
             StringBuilder failureMsg = new StringBuilder();
             for (XfptGoods goods : goodsList) {
                 try {
+                    applyCurrentSupplierScope(goods);
                     validateImportGoods(goods);
                     XfptGoods existing = lambdaQuery().eq(XfptGoods::getGoodsCode, goods.getGoodsCode()).one();
                     fillGoodsDefaults(goods);
@@ -100,9 +146,10 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
                         successNum++;
                         successMsg.append("<br/>").append(successNum).append("、商品 ").append(goods.getGoodsName()).append(" 导入成功");
                     } else if (updateSupport) {
+                        requireAccessibleGoods(existing.getId());
                         goods.setId(existing.getId());
                         goods.setUpdateBy(operName);
-                        updateById(goods);
+                        updateXfptGoods(goods);
                         successNum++;
                         successMsg.append("<br/>").append(successNum).append("、商品 ").append(goods.getGoodsName()).append(" 更新成功");
                     } else {
@@ -135,6 +182,8 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public int updateXfptGoods(XfptGoods xfptGoods)
         {
+                requireAccessibleGoods(xfptGoods.getId());
+                applyCurrentSupplierScope(xfptGoods);
                 fillGoodsDefaults(xfptGoods);
                 xfptGoodsMapper.deleteXfptGoodsSizeByGoodsId(xfptGoods.getId());
             insertXfptGoodsSize(xfptGoods);
@@ -153,6 +202,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         {
             List<Long> idList = Arrays.asList(ids);
             for (Long id : idList) {
+                requireAccessibleGoods(id);
                 xfptGoodsMapper.deleteXfptGoodsSizeByGoodsId(id);
         }
             return xfptGoodsMapper.deleteBatchIds(idList);
@@ -168,6 +218,7 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
         @Override
         public int deleteXfptGoodsById(Long id)
         {
+                requireAccessibleGoods(id);
                 xfptGoodsMapper.deleteXfptGoodsSizeByGoodsId(id);
             return xfptGoodsMapper.deleteById(id);
         }
@@ -240,6 +291,149 @@ public class XfptGoodsServiceImpl extends ServiceImpl<XfptGoodsMapper, XfptGoods
             if (StringUtils.isEmpty(goods.getPublishStatus())) {
                 throw new ServiceException("上架状态不能为空");
             }
+        }
+
+        private void applyCurrentSupplierScope(XfptGoods xfptGoods)
+        {
+            if (xfptGoods == null) {
+                return;
+            }
+            Long currentSupplierId = getCurrentSupplierIdIfScoped();
+            if (isSupplierScopedUser() && currentSupplierId == null) {
+                throw new ServiceException("当前登录账号未关联厂商，无法操作商品");
+            }
+            if (currentSupplierId == null) {
+                return;
+            }
+            SupplierMessage supplier = supplierMessageService.getById(currentSupplierId);
+            if (supplier == null) {
+                throw new ServiceException("当前登录账号关联的厂商不存在");
+            }
+            xfptGoods.setSupplierId(currentSupplierId);
+            xfptGoods.setSupplierName(supplier.getSupplierName());
+        }
+
+        private XfptGoods requireAccessibleGoods(Long id)
+        {
+            return requireAccessibleGoods(id, null);
+        }
+
+        private XfptGoods requireAccessibleGoods(Long id, Long schoolId)
+        {
+            if (id == null) {
+                throw new ServiceException("商品不存在");
+            }
+            Long currentSupplierId = getCurrentSupplierIdIfScoped();
+            if (isSupplierScopedUser() && currentSupplierId == null) {
+                throw new ServiceException("当前登录账号未关联厂商，无法操作商品");
+            }
+            XfptGoods goods = currentSupplierId == null
+                    ? xfptGoodsMapper.selectXfptGoodsById(id, schoolId)
+                    : xfptGoodsMapper.selectXfptGoodsByIdAndSupplierId(id, currentSupplierId, schoolId);
+            if (goods == null) {
+                throw new ServiceException(currentSupplierId == null
+                        ? (schoolId == null ? "商品不存在" : "商品不存在或未在当前学校统购上架")
+                        : "无权操作其他厂商的商品");
+            }
+            return goods;
+        }
+
+        private void applyParentSchoolScope(XfptGoods xfptGoods)
+        {
+            if (xfptGoods == null) {
+                return;
+            }
+            Object simIdValue = xfptGoods.getParams().get("simId");
+            String simId = simIdValue == null ? null : String.valueOf(simIdValue).trim();
+            if (StringUtils.isBlank(simId)) {
+                return;
+            }
+            Set<Long> schoolIds = resolveParentSchoolIds(simId);
+            if (xfptGoods.getSchoolId() != null) {
+                if (!schoolIds.isEmpty() && !schoolIds.contains(xfptGoods.getSchoolId())) {
+                    throw new ServiceException("只能查看当前家长绑定学生所属学校的商品");
+                }
+                xfptGoods.getParams().remove("schoolIds");
+                return;
+            }
+            if (schoolIds.isEmpty()) {
+                xfptGoods.setSchoolId(-1L);
+                xfptGoods.getParams().remove("schoolIds");
+                return;
+            }
+            xfptGoods.setSchoolId(resolveAccessibleSchoolId(schoolIds.iterator().next()));
+            xfptGoods.getParams().remove("schoolIds");
+        }
+
+        private Set<Long> resolveParentSchoolIds(String simId)
+        {
+            if (StringUtils.isBlank(simId)) {
+                return new LinkedHashSet<>();
+            }
+            List<XfptStudentInfo> studentInfos = xfptStudentInfoService.lambdaQuery()
+                    .eq(XfptStudentInfo::getSimId, simId)
+                    .list();
+            Set<Long> schoolIds = new LinkedHashSet<>();
+            if (studentInfos == null || studentInfos.isEmpty()) {
+                return schoolIds;
+            }
+            for (XfptStudentInfo studentInfo : studentInfos) {
+                Long schoolId = parseStudentSchoolId(studentInfo);
+                if (schoolId != null) {
+                    schoolIds.add(schoolId);
+                }
+            }
+            return schoolIds;
+        }
+
+        private Long parseStudentSchoolId(XfptStudentInfo studentInfo)
+        {
+            if (studentInfo == null || StringUtils.isBlank(studentInfo.getShcoolId())) {
+                return null;
+            }
+            try {
+                return Long.valueOf(studentInfo.getShcoolId().trim());
+            } catch (NumberFormatException ex) {
+                return null;
+            }
+        }
+
+        private Long resolveAccessibleSchoolId(Long rawSchoolId)
+        {
+            if (rawSchoolId == null) {
+                return null;
+            }
+            XfptSchoolMessage schoolMessage = xfptSchoolMessageService.getById(rawSchoolId);
+            if (schoolMessage != null) {
+                return schoolMessage.getId();
+            }
+            XfptSchoolMessage mappedSchool = xfptSchoolMessageService.lambdaQuery()
+                    .eq(XfptSchoolMessage::getDeptId, rawSchoolId)
+                    .last("limit 1")
+                    .one();
+            return mappedSchool == null ? rawSchoolId : mappedSchool.getId();
+        }
+
+        private Long getCurrentSupplierIdIfScoped()
+        {
+            SysUser currentUser = getCurrentUser();
+            if (!supplierAccessSupport.isSupplierUser(currentUser)) {
+                return null;
+            }
+            return supplierAccessSupport.resolveSupplierId(currentUser);
+        }
+
+        private boolean isSupplierScopedUser()
+        {
+            return supplierAccessSupport.isSupplierUser(getCurrentUser()) && !SecurityUtils.isAdmin(SecurityUtils.getUserId());
+        }
+
+        private SysUser getCurrentUser()
+        {
+            if (SecurityUtils.getLoginUser() == null) {
+                return null;
+            }
+            return SecurityUtils.getLoginUser().getSysUser();
         }
 
 }

@@ -16,6 +16,7 @@
       <!-- 文章信息 -->
       <div class="article-info">
         <span>发布时间：{{ article.createTime }}</span>
+        <span v-if="article.endTime" style="margin-left: 20px">截止时间：{{ article.endTime }}</span>
         <span style="margin-left: 20px">阅读量：{{ readCount }}</span>
       </div>
       <!-- 富文本内容 -->

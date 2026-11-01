@@ -65,7 +65,6 @@ public class XfptStudentInfoController extends BaseController {
             SysDept sysDept = xfptSchoolGradeClassService.selectDeptId(info.getShcoolId());
             //info.setXfptSchoolGradeClasses(xfptSchoolGradeClass);
             info.setSysDepts(sysDept);
-            info.setShcoolId(SecurityUtils.getLoginUser().getSysUser().getNickName());
         }
         return getDataTable(list);
     }

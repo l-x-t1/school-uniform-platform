@@ -18,6 +18,8 @@
         <result property="purchaseProcessId" column="purchase_process_id" />
         <result property="startTime" column="start_time" />
         <result property="endTime" column="end_time" />
+        <result property="purchaseStartTime" column="purchase_start_time" />
+        <result property="purchaseEndTime" column="purchase_end_time" />
         <result property="status" column="status" />
         <result property="applyStatus" column="apply_status" />
         <result property="publishTime" column="publish_time" />
@@ -59,14 +61,19 @@
         <result property="id" column="id" />
         <result property="noticeId" column="notice_id" />
         <result property="supplierId" column="supplier_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="schoolName" column="school_name" />
+        <result property="className" column="class_name" />
+        <result property="orderNo" column="order_no" />
+        <result property="orderQuantity" column="order_quantity" />
+        <result property="progressStatus" column="progress_status" />
+        <result property="progressStatusName" column="progress_status_name" />
+        <result property="logisticsNo" column="logistics_no" />
+        <result property="productionNo" column="production_no" />
+        <result property="deliveryNo" column="delivery_no" />
         <result property="noticeName" column="notice_name" />
         <result property="manufacturerName" column="manufacturer_name" />
-        <result property="promotionCount" column="promotion_count" />
-        <result property="expectedSalesCount" column="expected_sales_count" />
-        <result property="orderCount" column="order_count" />
-        <result property="orderRate" column="order_rate" />
-        <result property="timeRange" column="time_range" />
-        <result property="remainTime" column="remain_time" />
+        <result property="createTime" column="create_time" />
     </resultMap>
 
     <resultMap type="com.xfgl.school.domain.vo.GroupNoticeOrderDetailVo" id="GroupNoticeOrderDetailResult">
@@ -77,14 +84,40 @@
         <result property="orderTime" column="order_time" />
     </resultMap>
 
+    <resultMap type="XfptOrderInfo" id="ProgressOrderInfoResult">
+        <result property="id" column="id" />
+        <result property="orderNo" column="order_no" />
+        <result property="orderType" column="order_type" />
+        <result property="noticeId" column="notice_id" />
+        <result property="schoolId" column="school_id" />
+        <result property="schoolName" column="school_name" />
+        <result property="supplierId" column="supplier_id" />
+        <result property="supplierName" column="supplier_name" />
+        <result property="className" column="class_name" />
+        <result property="orderStatus" column="order_status" />
+        <result property="progressStatus" column="progress_status" />
+        <result property="logisticsNo" column="logistics_no" />
+        <result property="receiverName" column="receiver_name" />
+        <result property="receiverPhone" column="receiver_phone" />
+        <result property="receiverAddress" column="receiver_address" />
+        <result property="deptId" column="dept_id" />
+        <result property="createTime" column="create_time" />
+    </resultMap>
+
     <sql id="selectXfptGroupNoticeVo">
-        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_group_notice
+        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, purchase_start_time, purchase_end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag from xfpt_group_notice
     </sql>
 
     <select id="selectXfptGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
         <include refid="selectXfptGroupNoticeVo"/>
         <include refid="search"/>
         <if test="schoolId != null "> and school_id = #{schoolId}</if>
+        <if test="params.schoolIds != null and params.schoolIds.size() > 0">
+            and school_id in
+            <foreach item="schoolIdItem" collection="params.schoolIds" open="(" separator="," close=")">
+                #{schoolIdItem}
+            </foreach>
+        </if>
         <if test="schoolName != null and schoolName != ''"> and school_name like concat('%', #{schoolName}, '%')</if>
         <if test="title != null and title != ''"> and title = #{title}</if>
         <if test="noticeCode != null and noticeCode != ''"> and notice_code like concat('%', #{noticeCode}, '%')</if>
@@ -104,11 +137,11 @@
 
     <select id="selectSupplierGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
         select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
-               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.status, g.apply_status,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
                g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
                g.update_time, g.remark, g.del_flag
         from xfpt_group_notice g
-        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        inner join xfpt_notice_supplier_rel gns on gns.notice_id = g.id and gns.del_flag = '0'
         where g.del_flag = 0
           and gns.supplier_id = #{supplierId}
         <if test="schoolName != null and schoolName != ''"> and g.school_name like concat('%', #{schoolName}, '%')</if>
@@ -123,23 +156,70 @@
         g.id desc
     </select>
 
+    <select id="selectSupplierCooperationGroupNoticeList" parameterType="XfptGroupNotice" resultMap="XfptGroupNoticeResult">
+        select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
+               g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
+               g.update_time, g.remark, g.del_flag
+        from xfpt_group_notice g
+        where g.del_flag = 0
+          and exists (
+              select 1
+              from xfpt_school_supplier_rel rel
+              where rel.school_id = g.school_id
+                and rel.supplier_id = #{supplierId}
+                and rel.cooperate_status = '1'
+                and rel.del_flag = '0'
+          )
+        <if test="schoolId != null"> and g.school_id = #{schoolId}</if>
+        <if test="schoolName != null and schoolName != ''"> and g.school_name like concat('%', #{schoolName}, '%')</if>
+        <if test="title != null and title != ''"> and g.title like concat('%', #{title}, '%')</if>
+        <if test="noticeCode != null and noticeCode != ''"> and g.notice_code like concat('%', #{noticeCode}, '%')</if>
+        <if test="noticeType != null and noticeType != ''"> and g.notice_type = #{noticeType}</if>
+        <if test="status != null and status != ''"> and g.status = #{status}</if>
+        and g.status in ('1', '2')
+        order by
+        case when g.publish_time is null then 1 else 0 end,
+        g.publish_time desc,
+        g.id desc
+    </select>
+
     <select id="selectXfptGroupNoticeById" parameterType="Long" resultMap="XfptGroupNoticeXfptGroupNoticeItemResult">
-        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
+        select id, school_id, school_name, title, notice_code, notice_type, content, grade_ids, grade_names, team_meeting_id, purchase_process_id, start_time, end_time, purchase_start_time, purchase_end_time, status, apply_status, publish_time, result_publish_time, dept_id, create_by, create_time, update_by, update_time, remark, del_flag
         from xfpt_group_notice
         where id = #{id}
     </select>
 
     <select id="selectSupplierGroupNoticeById" resultMap="XfptGroupNoticeResult">
         select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
-               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.status, g.apply_status,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
                g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
                g.update_time, g.remark, g.del_flag
         from xfpt_group_notice g
-        inner join xfpt_group_notice_supplier gns on gns.notice_id = g.id and gns.del_flag = '0'
+        inner join xfpt_notice_supplier_rel gns on gns.notice_id = g.id and gns.del_flag = '0'
         where g.id = #{id}
           and g.del_flag = 0
           and g.status in ('1', '2')
           and gns.supplier_id = #{supplierId}
+    </select>
+
+    <select id="selectSupplierCooperationGroupNoticeById" resultMap="XfptGroupNoticeResult">
+        select g.id, g.school_id, g.school_name, g.title, g.notice_code, g.notice_type, g.content, g.grade_ids, g.grade_names,
+               g.team_meeting_id, g.purchase_process_id, g.start_time, g.end_time, g.purchase_start_time, g.purchase_end_time, g.status, g.apply_status,
+               g.publish_time, g.result_publish_time, g.dept_id, g.create_by, g.create_time, g.update_by,
+               g.update_time, g.remark, g.del_flag
+        from xfpt_group_notice g
+        where g.id = #{id}
+          and g.del_flag = 0
+          and g.status in ('1', '2')
+          and exists (
+              select 1
+              from xfpt_school_supplier_rel rel
+              where rel.school_id = g.school_id
+                and rel.supplier_id = #{supplierId}
+                and rel.cooperate_status = '1'
+                and rel.del_flag = '0'
+          )
     </select>
 
     <select id="selectXfptGroupNoticeItemById" parameterType="Long" resultMap="XfptGroupNoticeItemResult">
@@ -149,7 +229,170 @@
           and del_flag = 0
     </select>
 
+    <sql id="progressDeliverySummary">
+        select
+            order_id,
+            max(case when coalesce(logistics_no, '') = '' then null else logistics_no end) as logistics_no
+        from xfpt_delivery_order
+        where del_flag = 0
+        group by order_id
+    </sql>
+
+    <sql id="progressProductionSummary">
+        select
+            notice_id,
+            school_id,
+            supplier_id,
+            max(case when status = '1' then 1 else 0 end) as has_in_production,
+            max(case when status in ('2', '3') then 1 else 0 end) as has_finished,
+            substring_index(group_concat(production_no order by id desc separator ','), ',', 1) as production_no
+        from xfpt_production_order
+        where del_flag = 0
+          and order_type = '1'
+        group by notice_id, school_id, supplier_id
+    </sql>
+
+    <sql id="progressDeliveryByNoticeSummary">
+        select
+            d.notice_id,
+            d.school_id,
+            d.supplier_id,
+            max(case when d.delivery_status in ('1', '2') and coalesce(d.logistics_no, '') != '' then 1 else 0 end) as has_shipped,
+            substring_index(group_concat(case when coalesce(d.logistics_no, '') != '' then d.logistics_no end order by d.id desc separator ','), ',', 1) as logistics_no,
+            substring_index(group_concat(d.delivery_no order by d.id desc separator ','), ',', 1) as delivery_no,
+            max(d.create_time) as latest_create_time
+        from xfpt_delivery_order d
+        where d.del_flag = 0
+          and d.notice_id is not null
+        group by d.notice_id, d.school_id, d.supplier_id
+    </sql>
+
+    <sql id="progressOrderSummaryByNotice">
+        select
+            notice_id,
+            school_id,
+            supplier_id,
+            max(school_name) as school_name,
+            max(class_name) as class_name,
+            substring_index(group_concat(order_no order by id desc separator ','), ',', 1) as order_no,
+            sum(coalesce(order_quantity, 0)) as order_quantity,
+            max(case when coalesce(progress_status, '0') = '1' then 1 else 0 end) as has_supplier_viewed,
+            max(create_time) as latest_create_time
+        from (
+            select
+                info.id,
+                info.notice_id,
+                info.school_id,
+                info.supplier_id,
+                info.school_name,
+                info.class_name,
+                info.order_no,
+                info.progress_status,
+                info.create_time,
+                (
+                    select sum(coalesce(item.buy_num, 0))
+                    from xfpt_order_item item
+                    where item.order_id = info.id
+                      and item.del_flag = 0
+                ) as order_quantity
+            from xfpt_order_info info
+            where info.del_flag = 0
+              and info.order_type = '1'
+              and (info.order_status is null or info.order_status != '5')
+              and info.notice_id is not null
+        ) order_summary
+        group by notice_id, school_id, supplier_id
+    </sql>
+
     <select id="selectGroupNoticeProgressList" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">
+        select
+        g.id as id,
+        g.id as notice_id,
+        gns.supplier_id as supplier_id,
+        g.school_id as school_id,
+        coalesce(order_summary.school_name, g.school_name) as school_name,
+        coalesce(order_summary.class_name, '-') as class_name,
+        coalesce(order_summary.order_no, '-') as order_no,
+        coalesce(order_summary.order_quantity, 0) as order_quantity,
+        case
+            when notice_delivery.has_shipped = 1 then '4'
+            when production.has_finished = 1 then '3'
+            when production.has_in_production = 1 then '2'
+            when coalesce(order_summary.has_supplier_viewed, 0) = 1 then '1'
+            else '0'
+        end as progress_status,
+        case
+            when notice_delivery.has_shipped = 1 then '已发货'
+            when production.has_finished = 1 then '已完成'
+            when production.has_in_production = 1 then '制作中'
+            when coalesce(order_summary.has_supplier_viewed, 0) = 1 then '供应商已查看'
+            else '待查看'
+        end as progress_status_name,
+        notice_delivery.logistics_no as logistics_no,
+        production.production_no as production_no,
+        notice_delivery.delivery_no as delivery_no,
+        g.title as notice_name,
+        sm.supplier_name as manufacturer_name,
+        coalesce(order_summary.latest_create_time, production.latest_create_time, notice_delivery.latest_create_time, g.create_time) as create_time
+        from xfpt_group_notice g
+        inner join xfpt_notice_supplier_rel gns on gns.notice_id = g.id and gns.del_flag = '0'
+        left join xfpt_supplier_message sm on sm.id = gns.supplier_id and sm.del_flag = '0'
+        left join (
+        <include refid="progressOrderSummaryByNotice"/>
+        ) order_summary on order_summary.notice_id = g.id
+            and order_summary.school_id = g.school_id
+            and order_summary.supplier_id = gns.supplier_id
+        left join (
+        select
+            notice_id,
+            school_id,
+            supplier_id,
+            max(case when status = '1' then 1 else 0 end) as has_in_production,
+            max(case when status in ('2', '3') then 1 else 0 end) as has_finished,
+            substring_index(group_concat(production_no order by id desc separator ','), ',', 1) as production_no,
+            max(create_time) as latest_create_time
+        from xfpt_production_order
+        where del_flag = 0
+          and order_type = '1'
+          and notice_id is not null
+        group by notice_id, school_id, supplier_id
+        ) production on production.notice_id = g.id
+            and production.school_id = g.school_id
+            and production.supplier_id = gns.supplier_id
+        left join (
+        <include refid="progressDeliveryByNoticeSummary"/>
+        ) notice_delivery on notice_delivery.notice_id = g.id
+            and notice_delivery.school_id = g.school_id
+            and notice_delivery.supplier_id = gns.supplier_id
+        where g.del_flag = 0
+        and g.notice_type = '1'
+        <if test="schoolId != null">
+            and g.school_id = #{schoolId}
+        </if>
+        <if test="deptId != null">
+            and g.dept_id = #{deptId}
+        </if>
+        <if test="className != null and className != ''">
+            and order_summary.class_name like concat('%', #{className}, '%')
+        </if>
+        <if test="orderNo != null and orderNo != ''">
+            and order_summary.order_no like concat('%', #{orderNo}, '%')
+        </if>
+        <if test="progressStatus != null and progressStatus != ''">
+            and (
+                case
+                    when notice_delivery.has_shipped = 1 then '4'
+                    when production.has_finished = 1 then '3'
+                    when production.has_in_production = 1 then '2'
+                    when coalesce(order_summary.has_supplier_viewed, 0) = 1 then '1'
+                    else '0'
+                end
+            ) = #{progressStatus}
+        </if>
+        order by coalesce(order_summary.latest_create_time, production.latest_create_time, notice_delivery.latest_create_time, g.create_time) desc, g.id desc
+    </select>
+
+    <select id="selectGroupNoticeProgressListOld" parameterType="com.xfgl.school.domain.vo.GroupNoticeProgressQuery" resultMap="GroupNoticeProgressResult">
         select *
         from (
         select
@@ -240,9 +483,14 @@
         inner join xfpt_order_item item on item.order_id = info.id and item.del_flag = 0
         where info.del_flag = 0
         and info.notice_id = #{noticeId}
-        and info.dept_id = #{deptId}
         and info.order_type = '1'
         and (info.order_status is null or info.order_status != '5')
+        <if test="schoolId != null">
+            and info.school_id = #{schoolId}
+        </if>
+        <if test="deptId != null">
+            and info.dept_id = #{deptId}
+        </if>
         <if test="supplierId != null">
             and info.supplier_id = #{supplierId}
         </if>
@@ -357,30 +605,30 @@
 
     <select id="selectSupplierIdsByNoticeId" parameterType="Long" resultType="Long">
         select supplier_id
-        from xfpt_group_notice_supplier
+        from xfpt_notice_supplier_rel
         where notice_id = #{noticeId}
           and del_flag = '0'
         order by id asc
     </select>
 
     <delete id="deleteXfptGroupNoticeSupplierByNoticeId" parameterType="Long">
-        delete from xfpt_group_notice_supplier where notice_id = #{noticeId}
+        delete from xfpt_notice_supplier_rel where notice_id = #{noticeId}
     </delete>
 
     <delete id="deleteXfptGroupNoticeSupplierByNoticeIds">
-        delete from xfpt_group_notice_supplier where notice_id in
+        delete from xfpt_notice_supplier_rel where notice_id in
         <foreach item="noticeId" collection="noticeIds" open="(" separator="," close=")">
             #{noticeId}
         </foreach>
     </delete>
 
     <insert id="batchInsertXfptGroupNoticeSupplier">
-        insert into xfpt_group_notice_supplier(
-            notice_id, supplier_id, supplier_name, create_by, create_time, update_by, update_time, remark, del_flag
+        insert into xfpt_notice_supplier_rel(
+            notice_id, supplier_id, create_by, create_time, update_by, update_time, remark, del_flag
         ) values
         <foreach item="item" index="index" collection="list" separator=",">
             (
-            #{item.noticeId}, #{item.supplierId}, #{item.supplierName}, #{item.createBy}, #{item.createTime},
+            #{item.noticeId}, #{item.supplierId}, #{item.createBy}, #{item.createTime},
             #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag}
             )
         </foreach>
@@ -392,6 +640,27 @@
             ( #{item.id}, #{item.noticeId}, #{item.goodsId}, #{item.goodsName}, #{item.sizeRuleJson}, #{item.unitName}, #{item.buyNum}, #{item.priceDesc}, #{item.gradeIds}, #{item.gradeNames}, #{item.deptId}, #{item.createBy}, #{item.createTime}, #{item.updateBy}, #{item.updateTime}, #{item.remark}, #{item.delFlag})
         </foreach>
     </insert>
+
+    <select id="selectProgressOrderById" resultMap="ProgressOrderInfoResult">
+        select info.id, info.order_no, info.order_type, info.notice_id, info.school_id, info.school_name,
+               info.supplier_id, info.supplier_name, info.class_name, info.order_status, info.progress_status,
+               delivery.logistics_no, info.receiver_name, info.receiver_phone, info.receiver_address,
+               info.dept_id, info.create_time
+        from xfpt_order_info info
+        left join (
+        <include refid="progressDeliverySummary"/>
+        ) delivery on delivery.order_id = info.id
+        where info.id = #{orderId}
+          and info.del_flag = 0
+    </select>
+
+    <update id="updateProgressStatus">
+        update xfpt_order_info
+        set progress_status = #{progressStatus},
+            update_time = now()
+        where id = #{orderId}
+          and del_flag = 0
+    </update>
 
     <sql id="search">
         where del_flag = 0

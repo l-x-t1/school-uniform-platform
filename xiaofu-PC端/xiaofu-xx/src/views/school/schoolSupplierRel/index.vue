@@ -256,7 +256,7 @@
           <el-table :data="detailGoodsRelList" border size="mini" class="inner-table">
             <el-table-column label="序号" prop="index" width="70" align="center" />
             <el-table-column label="商品" min-width="220">
-              <template slot-scope="scope">{{ getGoodsName(scope.row.goodsId) }}</template>
+              <template slot-scope="scope">{{ getGoodsDisplayName(scope.row) }}</template>
             </el-table-column>
             <el-table-column label="状态" width="110" align="center">
               <template slot-scope="scope">
@@ -317,9 +317,10 @@
                   <el-select
                     v-model="form.supplierId"
                     filterable
-                    clearable
+                    :clearable="!supplierScoped"
                     placeholder="请选择供应商"
                     style="width: 100%"
+                    :disabled="supplierScoped"
                     @change="handleSupplierChange"
                   >
                     <el-option
@@ -531,6 +532,7 @@ import { listSchoolSupplierGoodsRel } from '@/api/school/schoolSupplierGoodsRel'
 import { listGoods } from '@/api/school/goods'
 import { listSupplierMessage } from '@/api/school/supplierMessage'
 import { getSchoolListCompleteDetail } from '@/api/jiaoyuju/schoolManagement'
+import { getCurrentSupplier } from '@/api/supplier/feature'
 
 export default {
   name: 'SchoolSupplierRel',
@@ -553,6 +555,8 @@ export default {
       schoolOptions: [],
       supplierOptions: [],
       goodsOptions: [],
+      supplierScoped: false,
+      currentSupplier: null,
       cooperateStatusOptions: [
         { value: '1', label: '合作中' },
         { value: '2', label: '已取消' },
@@ -604,12 +608,31 @@ export default {
     }
   },
   created() {
-    this.getSchoolOptions()
-    this.getSupplierOptions()
-    this.getGoodsOptions()
-    this.getList()
+    this.initializePage()
   },
   methods: {
+    async initializePage() {
+      await this.initSupplierScope()
+      this.getSchoolOptions()
+      this.getSupplierOptions()
+      this.getGoodsOptions()
+      this.getList()
+    },
+    async initSupplierScope() {
+      const roles = (this.$store.getters.roles || []).map(item => String(item).toLowerCase())
+      const isAdmin = roles.includes('admin')
+      this.supplierScoped = !isAdmin && roles.some(item => item === 'gys' || item === 'ceshigongying' || item.includes('gys'))
+      if (!this.supplierScoped) {
+        this.currentSupplier = null
+        return
+      }
+      try {
+        const response = await getCurrentSupplier()
+        this.currentSupplier = response.data || null
+      } catch (error) {
+        this.currentSupplier = null
+      }
+    },
     getDefaultForm() {
       return {
         id: null,
@@ -650,6 +673,7 @@ export default {
       this.xfptSchoolSupplierGoodsRelList = []
       this.checkedXfptSchoolSupplierGoodsRel = []
       this.resetForm('form')
+      this.applyCurrentSupplierToForm()
     },
     handleQuery() {
       this.queryParams.pageNum = 1
@@ -781,13 +805,25 @@ export default {
       })
     },
     getSupplierOptions() {
+      if (this.supplierScoped) {
+        this.supplierOptions = this.currentSupplier ? [this.currentSupplier] : []
+        this.applyCurrentSupplierToForm()
+        return
+      }
       listSupplierMessage({ pageNum: 1, pageSize: 1000 }).then(response => {
         this.supplierOptions = response.rows || []
       })
     },
+    applyCurrentSupplierToForm() {
+      if (!this.supplierScoped || !this.currentSupplier) {
+        return
+      }
+      this.form.supplierId = this.getSupplierId(this.currentSupplier)
+      this.form.supplierName = this.getSupplierName(this.currentSupplier)
+    },
     getGoodsOptions() {
       listGoods({ pageNum: 1, pageSize: 1000, status: '1' }).then(response => {
-        this.goodsOptions = response.rows || []
+        this.goodsOptions = this.mergeOptionsById(this.goodsOptions, response.rows || [])
       })
     },
     handleSchoolChange(value) {
@@ -824,6 +860,16 @@ export default {
     getSupplierId(item) {
       return item.id != null ? item.id : item.supplierId
     },
+    mergeOptionsById(existing, incoming) {
+      const optionMap = new Map()
+      ;[...(existing || []), ...(incoming || [])].forEach(item => {
+        if (!item || item.id == null) {
+          return
+        }
+        optionMap.set(String(item.id), Object.assign({}, optionMap.get(String(item.id)) || {}, item))
+      })
+      return Array.from(optionMap.values())
+    },
     formatGoodsOption(item) {
       return item.goodsCode ? `${item.goodsName}（${item.goodsCode}）` : item.goodsName
     },
@@ -833,6 +879,33 @@ export default {
         return this.formatGoodsOption(option)
       }
       return goodsId ? `未匹配商品（${goodsId}）` : '--'
+    },
+    formatGoodsLabel(goodsName, goodsCode) {
+      if (!goodsName) {
+        return ''
+      }
+      return goodsCode ? `${goodsName}（${goodsCode}）` : goodsName
+    },
+    ensureGoodsOption(row) {
+      if (!row || row.goodsId == null) {
+        return
+      }
+      const exists = this.goodsOptions.find(item => String(item.id) === String(row.goodsId))
+      if (exists) {
+        return
+      }
+      this.goodsOptions = this.mergeOptionsById(this.goodsOptions, [{
+        id: row.goodsId,
+        goodsName: row.goodsName,
+        goodsCode: row.goodsCode
+      }])
+    },
+    ensureGoodsOptionsFromList(list) {
+      ;(list || []).forEach(item => this.ensureGoodsOption(item))
+    },
+    getGoodsDisplayName(row) {
+      const directLabel = this.formatGoodsLabel(row && row.goodsName, row && row.goodsCode)
+      return directLabel || this.getGoodsName(row ? row.goodsId : null)
     },
     getOptionLabel(options, value) {
       const option = options.find(item => item.value === String(value))
@@ -936,7 +1009,11 @@ export default {
       if (!relId) {
         return Promise.resolve([])
       }
-      return listSchoolSupplierGoodsRel({ pageNum: 1, pageSize: 1000, relId }).then(response => response.rows || [])
+      return listSchoolSupplierGoodsRel({ pageNum: 1, pageSize: 1000, relId }).then(response => {
+        const rows = response.rows || []
+        this.ensureGoodsOptionsFromList(rows)
+        return rows
+      })
     },
     resetGoodsRelDialog() {
       this.goodsRelForm = {}

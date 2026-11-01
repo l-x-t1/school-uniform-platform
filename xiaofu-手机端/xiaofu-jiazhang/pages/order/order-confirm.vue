@@ -126,12 +126,29 @@ export default {
     this.loadDefaultAddress();
   },
   onShow() {
+    this.syncStudentFromStorage();
     const selectedAddress = uni.getStorageSync('selectedAddress');
     if (selectedAddress) {
       this.address = this.normalizeAddress(selectedAddress);
     }
   },
   methods: {
+    normalizeStudent(item = {}) {
+      return {
+        id: item.id || item.studentId || '',
+        studentId: item.studentId || item.id || '',
+        name: item.name || item.studentName || '待绑定学生',
+        schoolId: item.schoolId || item.shcoolId || item.deptId || item.sysDepts?.deptId || '',
+        shcoolId: item.shcoolId || item.schoolId || item.deptId || item.sysDepts?.deptId || '',
+        deptId: item.deptId || item.schoolId || item.shcoolId || item.sysDepts?.deptId || '',
+        school: item.school || item.schoolName || item.sysDepts?.deptName || '请先完善学生信息',
+        schoolName: item.schoolName || item.school || item.sysDepts?.deptName || '请先完善学生信息',
+        grade: item.grade || item.gradeName || '',
+        gradeName: item.gradeName || item.grade || '',
+        className: item.className || item.class || '',
+        isPlaceholder: !(item.id || item.studentId)
+      };
+    },
     normalizeAddress(item = {}) {
       return {
         id: item.id || item.addressId || '',
@@ -142,7 +159,53 @@ export default {
         isPlaceholder: false
       };
     },
+    applyStudent(student, writeBack = false) {
+      if (!student || !student.id) {
+        return false;
+      }
+      this.student = this.normalizeStudent(student);
+      if (writeBack) {
+        uni.setStorageSync('selectedStudent', this.student);
+      }
+      return true;
+    },
+    resolveCurrentStudent() {
+      const rawSelectedStudent = uni.getStorageSync('selectedStudent') || {};
+      const selectedStudent = rawSelectedStudent && (rawSelectedStudent.id || rawSelectedStudent.studentId)
+        ? this.normalizeStudent(rawSelectedStudent)
+        : null;
+      const studentList = (uni.getStorageSync('studentList') || []).map((item) => this.normalizeStudent(item));
+      const itemStudentId = this.items.find((item) => item.studentId || item.userStudentId)?.studentId
+        || this.items.find((item) => item.studentId || item.userStudentId)?.userStudentId
+        || '';
+
+      if (itemStudentId) {
+        const matchedItemStudent = studentList.find((item) => String(item.id || item.studentId || '') === String(itemStudentId));
+        if (matchedItemStudent) {
+          return matchedItemStudent;
+        }
+        if (selectedStudent && String(selectedStudent.id || selectedStudent.studentId || '') === String(itemStudentId)) {
+          return selectedStudent;
+        }
+      }
+
+      if (selectedStudent) {
+        const matchedSelectedStudent = studentList.find((item) =>
+          String(item.id || item.studentId || '') === String(selectedStudent.id || selectedStudent.studentId || '')
+        );
+        return matchedSelectedStudent || selectedStudent;
+      }
+
+      return studentList[0] || null;
+    },
+    syncStudentFromStorage(writeBack = false) {
+      const student = this.resolveCurrentStudent();
+      return this.applyStudent(student, writeBack);
+    },
     loadDefaultStudent() {
+      if (this.syncStudentFromStorage()) {
+        return;
+      }
       getDefaultStudent()
         .then((res) => {
           const data = res.data || res;
@@ -150,17 +213,7 @@ export default {
             this.useLocalStudent();
             return;
           }
-          this.student = {
-            id: data.id || data.studentId,
-            name: data.name || data.studentName || this.student.name,
-            schoolId: data.schoolId || data.deptId || data.sysDepts?.deptId || '',
-            deptId: data.deptId || data.schoolId || data.sysDepts?.deptId || '',
-            school: data.school || data.schoolName || this.student.school,
-            grade: data.grade || data.gradeName || '',
-            className: data.className || data.class || '',
-            isPlaceholder: false
-          };
-          uni.setStorageSync('selectedStudent', this.student);
+          this.applyStudent(data, true);
         })
         .catch(() => {
           this.useLocalStudent();
@@ -168,21 +221,7 @@ export default {
     },
     useLocalStudent() {
       if (!config.enableMockFallback) return;
-      const localStudents = uni.getStorageSync('studentList') || [];
-      const localStudent = localStudents[0];
-      if (localStudent) {
-        this.student = {
-          id: localStudent.id || localStudent.studentId,
-          name: localStudent.name || localStudent.studentName || '',
-          schoolId: localStudent.schoolId || localStudent.deptId || '',
-          deptId: localStudent.deptId || localStudent.schoolId || '',
-          school: localStudent.school || localStudent.schoolName || '',
-          grade: localStudent.grade || localStudent.gradeName || '',
-          className: localStudent.className || localStudent.class || '',
-          isPlaceholder: false
-        };
-        uni.setStorageSync('selectedStudent', this.student);
-      }
+      this.syncStudentFromStorage(true);
     },
     loadDefaultAddress() {
       const selectedAddress = uni.getStorageSync('selectedAddress');
@@ -283,6 +322,14 @@ export default {
         return;
       }
 
+      if (this.items.some((item) => !item.supplierId)) {
+        uni.showToast({
+          title: '商品供应商信息缺失，请重新选择商品后再提交',
+          icon: 'none'
+        });
+        return;
+      }
+
       this.submitting = true;
       uni.showLoading({ title: '提交中...' });
 
@@ -311,11 +358,11 @@ export default {
           mainImage: item.mainImage || item.image || '',
           name: item.name,
           goodsName: item.name || item.goodsName,
-          supplierId: item.supplierId || 1,
-          supplierName: item.supplierName || '测试供应商',
-          schoolId: item.schoolId || 1,
+          supplierId: item.supplierId || null,
+          supplierName: item.supplierName || '',
+          schoolId: item.schoolId || null,
           schoolName: item.schoolName || this.student.school,
-          deptId: item.deptId || item.schoolId || 1,
+          deptId: item.deptId || item.schoolId || null,
           noticeId: item.noticeId || null,
           orderType: item.orderType || item.saleType || '1',
           saleType: item.orderType || item.saleType || '1'
@@ -348,10 +395,10 @@ export default {
             orderTypeText: this.currentOrderTypeText,
             payStatus: '0',
             orderStatus: '0',
-            schoolId: payload.items[0]?.schoolId || 1,
+            schoolId: payload.items[0]?.schoolId || '',
             schoolName: payload.items[0]?.schoolName || this.student.school,
-            supplierId: payload.items[0]?.supplierId || 1,
-            supplierName: payload.items[0]?.supplierName || '测试供应商',
+            supplierId: payload.items[0]?.supplierId || null,
+            supplierName: payload.items[0]?.supplierName || '',
             studentId: this.student.id,
             studentName: this.student.name,
             gradeName: this.student.grade,
